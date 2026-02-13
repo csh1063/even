@@ -3,14 +3,17 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 70;
+	objectVersion = 55;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		01309DA478AC22159D054601 /* Moya.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E38D43CEE696BFEF020903BE /* Moya.framework */; };
 		5EA569B0768E5AD816A9A987 /* CombineMoya.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 742288D39DB3A440246920F5 /* CombineMoya.framework */; };
 		73E2CFE7B15DA84447EEB8D8 /* Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6D92AA65F88824A7589C1FF /* Data.swift */; };
+		818DF42555989CF54AB874A2 /* DefaultRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76688D30079DAA8FE8E72C1 /* DefaultRepository.swift */; };
+		8316E15461201093B98C1F89 /* Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BB16CCB75E103B3603596DE /* Service.swift */; };
 		901ACA7B98089AB702ADA830 /* Domain.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06FAA1459D11CCE724C34195 /* Domain.framework */; };
+		9B5D28D4A80A7917E414796E /* Network.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F01E911FF3FB09E7BF3FFE0 /* Network.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -31,15 +34,12 @@
 		06FAA1459D11CCE724C34195 /* Domain.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Domain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4E75197C294DE74F5162FAA7 /* Data.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Data.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		742288D39DB3A440246920F5 /* CombineMoya.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CombineMoya.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		7BB16CCB75E103B3603596DE /* Service.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Service.swift; sourceTree = "<group>"; };
+		7F01E911FF3FB09E7BF3FFE0 /* Network.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Network.swift; sourceTree = "<group>"; };
 		D6D92AA65F88824A7589C1FF /* Data.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Data.swift; sourceTree = "<group>"; };
 		E38D43CEE696BFEF020903BE /* Moya.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Moya.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F76688D30079DAA8FE8E72C1 /* DefaultRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultRepository.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
-
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		1926BB172EF94436006441A4 /* Repository */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Repository; sourceTree = "<group>"; };
-		1926BB182EF94440006441A4 /* Service */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Service; sourceTree = "<group>"; };
-		1926BB192EF94443006441A4 /* Network */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Network; sourceTree = "<group>"; };
-/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		818FC900AD146A9A336966D5 /* Frameworks */ = {
@@ -66,6 +66,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		73F3ED55BFDC2EF15878F5B6 /* Repository */ = {
+			isa = PBXGroup;
+			children = (
+				F76688D30079DAA8FE8E72C1 /* DefaultRepository.swift */,
+			);
+			path = Repository;
+			sourceTree = "<group>";
+		};
 		8A6D38DA6706D1F4DD8A055B = {
 			isa = PBXGroup;
 			children = (
@@ -74,12 +82,28 @@
 			);
 			sourceTree = "<group>";
 		};
+		A46DA33BCE1E2288153B2AC3 /* Network */ = {
+			isa = PBXGroup;
+			children = (
+				7F01E911FF3FB09E7BF3FFE0 /* Network.swift */,
+			);
+			path = Network;
+			sourceTree = "<group>";
+		};
 		AABE3A120DFAA5B30C74694C /* InfoPlists */ = {
 			isa = PBXGroup;
 			children = (
 				033B57EACF093CA22F91EAB9 /* Data-Info.plist */,
 			);
 			path = InfoPlists;
+			sourceTree = "<group>";
+		};
+		B119E31677D59F7802A67D11 /* Service */ = {
+			isa = PBXGroup;
+			children = (
+				7BB16CCB75E103B3603596DE /* Service.swift */,
+			);
+			path = Service;
 			sourceTree = "<group>";
 		};
 		C25E2D135BFBAC1019949D62 /* Derived */ = {
@@ -93,9 +117,9 @@
 		C590795A2658F92D49B27E8D /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				1926BB192EF94443006441A4 /* Network */,
-				1926BB182EF94440006441A4 /* Service */,
-				1926BB172EF94436006441A4 /* Repository */,
+				A46DA33BCE1E2288153B2AC3 /* Network */,
+				73F3ED55BFDC2EF15878F5B6 /* Repository */,
+				B119E31677D59F7802A67D11 /* Service */,
 				D6D92AA65F88824A7589C1FF /* Data.swift */,
 			);
 			path = Sources;
@@ -125,11 +149,6 @@
 			buildRules = (
 			);
 			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				1926BB172EF94436006441A4 /* Repository */,
-				1926BB182EF94440006441A4 /* Service */,
-				1926BB192EF94443006441A4 /* Network */,
 			);
 			name = Data;
 			packageProductDependencies = (
@@ -181,6 +200,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				73E2CFE7B15DA84447EEB8D8 /* Data.swift in Sources */,
+				9B5D28D4A80A7917E414796E /* Network.swift in Sources */,
+				818DF42555989CF54AB874A2 /* DefaultRepository.swift in Sources */,
+				8316E15461201093B98C1F89 /* Service.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -204,14 +226,17 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.sanghyeon.even.Data;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sanghyeon.moa.Data;
 				PRODUCT_NAME = Data;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = (
+					"$(inherited)",
+					DEBUG,
+				);
 				SWIFT_COMPILATION_MODE = singlefile;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -291,7 +316,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.sanghyeon.even.Data;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sanghyeon.moa.Data;
 				PRODUCT_NAME = Data;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;

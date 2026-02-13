@@ -18,7 +18,7 @@ final class SplashViewController: BaseViewController {
         label.font = UIFont.systemFont(ofSize: 32)
         label.textColor = .black
         label.textAlignment = .center
-        label.text = "EVEN"
+        label.text = "MOA"
         
         return label
     }()
@@ -26,29 +26,20 @@ final class SplashViewController: BaseViewController {
     private var descLabel: UILabel = {
         let label = UILabel()
 
-        label.numberOfLines = 2
+        label.numberOfLines = 0
         
-        let attriString = NSMutableAttributedString(string: "이",
+        let attriString = NSMutableAttributedString(string: "모아\n\n\n",
                                                     attributes: [
                                                         .foregroundColor: UIColor.black,
-                                                        .font: UIFont.systemFont(ofSize: 16)
+                                                        .font: UIFont.systemFont(ofSize: 12)
                                                     ])
-        attriString.append(NSMutableAttributedString(string: " 요리\n",
+        attriString.append(NSMutableAttributedString(string: "당신의 순간을 모으다",
                                                      attributes: [
                                                         .foregroundColor: UIColor.darkGray,
-                                                        .font: UIFont.systemFont(ofSize: 12)
-                                                     ]))
-        attriString.append(NSMutableAttributedString(string: "분",
-                                                     attributes: [
-                                                        .foregroundColor: UIColor.black,
                                                         .font: UIFont.systemFont(ofSize: 16)
-                                                     ]))
-        attriString.append(NSMutableAttributedString(string: "석해줘",
-                                                     attributes: [
-                                                        .foregroundColor: UIColor.darkGray,
-                                                        .font: UIFont.systemFont(ofSize: 12)
                                                      ]))
         label.attributedText = attriString
+        label.textAlignment = .center
         
         return label
     }()

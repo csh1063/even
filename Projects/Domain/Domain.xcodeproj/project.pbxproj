@@ -3,11 +3,13 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 70;
+	objectVersion = 55;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		032E4B53C9EDED3BCB584019 /* Domain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F491B7F514684708DC6E0D4 /* Domain.swift */; };
+		8F3AFDCCE9F7986C686A9960 /* UseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B677723E6C7FD14D593C8B5E /* UseCase.swift */; };
+		CB2B6D86A006CD52ED00099B /* Repository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D03FC7386FAA4B12A23002BC /* Repository.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,14 +27,11 @@
 
 /* Begin PBXFileReference section */
 		9F491B7F514684708DC6E0D4 /* Domain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Domain.swift; sourceTree = "<group>"; };
+		B677723E6C7FD14D593C8B5E /* UseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UseCase.swift; sourceTree = "<group>"; };
 		BD15A37E85BAE3A36B2CE72C /* Domain-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Domain-Info.plist"; sourceTree = "<group>"; };
+		D03FC7386FAA4B12A23002BC /* Repository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Repository.swift; sourceTree = "<group>"; };
 		FD49F277B86481D3D105FAC8 /* Domain.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Domain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
-
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		1926BB152EF94425006441A4 /* UseCase */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = UseCase; sourceTree = "<group>"; };
-		1926BB162EF9442B006441A4 /* Implement */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Implement; sourceTree = "<group>"; };
-/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		2069052369677C3E97D5C897 /* Frameworks */ = {
@@ -53,6 +52,14 @@
 			path = Derived;
 			sourceTree = "<group>";
 		};
+		04A08A9FA52DB67E22049769 /* Implement */ = {
+			isa = PBXGroup;
+			children = (
+				D03FC7386FAA4B12A23002BC /* Repository.swift */,
+			);
+			path = Implement;
+			sourceTree = "<group>";
+		};
 		23FB790DBB2E2B4343512188 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -64,11 +71,19 @@
 		28B694539E22431DAF52B883 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				1926BB162EF9442B006441A4 /* Implement */,
-				1926BB152EF94425006441A4 /* UseCase */,
+				04A08A9FA52DB67E22049769 /* Implement */,
+				2BE278B80FDD95404961E580 /* UseCase */,
 				9F491B7F514684708DC6E0D4 /* Domain.swift */,
 			);
 			path = Sources;
+			sourceTree = "<group>";
+		};
+		2BE278B80FDD95404961E580 /* UseCase */ = {
+			isa = PBXGroup;
+			children = (
+				B677723E6C7FD14D593C8B5E /* UseCase.swift */,
+			);
+			path = UseCase;
 			sourceTree = "<group>";
 		};
 		31AD0DDEDFC02FF4D89A76D4 = {
@@ -111,10 +126,6 @@
 			buildRules = (
 			);
 			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				1926BB152EF94425006441A4 /* UseCase */,
-				1926BB162EF9442B006441A4 /* Implement */,
 			);
 			name = Domain;
 			packageProductDependencies = (
@@ -166,6 +177,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				032E4B53C9EDED3BCB584019 /* Domain.swift in Sources */,
+				CB2B6D86A006CD52ED00099B /* Repository.swift in Sources */,
+				8F3AFDCCE9F7986C686A9960 /* UseCase.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -189,14 +202,17 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.sanghyeon.even.Domain;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sanghyeon.moa.Domain;
 				PRODUCT_NAME = Domain;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = (
+					"$(inherited)",
+					DEBUG,
+				);
 				SWIFT_COMPILATION_MODE = singlefile;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -335,7 +351,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.sanghyeon.even.Domain;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sanghyeon.moa.Domain;
 				PRODUCT_NAME = Domain;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;

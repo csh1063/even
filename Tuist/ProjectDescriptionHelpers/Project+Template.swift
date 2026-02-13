@@ -2,7 +2,7 @@ import ProjectDescription
 
 extension Project {
     
-    static let bundleId = "com.sanghyeon.even"
+    static let bundleId = "com.sanghyeon.moa"
     static let iosVersion = "15.0"
     
     /// Helper function to create the Project for this ExampleApp
