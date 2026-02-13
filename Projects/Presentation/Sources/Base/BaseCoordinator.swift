@@ -8,6 +8,7 @@
 
 import Foundation
 
+@MainActor
 open class BaseCoordinator {
     private var childCoordinators: [BaseCoordinator] = []
     
@@ -16,6 +17,7 @@ open class BaseCoordinator {
     open func start() { }
     
     public func start(coordinator: BaseCoordinator) {
+        print("==== \(Self.self) start        ====================")
         childCoordinators.append(coordinator)
         coordinator.start()
     }

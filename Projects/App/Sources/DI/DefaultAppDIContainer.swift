@@ -9,6 +9,7 @@
 import Foundation
 import Presentation
 
+@MainActor
 final class DefaultAppDIContainer: AppDIContainer {
     
     init() {

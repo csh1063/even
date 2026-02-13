@@ -46,6 +46,10 @@
 		1926BAF42EF4195B006441A4 /* Splash */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Splash; sourceTree = "<group>"; };
 		1926BAFA2EF41A7B006441A4 /* Base */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Base; sourceTree = "<group>"; };
 		1926BB0C2EF94057006441A4 /* Main */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Main; sourceTree = "<group>"; };
+		1926BB2B2EF96B17006441A4 /* Home */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Home; sourceTree = "<group>"; };
+		1926BB2C2EF96B1A006441A4 /* MyPage */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = MyPage; sourceTree = "<group>"; };
+		1926BB2D2EF96B21006441A4 /* List */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = List; sourceTree = "<group>"; };
+		1926BB462F0BBA81006441A4 /* Tabbar */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Tabbar; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,6 +103,10 @@
 		ACFC6E8F6D299B22A1D9900B /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				1926BB462F0BBA81006441A4 /* Tabbar */,
+				1926BB2D2EF96B21006441A4 /* List */,
+				1926BB2C2EF96B1A006441A4 /* MyPage */,
+				1926BB2B2EF96B17006441A4 /* Home */,
 				1926BB0C2EF94057006441A4 /* Main */,
 				1926BAFA2EF41A7B006441A4 /* Base */,
 				1926BAF42EF4195B006441A4 /* Splash */,
@@ -165,6 +173,10 @@
 				1926BAF42EF4195B006441A4 /* Splash */,
 				1926BAFA2EF41A7B006441A4 /* Base */,
 				1926BB0C2EF94057006441A4 /* Main */,
+				1926BB2B2EF96B17006441A4 /* Home */,
+				1926BB2C2EF96B1A006441A4 /* MyPage */,
+				1926BB2D2EF96B21006441A4 /* List */,
+				1926BB462F0BBA81006441A4 /* Tabbar */,
 			);
 			name = Presentation;
 			packageProductDependencies = (

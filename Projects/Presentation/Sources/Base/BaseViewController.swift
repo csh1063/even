@@ -11,6 +11,10 @@ import UIKit
 
 open class BaseViewController: UIViewController {
     
+    static var fatalMessage: String {
+        return "\(Self.self) does not support NSCoding"
+    }
+    
     open override func viewDidLoad() {
         super.viewDidLoad()
         

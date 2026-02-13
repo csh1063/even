@@ -10,23 +10,23 @@ import Foundation
 import UIKit
 import Combine
 
+@MainActor
 public final class MainCoordinator: BaseCoordinator {
-    private let container: AppDIContainer
+    
+    public var logout = PassthroughSubject<Bool, Never>()
+    
+    private let mainDIConatiner: MainDIContainer
     private let window: UIWindow
-    public var finished = PassthroughSubject<Bool, Never>()
-    
-    private var cancellables = Set<AnyCancellable>()
-    
-    public init(container: AppDIContainer, window: UIWindow) {
-        self.container = container
+    private var rootVC: UIViewController?
+
+    public init(container: MainDIContainer, window: UIWindow) {
+        self.mainDIConatiner = container
         self.window = window
     }
 
     public override func start() {
-        let viewModel = container.makeMainViewModel()
-        let viewController = MainViewController(viewModel: viewModel)
-
-        window.rootViewController = viewController
-        window.makeKeyAndVisible()
+        let tabbarContainer = mainDIConatiner.makeTabBarDIContainer()
+        let tabbarCoordinator = TabbarCoordinator(container: tabbarContainer, window: window)
+        start(coordinator: tabbarCoordinator)
     }
 }

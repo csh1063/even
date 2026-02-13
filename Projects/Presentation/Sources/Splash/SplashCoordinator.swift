@@ -10,6 +10,7 @@ import Foundation
 import UIKit
 import Combine
 
+@MainActor
 public final class SplashCoordinator: BaseCoordinator {
     private let container: AppDIContainer
     private let window: UIWindow
@@ -31,7 +32,6 @@ public final class SplashCoordinator: BaseCoordinator {
             }
             .store(in: &cancellables)
         let viewController = SplashViewController(viewModel: viewModel)
-
 
         window.rootViewController = viewController
         window.makeKeyAndVisible()

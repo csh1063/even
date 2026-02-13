@@ -9,6 +9,7 @@
 import Foundation
 import Combine
 
+@MainActor
 public final class SplashViewModel {
     
     enum Input {

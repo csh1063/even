@@ -63,7 +63,7 @@ final class SplashViewController: BaseViewController {
     }
     
     required public init?(coder: NSCoder) {
-        fatalError("SplashViewController does not support NSCoding")
+        fatalError(Self.fatalMessage)
     }
     
     public override func viewWillAppear(_ animated: Bool) {

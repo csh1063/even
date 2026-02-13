@@ -11,10 +11,11 @@ import Presentation
 import Combine
 import UIKit
 
+@MainActor
 final class AppCoordinator: BaseCoordinator {
     
-    private let window: UIWindow
     private let container: AppDIContainer
+    private let window: UIWindow
     
     private var cancellables = Set<AnyCancellable>()
 
@@ -37,15 +38,38 @@ final class AppCoordinator: BaseCoordinator {
             .store(in: &cancellables)
         start(coordinator: splashCoordinator)
     }
-
+    
     private func showMain() {
         print("showMain!!")
-//        let mainCoordinator = MainCoordinator(container: container, window: window)
-//        mainCoordinator.logout
-//            .sink { [weak self] in
-//                self?.showSplash()
-//            }
-//            .store(in: &cancellables)
-//        start(coordinator: mainCoordinator)
+        let mainDIContainer = MainDIContainer(appDiContainer: container)
+        let mainCoordinator = MainCoordinator(container: mainDIContainer, window: window)
+        mainCoordinator.logout
+            .sink { [weak self] _ in
+                self?.showSplash()
+            }
+            .store(in: &cancellables)
+        start(coordinator: mainCoordinator)
+    }
+    
+    // main coordinator가 없는 경우
+//    func showTabBar() {
+//        let tabbarDI = makeTabBarDIContainer()
+//        let tabbarCoordinator = TabbarCoordinator(container: tabbarDI, window: window)
+//
+//        start(coordinator: tabbarCoordinator)
+//    }
+//
+//    private func makeTabBarDIContainer() -> TabbarDIContainer {
+//        TabbarDIContainer(appDiContainer: container)
+//    }
+    
+}
+
+extension AppCoordinator: BaseEventRouter {
+    func route(_ event: BaseEvent) {
+        switch event {
+        case .logout:
+            showSplash()
+        }
     }
 }

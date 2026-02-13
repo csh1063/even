@@ -8,6 +8,7 @@
 
 import Foundation
 
+@MainActor
 public protocol AppDIContainer {
     func makeSplashViewModel() -> SplashViewModel
     func makeMainViewModel() -> MainViewModel
