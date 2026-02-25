@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23605" systemVersion="24D81" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
+    <entity name="AnalysisStateEntity" representedClassName="AnalysisStateEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isRunning" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="lastFullScan" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="lastIncrementalScan" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="processedCount" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="totalCount" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+    </entity>
+    <entity name="FolderEntity" representedClassName="FolderEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="name" attributeType="String"/>
+        <attribute name="type" attributeType="String"/>
+        <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="photos" toMany="YES" deletionRule="Nullify" destinationEntity="FolderPhotoEntity" inverseName="folder" inverseEntity="FolderPhotoEntity"/>
+        <relationship name="rules" toMany="YES" deletionRule="Nullify" destinationEntity="RuleEntity" inverseName="folder" inverseEntity="RuleEntity"/>
+        <fetchIndex name="idx_folder_createdAt">
+            <fetchIndexElement property="createdAt" type="Binary" order="ascending"/>
+        </fetchIndex>
+        <fetchIndex name="idx_folder_type">
+            <fetchIndexElement property="type" type="Binary" order="ascending"/>
+        </fetchIndex>
+    </entity>
+    <entity name="FolderPhotoEntity" representedClassName="FolderPhotoEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <relationship name="folder" maxCount="1" deletionRule="Cascade" destinationEntity="FolderEntity" inverseName="photos" inverseEntity="FolderEntity"/>
+        <relationship name="photo" maxCount="1" deletionRule="Cascade" destinationEntity="PhotoEntity" inverseName="folders" inverseEntity="PhotoEntity"/>
+        <fetchIndex name="idx_folderPhoto_photo">
+            <fetchIndexElement property="photo" type="Binary" order="ascending"/>
+        </fetchIndex>
+        <fetchIndex name="idx_folderPhoto_folder">
+            <fetchIndexElement property="folder" type="Binary" order="ascending"/>
+        </fetchIndex>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="photo"/>
+                <constraint value="folder"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+    </entity>
+    <entity name="PhotoEntity" representedClassName="PhotoEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="analyzedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="assetIdentifier" attributeType="String"/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="height" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isAnalyzed" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="latitude" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="longitude" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="width" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="folders" toMany="YES" deletionRule="Nullify" destinationEntity="FolderPhotoEntity" inverseName="photo" inverseEntity="FolderPhotoEntity"/>
+        <relationship name="tags" toMany="YES" deletionRule="Nullify" destinationEntity="TagEntity" inverseName="photos" inverseEntity="TagEntity"/>
+        <fetchIndex name="idx_photo_assetIdentifier">
+            <fetchIndexElement property="assetIdentifier" type="Binary" order="ascending"/>
+        </fetchIndex>
+        <fetchIndex name="idx_photo_createdAt">
+            <fetchIndexElement property="createdAt" type="Binary" order="ascending"/>
+        </fetchIndex>
+        <fetchIndex name="idx_photo_isAnalyzed">
+            <fetchIndexElement property="isAnalyzed" type="Binary" order="ascending"/>
+        </fetchIndex>
+    </entity>
+    <entity name="RuleEntity" representedClassName="RuleEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="comparison" attributeType="String"/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="type" attributeType="String"/>
+        <attribute name="value" attributeType="String"/>
+        <relationship name="folder" maxCount="1" deletionRule="Nullify" destinationEntity="FolderEntity" inverseName="rules" inverseEntity="FolderEntity"/>
+        <fetchIndex name="idx_rule_type">
+            <fetchIndexElement property="type" type="Binary" order="ascending"/>
+        </fetchIndex>
+    </entity>
+    <entity name="TagEntity" representedClassName="TagEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="confidence" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="name" attributeType="String"/>
+        <attribute name="nameNormalized" optional="YES" attributeType="String"/>
+        <attribute name="type" attributeType="String"/>
+        <relationship name="photos" toMany="YES" deletionRule="Nullify" destinationEntity="PhotoEntity" inverseName="tags" inverseEntity="PhotoEntity"/>
+        <fetchIndex name="idx_tag_nameNormalized">
+            <fetchIndexElement property="nameNormalized" type="Binary" order="ascending"/>
+        </fetchIndex>
+    </entity>
+</model>

@@ -3,11 +3,14 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 55;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		01309DA478AC22159D054601 /* Moya.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E38D43CEE696BFEF020903BE /* Moya.framework */; };
+		195ECBA22F4F510C00ED16BA /* CoreDataFolderRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 195ECBA12F4F510C00ED16BA /* CoreDataFolderRepository.swift */; };
+		195ECBA62F4F523100ED16BA /* CoreDataRuleRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 195ECBA52F4F523100ED16BA /* CoreDataRuleRepository.swift */; };
+		195ECBAE2F4F554000ED16BA /* CoreDataPhotoRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 195ECBAD2F4F554000ED16BA /* CoreDataPhotoRepository.swift */; };
 		5EA569B0768E5AD816A9A987 /* CombineMoya.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 742288D39DB3A440246920F5 /* CombineMoya.framework */; };
 		73E2CFE7B15DA84447EEB8D8 /* Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6D92AA65F88824A7589C1FF /* Data.swift */; };
 		818DF42555989CF54AB874A2 /* DefaultRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76688D30079DAA8FE8E72C1 /* DefaultRepository.swift */; };
@@ -32,6 +35,9 @@
 /* Begin PBXFileReference section */
 		033B57EACF093CA22F91EAB9 /* Data-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Data-Info.plist"; sourceTree = "<group>"; };
 		06FAA1459D11CCE724C34195 /* Domain.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Domain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		195ECBA12F4F510C00ED16BA /* CoreDataFolderRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataFolderRepository.swift; sourceTree = "<group>"; };
+		195ECBA52F4F523100ED16BA /* CoreDataRuleRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataRuleRepository.swift; sourceTree = "<group>"; };
+		195ECBAD2F4F554000ED16BA /* CoreDataPhotoRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataPhotoRepository.swift; sourceTree = "<group>"; };
 		4E75197C294DE74F5162FAA7 /* Data.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Data.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		742288D39DB3A440246920F5 /* CombineMoya.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CombineMoya.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7BB16CCB75E103B3603596DE /* Service.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Service.swift; sourceTree = "<group>"; };
@@ -40,6 +46,11 @@
 		E38D43CEE696BFEF020903BE /* Moya.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Moya.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F76688D30079DAA8FE8E72C1 /* DefaultRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultRepository.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		195ECB682F4C4C6A00ED16BA /* CoreData */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = CoreData; sourceTree = "<group>"; };
+		195ECB942F4F437100ED16BA /* Mapper */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Mapper; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		818FC900AD146A9A336966D5 /* Frameworks */ = {
@@ -69,6 +80,9 @@
 		73F3ED55BFDC2EF15878F5B6 /* Repository */ = {
 			isa = PBXGroup;
 			children = (
+				195ECBAD2F4F554000ED16BA /* CoreDataPhotoRepository.swift */,
+				195ECBA52F4F523100ED16BA /* CoreDataRuleRepository.swift */,
+				195ECBA12F4F510C00ED16BA /* CoreDataFolderRepository.swift */,
 				F76688D30079DAA8FE8E72C1 /* DefaultRepository.swift */,
 			);
 			path = Repository;
@@ -117,6 +131,8 @@
 		C590795A2658F92D49B27E8D /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				195ECB942F4F437100ED16BA /* Mapper */,
+				195ECB682F4C4C6A00ED16BA /* CoreData */,
 				A46DA33BCE1E2288153B2AC3 /* Network */,
 				73F3ED55BFDC2EF15878F5B6 /* Repository */,
 				B119E31677D59F7802A67D11 /* Service */,
@@ -149,6 +165,10 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				195ECB682F4C4C6A00ED16BA /* CoreData */,
+				195ECB942F4F437100ED16BA /* Mapper */,
 			);
 			name = Data;
 			packageProductDependencies = (
@@ -199,10 +219,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				195ECBA22F4F510C00ED16BA /* CoreDataFolderRepository.swift in Sources */,
 				73E2CFE7B15DA84447EEB8D8 /* Data.swift in Sources */,
 				9B5D28D4A80A7917E414796E /* Network.swift in Sources */,
 				818DF42555989CF54AB874A2 /* DefaultRepository.swift in Sources */,
 				8316E15461201093B98C1F89 /* Service.swift in Sources */,
+				195ECBAE2F4F554000ED16BA /* CoreDataPhotoRepository.swift in Sources */,
+				195ECBA62F4F523100ED16BA /* CoreDataRuleRepository.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -233,10 +256,7 @@
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = (
-					"$(inherited)",
-					DEBUG,
-				);
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
 				SWIFT_COMPILATION_MODE = singlefile;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
