@@ -121,6 +121,7 @@ open class CustomTabBarController: UIViewController {
         
         self.tabBarStackView.distribution = .fillEqually
         self.tabBarStackView.axis = .horizontal
+        self.tabBarStackView.alignment = .center
         self.tabBarStackView.spacing = 0
         self.tabBarStackView.translatesAutoresizingMaskIntoConstraints = false
         

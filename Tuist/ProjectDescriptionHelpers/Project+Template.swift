@@ -9,26 +9,30 @@ extension Project {
     public static func app(
         module: Module,
         dependencies: [TargetDependency] = [],
-        resources: ProjectDescription.ResourceFileElements? = nil
+        resources: ProjectDescription.ResourceFileElements? = nil,
+        coreDataModels: [CoreDataModel] = []
     ) -> Project {
         return makeProject(
             module: module,
             product: .app,
             bundleId: bundleId + ".\(module.name)",
             dependencies: dependencies,
-            resources: resources)
+            resources: resources,
+            coreDataModels: coreDataModels)
     }
     
     public static func framework(module: Module,
                                  dependencies: [TargetDependency] = [],
-                                 resources: ProjectDescription.ResourceFileElements? = nil
+                                 resources: ProjectDescription.ResourceFileElements? = nil,
+                                 coreDataModels: [CoreDataModel] = []
     ) -> Project {
         return makeProject(
             module: module,
             product: .framework,
             bundleId: bundleId + ".\(module.name)",
             dependencies: dependencies,
-            resources: resources)
+            resources: resources,
+            coreDataModels: coreDataModels)
     }
 
     // MARK: - Private
@@ -38,8 +42,8 @@ extension Project {
         bundleId: String,
         schemes: [Scheme] = [],
         dependencies: [TargetDependency] = [],
-        resources: ProjectDescription.ResourceFileElements? = nil) -> Project {
-            
+        resources: ProjectDescription.ResourceFileElements? = nil,
+        coreDataModels: [CoreDataModel] = []) -> Project {
             return Project(
                 name: module.name,
                 organizationName: "sanghyeon",
@@ -55,7 +59,8 @@ extension Project {
                         bundleId: bundleId,
                         sources: ["Sources/**"],
                         resources: resources,
-                        dependencies: dependencies
+                        dependencies: dependencies,
+                        coreDataModels: coreDataModels
                     ),
 //                    makeTarget(
 //                        name: "\(name)Tests",
@@ -77,7 +82,8 @@ extension Project {
         bundleId: String,
         sources: SourceFilesList?,
         resources: ProjectDescription.ResourceFileElements? = nil,
-        dependencies: [TargetDependency] = []) -> Target {
+        dependencies: [TargetDependency] = [],
+        coreDataModels: [CoreDataModel] = []) -> Target {
             
             return .target(
                 name: module.name,
@@ -89,7 +95,8 @@ extension Project {
                 infoPlist: product == .app ? .file(path: "SupportingFiles/Info.plist"):.default,
                 sources: sources,
                 resources: resources,
-                dependencies: dependencies
+                dependencies: dependencies,
+                coreDataModels: coreDataModels
             )
         }
 }

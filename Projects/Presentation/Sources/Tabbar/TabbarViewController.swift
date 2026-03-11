@@ -24,7 +24,7 @@ final class TabbarViewController: CustomTabBarController {
         self.setLayoutMargin(height: 56, bottom: 4,
                              leading: 40, trailing: 40, cornerRadius: 28)
         
-        self.setShadow(color: .black, alpha: 0.1, x: 0, y: 4, blur: 6)
+        self.setShadow(color: .black, alpha: 0.1, x: 0, y: 4, blur: 12)
         
         self.selectedIndex = 1
     }
