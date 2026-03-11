@@ -1,5 +1,5 @@
 //
-//  CoreDataRuleRepository.swift
+//  DefaultDataRuleRepository.swift
 //  Data
 //
 //  Created by sanghyeon on 2/26/26.
@@ -9,7 +9,7 @@
 import CoreData
 import Domain
 
-public final class CoreDataRuleRepository: RuleRepository {
+public final class DefaultDataRuleRepository: DataRuleRepository {
 
     private let coreDataStack: CoreDataStack
 

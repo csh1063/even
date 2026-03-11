@@ -1,5 +1,5 @@
 //
-//  PhotoRepository.swift
+//  DataPhotoRepository.swift
 //  Domain
 //
 //  Created by sanghyeon on 2/26/26.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-public protocol PhotoRepositoryProtocol {
+public protocol DataPhotoRepository {
     func fetchAll() async throws -> [Photo]
     func fetch(page: Int, pageSize: Int) async throws -> [Photo]
     func create(_ photo: Photo) async throws

@@ -1,5 +1,5 @@
 //
-//  RuleRepository.swift
+//  DataRuleRepository.swift
 //  Domain
 //
 //  Created by sanghyeon on 2/26/26.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-public protocol RuleRepository {
+public protocol DataRuleRepository {
 
     func create(
         folderID: UUID,

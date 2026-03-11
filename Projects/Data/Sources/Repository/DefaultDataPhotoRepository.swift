@@ -1,5 +1,5 @@
 //
-//  CoreDataPhotoRepository.swift
+//  DefaultDataPhotoRepository.swift
 //  Data
 //
 //  Created by sanghyeon on 2/26/26.
@@ -9,7 +9,7 @@
 import CoreData
 import Domain
 
-public final class PhotoRepository: PhotoRepositoryProtocol {
+public final class DefaultDataPhotoRepository: DataPhotoRepository {
 
     private let context: NSManagedObjectContext
 

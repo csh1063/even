@@ -3,26 +3,27 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 55;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		01309DA478AC22159D054601 /* Moya.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E38D43CEE696BFEF020903BE /* Moya.framework */; };
+		191B75352F61499200573243 /* DefaultPhotoLibararyRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 191B75342F61499200573243 /* DefaultPhotoLibararyRepository.swift */; };
+		191B75372F614A8400573243 /* PhotoLibararyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 191B75362F614A8400573243 /* PhotoLibararyService.swift */; };
 		228A6CF81E8DF5EB87148743 /* RuleMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8CAE15176BD158A2824F7E /* RuleMapper.swift */; };
 		27EF5E8BDDD1088E9BE5FF35 /* PhotoMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22E7107F069B71CCCFB2127B /* PhotoMapper.swift */; };
 		46C0E5AAB473EB35B7007D85 /* CoreDataStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E2F4971BB5CA13D93960BDF /* CoreDataStack.swift */; };
-		4944B8FE68224C69542D1A7A /* CoreDataFolderRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7C1857EAD3C244214469F38 /* CoreDataFolderRepository.swift */; };
+		4944B8FE68224C69542D1A7A /* DefaultDataFolderRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7C1857EAD3C244214469F38 /* DefaultDataFolderRepository.swift */; };
 		5EA569B0768E5AD816A9A987 /* CombineMoya.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 742288D39DB3A440246920F5 /* CombineMoya.framework */; };
-		70C62714FDA93299C8D37171 /* CoreDataRuleRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1077677B299CA2816121D56E /* CoreDataRuleRepository.swift */; };
+		70C62714FDA93299C8D37171 /* DefaultDataRuleRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1077677B299CA2816121D56E /* DefaultDataRuleRepository.swift */; };
 		73E2CFE7B15DA84447EEB8D8 /* Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6D92AA65F88824A7589C1FF /* Data.swift */; };
 		7E02083885FFCBC5F5BAB5CB /* TagMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87FA35814B3EC831B0DE5691 /* TagMapper.swift */; };
-		818DF42555989CF54AB874A2 /* DefaultRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76688D30079DAA8FE8E72C1 /* DefaultRepository.swift */; };
 		8316E15461201093B98C1F89 /* Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BB16CCB75E103B3603596DE /* Service.swift */; };
 		901ACA7B98089AB702ADA830 /* Domain.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06FAA1459D11CCE724C34195 /* Domain.framework */; };
 		9B5D28D4A80A7917E414796E /* Network.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F01E911FF3FB09E7BF3FFE0 /* Network.swift */; };
 		9F214F179A3DB0DE03EB9139 /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = BCBBADD880CFB5ED6E757DCB /* Model.xcdatamodeld */; };
 		C0FA085D15CE4008F67D6306 /* FolderMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC744E45CBEC6C856B81344E /* FolderMapper.swift */; };
-		D7DC55BE820426629CAE96E0 /* CoreDataPhotoRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF7AC1D22142645495F3F946 /* CoreDataPhotoRepository.swift */; };
+		D7DC55BE820426629CAE96E0 /* DefaultDataPhotoRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF7AC1D22142645495F3F946 /* DefaultDataPhotoRepository.swift */; };
 		EF1758E6E5692C8851826C7B /* TuistBundle+Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = 638B01CCB60A9F6C7990C5E6 /* TuistBundle+Data.swift */; };
 /* End PBXBuildFile section */
 
@@ -42,7 +43,9 @@
 /* Begin PBXFileReference section */
 		033B57EACF093CA22F91EAB9 /* Data-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Data-Info.plist"; sourceTree = "<group>"; };
 		06FAA1459D11CCE724C34195 /* Domain.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Domain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		1077677B299CA2816121D56E /* CoreDataRuleRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataRuleRepository.swift; sourceTree = "<group>"; };
+		1077677B299CA2816121D56E /* DefaultDataRuleRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultDataRuleRepository.swift; sourceTree = "<group>"; };
+		191B75342F61499200573243 /* DefaultPhotoLibararyRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultPhotoLibararyRepository.swift; sourceTree = "<group>"; };
+		191B75362F614A8400573243 /* PhotoLibararyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibararyService.swift; sourceTree = "<group>"; };
 		22E7107F069B71CCCFB2127B /* PhotoMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoMapper.swift; sourceTree = "<group>"; };
 		4E75197C294DE74F5162FAA7 /* Data.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Data.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5B8CAE15176BD158A2824F7E /* RuleMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuleMapper.swift; sourceTree = "<group>"; };
@@ -53,12 +56,11 @@
 		7F01E911FF3FB09E7BF3FFE0 /* Network.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Network.swift; sourceTree = "<group>"; };
 		87FA35814B3EC831B0DE5691 /* TagMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagMapper.swift; sourceTree = "<group>"; };
 		A10EE54FE8EECC0B04831294 /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
-		BF7AC1D22142645495F3F946 /* CoreDataPhotoRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataPhotoRepository.swift; sourceTree = "<group>"; };
+		BF7AC1D22142645495F3F946 /* DefaultDataPhotoRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultDataPhotoRepository.swift; sourceTree = "<group>"; };
 		CC744E45CBEC6C856B81344E /* FolderMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderMapper.swift; sourceTree = "<group>"; };
 		D6D92AA65F88824A7589C1FF /* Data.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Data.swift; sourceTree = "<group>"; };
 		E38D43CEE696BFEF020903BE /* Moya.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Moya.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		E7C1857EAD3C244214469F38 /* CoreDataFolderRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataFolderRepository.swift; sourceTree = "<group>"; };
-		F76688D30079DAA8FE8E72C1 /* DefaultRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultRepository.swift; sourceTree = "<group>"; };
+		E7C1857EAD3C244214469F38 /* DefaultDataFolderRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultDataFolderRepository.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -97,10 +99,10 @@
 		73F3ED55BFDC2EF15878F5B6 /* Repository */ = {
 			isa = PBXGroup;
 			children = (
-				E7C1857EAD3C244214469F38 /* CoreDataFolderRepository.swift */,
-				BF7AC1D22142645495F3F946 /* CoreDataPhotoRepository.swift */,
-				1077677B299CA2816121D56E /* CoreDataRuleRepository.swift */,
-				F76688D30079DAA8FE8E72C1 /* DefaultRepository.swift */,
+				E7C1857EAD3C244214469F38 /* DefaultDataFolderRepository.swift */,
+				BF7AC1D22142645495F3F946 /* DefaultDataPhotoRepository.swift */,
+				1077677B299CA2816121D56E /* DefaultDataRuleRepository.swift */,
+				191B75342F61499200573243 /* DefaultPhotoLibararyRepository.swift */,
 			);
 			path = Repository;
 			sourceTree = "<group>";
@@ -153,6 +155,7 @@
 			isa = PBXGroup;
 			children = (
 				7BB16CCB75E103B3603596DE /* Service.swift */,
+				191B75362F614A8400573243 /* PhotoLibararyService.swift */,
 			);
 			path = Service;
 			sourceTree = "<group>";
@@ -255,17 +258,18 @@
 			files = (
 				EF1758E6E5692C8851826C7B /* TuistBundle+Data.swift in Sources */,
 				46C0E5AAB473EB35B7007D85 /* CoreDataStack.swift in Sources */,
+				191B75352F61499200573243 /* DefaultPhotoLibararyRepository.swift in Sources */,
 				73E2CFE7B15DA84447EEB8D8 /* Data.swift in Sources */,
 				C0FA085D15CE4008F67D6306 /* FolderMapper.swift in Sources */,
 				27EF5E8BDDD1088E9BE5FF35 /* PhotoMapper.swift in Sources */,
 				228A6CF81E8DF5EB87148743 /* RuleMapper.swift in Sources */,
 				7E02083885FFCBC5F5BAB5CB /* TagMapper.swift in Sources */,
 				9B5D28D4A80A7917E414796E /* Network.swift in Sources */,
-				4944B8FE68224C69542D1A7A /* CoreDataFolderRepository.swift in Sources */,
-				D7DC55BE820426629CAE96E0 /* CoreDataPhotoRepository.swift in Sources */,
-				70C62714FDA93299C8D37171 /* CoreDataRuleRepository.swift in Sources */,
-				818DF42555989CF54AB874A2 /* DefaultRepository.swift in Sources */,
+				4944B8FE68224C69542D1A7A /* DefaultDataFolderRepository.swift in Sources */,
+				D7DC55BE820426629CAE96E0 /* DefaultDataPhotoRepository.swift in Sources */,
+				70C62714FDA93299C8D37171 /* DefaultDataRuleRepository.swift in Sources */,
 				8316E15461201093B98C1F89 /* Service.swift in Sources */,
+				191B75372F614A8400573243 /* PhotoLibararyService.swift in Sources */,
 				9F214F179A3DB0DE03EB9139 /* Model.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -297,10 +301,7 @@
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = (
-					"$(inherited)",
-					DEBUG,
-				);
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
 				SWIFT_COMPILATION_MODE = singlefile;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;

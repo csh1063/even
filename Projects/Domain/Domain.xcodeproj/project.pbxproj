@@ -3,20 +3,20 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 55;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		032E4B53C9EDED3BCB584019 /* Domain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F491B7F514684708DC6E0D4 /* Domain.swift */; };
-		0EABDB0063A36CBD57820851 /* FolderRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77C4B2F5DA786359D9E0C7CB /* FolderRepository.swift */; };
+		0EABDB0063A36CBD57820851 /* DataFolderRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77C4B2F5DA786359D9E0C7CB /* DataFolderRepository.swift */; };
+		191B75332F61493F00573243 /* PhotoLibararyRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 191B75322F61493F00573243 /* PhotoLibararyRepository.swift */; };
 		1DC044C2DE240D693389F866 /* Rule.swift in Sources */ = {isa = PBXBuildFile; fileRef = F97B62508E6CD48ED9D05289 /* Rule.swift */; };
 		22BEA3427F877EFB6F48231D /* Tag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74892408B4D3ECF5700E9257 /* Tag.swift */; };
 		57E46066937F3BF917762EBC /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 893E27696DCC5C0506FDE62C /* Photo.swift */; };
-		71BEE0A1E1FB96805A689EFE /* RuleRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3BE271C4AE13926B300BDD2 /* RuleRepository.swift */; };
+		71BEE0A1E1FB96805A689EFE /* DataRuleRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3BE271C4AE13926B300BDD2 /* DataRuleRepository.swift */; };
 		829285431C0A0AE067C4DE9B /* Folder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3249CC0855626132FB3A8E2F /* Folder.swift */; };
-		85A7D1C0855F4289753D50B8 /* PhotoRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A18565BBDC2D34D8E5DC93AD /* PhotoRepository.swift */; };
+		85A7D1C0855F4289753D50B8 /* DataPhotoRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A18565BBDC2D34D8E5DC93AD /* DataPhotoRepository.swift */; };
 		8F3AFDCCE9F7986C686A9960 /* UseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B677723E6C7FD14D593C8B5E /* UseCase.swift */; };
-		CB2B6D86A006CD52ED00099B /* Repository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D03FC7386FAA4B12A23002BC /* Repository.swift */; };
 		F28B4D3CF0B8D525ADF13EAB /* RuleEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD7DE4257822C831AB5F0FA4 /* RuleEngine.swift */; };
 /* End PBXBuildFile section */
 
@@ -34,17 +34,17 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		191B75322F61493F00573243 /* PhotoLibararyRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibararyRepository.swift; sourceTree = "<group>"; };
 		3249CC0855626132FB3A8E2F /* Folder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Folder.swift; sourceTree = "<group>"; };
 		74892408B4D3ECF5700E9257 /* Tag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tag.swift; sourceTree = "<group>"; };
-		77C4B2F5DA786359D9E0C7CB /* FolderRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderRepository.swift; sourceTree = "<group>"; };
+		77C4B2F5DA786359D9E0C7CB /* DataFolderRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataFolderRepository.swift; sourceTree = "<group>"; };
 		893E27696DCC5C0506FDE62C /* Photo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
 		9F491B7F514684708DC6E0D4 /* Domain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Domain.swift; sourceTree = "<group>"; };
-		A18565BBDC2D34D8E5DC93AD /* PhotoRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoRepository.swift; sourceTree = "<group>"; };
+		A18565BBDC2D34D8E5DC93AD /* DataPhotoRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataPhotoRepository.swift; sourceTree = "<group>"; };
 		AD7DE4257822C831AB5F0FA4 /* RuleEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuleEngine.swift; sourceTree = "<group>"; };
-		B3BE271C4AE13926B300BDD2 /* RuleRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuleRepository.swift; sourceTree = "<group>"; };
+		B3BE271C4AE13926B300BDD2 /* DataRuleRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataRuleRepository.swift; sourceTree = "<group>"; };
 		B677723E6C7FD14D593C8B5E /* UseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UseCase.swift; sourceTree = "<group>"; };
 		BD15A37E85BAE3A36B2CE72C /* Domain-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Domain-Info.plist"; sourceTree = "<group>"; };
-		D03FC7386FAA4B12A23002BC /* Repository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Repository.swift; sourceTree = "<group>"; };
 		F97B62508E6CD48ED9D05289 /* Rule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rule.swift; sourceTree = "<group>"; };
 		FD49F277B86481D3D105FAC8 /* Domain.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Domain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -71,10 +71,10 @@
 		04A08A9FA52DB67E22049769 /* Implement */ = {
 			isa = PBXGroup;
 			children = (
-				77C4B2F5DA786359D9E0C7CB /* FolderRepository.swift */,
-				A18565BBDC2D34D8E5DC93AD /* PhotoRepository.swift */,
-				D03FC7386FAA4B12A23002BC /* Repository.swift */,
-				B3BE271C4AE13926B300BDD2 /* RuleRepository.swift */,
+				77C4B2F5DA786359D9E0C7CB /* DataFolderRepository.swift */,
+				A18565BBDC2D34D8E5DC93AD /* DataPhotoRepository.swift */,
+				B3BE271C4AE13926B300BDD2 /* DataRuleRepository.swift */,
+				191B75322F61493F00573243 /* PhotoLibararyRepository.swift */,
 			);
 			path = Implement;
 			sourceTree = "<group>";
@@ -218,11 +218,11 @@
 			files = (
 				F28B4D3CF0B8D525ADF13EAB /* RuleEngine.swift in Sources */,
 				032E4B53C9EDED3BCB584019 /* Domain.swift in Sources */,
-				0EABDB0063A36CBD57820851 /* FolderRepository.swift in Sources */,
-				85A7D1C0855F4289753D50B8 /* PhotoRepository.swift in Sources */,
-				CB2B6D86A006CD52ED00099B /* Repository.swift in Sources */,
-				71BEE0A1E1FB96805A689EFE /* RuleRepository.swift in Sources */,
+				0EABDB0063A36CBD57820851 /* DataFolderRepository.swift in Sources */,
+				85A7D1C0855F4289753D50B8 /* DataPhotoRepository.swift in Sources */,
+				71BEE0A1E1FB96805A689EFE /* DataRuleRepository.swift in Sources */,
 				829285431C0A0AE067C4DE9B /* Folder.swift in Sources */,
+				191B75332F61493F00573243 /* PhotoLibararyRepository.swift in Sources */,
 				57E46066937F3BF917762EBC /* Photo.swift in Sources */,
 				1DC044C2DE240D693389F866 /* Rule.swift in Sources */,
 				22BEA3427F877EFB6F48231D /* Tag.swift in Sources */,
@@ -257,10 +257,7 @@
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = (
-					"$(inherited)",
-					DEBUG,
-				);
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
 				SWIFT_COMPILATION_MODE = singlefile;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;

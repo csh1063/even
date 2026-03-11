@@ -1,5 +1,5 @@
 //
-//  FolderRepository.swift
+//  DataFolderRepository.swift
 //  Domain
 //
 //  Created by sanghyeon on 2/26/26.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-public protocol FolderRepository {
+public protocol DataFolderRepository {
     func create(name: String) async throws -> Folder
     func fetchAll() async throws -> [Folder]
     func fetchPage(offset: Int, limit: Int) async throws -> [Folder]

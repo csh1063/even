@@ -32,7 +32,7 @@ final class TabbarCoordinator: BaseCoordinator {
         let list = container.makeListCoordinator().startAndReturn()
         let myPage = container.makeMyPageCoordinator().startAndReturn()
         
-        self.tabbarViewController?.setTabBarItem("house", selectedImage: "house.fill", vc: home, title: "홈")
+        self.tabbarViewController?.setTabBarItem("house", selectedImage: "house.fill", vc: home)//, title: "홈")
         self.tabbarViewController?.setTabBarItem("list.bullet.rectangle.portrait", selectedImage: "list.bullet.rectangle.portrait.fill", vc: list)//, title: "리스트")
         self.tabbarViewController?.setTabBarItem("person", selectedImage: "person.fill", vc: myPage)//, title: "마이")
         

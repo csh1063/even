@@ -1,5 +1,5 @@
 //
-//  CoreDataFolderRepository.swift
+//  DefaultDataFolderRepository.swift
 //  Data
 //
 //  Created by sanghyeon on 2/26/26.
@@ -9,7 +9,7 @@
 import CoreData
 import Domain
 
-public final class CoreDataFolderRepository: FolderRepository {
+public final class DefaultDataFolderRepository: DataFolderRepository {
 
     private let coreDataStack: CoreDataStack
 
