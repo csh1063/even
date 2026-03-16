@@ -7,7 +7,208 @@
 //
 
 import Foundation
+import Domain
+import Photos
 
-final class PhotoLibararyService {
+public final class PhotoLibararyService {
     
+    private let imageManager = PHCachingImageManager()
+    
+    private var pHResultMap: [PHCollection: PHFetchResult<PHAsset>] = [:]
+    private var allPhotos: PHFetchResult<PHAsset>?
+    
+    private var assetCache: [String: PHAsset] = [:]
+    
+    public init() {}
+    
+    public func checkPermission() async throws -> PhotoPermission {
+        
+        let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+        switch status {
+        case .authorized: return .fullAccess
+        case .notDetermined:
+            let newStatus = await PHPhotoLibrary.requestAuthorization(for: .readWrite)
+            switch newStatus {
+            case .authorized: return .fullAccess
+            case .limited: return .limitedAccess
+            case .notDetermined: return .notDetermined
+            default: return .denied
+            }
+        case .limited: return .limitedAccess
+        default: return .denied
+        }
+    }
+    
+    public func getAlbumList() async throws -> [AlbumModel] {
+        
+        return await Task.detached(priority: .userInitiated) {
+            
+            var albumModelList: [AlbumModel] = [AlbumModel]()
+            
+            let favoriteAlbums = PHAssetCollection.fetchAssetCollections(with: .smartAlbum,
+                                                                         subtype: .smartAlbumFavorites, options: nil)
+            let allAlbum = PHAssetCollection.fetchAssetCollections(with: .smartAlbum,
+                                                                   subtype: .smartAlbumUserLibrary,
+                                                                   options: nil)
+            let selfiesAlbum = PHAssetCollection.fetchAssetCollections(with: .smartAlbum,
+                                                                       subtype: .smartAlbumSelfPortraits,
+                                                                       options: nil)
+            let panoramaAlbum = PHAssetCollection.fetchAssetCollections(with: .smartAlbum,
+                                                                        subtype: .smartAlbumPanoramas,
+                                                                        options: nil)
+            let burstAlbum = PHAssetCollection.fetchAssetCollections(with: .smartAlbum,
+                                                                     subtype: .smartAlbumBursts, options: nil)
+            let screenShotAlbum = PHAssetCollection.fetchAssetCollections(with: .smartAlbum,
+                                                                          subtype: .smartAlbumScreenshots,
+                                                                          options: nil)
+            let userAlbums = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: nil)
+
+            let albums = [allAlbum, favoriteAlbums, selfiesAlbum,
+                          panoramaAlbum, burstAlbum, screenShotAlbum, userAlbums]
+            for album in albums {
+                album.enumerateObjects { (collection, _, _) -> Void in
+                    let opt = PHFetchOptions()
+                    let assets = PHAsset.fetchAssets(in: collection, options: opt)
+                    if assets.count > 0 {
+                        let fetchOptions = PHFetchOptions()
+                        fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+                        fetchOptions.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.image.rawValue)
+                        
+                        let newAlbum = AlbumModel(
+                            name: collection.localizedTitle ?? "",
+                            count: assets.count,
+                            collection: collection)
+                        
+                        albumModelList.append(newAlbum)
+                    }
+                }
+            }
+            
+            return albumModelList
+        }.value
+    }
+
+    public func getPhotoList(from collection: PHAssetCollection? = nil, page: Int, reload: Bool = false) async throws -> PhotoListModel {
+        
+        let realPage = max(1, page)
+        let countPerPage = 300
+        let start = (realPage - 1) * countPerPage
+        let end = start + countPerPage
+        
+        let result: PHFetchResult<PHAsset>
+        
+        if let collection {
+            if let savedResult = self.pHResultMap[collection], !reload {
+                result = savedResult
+            } else {
+                result = PHAsset.fetchAssets(in: collection, options: .defaultOptions)
+                self.pHResultMap[collection] = result
+            }
+        } else {
+            if let savedAll = self.allPhotos, !reload {
+                result = savedAll
+            } else {
+                result = PHAsset.fetchAssets(with: .image, options: .defaultOptions)
+            }
+        }
+        
+        let totalCount = result.count
+        let rangeStart = min(start, totalCount)
+        let rangeEnd = min(end, totalCount)
+        
+        let photos = (rangeStart..<rangeEnd).map { index -> PhotoModel in
+            let asset = result.object(at: index)
+//            print("asset", asset.localIdentifier)
+            
+            self.assetCache[asset.localIdentifier] = asset
+            return PhotoModel(asset: asset)
+        }
+        
+        let sortedPhotos = photos.sorted {
+            let created0 = $0.asset.creationDate ?? Date.distantPast
+            let created1 = $1.asset.creationDate ?? Date.distantPast
+            
+            if created0 == created1 {
+                return $0.asset.modificationDate ?? Date.distantPast
+                    > $1.asset.modificationDate ?? Date.distantPast
+            } else {
+                return created0 > created1
+            }
+        }
+        
+        return PhotoListModel(
+            title: collection?.localizedTitle ?? "",
+            photos: sortedPhotos,
+            hasNext: rangeEnd < totalCount
+        )
+    }
+    
+    public func loadImage(id: String, type: LoadPhotoOptionType) async throws -> CGImage? {
+        guard let asset = getAsset(id: id) else { return nil }
+        
+        let options = PHImageRequestOptions()
+        let size: CGSize
+        let contentMode: PHImageContentMode
+        switch type {
+        case .maxSize:
+            options.deliveryMode = .highQualityFormat
+            options.resizeMode = .exact
+            options.isSynchronous = false
+            options.isNetworkAccessAllowed = true
+            size = PHImageManagerMaximumSize
+            contentMode = .default
+        case .specialSize(let specialSize):
+            options.resizeMode = .fast
+            options.deliveryMode = .opportunistic
+            options.isSynchronous = false
+            options.isNetworkAccessAllowed = false
+            size = specialSize
+            contentMode = .aspectFill
+        }
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            imageManager.requestImage(
+                for: asset,
+                targetSize: size,
+                contentMode: contentMode,
+                options: options) { image, info in
+                    if let error = info?[PHImageErrorKey] as? Error {
+                        continuation.resume(throwing: error)
+                        return
+                    }
+                    continuation.resume(returning: image?.cgImage)
+            }
+        }
+    }
+    
+    private func getAsset(id: String) -> PHAsset? {
+        
+        if let cached = assetCache[id] { return cached }
+        
+        let fetched = PHAsset.fetchAssets(withLocalIdentifiers: [id], options: nil).firstObject
+        if let asset = fetched {
+            self.assetCache[id] = asset
+        }
+        return fetched
+    }
+    
+    func startCaching(for assets: [PHAsset], targetSize: CGSize) {
+        imageManager.startCachingImages(for: assets, targetSize: targetSize, contentMode: .aspectFill, options: nil)
+    }
+    
+    func stopCaching(for assets: [PHAsset], targetSize: CGSize) {
+        imageManager.stopCachingImages(for: assets, targetSize: targetSize, contentMode: .aspectFill, options: nil)
+    }
+}
+
+extension PHFetchOptions {
+    static var defaultOptions: PHFetchOptions {
+        let option = PHFetchOptions()
+        option.sortDescriptors = [
+            NSSortDescriptor(key: "creationDate", ascending: false),
+            NSSortDescriptor(key: "modificationDate", ascending: false)
+        ]
+        option.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.image.rawValue)
+        return option
+    }
 }

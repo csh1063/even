@@ -17,8 +17,28 @@ class CustomTabBarItem: UIView {
     let button: UIButton = UIButton()
     var label: UILabel?
     
-    var titleColor: UIColor = .gray
-    var selectedTitleColor: UIColor = .black
+    var titleColor: UIColor = .gray {
+        didSet {
+            self.image = self.image?.withTintColor(
+                self.titleColor,
+                renderingMode: .alwaysOriginal)
+            if !self.isSelected {
+                self.imageView.image = self.image
+                self.label?.textColor = titleColor
+            }
+        }
+    }
+    var selectedTitleColor: UIColor = .black {
+        didSet {
+            self.selectedImage = self.selectedImage?.withTintColor(
+                self.selectedTitleColor,
+                renderingMode: .alwaysOriginal)
+            if self.isSelected {
+                self.imageView.image = self.selectedImage
+                self.label?.textColor = self.selectedTitleColor
+            }
+        }
+    }
     
     var image: UIImage?
     var selectedImage: UIImage?

@@ -41,7 +41,6 @@ final class TabbarCoordinator: BaseCoordinator {
                            myPage]
         
         self.tabbarViewController?.setViewControllers(controllers)
-        self.tabbarViewController?.setItemColors(normal: .gray, selected: .black)
         
         window.rootViewController = self.tabbarViewController
         window.makeKeyAndVisible()

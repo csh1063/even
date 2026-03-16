@@ -3,13 +3,14 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		01309DA478AC22159D054601 /* Moya.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E38D43CEE696BFEF020903BE /* Moya.framework */; };
 		191B75352F61499200573243 /* DefaultPhotoLibararyRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 191B75342F61499200573243 /* DefaultPhotoLibararyRepository.swift */; };
 		191B75372F614A8400573243 /* PhotoLibararyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 191B75362F614A8400573243 /* PhotoLibararyService.swift */; };
+		191B75452F632A3600573243 /* PhotoModelMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 191B75442F632A3600573243 /* PhotoModelMapper.swift */; };
 		228A6CF81E8DF5EB87148743 /* RuleMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8CAE15176BD158A2824F7E /* RuleMapper.swift */; };
 		27EF5E8BDDD1088E9BE5FF35 /* PhotoMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22E7107F069B71CCCFB2127B /* PhotoMapper.swift */; };
 		46C0E5AAB473EB35B7007D85 /* CoreDataStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E2F4971BB5CA13D93960BDF /* CoreDataStack.swift */; };
@@ -46,6 +47,7 @@
 		1077677B299CA2816121D56E /* DefaultDataRuleRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultDataRuleRepository.swift; sourceTree = "<group>"; };
 		191B75342F61499200573243 /* DefaultPhotoLibararyRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultPhotoLibararyRepository.swift; sourceTree = "<group>"; };
 		191B75362F614A8400573243 /* PhotoLibararyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibararyService.swift; sourceTree = "<group>"; };
+		191B75442F632A3600573243 /* PhotoModelMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoModelMapper.swift; sourceTree = "<group>"; };
 		22E7107F069B71CCCFB2127B /* PhotoMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoMapper.swift; sourceTree = "<group>"; };
 		4E75197C294DE74F5162FAA7 /* Data.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Data.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5B8CAE15176BD158A2824F7E /* RuleMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuleMapper.swift; sourceTree = "<group>"; };
@@ -62,6 +64,10 @@
 		E38D43CEE696BFEF020903BE /* Moya.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Moya.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E7C1857EAD3C244214469F38 /* DefaultDataFolderRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultDataFolderRepository.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		191B75412F63297D00573243 /* Model */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Model; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		818FC900AD146A9A336966D5 /* Frameworks */ = {
@@ -131,6 +137,7 @@
 				22E7107F069B71CCCFB2127B /* PhotoMapper.swift */,
 				5B8CAE15176BD158A2824F7E /* RuleMapper.swift */,
 				87FA35814B3EC831B0DE5691 /* TagMapper.swift */,
+				191B75442F632A3600573243 /* PhotoModelMapper.swift */,
 			);
 			path = Mapper;
 			sourceTree = "<group>";
@@ -172,6 +179,7 @@
 		C590795A2658F92D49B27E8D /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				191B75412F63297D00573243 /* Model */,
 				9F237CA8AD26CFA46B1AECC5 /* CoreData */,
 				A0AA58D04D806D6F029CD199 /* Mapper */,
 				A46DA33BCE1E2288153B2AC3 /* Network */,
@@ -206,6 +214,9 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				191B75412F63297D00573243 /* Model */,
 			);
 			name = Data;
 			packageProductDependencies = (
@@ -256,6 +267,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				191B75452F632A3600573243 /* PhotoModelMapper.swift in Sources */,
 				EF1758E6E5692C8851826C7B /* TuistBundle+Data.swift in Sources */,
 				46C0E5AAB473EB35B7007D85 /* CoreDataStack.swift in Sources */,
 				191B75352F61499200573243 /* DefaultPhotoLibararyRepository.swift in Sources */,

@@ -10,21 +10,21 @@ import Foundation
 
 final class TabbarViewController: CustomTabBarController {
     
-//    init() {
-//        super.init(nibName: nil, bundle: nil)
-//    }
-//    
-//    public required init?(coder: NSCoder) {
-//        fatalError("init(coder:) has not been implemented")
-//    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.setLayoutMargin(height: 56, bottom: 4,
-                             leading: 40, trailing: 40, cornerRadius: 28)
+        self.setItemColors(
+            normal: .Theme.gray,
+            selected: .Theme.primary)
         
-        self.setShadow(color: .black, alpha: 0.1, x: 0, y: 4, blur: 12)
+        self.setLayoutMargin(height: 56,
+                             margin: .init(leading: 80, trailing: 80, bottom: 4),
+                             padding: .init(leading: 12, trailing: 12),
+                             cornerRadius: 28)
+//        self.setLayoutMargin(height: 56, bottom: 4,
+//                             leading: 80, trailing: 80, cornerRadius: 28)
+        
+        self.setShadow(color: .black, alpha: 0.1, x: 0, y: 4, blur: 16)
         
         self.selectedIndex = 1
     }

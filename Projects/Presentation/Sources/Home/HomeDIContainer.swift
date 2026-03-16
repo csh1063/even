@@ -29,7 +29,8 @@ final class HomeDIContainer {
 
 //        let useCase = Tab1UseCase(repository: repository)
 
-        return HomeViewModel()
+//        return HomeViewModel()
+        return appDIContainer.makeHomeViewModel()
     }
 
 //    func makeHomeDetailViewModel(

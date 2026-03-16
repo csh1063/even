@@ -8,6 +8,8 @@
 
 import Foundation
 import Presentation
+import Data
+import Domain
 
 @MainActor
 final class DefaultAppDIContainer: AppDIContainer {
@@ -40,5 +42,19 @@ final class DefaultAppDIContainer: AppDIContainer {
     
     func makeMainViewModel() -> MainViewModel {
         MainViewModel()
+    }
+    
+    // MARK: Home
+    func makeHomeRepository() -> PhotoLibararyRepository {
+        let service = PhotoLibararyService()
+        return DefaultPhotoLibararyRepository(service: service)
+    }
+    
+    func makeHomeUsecase() -> PhotoLibraryUsecase {
+        return DefaultPhotoLibraryUsecase(repository: makeHomeRepository())
+    }
+    
+    func makeHomeViewModel() -> HomeViewModel {
+        return HomeViewModel(usecase: makeHomeUsecase())
     }
 }

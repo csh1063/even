@@ -1,0 +1,36 @@
+//
+//  PhotoLibraryUsecase.swift
+//  Domain
+//
+//  Created by sanghyeon on 3/12/26.
+//  Copyright © 2026 sanghyeon. All rights reserved.
+//
+
+import Foundation
+
+public protocol PhotoLibraryUsecase {
+    func fetchData(page: Int) async throws -> PhotoList
+    func checkPermission() async throws -> PhotoPermission
+    func loadImage(id: String, type: LoadPhotoOptionType) async throws -> ImageData
+}
+
+public class DefaultPhotoLibraryUsecase: PhotoLibraryUsecase {
+    
+    let repository: PhotoLibararyRepository
+    
+    public init(repository: PhotoLibararyRepository) {
+        self.repository = repository
+    }
+    
+    public func fetchData(page: Int) async throws -> PhotoList {
+        try await self.repository.fetchPhotos(page: page)
+    }
+    
+    public func checkPermission() async throws -> PhotoPermission {
+        try await self.repository.checkPermission()
+    }
+    
+    public func loadImage(id: String, type: LoadPhotoOptionType) async throws -> ImageData {
+        try await self.repository.loadImage(id: id, type: type)
+    }
+}

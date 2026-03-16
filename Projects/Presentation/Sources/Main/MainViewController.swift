@@ -26,8 +26,8 @@ final class MainViewController: CustomTabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.setLayoutMargin(height: 56, bottom: 4,
-                             leading: 40, trailing: 40, cornerRadius: 28)
+//        self.setLayoutMargin(height: 56, bottom: 4,
+//                             leading: 40, trailing: 40, cornerRadius: 28)
         
         self.setShadow(color: .black, alpha: 0.1, x: 0, y: 4, blur: 6)
     }
