@@ -9,16 +9,12 @@
 import Foundation
 import UIKit
 
-public struct ImageData {
-    public let image: UIImage?
+public struct ImageData<T> {
+    public let cgImage: T?
 //    let width: CGFloat
 //    let height: CGFloat
     
-    public init(cgImage: CGImage?) {
-        if let cgImage {
-            self.image = UIImage(cgImage: cgImage)
-        } else {
-            self.image = nil
-        }
+    public init(cgImage: T?) {
+        self.cgImage = cgImage
     }
 }

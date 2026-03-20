@@ -11,6 +11,9 @@
 		191B75352F61499200573243 /* DefaultPhotoLibararyRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 191B75342F61499200573243 /* DefaultPhotoLibararyRepository.swift */; };
 		191B75372F614A8400573243 /* PhotoLibararyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 191B75362F614A8400573243 /* PhotoLibararyService.swift */; };
 		191B75452F632A3600573243 /* PhotoModelMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 191B75442F632A3600573243 /* PhotoModelMapper.swift */; };
+		191B75622F695BFF00573243 /* PhotoAnalysisService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 191B75612F695BFF00573243 /* PhotoAnalysisService.swift */; };
+		191B75672F6961AA00573243 /* PermissionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 191B75662F6961AA00573243 /* PermissionService.swift */; };
+		191B75712F6964F000573243 /* DefaultPhotoAnalysisRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 191B75702F6964F000573243 /* DefaultPhotoAnalysisRepository.swift */; };
 		228A6CF81E8DF5EB87148743 /* RuleMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8CAE15176BD158A2824F7E /* RuleMapper.swift */; };
 		27EF5E8BDDD1088E9BE5FF35 /* PhotoMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22E7107F069B71CCCFB2127B /* PhotoMapper.swift */; };
 		46C0E5AAB473EB35B7007D85 /* CoreDataStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E2F4971BB5CA13D93960BDF /* CoreDataStack.swift */; };
@@ -48,6 +51,9 @@
 		191B75342F61499200573243 /* DefaultPhotoLibararyRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultPhotoLibararyRepository.swift; sourceTree = "<group>"; };
 		191B75362F614A8400573243 /* PhotoLibararyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibararyService.swift; sourceTree = "<group>"; };
 		191B75442F632A3600573243 /* PhotoModelMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoModelMapper.swift; sourceTree = "<group>"; };
+		191B75612F695BFF00573243 /* PhotoAnalysisService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoAnalysisService.swift; sourceTree = "<group>"; };
+		191B75662F6961AA00573243 /* PermissionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionService.swift; sourceTree = "<group>"; };
+		191B75702F6964F000573243 /* DefaultPhotoAnalysisRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultPhotoAnalysisRepository.swift; sourceTree = "<group>"; };
 		22E7107F069B71CCCFB2127B /* PhotoMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoMapper.swift; sourceTree = "<group>"; };
 		4E75197C294DE74F5162FAA7 /* Data.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Data.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5B8CAE15176BD158A2824F7E /* RuleMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuleMapper.swift; sourceTree = "<group>"; };
@@ -67,6 +73,7 @@
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		191B75412F63297D00573243 /* Model */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Model; sourceTree = "<group>"; };
+		191B754D2F681AAA00573243 /* SwiftData */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = SwiftData; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,6 +116,7 @@
 				BF7AC1D22142645495F3F946 /* DefaultDataPhotoRepository.swift */,
 				1077677B299CA2816121D56E /* DefaultDataRuleRepository.swift */,
 				191B75342F61499200573243 /* DefaultPhotoLibararyRepository.swift */,
+				191B75702F6964F000573243 /* DefaultPhotoAnalysisRepository.swift */,
 			);
 			path = Repository;
 			sourceTree = "<group>";
@@ -163,6 +171,8 @@
 			children = (
 				7BB16CCB75E103B3603596DE /* Service.swift */,
 				191B75362F614A8400573243 /* PhotoLibararyService.swift */,
+				191B75612F695BFF00573243 /* PhotoAnalysisService.swift */,
+				191B75662F6961AA00573243 /* PermissionService.swift */,
 			);
 			path = Service;
 			sourceTree = "<group>";
@@ -179,6 +189,7 @@
 		C590795A2658F92D49B27E8D /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				191B754D2F681AAA00573243 /* SwiftData */,
 				191B75412F63297D00573243 /* Model */,
 				9F237CA8AD26CFA46B1AECC5 /* CoreData */,
 				A0AA58D04D806D6F029CD199 /* Mapper */,
@@ -217,6 +228,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				191B75412F63297D00573243 /* Model */,
+				191B754D2F681AAA00573243 /* SwiftData */,
 			);
 			name = Data;
 			packageProductDependencies = (
@@ -268,6 +280,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				191B75452F632A3600573243 /* PhotoModelMapper.swift in Sources */,
+				191B75712F6964F000573243 /* DefaultPhotoAnalysisRepository.swift in Sources */,
 				EF1758E6E5692C8851826C7B /* TuistBundle+Data.swift in Sources */,
 				46C0E5AAB473EB35B7007D85 /* CoreDataStack.swift in Sources */,
 				191B75352F61499200573243 /* DefaultPhotoLibararyRepository.swift in Sources */,
@@ -277,10 +290,12 @@
 				228A6CF81E8DF5EB87148743 /* RuleMapper.swift in Sources */,
 				7E02083885FFCBC5F5BAB5CB /* TagMapper.swift in Sources */,
 				9B5D28D4A80A7917E414796E /* Network.swift in Sources */,
+				191B75622F695BFF00573243 /* PhotoAnalysisService.swift in Sources */,
 				4944B8FE68224C69542D1A7A /* DefaultDataFolderRepository.swift in Sources */,
 				D7DC55BE820426629CAE96E0 /* DefaultDataPhotoRepository.swift in Sources */,
 				70C62714FDA93299C8D37171 /* DefaultDataRuleRepository.swift in Sources */,
 				8316E15461201093B98C1F89 /* Service.swift in Sources */,
+				191B75672F6961AA00573243 /* PermissionService.swift in Sources */,
 				191B75372F614A8400573243 /* PhotoLibararyService.swift in Sources */,
 				9F214F179A3DB0DE03EB9139 /* Model.xcdatamodeld in Sources */,
 			);

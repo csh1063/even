@@ -1,5 +1,5 @@
 //
-//  HomePhotoCell.swift
+//  PhotoCell.swift
 //  Presentation
 //
 //  Created by sanghyeon on 3/13/26.
@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 import Domain
 
-final class HomePhotoCell: UICollectionViewCell {
+final class PhotoCell: UICollectionViewCell {
     
     private let mainImageView: UIImageView = UIImageView()
     
@@ -32,13 +32,14 @@ final class HomePhotoCell: UICollectionViewCell {
     }
     
     required init?(coder: NSCoder) {
-        fatalError("HomePhotoCell does not support NSCoding")
+        fatalError("PhotoCell does not support NSCoding")
     }
     
     func setupView() {
         
         self.contentView.backgroundColor = .Theme.obsidian
         
+        self.mainImageView.backgroundColor = .white
         self.mainImageView.layer.masksToBounds = true
         self.mainImageView.contentMode = .scaleAspectFill
         
@@ -61,18 +62,13 @@ final class HomePhotoCell: UICollectionViewCell {
         }
     }
     
-    
-//    func configure(with photo: PhotoInAlbum) {
-//        self.mainImageView.image = photo.cellImage
-//    }
-    func configure(with photo: PhotoInAlbum, viewModel: HomeViewModel) {
-        self.assetIdentifier = photo.localIdentifier
+    func configure(with viewModel: PhotoCellItemViewModel) {
+        self.assetIdentifier = viewModel.photo.localIdentifier
         self.loadingView.isHidden = false
         task = Task {
-            let image = await viewModel.loadImage(id: photo.localIdentifier, size: self.frame.size)
+            let image = await viewModel.loadImage(size: self.frame.size)
             
-            // ✅ 요청한 사진이 여전히 이 셀에 필요한 사진인지 확인
-            if !Task.isCancelled && self.assetIdentifier == photo.localIdentifier {
+            if !Task.isCancelled && self.assetIdentifier == viewModel.photo.localIdentifier {
                 self.mainImageView.image = image
             }
             self.loadingView.isHidden = true

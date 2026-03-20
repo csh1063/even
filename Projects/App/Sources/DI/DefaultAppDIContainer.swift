@@ -44,17 +44,42 @@ final class DefaultAppDIContainer: AppDIContainer {
         MainViewModel()
     }
     
-    // MARK: Home
-    func makeHomeRepository() -> PhotoLibararyRepository {
-        let service = PhotoLibararyService()
-        return DefaultPhotoLibararyRepository(service: service)
+    // MARK: Photo Library
+    func makePhotoLibraryRepository() -> PhotoLibraryRepository {
+        let libraryService = PhotoLibraryService()
+        let permissionService = PermissionService()
+        return DefaultPhotoLibraryRepository(
+            libraryService: libraryService,
+            permissionService: permissionService
+        )
     }
     
-    func makeHomeUsecase() -> PhotoLibraryUsecase {
-        return DefaultPhotoLibraryUsecase(repository: makeHomeRepository())
+    func makePhotoLibraryUsecase() -> PhotoLibraryUsecase {
+        return DefaultPhotoLibraryUsecase(repository: makePhotoLibraryRepository())
     }
     
-    func makeHomeViewModel() -> HomeViewModel {
-        return HomeViewModel(usecase: makeHomeUsecase())
+    func makePhotoLibraryViewModel() -> PhotoLibraryViewModel {
+        return PhotoLibraryViewModel(usecase: makePhotoLibraryUsecase())
+    }
+    
+    // MARK: Album
+    func makePhotoAnalysisRepository() -> PhotoAnalysisRepository {
+        let analysisService = PhotoAnalysisService()
+        let libraryService = PhotoLibraryService()
+        return DefaultPhotoAnalysisRepository(
+            analysisService: analysisService,
+            libraryService: libraryService
+        )
+    }
+    
+    func makePhotoAnalysisUsecase() -> PhotoAnalysisUsecase {
+        return PhotoAnalysisUsecase(
+            libraryRepository: makePhotoLibraryRepository(),
+            analysisRepository: makePhotoAnalysisRepository()
+        )
+    }
+    
+    func makeAlbumViewModel() -> AlbumViewModel {
+        return AlbumViewModel(analysisUsecase: makePhotoAnalysisUsecase())
     }
 }

@@ -28,20 +28,6 @@ open class CustomTabBarController: UIViewController {
             return Padding(leading: 0, trailing: 0)
         }
     }
-//    public enum Alignment : Int, @unchecked Sendable {
-//        case none = 0
-//        case leading = 1
-//        case trailing = 2
-//    }
-    //    @IBOutlet var tabBarView: UIView!
-    //    @IBOutlet var tabBarLeading: NSLayoutConstraint!
-    //    @IBOutlet var tabBarTrailing: NSLayoutConstraint!
-    //    @IBOutlet var tabBarBottom: NSLayoutConstraint!
-    //    @IBOutlet var tabBarHeight: NSLayoutConstraint!
-    //
-    //    @IBOutlet var tabBarShadowView: UIView!
-    //
-    //    @IBOutlet var tabBarStackView: UIStackView!
     
     private var tabBarView: UIView = UIView()
     private var tabBarLeading: NSLayoutConstraint!
@@ -82,8 +68,15 @@ open class CustomTabBarController: UIViewController {
         }
     }
     
-    var titleColor: UIColor = .gray
-    var selectedTitleColor: UIColor = .black
+    private var titleColor: UIColor = .gray
+    private var selectedTitleColor: UIColor = .black
+    
+    private var tabbarBackgroundColor: UIColor = .systemBackground {
+        didSet {
+            self.tabBarView.backgroundColor = tabbarBackgroundColor
+            self.tabBarShadowView.backgroundColor = tabbarBackgroundColor
+        }
+    }
     
     weak var delegate: CustomTabBarDelegate?
     
@@ -140,10 +133,10 @@ open class CustomTabBarController: UIViewController {
     
     private func initView() {
         
-        self.tabBarView.backgroundColor = .systemBackground
+        self.tabBarView.backgroundColor = self.tabbarBackgroundColor
         self.tabBarView.translatesAutoresizingMaskIntoConstraints = false
         
-        self.tabBarShadowView.backgroundColor = .systemBackground
+        self.tabBarShadowView.backgroundColor = self.tabbarBackgroundColor
         self.tabBarShadowView.translatesAutoresizingMaskIntoConstraints = false
         
         self.tabBarStackView.distribution = .fillEqually
@@ -219,7 +212,7 @@ open class CustomTabBarController: UIViewController {
             let selectedVC = viewControllers[selectedIndex]
             self.addChild(selectedVC)
             view.insertSubview(selectedVC.view, at: 0)
-            //            view.insertSubview(selectedVC.view, belowSubview: tabBarShadowView)
+            
             selectedVC.view.frame = view.bounds
             selectedVC.didMove(toParent: self)
             
@@ -254,6 +247,10 @@ open class CustomTabBarController: UIViewController {
         self.viewControllers = viewControllers
     }
     
+    public func setBackgroundColor(_ color: UIColor) {
+        self.tabbarBackgroundColor = color
+    }
+    
     public func setItemColors(normal titleColor: UIColor? = nil,
                               selected selectedTitleColor: UIColor? = nil) {
         
@@ -270,24 +267,14 @@ open class CustomTabBarController: UIViewController {
         }
     }
     
-    public func setBackground(_ color: UIColor) {
-        self.tabBarView.backgroundColor = color
-    }
-    
     public func setLayoutMargin(height: CGFloat,
                                 margin: Margin,
                                 padding: Padding,
                                 cornerRadius: CGFloat? = nil) {
-//    public func setLayoutMargin(height: CGFloat = 50, bottom: CGFloat = 0,
-//                                leading: CGFloat = 20, trailing: CGFloat = 20,
-//                                cornerRadius: CGFloat? = nil) {
 
         self.height = height
         self.margin = margin
         self.padding = padding
-//        self.bottom = margin.bottom
-//        self.leading = margin.leading
-//        self.trailing = margin.trailing
         
         if let cornerRadius = cornerRadius {
             self.cornerRadius = cornerRadius

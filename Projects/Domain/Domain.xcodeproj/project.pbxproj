@@ -14,13 +14,17 @@
 		191B753B2F614B8700573243 /* PhotoInAlbum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 191B753A2F614B8700573243 /* PhotoInAlbum.swift */; };
 		191B753D2F61C0DD00573243 /* PhotoLibraryUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 191B753C2F61C0DD00573243 /* PhotoLibraryUsecase.swift */; };
 		191B75472F6332F100573243 /* ImageData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 191B75462F6332F100573243 /* ImageData.swift */; };
+		191B75692F6963B100573243 /* PhotoAnalysisUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 191B75682F6963B100573243 /* PhotoAnalysisUsecase.swift */; };
+		191B756B2F69649F00573243 /* PhotoAnalysisRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 191B756A2F69649F00573243 /* PhotoAnalysisRepository.swift */; };
+		191B756D2F6964B000573243 /* PhotoLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 191B756C2F6964B000573243 /* PhotoLabel.swift */; };
+		191B756F2F6964D500573243 /* AnalysisProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 191B756E2F6964D500573243 /* AnalysisProgress.swift */; };
+		191B75C42F6AFB0900573243 /* AnalysisState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 191B75C32F6AFB0900573243 /* AnalysisState.swift */; };
 		1DC044C2DE240D693389F866 /* Rule.swift in Sources */ = {isa = PBXBuildFile; fileRef = F97B62508E6CD48ED9D05289 /* Rule.swift */; };
 		22BEA3427F877EFB6F48231D /* Tag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74892408B4D3ECF5700E9257 /* Tag.swift */; };
 		57E46066937F3BF917762EBC /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 893E27696DCC5C0506FDE62C /* Photo.swift */; };
 		71BEE0A1E1FB96805A689EFE /* DataRuleRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3BE271C4AE13926B300BDD2 /* DataRuleRepository.swift */; };
 		829285431C0A0AE067C4DE9B /* Folder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3249CC0855626132FB3A8E2F /* Folder.swift */; };
 		85A7D1C0855F4289753D50B8 /* DataPhotoRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A18565BBDC2D34D8E5DC93AD /* DataPhotoRepository.swift */; };
-		8F3AFDCCE9F7986C686A9960 /* UseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B677723E6C7FD14D593C8B5E /* UseCase.swift */; };
 		F28B4D3CF0B8D525ADF13EAB /* RuleEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD7DE4257822C831AB5F0FA4 /* RuleEngine.swift */; };
 /* End PBXBuildFile section */
 
@@ -43,6 +47,11 @@
 		191B753A2F614B8700573243 /* PhotoInAlbum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoInAlbum.swift; sourceTree = "<group>"; };
 		191B753C2F61C0DD00573243 /* PhotoLibraryUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryUsecase.swift; sourceTree = "<group>"; };
 		191B75462F6332F100573243 /* ImageData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageData.swift; sourceTree = "<group>"; };
+		191B75682F6963B100573243 /* PhotoAnalysisUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoAnalysisUsecase.swift; sourceTree = "<group>"; };
+		191B756A2F69649F00573243 /* PhotoAnalysisRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoAnalysisRepository.swift; sourceTree = "<group>"; };
+		191B756C2F6964B000573243 /* PhotoLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLabel.swift; sourceTree = "<group>"; };
+		191B756E2F6964D500573243 /* AnalysisProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalysisProgress.swift; sourceTree = "<group>"; };
+		191B75C32F6AFB0900573243 /* AnalysisState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalysisState.swift; sourceTree = "<group>"; };
 		3249CC0855626132FB3A8E2F /* Folder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Folder.swift; sourceTree = "<group>"; };
 		74892408B4D3ECF5700E9257 /* Tag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tag.swift; sourceTree = "<group>"; };
 		77C4B2F5DA786359D9E0C7CB /* DataFolderRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataFolderRepository.swift; sourceTree = "<group>"; };
@@ -51,7 +60,6 @@
 		A18565BBDC2D34D8E5DC93AD /* DataPhotoRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataPhotoRepository.swift; sourceTree = "<group>"; };
 		AD7DE4257822C831AB5F0FA4 /* RuleEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuleEngine.swift; sourceTree = "<group>"; };
 		B3BE271C4AE13926B300BDD2 /* DataRuleRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataRuleRepository.swift; sourceTree = "<group>"; };
-		B677723E6C7FD14D593C8B5E /* UseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UseCase.swift; sourceTree = "<group>"; };
 		BD15A37E85BAE3A36B2CE72C /* Domain-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Domain-Info.plist"; sourceTree = "<group>"; };
 		F97B62508E6CD48ED9D05289 /* Rule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rule.swift; sourceTree = "<group>"; };
 		FD49F277B86481D3D105FAC8 /* Domain.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Domain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -83,6 +91,7 @@
 				A18565BBDC2D34D8E5DC93AD /* DataPhotoRepository.swift */,
 				B3BE271C4AE13926B300BDD2 /* DataRuleRepository.swift */,
 				191B75322F61493F00573243 /* PhotoLibararyRepository.swift */,
+				191B756A2F69649F00573243 /* PhotoAnalysisRepository.swift */,
 			);
 			path = Implement;
 			sourceTree = "<group>";
@@ -110,8 +119,8 @@
 		2BE278B80FDD95404961E580 /* UseCase */ = {
 			isa = PBXGroup;
 			children = (
-				B677723E6C7FD14D593C8B5E /* UseCase.swift */,
 				191B753C2F61C0DD00573243 /* PhotoLibraryUsecase.swift */,
+				191B75682F6963B100573243 /* PhotoAnalysisUsecase.swift */,
 			);
 			path = UseCase;
 			sourceTree = "<group>";
@@ -152,6 +161,9 @@
 		CF4E8210A1D8B7A147B27DF7 /* Entity */ = {
 			isa = PBXGroup;
 			children = (
+				191B75C32F6AFB0900573243 /* AnalysisState.swift */,
+				191B756E2F6964D500573243 /* AnalysisProgress.swift */,
+				191B756C2F6964B000573243 /* PhotoLabel.swift */,
 				191B753A2F614B8700573243 /* PhotoInAlbum.swift */,
 				191B75382F614B7C00573243 /* Album.swift */,
 				3249CC0855626132FB3A8E2F /* Folder.swift */,
@@ -228,21 +240,25 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				191B756F2F6964D500573243 /* AnalysisProgress.swift in Sources */,
 				191B753D2F61C0DD00573243 /* PhotoLibraryUsecase.swift in Sources */,
+				191B75C42F6AFB0900573243 /* AnalysisState.swift in Sources */,
 				F28B4D3CF0B8D525ADF13EAB /* RuleEngine.swift in Sources */,
 				191B75392F614B7C00573243 /* Album.swift in Sources */,
 				032E4B53C9EDED3BCB584019 /* Domain.swift in Sources */,
+				191B756D2F6964B000573243 /* PhotoLabel.swift in Sources */,
 				0EABDB0063A36CBD57820851 /* DataFolderRepository.swift in Sources */,
 				85A7D1C0855F4289753D50B8 /* DataPhotoRepository.swift in Sources */,
+				191B75692F6963B100573243 /* PhotoAnalysisUsecase.swift in Sources */,
 				191B753B2F614B8700573243 /* PhotoInAlbum.swift in Sources */,
 				71BEE0A1E1FB96805A689EFE /* DataRuleRepository.swift in Sources */,
 				191B75472F6332F100573243 /* ImageData.swift in Sources */,
 				829285431C0A0AE067C4DE9B /* Folder.swift in Sources */,
+				191B756B2F69649F00573243 /* PhotoAnalysisRepository.swift in Sources */,
 				191B75332F61493F00573243 /* PhotoLibararyRepository.swift in Sources */,
 				57E46066937F3BF917762EBC /* Photo.swift in Sources */,
 				1DC044C2DE240D693389F866 /* Rule.swift in Sources */,
 				22BEA3427F877EFB6F48231D /* Tag.swift in Sources */,
-				8F3AFDCCE9F7986C686A9960 /* UseCase.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

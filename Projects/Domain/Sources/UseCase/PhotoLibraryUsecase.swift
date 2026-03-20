@@ -11,14 +11,14 @@ import Foundation
 public protocol PhotoLibraryUsecase {
     func fetchData(page: Int) async throws -> PhotoList
     func checkPermission() async throws -> PhotoPermission
-    func loadImage(id: String, type: LoadPhotoOptionType) async throws -> ImageData
+    func loadImage<T>(id: String, type: LoadPhotoOptionType) async throws -> ImageData<T>
 }
 
 public class DefaultPhotoLibraryUsecase: PhotoLibraryUsecase {
     
-    let repository: PhotoLibararyRepository
+    let repository: PhotoLibraryRepository
     
-    public init(repository: PhotoLibararyRepository) {
+    public init(repository: PhotoLibraryRepository) {
         self.repository = repository
     }
     
@@ -30,7 +30,7 @@ public class DefaultPhotoLibraryUsecase: PhotoLibraryUsecase {
         try await self.repository.checkPermission()
     }
     
-    public func loadImage(id: String, type: LoadPhotoOptionType) async throws -> ImageData {
-        try await self.repository.loadImage(id: id, type: type)
+    public func loadImage<T>(id: String, type: LoadPhotoOptionType) async throws -> ImageData<T> {
+        return try await self.repository.loadImage(id: id, type: type)
     }
 }

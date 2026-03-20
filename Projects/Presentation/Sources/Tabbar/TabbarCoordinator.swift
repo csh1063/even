@@ -28,16 +28,16 @@ final class TabbarCoordinator: BaseCoordinator {
         
         self.tabbarViewController = TabbarViewController()
         
-        let home = container.makeHomeCoordinator().startAndReturn()
-        let list = container.makeListCoordinator().startAndReturn()
+        let photo = container.makePhotoLibraryCoordinator().startAndReturn()
+        let album = container.makeAlbumCoordinator().startAndReturn()
         let myPage = container.makeMyPageCoordinator().startAndReturn()
         
-        self.tabbarViewController?.setTabBarItem("house", selectedImage: "house.fill", vc: home)//, title: "홈")
-        self.tabbarViewController?.setTabBarItem("list.bullet.rectangle.portrait", selectedImage: "list.bullet.rectangle.portrait.fill", vc: list)//, title: "리스트")
+        self.tabbarViewController?.setTabBarItem("house", selectedImage: "house.fill", vc: photo)//, title: "홈")
+        self.tabbarViewController?.setTabBarItem("list.bullet.rectangle.portrait", selectedImage: "list.bullet.rectangle.portrait.fill", vc: album)//, title: "리스트")
         self.tabbarViewController?.setTabBarItem("person", selectedImage: "person.fill", vc: myPage)//, title: "마이")
         
-        let controllers = [home,
-                           list,
+        let controllers = [photo,
+                           album,
                            myPage]
         
         self.tabbarViewController?.setViewControllers(controllers)

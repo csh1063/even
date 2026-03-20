@@ -13,12 +13,14 @@ final class TabbarViewController: CustomTabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        self.setBackgroundColor(.Theme.white)
+        
         self.setItemColors(
             normal: .Theme.gray,
             selected: .Theme.primary)
         
         self.setLayoutMargin(height: 56,
-                             margin: .init(leading: 80, trailing: 80, bottom: 4),
+                             margin: .init(leading: 20, trailing: 200, bottom: 4),
                              padding: .init(leading: 12, trailing: 12),
                              cornerRadius: 28)
 //        self.setLayoutMargin(height: 56, bottom: 4,

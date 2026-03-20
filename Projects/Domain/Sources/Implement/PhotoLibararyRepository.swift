@@ -1,5 +1,5 @@
 //
-//  PhotoLibararyRepository.swift
+//  PhotoLibraryRepository.swift
 //  Domain
 //
 //  Created by sanghyeon on 3/11/26.
@@ -8,8 +8,8 @@
 
 import Foundation
 
-public protocol PhotoLibararyRepository {
+public protocol PhotoLibraryRepository {
     func fetchPhotos(page: Int) async throws -> PhotoList
     func checkPermission() async throws -> PhotoPermission
-    func loadImage(id: String, type: LoadPhotoOptionType) async throws -> ImageData
+    func loadImage<T>(id: String, type: LoadPhotoOptionType) async throws -> ImageData<T>
 }

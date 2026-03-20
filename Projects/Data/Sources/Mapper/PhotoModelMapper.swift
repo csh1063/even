@@ -9,7 +9,7 @@
 import Foundation
 import Domain
 
-extension AlbumModel {
+extension AlbumAssetEntity {
     func toDomain() -> Album {
         return Album(
             name: self.name,
@@ -18,7 +18,7 @@ extension AlbumModel {
     }
 }
 
-extension PhotoModel {
+extension PhotoAssetEntity {
     func toDomain() -> PhotoInAlbum {
         return PhotoInAlbum(
             id: self.asset.localIdentifier
@@ -26,7 +26,7 @@ extension PhotoModel {
     }
 }
 
-extension PhotoListModel {
+extension PhotoAssetListEntity {
     func toDomain() -> PhotoList {
         return PhotoList(
             title: self.title,

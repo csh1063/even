@@ -17,14 +17,14 @@ public final class TabbarDIContainer {
         self.appDiContainer = appDiContainer
     }
     
-    func makeHomeCoordinator() -> HomeCoordinator {
-        let diContainer = HomeDIContainer(appDIContainer: appDiContainer)
-        return HomeCoordinator(diContainer: diContainer)
+    func makePhotoLibraryCoordinator() -> PhotoLibraryCoordinator {
+        let diContainer = PhotoLibraryDIContainer(appDIContainer: appDiContainer)
+        return PhotoLibraryCoordinator(diContainer: diContainer)
     }
     
-    func makeListCoordinator() -> ListCoordinator {
-        let diContainer = ListDIContainer(appDIContainer: appDiContainer)
-        return ListCoordinator(diContainer: diContainer)
+    func makeAlbumCoordinator() -> AlbumCoordinator {
+        let diContainer = AlbumDIContainer(appDIContainer: appDiContainer)
+        return AlbumCoordinator(diContainer: diContainer)
     }
     
     func makeMyPageCoordinator() -> MyPageCoordinator {

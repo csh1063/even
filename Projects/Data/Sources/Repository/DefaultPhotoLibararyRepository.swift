@@ -1,5 +1,5 @@
 //
-//  DefaultPhotoLibararyRepository.swift
+//  DefaultPhotoLibraryRepository.swift
 //  Data
 //
 //  Created by sanghyeon on 3/11/26.
@@ -9,25 +9,30 @@
 import Foundation
 import Domain
 
-public final class DefaultPhotoLibararyRepository: PhotoLibararyRepository {
+public final class DefaultPhotoLibraryRepository: PhotoLibraryRepository {
 
-    private let service: PhotoLibararyService
+    private let libraryService: PhotoLibraryService
+    private let permissionService: PermissionService
     
-    public init(service: PhotoLibararyService) {
-        self.service = service
+    public init(
+        libraryService: PhotoLibraryService,
+        permissionService: PermissionService
+    ) {
+        self.libraryService = libraryService
+        self.permissionService = permissionService
     }
 
     public func fetchPhotos(page: Int) async throws -> PhotoList {
-        return try await self.service.getPhotoList(page: page).toDomain()
+        return try await self.libraryService.getPhotoList(page: page).toDomain()
     }
     
     public func checkPermission() async throws -> PhotoPermission {
-        try await self.service.checkPermission()
+        try await self.permissionService.checkPermission()
     }
     
-    public func loadImage(id: String, type: LoadPhotoOptionType) async throws -> ImageData {
-        let cgImage = try await self.service.loadImage(id: id, type: type)
-        return ImageData(cgImage: cgImage)
+    public func loadImage<T>(id: String, type: LoadPhotoOptionType) async throws -> ImageData<T> {
+        let cgImage = try await self.libraryService.loadImage(id: id, type: type)
+        return ImageData(cgImage: cgImage as? T)
     }
 }
 

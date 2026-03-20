@@ -1,5 +1,5 @@
 //
-//  PhotoLibararyService.swift
+//  PhotoLibraryService.swift
 //  Data
 //
 //  Created by sanghyeon on 3/11/26.
@@ -10,7 +10,7 @@ import Foundation
 import Domain
 import Photos
 
-public final class PhotoLibararyService {
+public final class PhotoLibraryService {
     
     private let imageManager = PHCachingImageManager()
     
@@ -21,29 +21,11 @@ public final class PhotoLibararyService {
     
     public init() {}
     
-    public func checkPermission() async throws -> PhotoPermission {
-        
-        let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
-        switch status {
-        case .authorized: return .fullAccess
-        case .notDetermined:
-            let newStatus = await PHPhotoLibrary.requestAuthorization(for: .readWrite)
-            switch newStatus {
-            case .authorized: return .fullAccess
-            case .limited: return .limitedAccess
-            case .notDetermined: return .notDetermined
-            default: return .denied
-            }
-        case .limited: return .limitedAccess
-        default: return .denied
-        }
-    }
-    
-    public func getAlbumList() async throws -> [AlbumModel] {
+    public func getAlbumList() async throws -> [AlbumAssetEntity] {
         
         return await Task.detached(priority: .userInitiated) {
             
-            var albumModelList: [AlbumModel] = [AlbumModel]()
+            var albumModelList: [AlbumAssetEntity] = [AlbumAssetEntity]()
             
             let favoriteAlbums = PHAssetCollection.fetchAssetCollections(with: .smartAlbum,
                                                                          subtype: .smartAlbumFavorites, options: nil)
@@ -74,7 +56,7 @@ public final class PhotoLibararyService {
                         fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
                         fetchOptions.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.image.rawValue)
                         
-                        let newAlbum = AlbumModel(
+                        let newAlbum = AlbumAssetEntity(
                             name: collection.localizedTitle ?? "",
                             count: assets.count,
                             collection: collection)
@@ -88,10 +70,10 @@ public final class PhotoLibararyService {
         }.value
     }
 
-    public func getPhotoList(from collection: PHAssetCollection? = nil, page: Int, reload: Bool = false) async throws -> PhotoListModel {
+    public func getPhotoList(from collection: PHAssetCollection? = nil, page: Int, reload: Bool = false) async throws -> PhotoAssetListEntity {
         
         let realPage = max(1, page)
-        let countPerPage = 300
+        let countPerPage = 10
         let start = (realPage - 1) * countPerPage
         let end = start + countPerPage
         
@@ -115,13 +97,14 @@ public final class PhotoLibararyService {
         let totalCount = result.count
         let rangeStart = min(start, totalCount)
         let rangeEnd = min(end, totalCount)
+//        let rangeEnd = totalCount
         
-        let photos = (rangeStart..<rangeEnd).map { index -> PhotoModel in
+        let photos = (rangeStart..<rangeEnd).map { index -> PhotoAssetEntity in
             let asset = result.object(at: index)
 //            print("asset", asset.localIdentifier)
             
             self.assetCache[asset.localIdentifier] = asset
-            return PhotoModel(asset: asset)
+            return PhotoAssetEntity(asset: asset)
         }
         
         let sortedPhotos = photos.sorted {
@@ -136,10 +119,10 @@ public final class PhotoLibararyService {
             }
         }
         
-        return PhotoListModel(
+        return PhotoAssetListEntity(
             title: collection?.localizedTitle ?? "",
             photos: sortedPhotos,
-            hasNext: rangeEnd < totalCount
+            hasNext: false//rangeEnd < totalCount
         )
     }
     
@@ -172,6 +155,10 @@ public final class PhotoLibararyService {
                 targetSize: size,
                 contentMode: contentMode,
                 options: options) { image, info in
+                    // 최종 결과인지 확인
+                    let isDegraded = info?[PHImageResultIsDegradedKey] as? Bool ?? false
+                    if isDegraded { return }  // 저화질이면 무시
+
                     if let error = info?[PHImageErrorKey] as? Error {
                         continuation.resume(throwing: error)
                         return

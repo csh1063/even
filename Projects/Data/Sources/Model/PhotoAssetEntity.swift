@@ -9,18 +9,18 @@
 import Foundation
 import Photos
 
-public struct AlbumModel {
+public struct AlbumAssetEntity {
     let name: String
     let count: Int
     let collection: PHAssetCollection?
 }
 
-public struct PhotoModel {
+public struct PhotoAssetEntity {
     let asset: PHAsset
 }
 
-public struct PhotoListModel {
+public struct PhotoAssetListEntity {
     let title: String
-    let photos: [PhotoModel]
+    let photos: [PhotoAssetEntity]
     let hasNext: Bool
 }
