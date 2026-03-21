@@ -23,7 +23,7 @@ final class DefaultAppDIContainer: AppDIContainer {
         
     }
     
-    func makeSplashUsecase() {
+    func makeSplashUseCase() {
         
     }
     
@@ -36,7 +36,7 @@ final class DefaultAppDIContainer: AppDIContainer {
         
     }
     
-    func makeMainUsecase() {
+    func makeMainUseCase() {
         
     }
     
@@ -54,32 +54,44 @@ final class DefaultAppDIContainer: AppDIContainer {
         )
     }
     
-    func makePhotoLibraryUsecase() -> PhotoLibraryUsecase {
-        return DefaultPhotoLibraryUsecase(repository: makePhotoLibraryRepository())
+    func makePhotoLibraryUseCase() -> PhotoLibraryUseCase {
+        return DefaultPhotoLibraryUseCase(repository: makePhotoLibraryRepository())
     }
     
     func makePhotoLibraryViewModel() -> PhotoLibraryViewModel {
-        return PhotoLibraryViewModel(usecase: makePhotoLibraryUsecase())
+        return PhotoLibraryViewModel(useCase: makePhotoLibraryUseCase())
     }
     
     // MARK: Album
     func makePhotoAnalysisRepository() -> PhotoAnalysisRepository {
         let analysisService = PhotoAnalysisService()
         let libraryService = PhotoLibraryService()
+        let geocoderService = GeocoderService()
         return DefaultPhotoAnalysisRepository(
             analysisService: analysisService,
-            libraryService: libraryService
+            libraryService: libraryService,
+            geocoderService: geocoderService
         )
     }
     
-    func makePhotoAnalysisUsecase() -> PhotoAnalysisUsecase {
-        return PhotoAnalysisUsecase(
+    func makePhotoAnalysisUseCase() -> PhotoAnalysisUseCase {
+        return PhotoAnalysisUseCase(
+            libraryRepository: makePhotoLibraryRepository(),
+            analysisRepository: makePhotoAnalysisRepository()
+        )
+    }
+    
+    func makePhotoLocationAnalysisUseCase() -> PhotoLocationAnalysisUseCase {
+        return PhotoLocationAnalysisUseCase(
             libraryRepository: makePhotoLibraryRepository(),
             analysisRepository: makePhotoAnalysisRepository()
         )
     }
     
     func makeAlbumViewModel() -> AlbumViewModel {
-        return AlbumViewModel(analysisUsecase: makePhotoAnalysisUsecase())
+        return AlbumViewModel(
+            analysisUseCase: makePhotoAnalysisUseCase(),
+            locationAnalysisUseCase: makePhotoLocationAnalysisUseCase()
+        )
     }
 }

@@ -17,6 +17,7 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
     
     private let analysisService: PhotoAnalysisService
     private let libraryService: PhotoLibraryService  // 이미지 로드용
+    private let geocoderService: GeocoderService
     private let batchSize: Int
     
     // MARK: - Init
@@ -24,15 +25,16 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
     public init(
         analysisService: PhotoAnalysisService,
         libraryService: PhotoLibraryService,
+        geocoderService: GeocoderService,
         batchSize: Int = 20
     ) {
         self.analysisService = analysisService
         self.libraryService = libraryService
+        self.geocoderService = geocoderService
         self.batchSize = batchSize
     }
     
     // MARK: - Public
-    
     /// 여러 사진 배치 분석 → 진행률 스트림 반환
     public func analyze(photoIds: [String]) -> AsyncThrowingStream<AnalysisProgress, Error> {
         print("DefaultPhotoAnalysisRepository analyze")
@@ -48,33 +50,80 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                             for photoId in batch {
                                 group.addTask {
                                     let labels = try await self.analyzeSingle(photoId: photoId)
-                                    print("id: ", photoId, "/ labels: ", labels.map{ $0.name }.joined(separator: ", "))
+                                    print("id: ", photoId, "/ labels: ", (labels).map{ $0.name }.joined(separator: ", "))
                                     return (photoId, labels)
                                 }
                             }
                             
                             for try await (identifier, labels) in group {
                                 completed += 1
-                                let progress = Double(completed/total)
-                                let state: AnalysisState
-//                                if labels == [] {
-//                                    state = .unavailable(reason: "fail model loading")
-//                                } else {
-                                    state = progress == 1 ? .completed:.progress(progress)
-//                                }
-                                
+                                let progress = Double(Double(completed)/Double(total))
+                                print("completed: \(completed), \(Double(completed))")
+                                print("total: \(total), \(Double(total))")
+                                print("progress: \(progress), \(Double(completed/total))")
                                 continuation.yield(
                                     AnalysisProgress(
                                         identifier: identifier,
                                         labels: labels,
                                         completed: completed,
                                         total: total,
-                                        state: state
+                                        state: progress == 1 ? .completed:.progress(progress)
                                     )
                                 )
                             }
                         }
+                        
+                        // 배치 사이에 딜레이
+//                        try await Task.sleep(nanoseconds: 1_000_000_000) // 1.5초
                     }
+                    continuation.finish()
+                }
+                catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+        }
+    }
+    
+    public func locationAnalyze(photoIds: [String]) -> AsyncThrowingStream<AnalysisProgress, Error> {
+        print("DefaultPhotoAnalysisRepository locationAnalyze")
+        return AsyncThrowingStream { continuation in
+            Task.detached(priority: .userInitiated) {
+                do {
+                    var completed = 0
+                    let assets = try await self.libraryService.getPhoto(ids: photoIds)
+                    let total = assets.count
+                    
+                    for (index, asset) in assets.enumerated() {
+                        
+                        // 45개마다 60초 대기
+                        if index > 0 && index % 45 == 0 {
+                            print("위치 요청 제한 대기중...")
+                            try await Task.sleep(nanoseconds: 60_000_000_000)
+                        }
+                        
+                        let localLabels: [PhotoLabel]
+                        if let location = asset.location {
+                            print("has location", location.coordinate)
+                            localLabels = try await self.geocoderService.fetchAddress(from: location, id: asset.localIdentifier)
+                            print("localLabels", localLabels.map{$0.name}.joined(separator: ", "))
+                        } else {
+                            localLabels = []
+                        }
+                        
+                        completed += 1
+                        let progress = Double(Double(completed)/Double(total))
+                        continuation.yield(
+                            AnalysisProgress(
+                                identifier: asset.localIdentifier,
+                                labels: localLabels,
+                                completed: completed,
+                                total: total,
+                                state: progress == 1 ? .completed:.progress(progress)
+                            )
+                        )
+                    }
+                    
                     continuation.finish()
                 }
                 catch {
@@ -89,7 +138,7 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
         guard let cgImage = try? await loadImage(photoId: photoId) else {
             return []
         }
-        return try await analysisService.analyze(image: cgImage)
+        return try await self.analysisService.analyze(image: cgImage)
     }
     
     // MARK: - Private

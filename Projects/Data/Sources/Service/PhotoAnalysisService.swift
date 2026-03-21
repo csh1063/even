@@ -75,11 +75,11 @@ public final class PhotoAnalysisService {
     
     public func analyze(image: CGImage) async throws -> [PhotoLabel] {
         async let objectLabels = classifyImage(image)   // 방법 3 - Vision 분류기
-        async let faceLabels = detectFace(image)        // 방법 2 - 얼굴 감지
+//        async let faceLabels = detectFace(image)        // 방법 2 - 얼굴 감지
         async let textLabels = detectText(image)        // 방법 2 - 텍스트 감지
-        async let barcodeLabels = detectBarcode(image)  // 방법 2 - 바코드 감지
+//        async let barcodeLabels = detectBarcode(image)  // 방법 2 - 바코드 감지
         
-        let all = try await objectLabels + faceLabels + textLabels + barcodeLabels
+        let all = try await objectLabels + /*faceLabels +*/ textLabels //+ barcodeLabels
         
         // 중복 제거 (같은 name이면 confidence 높은 것 유지)
         return deduplicated(all)
@@ -105,7 +105,9 @@ public final class PhotoAnalysisService {
                     continuation.resume(returning: labels)
                     
                 } catch {
-                    continuation.resume(throwing: error)
+//                    continuation.resume(throwing: error)
+                    print("Vision classifyImage 에러:", error)
+                    continuation.resume(returning: [])
                 }
             }
         }
@@ -117,28 +119,25 @@ public final class PhotoAnalysisService {
         return await withCheckedContinuation { continuation in
             faceQueue.async {
                 
-                let request = VNDetectFaceRectanglesRequest { request, error in
-                    guard error == nil,
-                          let results = request.results as? [VNFaceObservation],
+                let request = VNDetectFaceRectanglesRequest()
+                let handler = VNImageRequestHandler(cgImage: image, options: [:])
+                
+                do {
+                    try handler.perform([request])
+                    
+                    guard let results = request.results,
                           !results.isEmpty else {
                         continuation.resume(returning: [])
                         return
                     }
                     
-                    // 얼굴 수에 따라 라벨 구분
                     let label = results.count > 1 ? "people_group" : "people"
                     continuation.resume(returning: [
                         PhotoLabel(name: label, confidence: 1.0),
                         PhotoLabel(name: "portrait", confidence: 1.0)
                     ])
-                }
-                
-                let handler = VNImageRequestHandler(cgImage: image, options: [:])
-                do {
-                    try handler.perform([request])
-                }
-                catch {
-                    print("Vision detectFace 에러:", error)  // 여기 찍히나요?
+                } catch {
+                    print("Vision detectFace 에러:", error)
                     continuation.resume(returning: [])
                 }
             }
@@ -149,9 +148,14 @@ public final class PhotoAnalysisService {
     private func detectText(_ image: CGImage) async throws -> [PhotoLabel] {
         return await withCheckedContinuation { continuation in
             textQueue.async {
-                let request = VNRecognizeTextRequest { request, error in
-                    guard error == nil,
-                          let results = request.results as? [VNRecognizedTextObservation],
+                let request = VNRecognizeTextRequest()
+                request.recognitionLevel = .fast  // 분류용이라 fast로 충분
+                let handler = VNImageRequestHandler(cgImage: image, options: [:])
+                
+                do {
+                    try handler.perform([request])
+                
+                    guard let results = request.results,
                           !results.isEmpty else {
                         continuation.resume(returning: [])
                         return
@@ -162,12 +166,6 @@ public final class PhotoAnalysisService {
                     continuation.resume(returning: [
                         PhotoLabel(name: label, confidence: 1.0)
                     ])
-                }
-                request.recognitionLevel = .fast  // 분류용이라 fast로 충분
-                
-                let handler = VNImageRequestHandler(cgImage: image, options: [:])
-                do {
-                    try handler.perform([request])
                 }
                 catch {
                     print("Vision detectText 에러:", error)
@@ -181,9 +179,13 @@ public final class PhotoAnalysisService {
     private func detectBarcode(_ image: CGImage) async throws -> [PhotoLabel] {
         return await withCheckedContinuation { continuation in
             barcodeQueue.async {
-                let request = VNDetectBarcodesRequest { request, error in
-                    guard error == nil,
-                          let results = request.results as? [VNBarcodeObservation],
+                let request = VNDetectBarcodesRequest()
+                let handler = VNImageRequestHandler(cgImage: image, options: [:])
+                
+                do {
+                    try handler.perform([request])
+                    
+                    guard let results = request.results,
                           !results.isEmpty else {
                         continuation.resume(returning: [])
                         return
@@ -195,11 +197,6 @@ public final class PhotoAnalysisService {
                     
                     continuation.resume(returning: labels)
                 }
-                
-                let handler = VNImageRequestHandler(cgImage: image, options: [:])
-                do {
-                    try handler.perform([request])
-                }
                 catch {
                     print("Vision detectBarcode 에러:", error)
                     continuation.resume(returning: [])
@@ -207,19 +204,7 @@ public final class PhotoAnalysisService {
             }
         }
     }
-//
-//    public func fetchLocation(localIdentifier: String) async -> [PhotoLabel] {
-//        let assets = PHAsset.fetchAssets(
-//            withLocalIdentifiers: [localIdentifier],
-//            options: nil
-//        )
-//        guard let asset = assets.firstObject,
-//              let location = asset.location else { return [] }
-//        
-//        guard let address = await fetchAddress(from: location) else { return [] }
-//        return [PhotoLabel(name: address, confidence: 1.0)]
-//    }
-//    
+    
     /// 중복 라벨 제거 - 같은 name이면 confidence 높은 것 유지
     private func deduplicated(_ labels: [PhotoLabel]) -> [PhotoLabel] {
         return Dictionary(grouping: labels, by: { $0.name })

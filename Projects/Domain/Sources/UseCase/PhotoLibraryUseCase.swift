@@ -1,5 +1,5 @@
 //
-//  PhotoLibraryUsecase.swift
+//  PhotoLibraryUseCase.swift
 //  Domain
 //
 //  Created by sanghyeon on 3/12/26.
@@ -8,13 +8,13 @@
 
 import Foundation
 
-public protocol PhotoLibraryUsecase {
+public protocol PhotoLibraryUseCase {
     func fetchData(page: Int) async throws -> PhotoList
     func checkPermission() async throws -> PhotoPermission
     func loadImage<T>(id: String, type: LoadPhotoOptionType) async throws -> ImageData<T>
 }
 
-public class DefaultPhotoLibraryUsecase: PhotoLibraryUsecase {
+public class DefaultPhotoLibraryUseCase: PhotoLibraryUseCase {
     
     let repository: PhotoLibraryRepository
     

@@ -9,6 +9,7 @@
 import Foundation
 import Domain
 import Photos
+import CoreLocation
 
 public final class PhotoLibraryService {
     
@@ -73,7 +74,7 @@ public final class PhotoLibraryService {
     public func getPhotoList(from collection: PHAssetCollection? = nil, page: Int, reload: Bool = false) async throws -> PhotoAssetListEntity {
         
         let realPage = max(1, page)
-        let countPerPage = 10
+        let countPerPage = 300
         let start = (realPage - 1) * countPerPage
         let end = start + countPerPage
         
@@ -167,6 +168,54 @@ public final class PhotoLibraryService {
             }
         }
     }
+
+    public func getPhoto(ids: [String]) async throws -> [PHAsset] {
+        let assets = PHAsset.fetchAssets(
+            withLocalIdentifiers: ids,
+            options: nil
+        )
+        
+        var photosWithLocation: [PHAsset] = []
+        assets.enumerateObjects { asset, _, _ in
+            if asset.location != nil {
+                photosWithLocation.append(asset)
+            }
+        }
+        return photosWithLocation
+    }
+
+    private func fetchAddress(from location: CLLocation) async -> String? {
+        let geocoder = CLGeocoder()
+        
+        do {
+            let placemarks = try await geocoder.reverseGeocodeLocation(location)
+            guard let placemark = placemarks.first else { return nil }
+            
+            
+            // 주소 조합
+            let address = [
+                placemark.name, // 강남파이낸스센터
+                placemark.thoroughfare, // 테헤란로
+                placemark.subThoroughfare, // 152
+                placemark.locality, // 서울특별시
+                placemark.subLocality, // 강남구
+                placemark.administrativeArea, // 서울특별시
+                placemark.subAdministrativeArea,
+                placemark.postalCode, // 06236
+                placemark.isoCountryCode,  // KR
+                placemark.country, // 대한민국
+                placemark.inlandWater, // nil
+                placemark.ocean   // nil
+            ]
+            .compactMap { $0 }
+            .joined(separator: " ")
+            
+            return address
+        } catch {
+            return nil
+        }
+    }
+    
     
     private func getAsset(id: String) -> PHAsset? {
         

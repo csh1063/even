@@ -36,11 +36,11 @@ public final class PhotoLibraryViewModel {
     @Published private var photoPermission: PhotoPermission = .notDetermined
     
     private let input = PassthroughSubject<Input, Never>()
-    private let usecase: PhotoLibraryUsecase
+    private let useCase: PhotoLibraryUseCase
     private var cancellable = Set<AnyCancellable>()
     
-    public init(usecase: PhotoLibraryUsecase) {
-        self.usecase = usecase
+    public init(useCase: PhotoLibraryUseCase) {
+        self.useCase = useCase
         self.bind()
     }
     
@@ -59,13 +59,13 @@ public final class PhotoLibraryViewModel {
     }
     
     func checkPermission() async throws -> PhotoPermission {
-        self.photoPermission = try await self.usecase.checkPermission()
+        self.photoPermission = try await self.useCase.checkPermission()
         return self.photoPermission
     }
     
     func loadImage(id: String, size: CGSize) async -> UIImage? {
         do {
-            guard let cgImage: CGImage = try await usecase.loadImage(
+            guard let cgImage: CGImage = try await useCase.loadImage(
                 id: id,
                 type: .specialSize(size)
             ).cgImage else {
@@ -101,7 +101,7 @@ public final class PhotoLibraryViewModel {
         print("loadPhoto", page)
         do {
             self.isLoading = false
-            let photoList = try await self.usecase.fetchData(page: page)
+            let photoList = try await self.useCase.fetchData(page: page)
             print("photos count: ", photoList.photos.count)
             self.photos = photoList.photos
             self.hasNext = photoList.hasNext

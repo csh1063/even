@@ -1,14 +1,14 @@
 //
-//  PhotoAnalysisUsecase.swift
+//  PhotoLocationAnalysisUseCase.swift
 //  Domain
 //
-//  Created by sanghyeon on 3/17/26.
+//  Created by sanghyeon on 3/21/26.
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
 import Foundation
 
-public final class PhotoAnalysisUsecase {
+public final class PhotoLocationAnalysisUseCase {
     
     private let libraryRepository: PhotoLibraryRepository
     private let analysisRepository: PhotoAnalysisRepository
@@ -21,8 +21,8 @@ public final class PhotoAnalysisUsecase {
         self.analysisRepository = analysisRepository
     }
  
-    public func analysis() async throws -> AsyncThrowingStream<AnalysisProgress, Error> {
+    public func analyze() async throws -> AsyncThrowingStream<AnalysisProgress, Error> {
         let photos = try await self.libraryRepository.fetchPhotos(page: 0)
-        return analysisRepository.analyze(photoIds: photos.photos.map {$0.localIdentifier})
+        return analysisRepository.locationAnalyze(photoIds: photos.photos.map {$0.localIdentifier})
     }
 }

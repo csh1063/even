@@ -15,6 +15,7 @@ final class AlbumViewController: BaseViewController {
     
     private let mainLabel: UILabel = UILabel()
     private let progressLabel: UILabel = UILabel()
+    private let locationProgressLabel: UILabel = UILabel()
     
     private let button: UIButton = UIButton()
     
@@ -36,28 +37,32 @@ final class AlbumViewController: BaseViewController {
         
         self.setupView()
         self.setupBindings()
-        
-        Task {
-            await testVision()
-        }
     }
     
     private func setupView() {
         
         mainLabel.text = "Albums"
+        progressLabel.isHidden = true
+        locationProgressLabel.isHidden = true
         button.setTitle("고고", for: .normal)
         button.setTitleColor(.Theme.midnight, for: .normal)
         
         view.addSubview(mainLabel)
         view.addSubview(progressLabel)
+        view.addSubview(locationProgressLabel)
         view.addSubview(button)
         
         mainLabel.snp.makeConstraints { make in
-            make.center.equalTo(view)
+            make.centerX.equalTo(view)
+            make.centerY.equalTo(view).offset(-80)
         }
         progressLabel.snp.makeConstraints { make in
-            make.centerY.equalTo(mainLabel)
-            make.leading.equalTo(mainLabel.snp.trailing)
+            make.centerX.equalTo(view)
+            make.top.equalTo(mainLabel.snp.bottom)
+        }
+        locationProgressLabel.snp.makeConstraints { make in
+            make.centerX.equalTo(view)
+            make.top.equalTo(progressLabel.snp.bottom)
         }
         
         button.snp.makeConstraints { make in
@@ -68,40 +73,39 @@ final class AlbumViewController: BaseViewController {
     
     private func setupBindings() {
         
+        viewModel.$progressRatio
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] ratio in
+                self?.progressLabel.text = String(format: "%.2f", ratio)
+            }
+            .store(in: &cancellables)
+        
+        viewModel.$isAnalyzing
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isLoading in
+                self?.progressLabel.isHidden = !isLoading
+            }
+            .store(in: &cancellables)
+        
+        viewModel.$locationProgressRatio
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] ratio in
+                self?.locationProgressLabel.text = String(format: "%.2f", ratio)
+            }
+            .store(in: &cancellables)
+        
+        viewModel.$isLocationAnalyzing
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isLoading in
+                self?.locationProgressLabel.isHidden = !isLoading
+            }
+            .store(in: &cancellables)
+        
         button.tapPublisher
             .sink { [weak self] button in
                 guard let self else {return}
                 self.viewModel.send(.analysis)
             }
             .store(in: &cancellables)
-    }
-    
-    func testVision() async {
-//        print("테스트 시작")
-//        
-//        // 테스트용 이미지 직접 생성
-//        let size = CGSize(width: 100, height: 100)
-//        UIGraphicsBeginImageContext(size)
-//        UIColor.red.setFill()
-//        UIRectFill(CGRect(origin: .zero, size: size))
-//        let testImage = UIGraphicsGetImageFromCurrentImageContext()
-//        UIGraphicsEndImageContext()
-//        
-//        guard let cgImage = testImage?.cgImage else {
-//            print("cgImage 생성 실패")
-//            return
-//        }
-//        
-//        print("cgImage 생성 성공")
-//        
-//        let request = VNClassifyImageRequest()
-//        let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-//        
-//        do {
-//            try handler.perform([request])
-//            print("perform 성공, 결과:", request.results?.count ?? 0)
-//        } catch {
-//            print("perform 에러:", error)
-//        }
     }
 }
