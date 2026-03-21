@@ -23,20 +23,15 @@ public final class AlbumViewModel {
     @Published var progressRatio: Double = 0
     @Published var locationProgressRatio: Double = 0
     @Published var isAnalyzing : Bool = false
-    @Published var isLocationAnalyzing : Bool = false
     
     let input = PassthroughSubject<Input, Never>()
     
-    private let analysisUseCase: PhotoAnalysisUseCase
-    private let locationAnalysisUseCase: PhotoLocationAnalysisUseCase
+    private let useCase: PhotoAnalysisUseCase
     private var cancellable = Set<AnyCancellable>()
     
-    public init(
-        analysisUseCase: PhotoAnalysisUseCase,
-        locationAnalysisUseCase: PhotoLocationAnalysisUseCase) {
+    public init(useCase: PhotoAnalysisUseCase) {
         
-        self.analysisUseCase = analysisUseCase
-        self.locationAnalysisUseCase = locationAnalysisUseCase
+        self.useCase = useCase
         self.bind()
     }
     
@@ -66,7 +61,7 @@ public final class AlbumViewModel {
             self.isAnalyzing = true
             do {
                 // analysis가 async throws 이기 때문에 try await 이 각각
-                for try await progress in try await analysisUseCase.analysis() {
+                for try await progress in useCase.analysis() {
                     switch progress.state {
                     case .progress(let ratio):
                         print("progress", ratio)
@@ -74,19 +69,15 @@ public final class AlbumViewModel {
                     case .completed:
                         print("completed")
                         self.progressRatio = 1.0
-                        self.isAnalyzing = false
                     case .unavailable(let reason):
 //                        self.showUnavailableMessage(reason)
                         print("reason", reason)
-                        self.isAnalyzing = false
                     }
                 }
                 
-                self.isLocationAnalyzing = true
-                
                 // 2차 - 위치 분석 (백그라운드)
                 Task.detached(priority: .background) {
-                    for try await progress in try await self.locationAnalysisUseCase.analyze() {
+                    for try await progress in self.useCase.locationAnalysis() {
                         await MainActor.run {
                             switch progress.state {
                             case .progress(let ratio):
@@ -95,11 +86,11 @@ public final class AlbumViewModel {
                             case .completed:
                                 print("completed")
                                 self.locationProgressRatio = 1.0
-                                self.isLocationAnalyzing = false
+                                self.isAnalyzing = false
                             case .unavailable(let reason):
         //                        self.showUnavailableMessage(reason)
                                 print("reason", reason)
-                                self.isLocationAnalyzing = false
+                                self.isAnalyzing = false
                             }
                         }
                     }
@@ -108,7 +99,6 @@ public final class AlbumViewModel {
             catch {
                 print("error", error.localizedDescription)
                 self.isAnalyzing = false
-                self.isLocationAnalyzing = false
             }
         }
     }

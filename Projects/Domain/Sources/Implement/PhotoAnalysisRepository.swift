@@ -9,7 +9,7 @@
 import Foundation
 
 public protocol PhotoAnalysisRepository {
-    func analyze(photoIds: [String]) -> AsyncThrowingStream<AnalysisProgress, Error>
-    func locationAnalyze(photoIds: [String]) -> AsyncThrowingStream<AnalysisProgress, Error>
+    func analyze() -> AsyncThrowingStream<AnalysisProgress, Error>
+    func locationAnalyze() -> AsyncThrowingStream<AnalysisProgress, Error>
     func analyzeSingle(photoId: String) async throws  -> [PhotoLabel]
 }

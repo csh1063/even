@@ -10,6 +10,7 @@ import Foundation
 import Domain
 import Photos
 import CoreLocation
+import PhotosUI
 
 public final class PhotoLibraryService {
     

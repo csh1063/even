@@ -13,7 +13,7 @@ final class TabbarViewController: CustomTabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.setBackgroundColor(.Theme.white)
+        self.setBackgroundColor(.Theme.primary)
         
         self.setItemColors(
             normal: .Theme.gray,

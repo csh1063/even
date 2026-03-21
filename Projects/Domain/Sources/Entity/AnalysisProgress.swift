@@ -8,7 +8,8 @@
 
 
 public struct AnalysisProgress {
-    public let identifier: String
+//    public let identifier: String
+    public let photo: Photo
     public let labels: [PhotoLabel]
     public let completed: Int
     public let total: Int
@@ -19,8 +20,8 @@ public struct AnalysisProgress {
         return Double(completed) / Double(total)
     }
     
-    public init(identifier: String, labels: [PhotoLabel], completed: Int, total: Int, state: AnalysisState) {
-        self.identifier = identifier
+    public init(photo: Photo, labels: [PhotoLabel], completed: Int, total: Int, state: AnalysisState) {
+        self.photo = photo
         self.labels = labels
         self.completed = completed
         self.total = total

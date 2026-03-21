@@ -36,26 +36,28 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
     
     // MARK: - Public
     /// 여러 사진 배치 분석 → 진행률 스트림 반환
-    public func analyze(photoIds: [String]) -> AsyncThrowingStream<AnalysisProgress, Error> {
+    public func analyze() -> AsyncThrowingStream<AnalysisProgress, Error> {
         print("DefaultPhotoAnalysisRepository analyze")
         return AsyncThrowingStream { continuation in
             Task {
                 do {
-                    let total = photoIds.count
+                    let photos = try await libraryService.getPhotoList(page: 0).photos
+                    let total = photos.count
                     var completed = 0
-                    let batches = photoIds.chunked(into: batchSize)
+                    let batches = photos.chunked(into: batchSize)
                     
                     for batch in batches {
-                        try await withThrowingTaskGroup(of: (String, [PhotoLabel]).self) { group in
-                            for photoId in batch {
+                        try await withThrowingTaskGroup(of: (PhotoAssetEntity, [PhotoLabel]).self) { group in
+                            for photo in batch {
                                 group.addTask {
+                                    let photoId = photo.asset.localIdentifier
                                     let labels = try await self.analyzeSingle(photoId: photoId)
                                     print("id: ", photoId, "/ labels: ", (labels).map{ $0.name }.joined(separator: ", "))
-                                    return (photoId, labels)
+                                    return (photo, labels)
                                 }
                             }
                             
-                            for try await (identifier, labels) in group {
+                            for try await (photo, labels) in group {
                                 completed += 1
                                 let progress = Double(Double(completed)/Double(total))
                                 print("completed: \(completed), \(Double(completed))")
@@ -63,7 +65,9 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                                 print("progress: \(progress), \(Double(completed/total))")
                                 continuation.yield(
                                     AnalysisProgress(
-                                        identifier: identifier,
+                                        photo: Photo(
+                                            localIdentifier: photo.asset.localIdentifier,
+                                            createdAt: photo.asset.creationDate ?? Date()),
                                         labels: labels,
                                         completed: completed,
                                         total: total,
@@ -85,28 +89,24 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
         }
     }
     
-    public func locationAnalyze(photoIds: [String]) -> AsyncThrowingStream<AnalysisProgress, Error> {
+    public func locationAnalyze() -> AsyncThrowingStream<AnalysisProgress, Error> {
         print("DefaultPhotoAnalysisRepository locationAnalyze")
         return AsyncThrowingStream { continuation in
             Task.detached(priority: .userInitiated) {
                 do {
                     var completed = 0
+                    let photos = try await self.libraryService.getPhotoList(page: 0).photos
+                    let photoIds = photos.map { $0.asset.localIdentifier }
                     let assets = try await self.libraryService.getPhoto(ids: photoIds)
                     let total = assets.count
                     
-                    for (index, asset) in assets.enumerated() {
-                        
-                        // 45개마다 60초 대기
-                        if index > 0 && index % 45 == 0 {
-                            print("위치 요청 제한 대기중...")
-                            try await Task.sleep(nanoseconds: 60_000_000_000)
-                        }
+                    for (_, asset) in assets.enumerated(){
                         
                         let localLabels: [PhotoLabel]
                         if let location = asset.location {
                             print("has location", location.coordinate)
                             localLabels = try await self.geocoderService.fetchAddress(from: location, id: asset.localIdentifier)
-                            print("localLabels", localLabels.map{$0.name}.joined(separator: ", "))
+                            print("localLabels: ", localLabels.map{$0.name}.joined(separator: ", "))
                         } else {
                             localLabels = []
                         }
@@ -115,13 +115,16 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                         let progress = Double(Double(completed)/Double(total))
                         continuation.yield(
                             AnalysisProgress(
-                                identifier: asset.localIdentifier,
+                                photo: Photo(
+                                    localIdentifier: asset.localIdentifier,
+                                    createdAt: asset.creationDate ?? Date()),
                                 labels: localLabels,
                                 completed: completed,
                                 total: total,
                                 state: progress == 1 ? .completed:.progress(progress)
                             )
                         )
+                        try await Task.sleep(nanoseconds: 1_500_000_000)
                     }
                     
                     continuation.finish()

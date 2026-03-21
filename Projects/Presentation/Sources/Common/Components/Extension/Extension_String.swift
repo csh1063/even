@@ -5,7 +5,7 @@ extension String {
 
     // 종성 받침 여부
     var josa: Bool? {
-        guard Locale.current.languageCode == "ko" else { return nil}
+        guard Locale.current.language.languageCode?.identifier == "ko" else { return nil}
         guard let text = self.last else { return false }
         let val = UnicodeScalar(String(text))?.value
         guard let value = val, value > 0xac00 else { return false }

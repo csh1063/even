@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import UIKit
 
 public struct ImageData<T> {
     public let cgImage: T?

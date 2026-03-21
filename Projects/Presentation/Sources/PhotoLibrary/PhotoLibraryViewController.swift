@@ -122,21 +122,6 @@ final class PhotoLibraryViewController: BaseViewController {
 }
 
 extension PhotoLibraryViewController {
-    
-    // DataSource 설정
-//    private func configureDataSource() {
-//        let cellRegistration = UICollectionView.CellRegistration<PhotoCell, PhotoInAlbum> { [weak self] cell, indexPath, photo in
-//            guard let self else { return }
-//            
-//            let cellViewModel = PhotoCellViewModel(photo: photo, imageLoader: viewModel)
-//            cell.configure(with: cellViewModel)
-//        }
-//        
-//        dataSource = UICollectionViewDiffableDataSource<Int, PhotoCellViewModel>(collectionView: collectionView) {
-//            (collectionView, indexPath, photo) -> UICollectionViewCell? in
-//            return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: photo)
-//        }
-//    }
     private func configureDataSource() {
         let cellRegistration = UICollectionView.CellRegistration<PhotoCell, PhotoCellItemViewModel> { cell, indexPath, cellViewModel in
             cell.configure(with: cellViewModel)   // weak self도 필요 없어짐
@@ -154,14 +139,4 @@ extension PhotoLibraryViewController {
         snapshot.appendItems(photos)
         dataSource.apply(snapshot, animatingDifferences: true)
     }
-
-//    private func applySnapshot(with photos: [PhotoInAlbum]) {
-//        print("스냅샷 적용! 데이터 개수: \(photos.count)") // 로그 추가
-//        var snapshot = NSDiffableDataSourceSnapshot<Int, PhotoInAlbum>()
-//        snapshot.appendSections([0])
-//        snapshot.appendItems(photos)
-//        
-//        // 데이터가 바뀌면 Diff알고리즘이 알아서 계산해서 업데이트합니다.
-//        dataSource.apply(snapshot, animatingDifferences: true)
-//    }
 }

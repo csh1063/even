@@ -10,9 +10,43 @@ import Foundation
 import Presentation
 import Data
 import Domain
+import SwiftData
 
 @MainActor
 final class DefaultAppDIContainer: AppDIContainer {
+    
+    var container: ModelContainer {
+        do {
+            let container = try ModelContainer(
+                for: PhotoEntity.self,
+                FolderEntity.self,
+                FolderPhotoMapEntity.self,
+                PhotoLabelEntity.self,
+                FolderKeywordEntity.self
+            )
+            
+            // DI 컨테이너에 context 주입
+            return container
+        } catch {
+            fatalError("ModelContainer 생성 실패: \(error)")
+        }
+    }
+//    var context: ModelContext {
+//        do {
+//            let container = try ModelContainer(
+//                for: PhotoEntity.self,
+//                FolderEntity.self,
+//                FolderPhotoMapEntity.self,
+//                PhotoLabelEntity.self,
+//                FolderKeywordEntity.self
+//            )
+//            
+//            // DI 컨테이너에 context 주입
+//            return container.mainContext
+//        } catch {
+//            fatalError("ModelContainer 생성 실패: \(error)")
+//        }
+//    }
     
     init() {
         
@@ -74,24 +108,20 @@ final class DefaultAppDIContainer: AppDIContainer {
         )
     }
     
+    func makePhotoDataRepository() -> PhotoDataRepository {
+        return DefaultPhotoDataRepository(container: container)
+//        return DefaultPhotoDataRepository(context: context)
+    }
+    
     func makePhotoAnalysisUseCase() -> PhotoAnalysisUseCase {
         return PhotoAnalysisUseCase(
             libraryRepository: makePhotoLibraryRepository(),
-            analysisRepository: makePhotoAnalysisRepository()
-        )
-    }
-    
-    func makePhotoLocationAnalysisUseCase() -> PhotoLocationAnalysisUseCase {
-        return PhotoLocationAnalysisUseCase(
-            libraryRepository: makePhotoLibraryRepository(),
-            analysisRepository: makePhotoAnalysisRepository()
+            analysisRepository: makePhotoAnalysisRepository(),
+            dataRepository: makePhotoDataRepository()
         )
     }
     
     func makeAlbumViewModel() -> AlbumViewModel {
-        return AlbumViewModel(
-            analysisUseCase: makePhotoAnalysisUseCase(),
-            locationAnalysisUseCase: makePhotoLocationAnalysisUseCase()
-        )
+        return AlbumViewModel(useCase: makePhotoAnalysisUseCase())
     }
 }

@@ -3,7 +3,7 @@ import ProjectDescription
 extension Project {
     
     static let bundleId = "com.sanghyeon.moa"
-    static let iosVersion = "15.0"
+    static let iosVersion = "17.0"
     
     /// Helper function to create the Project for this ExampleApp
     public static func app(
@@ -15,7 +15,7 @@ extension Project {
         return makeProject(
             module: module,
             product: .app,
-            bundleId: bundleId + ".\(module.name)",
+            bundleId: bundleId,// + ".\(module.name)",
             dependencies: dependencies,
             resources: resources,
             coreDataModels: coreDataModels)
@@ -103,9 +103,9 @@ extension Project {
 
 public extension TargetDependency {
 //    static let alamofire: TargetDependency       = .external(name: "Alamofire")
-    static let moya: TargetDependency            = .external(name: "Moya")
-    static let combineMoya: TargetDependency     = .external(name: "CombineMoya")
+//    static let moya: TargetDependency            = .external(name: "Moya")
+//    static let combineMoya: TargetDependency     = .external(name: "CombineMoya")
     static let snapKit: TargetDependency         = .external(name: "SnapKit")
-    static let kingfisher: TargetDependency      = .external(name: "Kingfisher")
+//    static let kingfisher: TargetDependency      = .external(name: "Kingfisher")
 //    static let lottie: TargetDependency          = .external(name: "Lottie")
 }

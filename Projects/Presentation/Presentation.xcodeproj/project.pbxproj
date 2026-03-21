@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 55;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -26,7 +26,6 @@
 		3715B8B51A191869851EC95E /* TabbarCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8C733F1D7589153F1FFE1F /* TabbarCoordinator.swift */; };
 		375EAC7FDF30102BB01AFF26 /* Extension_String.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8300BFD9F89CA11913EBBE1 /* Extension_String.swift */; };
 		3ADFEEF985D7BC1626FD5643 /* MyPageDIContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55DFCE6EDBF9C396DD6D6E33 /* MyPageDIContainer.swift */; };
-		3BA2ACAE80D538954FE53359 /* Kingfisher.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DAF37120CD93338E2FDE8F39 /* Kingfisher.framework */; };
 		415FC59E52A77D8CF12C8565 /* BaseEventRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C06D9DFB2413E81BE06AAC41 /* BaseEventRouter.swift */; };
 		41D0A49F97489D468191FE54 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98AAFFF31B76C431F1139731 /* HomeViewController.swift */; };
 		4CBB27F7B63BE0497C778288 /* SplashCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DFADB91C9C20B195DC6FDC /* SplashCoordinator.swift */; };
@@ -159,7 +158,6 @@
 		CEB9EB9C6C13C8F825E27E73 /* SnapKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SnapKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D8300BFD9F89CA11913EBBE1 /* Extension_String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension_String.swift; sourceTree = "<group>"; };
 		D950EBD5C5E8E6FB899C6E8A /* MyPageCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPageCoordinator.swift; sourceTree = "<group>"; };
-		DAF37120CD93338E2FDE8F39 /* Kingfisher.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Kingfisher.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E40A6C338B0BC01EC436E06E /* Extension_Sequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension_Sequence.swift; sourceTree = "<group>"; };
 		E474256CB4A9464026CD7F10 /* BaseCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseCoordinator.swift; sourceTree = "<group>"; };
 		EDC7E8CD06B312A92C2C3101 /* Extension_UITextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension_UITextField.swift; sourceTree = "<group>"; };
@@ -173,7 +171,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				9A38F45616541E23B2BD7536 /* Domain.framework in Frameworks */,
-				3BA2ACAE80D538954FE53359 /* Kingfisher.framework in Frameworks */,
 				550A378C83436838E543D472 /* SnapKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -415,7 +412,6 @@
 			isa = PBXGroup;
 			children = (
 				82F0720D9B464CF8F3E51AD1 /* Domain.framework */,
-				DAF37120CD93338E2FDE8F39 /* Kingfisher.framework */,
 				342AE4EAEE40294F0A26F2B8 /* Presentation.framework */,
 				CEB9EB9C6C13C8F825E27E73 /* SnapKit.framework */,
 			);
@@ -712,7 +708,7 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = "Derived/InfoPlists/Presentation-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -725,7 +721,10 @@
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = (
+					"$(inherited)",
+					DEBUG,
+				);
 				SWIFT_COMPILATION_MODE = singlefile;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -746,7 +745,7 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = "Derived/InfoPlists/Presentation-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

@@ -8,30 +8,24 @@
 
 import Foundation
 
-//public struct Photo: Identifiable {
-//    public let id: UUID
-//    public let assetIdentifier: String
-//    public let tags: [Tag]
-//
-//    public init(
-//        id: UUID,
-//        assetIdentifier: String,
-//        tags: [Tag]
-//    ) {
-//        self.id = id
-//        self.assetIdentifier = assetIdentifier
-//        self.tags = tags
-//    }
-//}
-//@Model
-public class Photo {
-    public var id: UUID
-    public var localIdentifier: String
-    public var createdAt: Date
+public struct Photo {
+    public let id: UUID
+    public let localIdentifier: String
+    public let createdAt: Date
+    public var analyzedAt: Date?
+    public var labels: [PhotoLabel]
     
-    public init(localIdentifier: String) {
-        self.id = UUID()
+    public init(
+        id: UUID = UUID(),
+        localIdentifier: String,
+        createdAt: Date = Date(),
+        analyzedAt: Date? = nil,
+        labels: [PhotoLabel] = []
+    ) {
+        self.id = id
         self.localIdentifier = localIdentifier
-        self.createdAt = Date()
+        self.createdAt = createdAt
+        self.analyzedAt = analyzedAt
+        self.labels = labels
     }
 }
