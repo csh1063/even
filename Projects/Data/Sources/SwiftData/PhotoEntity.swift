@@ -19,8 +19,10 @@ public final class PhotoEntity {
     @Relationship(deleteRule: .cascade)
     public var labels: [PhotoLabelEntity] = []
     
-    @Relationship(deleteRule: .cascade)
-    public var folderMaps: [FolderPhotoMapEntity] = []
+    @Relationship(deleteRule: .nullify)
+    public var folders: [FolderEntity] = []
+//    @Relationship(deleteRule: .cascade, inverse: \FolderPhotoMapEntity.photo)
+//    public var folderMaps: [FolderPhotoMapEntity] = []
     
     public init(
         id: UUID = UUID(),

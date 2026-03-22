@@ -10,6 +10,7 @@ import Foundation
 import Combine
 import Domain
 
+@MainActor
 public final class AlbumViewModel {
     
     enum Input {
@@ -21,17 +22,21 @@ public final class AlbumViewModel {
     }
     
     @Published var progressRatio: Double = 0
+    @Published var autoFolderProgressRatio: Double = 0
     @Published var locationProgressRatio: Double = 0
     @Published var isAnalyzing : Bool = false
     
     let input = PassthroughSubject<Input, Never>()
     
-    private let useCase: PhotoAnalysisUseCase
+    private let analysisUseCase: PhotoAnalysisUseCase
+    private let autoFolderUseCase: AutoFolderUseCase
     private var cancellable = Set<AnyCancellable>()
     
-    public init(useCase: PhotoAnalysisUseCase) {
+    public init(analysisUseCase: PhotoAnalysisUseCase,
+                autoFolderUseCase: AutoFolderUseCase) {
         
-        self.useCase = useCase
+        self.analysisUseCase = analysisUseCase
+        self.autoFolderUseCase = autoFolderUseCase
         self.bind()
     }
     
@@ -60,8 +65,8 @@ public final class AlbumViewModel {
         case .analysis:
             self.isAnalyzing = true
             do {
-                // analysis가 async throws 이기 때문에 try await 이 각각
-                for try await progress in useCase.analysis() {
+
+                for try await progress in analysisUseCase.analysis() {
                     switch progress.state {
                     case .progress(let ratio):
                         print("progress", ratio)
@@ -75,9 +80,24 @@ public final class AlbumViewModel {
                     }
                 }
                 
+                for try await progress in autoFolderUseCase.execute() {
+                    self.autoFolderProgressRatio = progress.ratio
+                    switch progress.step {
+                    case .analyzing: break
+//                        self.statusMessage = "라벨 분석 중..."
+                    case .creatingFolders: break
+//                        self.statusMessage = "폴더 생성 중..."
+                    case .classifying: break
+//                        self.statusMessage = "사진 분류 중..."
+                    case .completed:
+                        self.autoFolderProgressRatio = 1.0
+//                        self.statusMessage = "완료!"
+                    }
+                }
+                
                 // 2차 - 위치 분석 (백그라운드)
                 Task.detached(priority: .background) {
-                    for try await progress in self.useCase.locationAnalysis() {
+                    for try await progress in await self.analysisUseCase.locationAnalysis() {
                         await MainActor.run {
                             switch progress.state {
                             case .progress(let ratio):

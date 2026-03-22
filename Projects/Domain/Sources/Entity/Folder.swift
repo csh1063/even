@@ -11,6 +11,7 @@ import Foundation
 public struct Folder {
     public let id: UUID
     public let name: String
+    public let displayName: String
     public let createdAt: Date
     public var isAuto: Bool
     public var coverPhotoIdentifier: String?
@@ -19,6 +20,7 @@ public struct Folder {
     public init(
         id: UUID = UUID(),
         name: String,
+        displayName: String,
         createdAt: Date = Date(),
         isAuto: Bool = false,
         coverPhotoIdentifier: String? = nil,
@@ -26,6 +28,7 @@ public struct Folder {
     ) {
         self.id = id
         self.name = name
+        self.displayName = displayName
         self.createdAt = createdAt
         self.isAuto = isAuto
         self.coverPhotoIdentifier = coverPhotoIdentifier

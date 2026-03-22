@@ -17,6 +17,8 @@ final class AlbumViewController: BaseViewController {
     private let mainLabel: UILabel = UILabel()
     private let progressLabel: UILabel = UILabel()
     private let progressBar: UIProgressView = UIProgressView(progressViewStyle: .bar)
+    private let folderProgressLabel: UILabel = UILabel()
+    private let folderProgressBar: UIProgressView = UIProgressView(progressViewStyle: .bar)
     private let locationProgressLabel: UILabel = UILabel()
     private let locationProgressBar: UIProgressView = UIProgressView(progressViewStyle: .bar)
     
@@ -45,17 +47,28 @@ final class AlbumViewController: BaseViewController {
     private func setupView() {
         
         mainLabel.text = "Albums"
+        mainLabel.textColor = .Theme.midnight
         progressLabel.isHidden = true
+        folderProgressLabel.isHidden = true
         locationProgressLabel.isHidden = true
         progressBar.isHidden = true
+        folderProgressBar.isHidden = true
         locationProgressBar.isHidden = true
+        progressBar.trackTintColor = .Theme.gray
+        folderProgressBar.trackTintColor = .Theme.gray
+        locationProgressBar.trackTintColor = .Theme.gray
+        progressBar.progressTintColor = .Theme.primary
+        folderProgressBar.progressTintColor = .Theme.primary
+        locationProgressBar.progressTintColor = .Theme.primary
         button.setTitle("고고", for: .normal)
         button.setTitleColor(.Theme.midnight, for: .normal)
         
 //        view.addSubview(mainLabel)
         view.addSubview(progressLabel)
         view.addSubview(locationProgressLabel)
+        view.addSubview(folderProgressLabel)
         view.addSubview(progressBar)
+        view.addSubview(folderProgressBar)
         view.addSubview(locationProgressBar)
         
         view.addSubview(naviView)
@@ -74,8 +87,15 @@ final class AlbumViewController: BaseViewController {
         }
         
         progressBar.snp.makeConstraints { make in
-            make.leading.trailing.equalTo(view)
-            make.top.equalTo(naviView.snp.bottom)
+            make.leading.equalTo(view)
+            make.trailing.equalTo(view.snp.centerX)
+            make.top.equalTo(naviView.snp.bottom).offset(2)
+        }
+        
+        folderProgressBar.snp.makeConstraints { make in
+            make.trailing.equalTo(view)
+            make.leading.equalTo(view.snp.centerX)
+            make.top.equalTo(naviView.snp.bottom).offset(2)
         }
         
         locationProgressBar.snp.makeConstraints { make in
@@ -88,9 +108,14 @@ final class AlbumViewController: BaseViewController {
             make.centerY.equalTo(view).offset(-40)
         }
         
+        folderProgressLabel.snp.makeConstraints { make in
+            make.leading.trailing.equalTo(view)
+            make.top.equalTo(progressLabel.snp.bottom)
+        }
+        
         locationProgressLabel.snp.makeConstraints { make in
             make.centerX.equalTo(view)
-            make.top.equalTo(progressLabel.snp.bottom)
+            make.top.equalTo(folderProgressLabel.snp.bottom)
         }
         
         button.snp.makeConstraints { make in
@@ -105,7 +130,15 @@ final class AlbumViewController: BaseViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] ratio in
                 self?.progressLabel.text = String(format: "%.3f", ratio)
-                self?.progressBar.progress = Float(ratio / 2.0)
+                self?.progressBar.progress = Float(ratio)
+            }
+            .store(in: &cancellables)
+        
+        viewModel.$autoFolderProgressRatio
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] ratio in
+                self?.folderProgressLabel.text = String(format: "%.3f", ratio)
+                self?.folderProgressBar.progress = Float(ratio)
             }
             .store(in: &cancellables)
         
@@ -121,8 +154,10 @@ final class AlbumViewController: BaseViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isLoading in
                 self?.progressLabel.isHidden = !isLoading
+                self?.folderProgressLabel.isHidden = !isLoading
                 self?.locationProgressLabel.isHidden = !isLoading
                 self?.progressBar.isHidden = !isLoading
+                self?.folderProgressBar.isHidden = !isLoading
                 self?.locationProgressBar.isHidden = !isLoading
             }
             .store(in: &cancellables)

@@ -30,6 +30,7 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
         let entity = FolderEntity(
             id: folder.id,
             name: folder.name,
+            displayName: folder.name,
             isAuto: folder.isAuto,
             coverPhotoIdentifier: folder.coverPhotoIdentifier
         )
@@ -94,38 +95,64 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
     }
     
     public func addPhoto(folderId: UUID, photoIdentifier: String) throws {
+        print("addPhoto 1")
         let folderDescriptor = FetchDescriptor<FolderEntity>(
             predicate: #Predicate { $0.id == folderId }
         )
+        print("addPhoto 2")
         let photoDescriptor = FetchDescriptor<PhotoEntity>(
             predicate: #Predicate { $0.localIdentifier == photoIdentifier }
         )
-        
+        print("addPhoto 3")
         guard let folder = try context.fetch(folderDescriptor).first else {
             throw FolderRepositoryError.folderNotFound
         }
+        print("addPhoto 4")
         guard let photo = try context.fetch(photoDescriptor).first else {
             throw FolderRepositoryError.photoNotFound
         }
+        print("addPhoto 5")
+        // 중복 체크
+        guard !folder.photos.contains(where: { $0.localIdentifier == photoIdentifier }) else { return }
         
-        let map = FolderPhotoMapEntity(
-            folder: folder,
-            photo: photo
-        )
-        context.insert(map)
+        folder.photos.append(photo)
+//        let map = FolderPhotoMapEntity(
+//            folder: folder,
+//            photo: photo
+//        )
+//        print("addPhoto 6")
+//        context.insert(map)
+        print("addPhoto 7")
         try context.save()
     }
     
     public func removePhoto(folderId: UUID, photoIdentifier: String) throws {
-        let fetchDescriptor = FetchDescriptor<FolderPhotoMapEntity>(
-            predicate: #Predicate {
-                $0.folder?.id == folderId &&
-                $0.photo?.localIdentifier == photoIdentifier
-            }
+//        let fetchDescriptor = FetchDescriptor<FolderPhotoMapEntity>(
+//            predicate: #Predicate {
+//                $0.folder?.id == folderId &&
+//                $0.photo?.localIdentifier == photoIdentifier
+//            }
+//        )
+//        
+//        guard let map = try context.fetch(fetchDescriptor).first else { return }
+//        context.delete(map)
+//        try context.save()
+    }
+    
+    public func deleteAutoFolders() throws {
+        // 1. 자동 폴더 가져오기
+        print("deleteAutoFolders 1")
+        let folderDescriptor = FetchDescriptor<FolderEntity>(
+            predicate: #Predicate { $0.isAuto == true }
         )
+        print("deleteAutoFolders 2")
+        let autoFolders = try context.fetch(folderDescriptor)
         
-        guard let map = try context.fetch(fetchDescriptor).first else { return }
-        context.delete(map)
+        print("deleteAutoFolders 5")
+        // 3. 폴더 삭제
+        autoFolders.forEach { context.delete($0) }
+        
+        print("deleteAutoFolders 6")
         try context.save()
     }
 }

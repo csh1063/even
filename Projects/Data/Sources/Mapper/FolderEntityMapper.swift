@@ -14,6 +14,7 @@ extension FolderEntity {
         Folder(
             id: id,
             name: name,
+            displayName: displayName,
             createdAt: createdAt,
             isAuto: isAuto,
             coverPhotoIdentifier: coverPhotoIdentifier,

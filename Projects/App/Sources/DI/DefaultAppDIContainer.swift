@@ -20,7 +20,7 @@ final class DefaultAppDIContainer: AppDIContainer {
             let container = try ModelContainer(
                 for: PhotoEntity.self,
                 FolderEntity.self,
-                FolderPhotoMapEntity.self,
+//                FolderPhotoMapEntity.self,
                 PhotoLabelEntity.self,
                 FolderKeywordEntity.self
             )
@@ -121,7 +121,20 @@ final class DefaultAppDIContainer: AppDIContainer {
         )
     }
     
+    func makeFolderDataRepository() -> FolderDataRepository {
+        return DefaultFolderDataRepository(context: container.mainContext)
+    }
+    
+    func makeAutoFolderUseCase() -> AutoFolderUseCase {
+        return AutoFolderUseCase(
+            photoDataRepository: makePhotoDataRepository(),
+            folderDataRepository: makeFolderDataRepository())
+    }
+    
     func makeAlbumViewModel() -> AlbumViewModel {
-        return AlbumViewModel(useCase: makePhotoAnalysisUseCase())
+        return AlbumViewModel(
+            analysisUseCase: makePhotoAnalysisUseCase(),
+            autoFolderUseCase: makeAutoFolderUseCase()
+        )
     }
 }

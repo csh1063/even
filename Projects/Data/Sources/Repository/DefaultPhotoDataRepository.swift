@@ -62,7 +62,11 @@ public final class DefaultPhotoDataRepository: PhotoDataRepository {
                 )
                 context.insert(entity)
             }
-            
+//            
+//            try context.delete(
+//                model: PhotoLabelEntity.self,
+//                where: #Predicate { $0.photo?.localIdentifier == identifier }
+//            )
             entity.labels.forEach { context.delete($0) }
             
             labels.forEach {
