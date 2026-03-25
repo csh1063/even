@@ -12,4 +12,5 @@ public protocol PhotoDataRepository {
     func fetchAll() throws -> [Photo]
     func fetchUnanalyzed() throws -> [Photo]
     func delete(identifier: String) throws
+    func deleteAll() throws
 }

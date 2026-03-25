@@ -50,26 +50,4 @@ final class AppCoordinator: BaseCoordinator {
             .store(in: &cancellables)
         start(coordinator: mainCoordinator)
     }
-    
-    // main coordinator가 없는 경우
-//    func showTabBar() {
-//        let tabbarDI = makeTabBarDIContainer()
-//        let tabbarCoordinator = TabbarCoordinator(container: tabbarDI, window: window)
-//
-//        start(coordinator: tabbarCoordinator)
-//    }
-//
-//    private func makeTabBarDIContainer() -> TabbarDIContainer {
-//        TabbarDIContainer(appDiContainer: container)
-//    }
-    
-}
-
-extension AppCoordinator: BaseEventRouter {
-    func route(_ event: BaseEvent) {
-        switch event {
-        case .logout:
-            showSplash()
-        }
-    }
 }

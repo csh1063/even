@@ -12,11 +12,6 @@ import Domain
 
 public final class DefaultPhotoDataRepository: PhotoDataRepository {
     
-//    private let context: ModelContext
-//    
-//    public init(context: ModelContext) {
-//        self.context = context
-//    }
     private let container: ModelContainer
     
     public init(container: ModelContainer) {
@@ -62,11 +57,7 @@ public final class DefaultPhotoDataRepository: PhotoDataRepository {
                 )
                 context.insert(entity)
             }
-//            
-//            try context.delete(
-//                model: PhotoLabelEntity.self,
-//                where: #Predicate { $0.photo?.localIdentifier == identifier }
-//            )
+            
             entity.labels.forEach { context.delete($0) }
             
             labels.forEach {
@@ -110,6 +101,33 @@ public final class DefaultPhotoDataRepository: PhotoDataRepository {
         }
         
         context.delete(entity)
+        try context.save()
+    }
+    
+    public func deleteAll() throws {
+        let context = ModelContext(container)
+        // keyword 삭제
+        let keywords = try context.fetch(FetchDescriptor<FolderKeywordEntity>())
+        keywords.forEach { context.delete($0) }
+        try context.save()
+        
+        // label 삭제
+        let labels = try context.fetch(FetchDescriptor<PhotoLabelEntity>())
+        labels.forEach { context.delete($0) }
+        try context.save()
+        
+        // photo-folder 연결 제거
+        let photos = try context.fetch(FetchDescriptor<PhotoEntity>())
+        photos.forEach { $0.folders = [] }
+        try context.save()
+        
+        // folder 삭제
+        let folders = try context.fetch(FetchDescriptor<FolderEntity>())
+        folders.forEach { context.delete($0) }
+        try context.save()
+        
+        // photo 삭제
+        photos.forEach { context.delete($0) }
         try context.save()
     }
 }

@@ -98,12 +98,11 @@ public final class PhotoLibraryService {
         
         let totalCount = result.count
         let rangeStart = min(start, totalCount)
-        let rangeEnd = min(end, totalCount)
-//        let rangeEnd = totalCount
+//        let rangeEnd = min(end, totalCount)
+        let rangeEnd = totalCount
         
         let photos = (rangeStart..<rangeEnd).map { index -> PhotoAssetEntity in
             let asset = result.object(at: index)
-//            print("asset", asset.localIdentifier)
             
             self.assetCache[asset.localIdentifier] = asset
             return PhotoAssetEntity(asset: asset)

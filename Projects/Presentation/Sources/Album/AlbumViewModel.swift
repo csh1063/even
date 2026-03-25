@@ -9,40 +9,61 @@
 import Foundation
 import Combine
 import Domain
+import UIKit
 
 @MainActor
 public final class AlbumViewModel {
     
     enum Input {
+        case appear
         case analysis
+        case clear
     }
     
     public struct Output {
+        let folders: AnyPublisher<[Folder], Never>
         let progressRatio: AnyPublisher<Double, Never>
+        let autoFolderProgressRatio: AnyPublisher<Double, Never>
+        let locationProgressRatio: AnyPublisher<Double, Never>
+        let locationFolderProgressRatio: AnyPublisher<Double, Never>
+        let isAnalyzing: AnyPublisher<Bool, Never>
     }
     
-    @Published var progressRatio: Double = 0
-    @Published var autoFolderProgressRatio: Double = 0
-    @Published var locationProgressRatio: Double = 0
-    @Published var isAnalyzing : Bool = false
+    @Published private var folders: [Folder] = []
+    @Published private var progressRatio: Double = 0
+    @Published private var autoFolderProgressRatio: Double = 0
+    @Published private var locationProgressRatio: Double = 0
+    @Published private var locationFolderProgressRatio: Double = 0
+    @Published private var isAnalyzing : Bool = false
     
     let input = PassthroughSubject<Input, Never>()
     
+    private let photoUseCase: PhotoLibraryUseCase
     private let analysisUseCase: PhotoAnalysisUseCase
     private let autoFolderUseCase: AutoFolderUseCase
+    private let folderUseCase: FolderUseCase
     private var cancellable = Set<AnyCancellable>()
     
-    public init(analysisUseCase: PhotoAnalysisUseCase,
-                autoFolderUseCase: AutoFolderUseCase) {
+    public init(photoUseCase: PhotoLibraryUseCase,
+                analysisUseCase: PhotoAnalysisUseCase,
+                autoFolderUseCase: AutoFolderUseCase,
+                folderUseCase: FolderUseCase) {
         
+        self.photoUseCase = photoUseCase
         self.analysisUseCase = analysisUseCase
         self.autoFolderUseCase = autoFolderUseCase
+        self.folderUseCase = folderUseCase
         self.bind()
     }
     
     public func transform() -> Output {
         return Output(
-            progressRatio: $progressRatio.eraseToAnyPublisher()
+            folders: $folders.eraseToAnyPublisher(),
+            progressRatio: $progressRatio.eraseToAnyPublisher(),
+            autoFolderProgressRatio: $autoFolderProgressRatio.eraseToAnyPublisher(),
+            locationProgressRatio: $locationProgressRatio.eraseToAnyPublisher(),
+            locationFolderProgressRatio: $locationFolderProgressRatio.eraseToAnyPublisher(),
+            isAnalyzing: $isAnalyzing.eraseToAnyPublisher()
         )
     }
     
@@ -62,6 +83,8 @@ public final class AlbumViewModel {
     private func handle(_ input: Input) async {
         
         switch input {
+        case .appear:
+            _ = await self.loadFodlers()
         case .analysis:
             self.isAnalyzing = true
             do {
@@ -79,7 +102,7 @@ public final class AlbumViewModel {
                         print("reason", reason)
                     }
                 }
-                
+ 
                 for try await progress in autoFolderUseCase.execute() {
                     self.autoFolderProgressRatio = progress.ratio
                     switch progress.step {
@@ -95,7 +118,13 @@ public final class AlbumViewModel {
                     }
                 }
                 
-                // 2차 - 위치 분석 (백그라운드)
+                let success = await self.loadFodlers()
+                guard success else {
+                    self.isAnalyzing = false
+                    return
+                }
+                
+//                 2차 - 위치 분석 (백그라운드)
                 Task.detached(priority: .background) {
                     for try await progress in await self.analysisUseCase.locationAnalysis() {
                         await MainActor.run {
@@ -106,13 +135,34 @@ public final class AlbumViewModel {
                             case .completed:
                                 print("completed")
                                 self.locationProgressRatio = 1.0
-                                self.isAnalyzing = false
+//                                self.isAnalyzing = false
                             case .unavailable(let reason):
         //                        self.showUnavailableMessage(reason)
                                 print("reason", reason)
-                                self.isAnalyzing = false
+//                                self.isAnalyzing = false
                             }
                         }
+                    }
+                    
+                    for try await progress in await self.autoFolderUseCase.execute() {
+                        await MainActor.run {
+                            self.locationFolderProgressRatio = progress.ratio
+                            switch progress.step {
+                            case .analyzing: break
+//                                self.statusMessage = "라벨 분석 중..."
+                            case .creatingFolders: break
+//                                self.statusMessage = "폴더 생성 중..."
+                            case .classifying: break
+//                                self.statusMessage = "사진 분류 중..."
+                            case .completed:
+                                self.locationFolderProgressRatio = 1.0
+//                                self.statusMessage = "완료!"
+                            }
+                        }
+                    }
+                    _ = await self.loadFodlers()
+                    await MainActor.run {
+                        self.isAnalyzing = false
                     }
                 }
             }
@@ -120,6 +170,45 @@ public final class AlbumViewModel {
                 print("error", error.localizedDescription)
                 self.isAnalyzing = false
             }
+        case .clear:
+            do {
+                try await self.analysisUseCase.deletePhotos()
+                _ = await self.loadFodlers()
+            }
+            catch {
+                print("error", error.localizedDescription)
+            }
         }
     }
+    
+    private func loadFodlers() async -> Bool {
+        do {
+            let folders = try await self.folderUseCase.fetchAll()
+            self.folders = folders
+            return true
+        }
+        catch {
+            print("loadFodlers error")
+            return false
+        }
+    }
+    
+    func loadImage(id: String, size: CGSize) async -> UIImage? {
+        do {
+            guard let cgImage: CGImage = try await photoUseCase.loadImage(
+                id: id,
+                type: .specialSize(size)
+            ).cgImage else {
+                return nil
+            }
+            
+            return UIImage(cgImage: cgImage)
+        } catch {
+            print("이미지 로딩 실패: \(error.localizedDescription)")
+            return nil
+        }
+    }
+}
+
+extension AlbumViewModel: ImageLoadable {
 }

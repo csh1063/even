@@ -38,6 +38,10 @@ public final class PhotoAnalysisUseCase {
         }
     }
     
+    public func deletePhotos() async throws {
+        try self.dataRepository.deleteAll()
+    }
+    
     // MARK: - Private
     private func execute(
         _ stream: @escaping () -> AsyncThrowingStream<AnalysisProgress, Error>?
@@ -51,10 +55,6 @@ public final class PhotoAnalysisUseCase {
                     }
                     
                     for try await progress in analysisStream {
-//                        print("====================???", progress.photo.localIdentifier)
-//                        try dataRepository.savePhoto(photo: progress.photo)
-//                        print("====================!!!", progress.photo.localIdentifier, progress.labels.map {$0.name}.joined(separator: ","))
-
                         try await dataRepository.saveAndUpdateLabels(
                             photo: progress.photo,
                             labels: progress.labels

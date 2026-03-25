@@ -11,6 +11,3 @@ import UIKit
 protocol ImageLoadable {
     func loadImage(id: String, size: CGSize) async -> UIImage?
 }
-
-// PhotoLibraryViewModel에 채택
-extension PhotoLibraryViewModel: ImageLoadable { }

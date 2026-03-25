@@ -20,33 +20,15 @@ final class DefaultAppDIContainer: AppDIContainer {
             let container = try ModelContainer(
                 for: PhotoEntity.self,
                 FolderEntity.self,
-//                FolderPhotoMapEntity.self,
                 PhotoLabelEntity.self,
                 FolderKeywordEntity.self
             )
             
-            // DI 컨테이너에 context 주입
             return container
         } catch {
             fatalError("ModelContainer 생성 실패: \(error)")
         }
     }
-//    var context: ModelContext {
-//        do {
-//            let container = try ModelContainer(
-//                for: PhotoEntity.self,
-//                FolderEntity.self,
-//                FolderPhotoMapEntity.self,
-//                PhotoLabelEntity.self,
-//                FolderKeywordEntity.self
-//            )
-//            
-//            // DI 컨테이너에 context 주입
-//            return container.mainContext
-//        } catch {
-//            fatalError("ModelContainer 생성 실패: \(error)")
-//        }
-//    }
     
     init() {
         
@@ -89,11 +71,11 @@ final class DefaultAppDIContainer: AppDIContainer {
     }
     
     func makePhotoLibraryUseCase() -> PhotoLibraryUseCase {
-        return DefaultPhotoLibraryUseCase(repository: makePhotoLibraryRepository())
+        DefaultPhotoLibraryUseCase(repository: makePhotoLibraryRepository())
     }
     
     func makePhotoLibraryViewModel() -> PhotoLibraryViewModel {
-        return PhotoLibraryViewModel(useCase: makePhotoLibraryUseCase())
+        PhotoLibraryViewModel(useCase: makePhotoLibraryUseCase())
     }
     
     // MARK: Album
@@ -109,12 +91,12 @@ final class DefaultAppDIContainer: AppDIContainer {
     }
     
     func makePhotoDataRepository() -> PhotoDataRepository {
-        return DefaultPhotoDataRepository(container: container)
+        DefaultPhotoDataRepository(container: container)
 //        return DefaultPhotoDataRepository(context: context)
     }
     
     func makePhotoAnalysisUseCase() -> PhotoAnalysisUseCase {
-        return PhotoAnalysisUseCase(
+        PhotoAnalysisUseCase(
             libraryRepository: makePhotoLibraryRepository(),
             analysisRepository: makePhotoAnalysisRepository(),
             dataRepository: makePhotoDataRepository()
@@ -122,19 +104,25 @@ final class DefaultAppDIContainer: AppDIContainer {
     }
     
     func makeFolderDataRepository() -> FolderDataRepository {
-        return DefaultFolderDataRepository(context: container.mainContext)
+        DefaultFolderDataRepository(container: container)
     }
     
     func makeAutoFolderUseCase() -> AutoFolderUseCase {
-        return AutoFolderUseCase(
+        AutoFolderUseCase(
             photoDataRepository: makePhotoDataRepository(),
             folderDataRepository: makeFolderDataRepository())
     }
     
+    func makeFolderUseCase() -> FolderUseCase {
+        FolderUseCase(folderRepository: makeFolderDataRepository())
+    }
+    
     func makeAlbumViewModel() -> AlbumViewModel {
-        return AlbumViewModel(
+        AlbumViewModel(
+            photoUseCase: makePhotoLibraryUseCase(),
             analysisUseCase: makePhotoAnalysisUseCase(),
-            autoFolderUseCase: makeAutoFolderUseCase()
+            autoFolderUseCase: makeAutoFolderUseCase(),
+            folderUseCase: makeFolderUseCase()
         )
     }
 }

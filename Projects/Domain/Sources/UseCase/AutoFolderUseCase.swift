@@ -15,7 +15,7 @@ public final class AutoFolderUseCase {
     private let folderDataRepository: FolderDataRepository
     
     // 폴더 생성 최소 비율
-    private let threshold: Double = 0.1
+    private let threshold: Double = 0.05
     
     public init(
         photoDataRepository: PhotoDataRepository,
@@ -27,94 +27,78 @@ public final class AutoFolderUseCase {
     
     public func execute() -> AsyncThrowingStream<FolderProgress, Error> {
         AsyncThrowingStream { continuation in
-            Task {
+//            Task {
                 do {
-                    // 1. 전체 사진 가져오기
-                    print("AutoFolderUseCase 1")
+                    // 사진 불러오기
                     let photos = try photoDataRepository.fetchAll()
                     guard !photos.isEmpty else {
                         continuation.finish()
                         return
                     }
-                    print("AutoFolderUseCase 2")
-                    
                     let total = Double(photos.count)
-                    
-                    // 2. 라벨별 카운트
                     continuation.yield(FolderProgress(step: .analyzing, ratio: 0))
                     
-                    print("AutoFolderUseCase 3")
+                    // 각 라벨 수
                     var labelCount: [String: Int] = [:]
                     photos.forEach { photo in
                         photo.labels.forEach { label in
                             labelCount[label.name, default: 0] += 1
                         }
                     }
-                    print("AutoFolderUseCase 4")
                     
-                    // 3. threshold 이상인 라벨만 필터링
+                    // 기준 이상의 라벨 분류
                     let qualifiedLabels = labelCount
                         .filter { Double($0.value) / total >= threshold }
                         .sorted { $0.value > $1.value }
                     
-                    print("AutoFolderUseCase 5")
                     continuation.yield(FolderProgress(step: .creatingFolders, ratio: 0))
                     
-                    // 4. 기존 자동 폴더 삭제
                     try folderDataRepository.deleteAutoFolders()
                     
-                    print("AutoFolderUseCase 6")
-                    // 5. 폴더 생성
+                    // 폴더 생성
                     for (index, (label, _)) in qualifiedLabels.enumerated() {
                         let folder = Folder(
                             name: label,
                             displayName: label,
                             isAuto: true,
-                            keywords: [label]
+                            keywords: [label],
+                            photoCount: 0
                         )
                         try folderDataRepository.saveFolder(folder: folder)
                         
+                        print("folder name:", folder.displayName)
                         let ratio = Double(index + 1) / Double(qualifiedLabels.count)
                         continuation.yield(FolderProgress(step: .creatingFolders, ratio: ratio))
                     }
                     
-                    print("AutoFolderUseCase 7")
-                    // 6. 사진 분류
+                    // 폴더별 사진 분류
                     let folders = try folderDataRepository.fetchAll().filter { $0.isAuto }
                     var classified = 0
                     
-                    print("AutoFolderUseCase 1")
-                    for photo in photos {
-                        let photoLabelNames = Set(photo.labels.map { $0.name })
-                        
-                        print("AutoFolderUseCase in 2")
-                        for folder in folders {
-                            let matched = folder.keywords.contains { photoLabelNames.contains($0) }
-                            print("AutoFolderUseCase in 3")
-                            if matched {
-                                print("AutoFolderUseCase in 4")
-                                try folderDataRepository.addPhoto(
-                                    folderId: folder.id,
-                                    photoIdentifier: photo.localIdentifier
-                                )
+                    // 폴더별로 한번에 추가
+                    for folder in folders {
+                        let matchedIdentifiers = photos
+                            .filter { photo in
+                                let photoLabelNames = Set(photo.labels.map { $0.name })
+                                return folder.keywords.contains { photoLabelNames.contains($0) }
                             }
-                            print("AutoFolderUseCase in 5")
-                        }
+                            .map { $0.localIdentifier }
                         
+                        try folderDataRepository.addPhotos(
+                            folderId: folder.id,
+                            photoIdentifiers: matchedIdentifiers
+                        )
                         classified += 1
-                        let ratio = Double(classified) / total
-                        print("AutoFolderUseCase in 6")
+                        let ratio = Double(classified) / Double(folders.count)
                         continuation.yield(FolderProgress(step: .classifying, ratio: ratio))
                     }
-                    
-                    print("AutoFolderUseCase 9")
+
                     continuation.yield(FolderProgress(step: .completed, ratio: 1.0))
                     continuation.finish()
-                    
                 } catch {
                     continuation.finish(throwing: error)
                 }
             }
-        }
+//        }
     }
 }

@@ -101,13 +101,13 @@ public final class GeocoderService {
         [
             placemark.name, // 강남파이낸스센터
             placemark.thoroughfare, // 테헤란로
-            placemark.subThoroughfare, // 152
+//            placemark.subThoroughfare, // 152
             placemark.locality, // 서울특별시
             placemark.subLocality, // 강남구
             placemark.administrativeArea, // 서울특별시
             placemark.subAdministrativeArea, // 군? 한국에선 거의 안나오지만 나올수도?
-            placemark.postalCode, // 06236
-            placemark.isoCountryCode,  // KR
+//            placemark.postalCode, // 06236
+//            placemark.isoCountryCode,  // KR
             placemark.country, // 대한민국
             placemark.inlandWater, // nil 호수 이름?
             placemark.ocean   // nil 바다 이름

@@ -37,7 +37,6 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
     // MARK: - Public
     /// 여러 사진 배치 분석 → 진행률 스트림 반환
     public func analyze() -> AsyncThrowingStream<AnalysisProgress, Error> {
-        print("DefaultPhotoAnalysisRepository analyze")
         return AsyncThrowingStream { continuation in
             Task {
                 do {
@@ -60,9 +59,6 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                             for try await (photo, labels) in group {
                                 completed += 1
                                 let progress = Double(Double(completed)/Double(total))
-                                print("completed: \(completed), \(Double(completed))")
-                                print("total: \(total), \(Double(total))")
-                                print("progress: \(progress), \(Double(completed/total))")
                                 continuation.yield(
                                     AnalysisProgress(
                                         photo: Photo(
@@ -76,9 +72,6 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                                 )
                             }
                         }
-                        
-                        // 배치 사이에 딜레이
-//                        try await Task.sleep(nanoseconds: 1_000_000_000) // 1.5초
                     }
                     continuation.finish()
                 }
@@ -90,7 +83,7 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
     }
     
     public func locationAnalyze() -> AsyncThrowingStream<AnalysisProgress, Error> {
-        print("DefaultPhotoAnalysisRepository locationAnalyze")
+        
         return AsyncThrowingStream { continuation in
             Task.detached(priority: .userInitiated) {
                 do {
@@ -104,7 +97,7 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                         
                         let localLabels: [PhotoLabel]
                         if let location = asset.location {
-                            print("has location", location.coordinate)
+                            print("location: ", "\(location.coordinate.latitude),\(location.coordinate.longitude)")
                             localLabels = try await self.geocoderService.fetchAddress(from: location, id: asset.localIdentifier)
                             print("localLabels: ", localLabels.map{$0.name}.joined(separator: ", "))
                         } else {

@@ -15,5 +15,6 @@ public protocol FolderDataRepository {
     func delete(id: UUID) throws
     func deleteAutoFolders() throws  // 자동 폴더만 삭제
     func addPhoto(folderId: UUID, photoIdentifier: String) throws
+    func addPhotos(folderId: UUID, photoIdentifiers: [String]) throws
     func removePhoto(folderId: UUID, photoIdentifier: String) throws
 }

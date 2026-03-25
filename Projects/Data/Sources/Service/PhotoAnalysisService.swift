@@ -6,60 +6,8 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
-import Vision
-import CoreML
 import Domain
-
-//public final class PhotoAnalysisService {
-//    
-//    // MARK: - Properties
-//    
-//    private let model: VNCoreMLModel?
-//    
-//    // MARK: - Init
-//    
-//    public init() {
-//        if let mlModel = try? MobileNetV2(configuration: MLModelConfiguration()).model {
-//            self.model = try? VNCoreMLModel(for: mlModel)
-//        } else {
-//            self.model = nil
-//        }
-//    }
-//    
-//    // MARK: - Public
-//    
-//    /// 단일 사진 분석 → 라벨 반환
-//    public func analyze(image: CGImage) async -> [PhotoLabel]? {
-//        return await performAnalysis(image)
-//    }
-//    
-//    // MARK: - Private
-//    private func performAnalysis(_ cgImage: CGImage) async -> [PhotoLabel]? {
-//        guard let model else { return nil }
-//        
-//        return await withCheckedContinuation { continuation in
-//            let request = VNCoreMLRequest(model: model) { request, error in
-//                guard error == nil,
-//                      let results = request.results as? [VNClassificationObservation] else {
-//                    continuation.resume(returning: [])
-//                    return
-//                }
-//                
-//                let labels = results
-//                    .filter { $0.confidence >= 0.1 }
-//                    .map { PhotoLabel(name: $0.identifier, confidence: Float($0.confidence)) }
-//                
-//                continuation.resume(returning: labels)
-//            }
-//            
-//            let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-//            try? handler.perform([request])
-//        }
-//    }
-//}
-
 import Vision
-import CoreImage
 import CoreGraphics
 
 public final class PhotoAnalysisService {

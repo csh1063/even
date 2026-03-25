@@ -15,14 +15,37 @@ final class AlbumViewController: BaseViewController {
     
     private var naviView: UIView = UIView()
     private let mainLabel: UILabel = UILabel()
-    private let progressLabel: UILabel = UILabel()
     private let progressBar: UIProgressView = UIProgressView(progressViewStyle: .bar)
-    private let folderProgressLabel: UILabel = UILabel()
     private let folderProgressBar: UIProgressView = UIProgressView(progressViewStyle: .bar)
-    private let locationProgressLabel: UILabel = UILabel()
     private let locationProgressBar: UIProgressView = UIProgressView(progressViewStyle: .bar)
+    private let locationFolderProgressBar: UIProgressView = UIProgressView(progressViewStyle: .bar)
     
-    private let button: UIButton = UIButton()
+    private let analysisButton: UIButton = UIButton()
+    private let clearButton: UIButton = UIButton()
+    
+    private var collectionView: UICollectionView = {
+
+        let space: CGFloat = 2
+        let count: CGFloat = 2
+//        let height = AppInfo.shared.bannerHeight
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .vertical
+        layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        layout.minimumLineSpacing = space
+        layout.minimumInteritemSpacing = space
+        
+        let width = (UIScreen.main.bounds.width - (space * (count - 1))) / count
+        
+        layout.itemSize = CGSize(width: width, height: width)
+
+        let collectionView = UICollectionView(frame: CGRect.zero, collectionViewLayout: layout)
+        collectionView.isScrollEnabled = true
+        collectionView.showsVerticalScrollIndicator = false
+
+        return collectionView
+    }()
+    
+    private var dataSource: UICollectionViewDiffableDataSource<Int, FolderCellItemViewModel>!
     
     private let viewModel: AlbumViewModel
     
@@ -44,36 +67,47 @@ final class AlbumViewController: BaseViewController {
         self.setupBindings()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        self.viewModel.send(.appear)
+    }
+    
     private func setupView() {
         
+        naviView.backgroundColor = .Theme.white
         mainLabel.text = "Albums"
         mainLabel.textColor = .Theme.midnight
-        progressLabel.isHidden = true
-        folderProgressLabel.isHidden = true
-        locationProgressLabel.isHidden = true
         progressBar.isHidden = true
         folderProgressBar.isHidden = true
         locationProgressBar.isHidden = true
+        locationFolderProgressBar.isHidden = true
         progressBar.trackTintColor = .Theme.gray
         folderProgressBar.trackTintColor = .Theme.gray
         locationProgressBar.trackTintColor = .Theme.gray
+        locationFolderProgressBar.trackTintColor = .Theme.gray
         progressBar.progressTintColor = .Theme.primary
         folderProgressBar.progressTintColor = .Theme.primary
         locationProgressBar.progressTintColor = .Theme.primary
-        button.setTitle("고고", for: .normal)
-        button.setTitleColor(.Theme.midnight, for: .normal)
+        locationFolderProgressBar.progressTintColor = .Theme.primary
+        analysisButton.setTitle("분석", for: .normal)
+        analysisButton.setTitleColor(.Theme.primary, for: .normal)
+        clearButton.setTitle("초기", for: .normal)
+        clearButton.setTitleColor(.Theme.secondary, for: .normal)
+
+        view.addSubview(collectionView)
         
-//        view.addSubview(mainLabel)
-        view.addSubview(progressLabel)
-        view.addSubview(locationProgressLabel)
-        view.addSubview(folderProgressLabel)
         view.addSubview(progressBar)
         view.addSubview(folderProgressBar)
         view.addSubview(locationProgressBar)
+        view.addSubview(locationFolderProgressBar)
         
         view.addSubview(naviView)
         naviView.addSubview(mainLabel)
-        view.addSubview(button)
+        view.addSubview(analysisButton)
+        view.addSubview(clearButton)
+        
+        self.configureDataSource()
         
         naviView.snp.makeConstraints { make in
             make.top.equalTo(self.view.safeAreaLayoutGuide)
@@ -99,74 +133,120 @@ final class AlbumViewController: BaseViewController {
         }
         
         locationProgressBar.snp.makeConstraints { make in
-            make.leading.trailing.equalTo(view)
-            make.top.equalTo(progressBar.snp.bottom)
+            make.leading.equalTo(view)
+            make.trailing.equalTo(view.snp.centerX)
+            make.top.equalTo(naviView.snp.bottom).offset(4)
         }
         
-        progressLabel.snp.makeConstraints { make in
-            make.centerX.equalTo(view)
-            make.centerY.equalTo(view).offset(-40)
+        locationFolderProgressBar.snp.makeConstraints { make in
+            make.trailing.equalTo(view)
+            make.leading.equalTo(view.snp.centerX)
+            make.top.equalTo(naviView.snp.bottom).offset(4)
         }
         
-        folderProgressLabel.snp.makeConstraints { make in
-            make.leading.trailing.equalTo(view)
-            make.top.equalTo(progressLabel.snp.bottom)
-        }
-        
-        locationProgressLabel.snp.makeConstraints { make in
-            make.centerX.equalTo(view)
-            make.top.equalTo(folderProgressLabel.snp.bottom)
-        }
-        
-        button.snp.makeConstraints { make in
-            make.top.equalTo(self.view.safeAreaLayoutGuide)
+        analysisButton.snp.makeConstraints { make in
+            make.top.bottom.equalTo(self.naviView)
             make.trailing.equalTo(self.view)
+            make.width.equalTo(60)
+        }
+        
+        clearButton.snp.makeConstraints { make in
+            make.top.bottom.equalTo(self.naviView)
+            make.trailing.equalTo(self.analysisButton.snp.leading)
+            make.width.equalTo(60)
+        }
+        
+        collectionView.snp.makeConstraints { make in
+            make.top.equalTo(naviView.snp.bottom)
+            make.bottom.leading.trailing.equalTo(self.view)
         }
     }
     
     private func setupBindings() {
         
-        viewModel.$progressRatio
+        let output = self.viewModel.transform()
+        output.progressRatio
             .receive(on: DispatchQueue.main)
             .sink { [weak self] ratio in
-                self?.progressLabel.text = String(format: "%.3f", ratio)
                 self?.progressBar.progress = Float(ratio)
             }
             .store(in: &cancellables)
         
-        viewModel.$autoFolderProgressRatio
+        output.autoFolderProgressRatio
             .receive(on: DispatchQueue.main)
             .sink { [weak self] ratio in
-                self?.folderProgressLabel.text = String(format: "%.3f", ratio)
                 self?.folderProgressBar.progress = Float(ratio)
             }
             .store(in: &cancellables)
         
-        viewModel.$locationProgressRatio
+        output.locationProgressRatio
             .receive(on: DispatchQueue.main)
             .sink { [weak self] ratio in
-                self?.locationProgressLabel.text = String(format: "%.3f", ratio)
-                self?.locationProgressBar.progress = Float(ratio / 2.0)
+                self?.locationProgressBar.progress = Float(ratio)
             }
             .store(in: &cancellables)
         
-        viewModel.$isAnalyzing
+        output.locationFolderProgressRatio
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] ratio in
+                self?.locationFolderProgressBar.progress = Float(ratio)
+            }
+            .store(in: &cancellables)
+        
+        output.isAnalyzing
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isLoading in
-                self?.progressLabel.isHidden = !isLoading
-                self?.folderProgressLabel.isHidden = !isLoading
-                self?.locationProgressLabel.isHidden = !isLoading
                 self?.progressBar.isHidden = !isLoading
                 self?.folderProgressBar.isHidden = !isLoading
                 self?.locationProgressBar.isHidden = !isLoading
+                self?.locationFolderProgressBar.isHidden = !isLoading
             }
             .store(in: &cancellables)
 
-        button.tapPublisher
+        analysisButton.tapPublisher
             .sink { [weak self] button in
                 guard let self else {return}
                 self.viewModel.send(.analysis)
             }
             .store(in: &cancellables)
+        
+        clearButton.tapPublisher
+            .sink { [weak self] button in
+                guard let self else {return}
+                self.viewModel.send(.clear)
+            }
+            .store(in: &cancellables)
+        
+        output.folders
+            .receive(on: DispatchQueue.main)
+            .map { [weak self] folders -> [FolderCellItemViewModel] in
+                guard let self else { return [] }
+                return folders.map { FolderCellItemViewModel(folder: $0, imageLoader: self.viewModel) }
+            }
+            .sink { [weak self] folders in
+                print("folders sink: ", folders.count)
+                self?.applySnapshot(with: folders)
+            }
+            .store(in: &cancellables)
+    }
+}
+
+extension AlbumViewController {
+    private func configureDataSource() {
+        let cellRegistration = UICollectionView.CellRegistration<FolderCell, FolderCellItemViewModel> { cell, indexPath, cellViewModel in
+            cell.configure(with: cellViewModel)   // weak self도 필요 없어짐
+        }
+        
+        dataSource = UICollectionViewDiffableDataSource<Int, FolderCellItemViewModel>(collectionView: collectionView) {
+            collectionView, indexPath, cellViewModel in
+            return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: cellViewModel)
+        }
+    }
+    
+    private func applySnapshot(with folders: [FolderCellItemViewModel]) {
+        var snapshot = NSDiffableDataSourceSnapshot<Int, FolderCellItemViewModel>()
+        snapshot.appendSections([0])
+        snapshot.appendItems(folders)
+        dataSource.apply(snapshot, animatingDifferences: true)
     }
 }

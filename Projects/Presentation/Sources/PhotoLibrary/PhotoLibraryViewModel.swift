@@ -112,3 +112,5 @@ public final class PhotoLibraryViewModel {
         }
     }
 }
+
+extension PhotoLibraryViewModel: ImageLoadable { }

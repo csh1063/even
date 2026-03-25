@@ -16,6 +16,8 @@
 	<string>1.0.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>CFBundleDisplayName</key>
+	<string>모아</string>
 	<key>IDEPreferLogStreaming</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>

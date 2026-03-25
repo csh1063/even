@@ -16,6 +16,8 @@ public struct Folder {
     public var isAuto: Bool
     public var coverPhotoIdentifier: String?
     public var keywords: [String]
+    public var photos: [Photo]
+    public var photoCount: Int
     
     public init(
         id: UUID = UUID(),
@@ -24,7 +26,9 @@ public struct Folder {
         createdAt: Date = Date(),
         isAuto: Bool = false,
         coverPhotoIdentifier: String? = nil,
-        keywords: [String] = []
+        keywords: [String] = [],
+        photos: [Photo] = [],
+        photoCount: Int
     ) {
         self.id = id
         self.name = name
@@ -33,5 +37,7 @@ public struct Folder {
         self.isAuto = isAuto
         self.coverPhotoIdentifier = coverPhotoIdentifier
         self.keywords = keywords
+        self.photos = photos
+        self.photoCount = photoCount
     }
 }

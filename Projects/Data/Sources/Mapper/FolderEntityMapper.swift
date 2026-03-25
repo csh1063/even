@@ -18,7 +18,9 @@ extension FolderEntity {
             createdAt: createdAt,
             isAuto: isAuto,
             coverPhotoIdentifier: coverPhotoIdentifier,
-            keywords: keywords.map { $0.keyword }
+            keywords: keywords.map { $0.keyword },
+            photos: photos.sorted { $0.createdAt > $1.createdAt} .prefix(4).map {$0.toDomain()},
+            photoCount: photos.count
         )
     }
 }
