@@ -18,12 +18,12 @@ public final class TabbarDIContainer {
     }
     
     func makePhotoLibraryCoordinator() -> PhotoLibraryCoordinator {
-        let diContainer = PhotoLibraryDIContainer(appDIContainer: appDiContainer)
+        let diContainer = appDiContainer.makePhotoLibraryDIContainer()
         return PhotoLibraryCoordinator(diContainer: diContainer)
     }
     
     func makeAlbumCoordinator() -> AlbumCoordinator {
-        let diContainer = AlbumDIContainer(appDIContainer: appDiContainer)
+        let diContainer = appDiContainer.makeAlbumDIContainer()
         return AlbumCoordinator(diContainer: diContainer)
     }
     

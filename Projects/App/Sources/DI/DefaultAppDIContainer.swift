@@ -15,30 +15,33 @@ import SwiftData
 @MainActor
 final class DefaultAppDIContainer: AppDIContainer {
     
-    var container: ModelContainer {
-        do {
-            let container = try ModelContainer(
-                for: PhotoEntity.self,
-                FolderEntity.self,
-                PhotoLabelEntity.self,
-                FolderKeywordEntity.self
-            )
-            
-            return container
-        } catch {
-            fatalError("ModelContainer 생성 실패: \(error)")
-        }
-    }
+    let container: ModelContainer
+
+    private lazy var photoLibraryRepository = repositoryFactory.makePhotoLibraryRepository()
+    private lazy var photoAnalysisRepository = repositoryFactory.makePhotoAnalysisRepository()
+    private lazy var photoDataRepository = repositoryFactory.makePhotoDataRepository()
+    private lazy var folderDataRepository = repositoryFactory.makeFolderDataRepository()
+    
+    private lazy var serviceFactory = ServiceFactory()
+    private lazy var repositoryFactory = RepositoryFactory(
+        container: container,
+        serviceFactory: serviceFactory
+    )
     
     init() {
-        
+       do {
+           container = try ModelContainer(
+               for: PhotoEntity.self,
+               FolderEntity.self,
+               PhotoLabelEntity.self,
+               FolderKeywordEntity.self
+           )
+       } catch {
+           fatalError("ModelContainer 생성 실패: \(error)")
+       }
     }
     
     // MARK: Splash
-    func makeSplashRepository() {
-        
-    }
-    
     func makeSplashUseCase() {
         
     }
@@ -48,10 +51,6 @@ final class DefaultAppDIContainer: AppDIContainer {
     }
     
     // MARK: Main
-    func makeMainRepository() {
-        
-    }
-    
     func makeMainUseCase() {
         
     }
@@ -61,68 +60,17 @@ final class DefaultAppDIContainer: AppDIContainer {
     }
     
     // MARK: Photo Library
-    func makePhotoLibraryRepository() -> PhotoLibraryRepository {
-        let libraryService = PhotoLibraryService()
-        let permissionService = PermissionService()
-        return DefaultPhotoLibraryRepository(
-            libraryService: libraryService,
-            permissionService: permissionService
+    func makePhotoLibraryDIContainer() -> PhotoLibraryDIContainer {
+        PhotoLibraryDIContainer(
+            photoLibraryRepository: photoLibraryRepository
         )
-    }
-    
-    func makePhotoLibraryUseCase() -> PhotoLibraryUseCase {
-        DefaultPhotoLibraryUseCase(repository: makePhotoLibraryRepository())
-    }
-    
-    func makePhotoLibraryViewModel() -> PhotoLibraryViewModel {
-        PhotoLibraryViewModel(useCase: makePhotoLibraryUseCase())
     }
     
     // MARK: Album
-    func makePhotoAnalysisRepository() -> PhotoAnalysisRepository {
-        let analysisService = PhotoAnalysisService()
-        let libraryService = PhotoLibraryService()
-        let geocoderService = GeocoderService()
-        return DefaultPhotoAnalysisRepository(
-            analysisService: analysisService,
-            libraryService: libraryService,
-            geocoderService: geocoderService
-        )
-    }
-    
-    func makePhotoDataRepository() -> PhotoDataRepository {
-        DefaultPhotoDataRepository(container: container)
-//        return DefaultPhotoDataRepository(context: context)
-    }
-    
-    func makePhotoAnalysisUseCase() -> PhotoAnalysisUseCase {
-        PhotoAnalysisUseCase(
-            libraryRepository: makePhotoLibraryRepository(),
-            analysisRepository: makePhotoAnalysisRepository(),
-            dataRepository: makePhotoDataRepository()
-        )
-    }
-    
-    func makeFolderDataRepository() -> FolderDataRepository {
-        DefaultFolderDataRepository(container: container)
-    }
-    
-    func makeAutoFolderUseCase() -> AutoFolderUseCase {
-        AutoFolderUseCase(
-            photoDataRepository: makePhotoDataRepository(),
-            folderDataRepository: makeFolderDataRepository())
-    }
-    
-    func makeFolderUseCase() -> FolderUseCase {
-        FolderUseCase(folderRepository: makeFolderDataRepository())
-    }
-    
-    func makeAlbumViewModel() -> AlbumViewModel {
-        AlbumViewModel(
-            photoUseCase: makePhotoLibraryUseCase(),
-            analysisUseCase: makePhotoAnalysisUseCase(),
-            autoFolderUseCase: makeAutoFolderUseCase(),
-            folderUseCase: makeFolderUseCase()
-        )
+    func makeAlbumDIContainer() -> AlbumDIContainer {
+        AlbumDIContainer(photoLibraryRepository: photoLibraryRepository,
+                         photoAnalysisRepository: photoAnalysisRepository,
+                         photoDataRepository: photoDataRepository,
+                         folderDataRepository: folderDataRepository)
     }
 }

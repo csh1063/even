@@ -3,11 +3,13 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 55;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		025400DBA1FBCED05EECA3ED /* PhotoModelMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D23287CAC9A15F1CD81389D /* PhotoModelMapper.swift */; };
+		1987475C2F7432B900A6AC8D /* ServiceFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1987475B2F7432B900A6AC8D /* ServiceFactory.swift */; };
+		1987475E2F74336C00A6AC8D /* RepositoryFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1987475D2F74336C00A6AC8D /* RepositoryFactory.swift */; };
 		2169AA2311BA60ACAA3F77E2 /* FolderEntityMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13D68148ECEC00D5F0D873BA /* FolderEntityMapper.swift */; };
 		22AD151C6F8F526A63C49DF8 /* GeocoderService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34FC610C922DCAAD54F6B871 /* GeocoderService.swift */; };
 		43B044BA23904FB3BCE5C9BA /* DefaultPhotoAnalysisRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C189B2600E5ECFA19EE3FD77 /* DefaultPhotoAnalysisRepository.swift */; };
@@ -52,6 +54,8 @@
 		06FAA1459D11CCE724C34195 /* Domain.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Domain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		13D68148ECEC00D5F0D873BA /* FolderEntityMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderEntityMapper.swift; sourceTree = "<group>"; };
 		15E0F3D1A2F015968E4FBB6A /* SwiftDataStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDataStack.swift; sourceTree = "<group>"; };
+		1987475B2F7432B900A6AC8D /* ServiceFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceFactory.swift; sourceTree = "<group>"; };
+		1987475D2F74336C00A6AC8D /* RepositoryFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryFactory.swift; sourceTree = "<group>"; };
 		1E0A1E65D202F027E3B90C53 /* PhotoLabelEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLabelEntity.swift; sourceTree = "<group>"; };
 		2A185E0021472505F30321DF /* BlockWord.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = BlockWord.json; sourceTree = "<group>"; };
 		2FEE537A6453D74F3910F7C2 /* DefaultFolderDataRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultFolderDataRepository.swift; sourceTree = "<group>"; };
@@ -124,6 +128,7 @@
 		73F3ED55BFDC2EF15878F5B6 /* Repository */ = {
 			isa = PBXGroup;
 			children = (
+				1987475D2F74336C00A6AC8D /* RepositoryFactory.swift */,
 				2FEE537A6453D74F3910F7C2 /* DefaultFolderDataRepository.swift */,
 				C189B2600E5ECFA19EE3FD77 /* DefaultPhotoAnalysisRepository.swift */,
 				6276A561BC623AC921892190 /* DefaultPhotoDataRepository.swift */,
@@ -183,6 +188,7 @@
 		B119E31677D59F7802A67D11 /* Service */ = {
 			isa = PBXGroup;
 			children = (
+				1987475B2F7432B900A6AC8D /* ServiceFactory.swift */,
 				34FC610C922DCAAD54F6B871 /* GeocoderService.swift */,
 				5070A6753C1BF6C98B7913FC /* PermissionService.swift */,
 				96A17E0B5CA585E3F519C606 /* PhotoAnalysisService.swift */,
@@ -294,6 +300,7 @@
 				2169AA2311BA60ACAA3F77E2 /* FolderEntityMapper.swift in Sources */,
 				43FADE1F1CA4BF5AFFE68B08 /* PhotoEntityMapper.swift in Sources */,
 				8FEFDFB6A3E14CB6A276BC77 /* PhotoLabelEntityMapper.swift in Sources */,
+				1987475C2F7432B900A6AC8D /* ServiceFactory.swift in Sources */,
 				025400DBA1FBCED05EECA3ED /* PhotoModelMapper.swift in Sources */,
 				9B112AC7348361AEC6F345D0 /* PhotoAssetEntity.swift in Sources */,
 				9B5D28D4A80A7917E414796E /* Network.swift in Sources */,
@@ -306,6 +313,7 @@
 				AD69ED776BF945A29DC4CBC1 /* PhotoAnalysisService.swift in Sources */,
 				C5E3901016A28982EE6D8EC0 /* PhotoLibararyService.swift in Sources */,
 				507C01346A8EAE9FB825F167 /* FolderEntity.swift in Sources */,
+				1987475E2F74336C00A6AC8D /* RepositoryFactory.swift in Sources */,
 				DF2506225BD04CA9D8D9C796 /* FolderKeywordEntity.swift in Sources */,
 				B6C0E93D02A1832F65FE3AB1 /* FolderPhotoMapEntity.swift in Sources */,
 				F074A0B6E299B688A708BF0F /* PhotoEntity.swift in Sources */,
@@ -341,10 +349,7 @@
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = (
-					"$(inherited)",
-					DEBUG,
-				);
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
 				SWIFT_COMPILATION_MODE = singlefile;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;

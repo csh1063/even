@@ -12,7 +12,7 @@ import Foundation
 public protocol AppDIContainer {
     func makeSplashViewModel() -> SplashViewModel
     func makeMainViewModel() -> MainViewModel
-    func makePhotoLibraryViewModel() -> PhotoLibraryViewModel
-    func makeAlbumViewModel() -> AlbumViewModel
+    func makePhotoLibraryDIContainer() -> PhotoLibraryDIContainer
+    func makeAlbumDIContainer() -> AlbumDIContainer
 }
 

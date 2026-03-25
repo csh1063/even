@@ -7,30 +7,29 @@
 //
 
 import Foundation
+import Domain
 
 @MainActor
-final class PhotoLibraryDIContainer {
+public final class PhotoLibraryDIContainer {
 
-    let appDIContainer: AppDIContainer
-
-    init(appDIContainer: AppDIContainer) {
-        self.appDIContainer = appDIContainer
+//    let appDIContainer: AppDIContainer
+//
+//    init(appDIContainer: AppDIContainer) {
+//        self.appDIContainer = appDIContainer
+//    }
+    
+    let photoLibraryRepository: PhotoLibraryRepository
+    
+    public init(photoLibraryRepository: PhotoLibraryRepository) {
+        self.photoLibraryRepository = photoLibraryRepository
     }
 
     func makePhotoLibraryViewModel() -> PhotoLibraryViewModel {
-//        let service = Tab1Service(
-//            provider: appDIContainer.providerFactory.makeProvider()
-//        )
-
-//        let repository = Tab1Repository(
-//            service: service,
-//            tokenRepository: appDIContainer.tokenRepository
-//        )
-
-//        let useCase = Tab1UseCase(repository: repository)
-
-//        return HomeViewModel()
-        return appDIContainer.makePhotoLibraryViewModel()
+        let usecase = DefaultPhotoLibraryUseCase(
+            repository: photoLibraryRepository
+        )
+        
+        return PhotoLibraryViewModel(useCase: usecase)
     }
 
 //    func makeHomeDetailViewModel(

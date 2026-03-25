@@ -23,26 +23,11 @@ final class AlbumCoordinator: BaseCoordinator {
         let viewModel = diContainer.makeAlbumViewModel()
         let vc = AlbumViewController(viewModel: viewModel)
 
-//        vc.onSelectItem = { [weak self] id in
-//            self?.showDetail(id: id)
-//        }
-
         navigationController.viewControllers = [vc]
     }
 
     func startAndReturn() -> UINavigationController {
         start()
-//        navigationController.tabBarItem =
-//            UITabBarItem(title: "Tab1", image: nil, selectedImage: nil)
         return navigationController
     }
-
-//    private func showDetail(id: String) {
-//        let detailDI = diContainer.makeDetailDIContainer(itemID: id)
-//        let coordinator = Tab1DetailCoordinator(
-//            navigationController: navigationController,
-//            diContainer: detailDI
-//        )
-//        coordinator.start()
-//    }
 }
