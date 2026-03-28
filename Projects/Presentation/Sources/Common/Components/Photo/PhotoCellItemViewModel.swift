@@ -17,18 +17,23 @@ struct PhotoCellItemViewModel: Hashable {
     var isSelected: Bool = false            // 선택 상태
     var isFavorite: Bool = false            // 즐겨찾기
     
-    let photo: PhotoInAlbum
+//    let photo: PhotoInAlbum
     private let imageLoader: any ImageLoadable
     
-    init(photo: PhotoInAlbum, imageLoader: any ImageLoadable) {
-        self.localIdentifier = photo.localIdentifier
+    init(localIdentifier: String, imageLoader: any ImageLoadable) {
+        self.localIdentifier = localIdentifier
         self.formattedDate = ""
-        self.photo = photo
         self.imageLoader = imageLoader
     }
+//    init(photo: PhotoInAlbum, imageLoader: any ImageLoadable) {
+//        self.localIdentifier = photo.localIdentifier
+//        self.formattedDate = ""
+//        self.photo = photo
+//        self.imageLoader = imageLoader
+//    }
     
     func loadImage(size: CGSize) async -> UIImage? {
-        await imageLoader.loadImage(id: photo.localIdentifier, size: size)
+        await imageLoader.loadImage(id: localIdentifier, size: size)
     }
     
     static func == (lhs: PhotoCellItemViewModel, rhs: PhotoCellItemViewModel) -> Bool {

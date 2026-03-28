@@ -9,7 +9,11 @@
 
 import Foundation
 
-public final class AutoFolderUseCase {
+public protocol AutoFolderUseCase {
+    func execute() -> AsyncThrowingStream<FolderProgress, Error>
+}
+
+public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
     
     private let photoDataRepository: PhotoDataRepository
     private let folderDataRepository: FolderDataRepository

@@ -63,6 +63,24 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
         }.map {$0.toDomain()}
     }
     
+    public func fetchPhotos(by folderId: UUID) throws -> [Photo] {
+        
+        let context = ModelContext(container)
+        
+        let fetchDescriptor = FetchDescriptor<FolderEntity>.init(
+            predicate: #Predicate { $0.id == folderId }
+        )
+        
+        guard let folder = try context.fetch(fetchDescriptor).first else {
+            throw FolderRepositoryError.folderNotFound
+        }
+        
+        return folder.photos.sorted {
+            $0.createdAt > $1.createdAt
+        }
+        .map {$0.toDomain()}
+    }
+    
     public func updateFolder(folder: Folder) throws {
         
         let context = ModelContext(container)

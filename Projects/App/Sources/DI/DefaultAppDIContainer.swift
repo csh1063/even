@@ -17,10 +17,21 @@ final class DefaultAppDIContainer: AppDIContainer {
     
     let container: ModelContainer
 
-    private lazy var photoLibraryRepository = repositoryFactory.makePhotoLibraryRepository()
-    private lazy var photoAnalysisRepository = repositoryFactory.makePhotoAnalysisRepository()
-    private lazy var photoDataRepository = repositoryFactory.makePhotoDataRepository()
-    private lazy var folderDataRepository = repositoryFactory.makeFolderDataRepository()
+    var photoLibraryRepository: PhotoLibraryRepository{
+        repositoryFactory.photoLibraryRepository
+    }
+    
+    var photoAnalysisRepository: PhotoAnalysisRepository{
+        repositoryFactory.photoAnalysisRepository
+    }
+    
+    var photoDataRepository: PhotoDataRepository{
+        repositoryFactory.photoDataRepository
+    }
+    
+    var folderDataRepository: FolderDataRepository{
+        repositoryFactory.folderDataRepository
+    }
     
     private lazy var serviceFactory = ServiceFactory()
     private lazy var repositoryFactory = RepositoryFactory(
@@ -68,9 +79,10 @@ final class DefaultAppDIContainer: AppDIContainer {
     
     // MARK: Album
     func makeAlbumDIContainer() -> AlbumDIContainer {
-        AlbumDIContainer(photoLibraryRepository: photoLibraryRepository,
-                         photoAnalysisRepository: photoAnalysisRepository,
-                         photoDataRepository: photoDataRepository,
-                         folderDataRepository: folderDataRepository)
+        AlbumDIContainer(appDIContainer: self)
+//        AlbumDIContainer(photoLibraryRepository: photoLibraryRepository,
+//                         photoAnalysisRepository: photoAnalysisRepository,
+//                         photoDataRepository: photoDataRepository,
+//                         folderDataRepository: folderDataRepository)
     }
 }

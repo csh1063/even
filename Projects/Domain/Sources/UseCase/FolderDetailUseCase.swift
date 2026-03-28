@@ -1,0 +1,26 @@
+//
+//  FolderDetailUseCase.swift
+//  Domain
+//
+//  Created by sanghyeon on 3/26/26.
+//  Copyright © 2026 sanghyeon. All rights reserved.
+//
+
+import Foundation
+
+public protocol FolderDetailUseCase {
+    func fetchPhotos(by folderId: UUID) async throws -> [Photo]
+}
+
+public final class DefaultFolderDetailUseCase: FolderDetailUseCase {
+    
+    private let repository: FolderDataRepository
+    
+    public init(repository: FolderDataRepository) {
+        self.repository = repository
+    }
+    
+    public func fetchPhotos(by folderId: UUID) async throws -> [Photo] {
+        try repository.fetchPhotos(by: folderId)
+    }
+}

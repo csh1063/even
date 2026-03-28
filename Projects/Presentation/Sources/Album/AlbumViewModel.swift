@@ -18,6 +18,8 @@ public final class AlbumViewModel {
         case appear
         case analysis
         case clear
+        case dummy
+        case selectItem(Folder)
     }
     
     public struct Output {
@@ -38,17 +40,21 @@ public final class AlbumViewModel {
     
     let input = PassthroughSubject<Input, Never>()
     
+    private weak var coordinator: AlbumCoordinator?
     private let photoUseCase: PhotoLibraryUseCase
     private let analysisUseCase: PhotoAnalysisUseCase
     private let autoFolderUseCase: AutoFolderUseCase
     private let folderUseCase: FolderUseCase
+    
     private var cancellable = Set<AnyCancellable>()
     
-    public init(photoUseCase: PhotoLibraryUseCase,
+    public init(coordinator: AlbumCoordinator,
+                photoUseCase: PhotoLibraryUseCase,
                 analysisUseCase: PhotoAnalysisUseCase,
                 autoFolderUseCase: AutoFolderUseCase,
                 folderUseCase: FolderUseCase) {
         
+        self.coordinator = coordinator
         self.photoUseCase = photoUseCase
         self.analysisUseCase = analysisUseCase
         self.autoFolderUseCase = autoFolderUseCase
@@ -178,11 +184,27 @@ public final class AlbumViewModel {
             catch {
                 print("error", error.localizedDescription)
             }
+        case .dummy:
+            do {
+                print("create dummy!")
+                try await self.folderUseCase.createDummy()
+                _ = await self.loadFodlers()
+            }
+            catch {
+                
+            }
+        case .selectItem(let folder):
+            print("!!!")
+            if self.coordinator == nil {
+                    print("🚨 에러: Coordinator가 nil입니다!")
+                }
+            self.coordinator?.moveDetail(folder: folder)
         }
     }
     
     private func loadFodlers() async -> Bool {
         do {
+            print("load folders")
             let folders = try await self.folderUseCase.fetchAll()
             self.folders = folders
             return true

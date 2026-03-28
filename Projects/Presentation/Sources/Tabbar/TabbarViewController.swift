@@ -30,4 +30,12 @@ final class TabbarViewController: CustomTabBarController {
         
         self.selectedIndex = 1
     }
+    
+    func showTabbar() {
+        self.animateFade(isShow: true)
+    }
+    
+    func hideTabbar() {
+        self.animateFade(isShow: false)
+    }
 }

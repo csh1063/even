@@ -13,21 +13,22 @@ import Vision
 
 final class AlbumViewController: BaseViewController {
     
-    private var naviView: UIView = UIView()
-    private let mainLabel: UILabel = UILabel()
+    private var naviView: NaviBarView = NaviBarView(type: .title(.leading))
+    
     private let progressBar: UIProgressView = UIProgressView(progressViewStyle: .bar)
     private let folderProgressBar: UIProgressView = UIProgressView(progressViewStyle: .bar)
     private let locationProgressBar: UIProgressView = UIProgressView(progressViewStyle: .bar)
     private let locationFolderProgressBar: UIProgressView = UIProgressView(progressViewStyle: .bar)
     
-    private let analysisButton: UIButton = UIButton()
-    private let clearButton: UIButton = UIButton()
+    // for simulator test
+    private let dummyButton: UIButton = UIButton()
+        .withTitle("더미", for: .normal)
+        .withTitleColor(.Theme.nickel, for: .normal)
     
     private var collectionView: UICollectionView = {
 
         let space: CGFloat = 2
         let count: CGFloat = 2
-//        let height = AppInfo.shared.bannerHeight
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
         layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
@@ -41,6 +42,7 @@ final class AlbumViewController: BaseViewController {
         let collectionView = UICollectionView(frame: CGRect.zero, collectionViewLayout: layout)
         collectionView.isScrollEnabled = true
         collectionView.showsVerticalScrollIndicator = false
+        collectionView.backgroundColor = .Theme.white
 
         return collectionView
     }()
@@ -75,26 +77,26 @@ final class AlbumViewController: BaseViewController {
     
     private func setupView() {
         
-        naviView.backgroundColor = .Theme.white
-        mainLabel.text = "Albums"
-        mainLabel.textColor = .Theme.midnight
+        naviView.setTitle("Albums")
+        naviView.addRightButtons([(.reset, .Theme.secondary), (.analysis, .Theme.primary)])
+        
+        collectionView.delegate = self
+        
         progressBar.isHidden = true
         folderProgressBar.isHidden = true
         locationProgressBar.isHidden = true
         locationFolderProgressBar.isHidden = true
+        
         progressBar.trackTintColor = .Theme.gray
         folderProgressBar.trackTintColor = .Theme.gray
         locationProgressBar.trackTintColor = .Theme.gray
         locationFolderProgressBar.trackTintColor = .Theme.gray
+        
         progressBar.progressTintColor = .Theme.primary
         folderProgressBar.progressTintColor = .Theme.primary
         locationProgressBar.progressTintColor = .Theme.primary
         locationFolderProgressBar.progressTintColor = .Theme.primary
-        analysisButton.setTitle("분석", for: .normal)
-        analysisButton.setTitleColor(.Theme.primary, for: .normal)
-        clearButton.setTitle("초기", for: .normal)
-        clearButton.setTitleColor(.Theme.secondary, for: .normal)
-
+        
         view.addSubview(collectionView)
         
         view.addSubview(progressBar)
@@ -103,21 +105,13 @@ final class AlbumViewController: BaseViewController {
         view.addSubview(locationFolderProgressBar)
         
         view.addSubview(naviView)
-        naviView.addSubview(mainLabel)
-        view.addSubview(analysisButton)
-        view.addSubview(clearButton)
+        view.addSubview(dummyButton)
         
         self.configureDataSource()
         
         naviView.snp.makeConstraints { make in
-            make.top.equalTo(self.view.safeAreaLayoutGuide)
+            make.top.equalToSuperview()
             make.leading.trailing.equalTo(self.view)
-            make.height.equalTo(48)
-        }
-        
-        mainLabel.snp.makeConstraints { make in
-            make.top.bottom.equalTo(naviView)
-            make.leading.equalTo(naviView).offset(20)
         }
         
         progressBar.snp.makeConstraints { make in
@@ -144,15 +138,9 @@ final class AlbumViewController: BaseViewController {
             make.top.equalTo(naviView.snp.bottom).offset(4)
         }
         
-        analysisButton.snp.makeConstraints { make in
+        dummyButton.snp.makeConstraints { make in
             make.top.bottom.equalTo(self.naviView)
-            make.trailing.equalTo(self.view)
-            make.width.equalTo(60)
-        }
-        
-        clearButton.snp.makeConstraints { make in
-            make.top.bottom.equalTo(self.naviView)
-            make.trailing.equalTo(self.analysisButton.snp.leading)
+            make.trailing.equalTo(self.naviView).offset(-120)
             make.width.equalTo(60)
         }
         
@@ -203,17 +191,23 @@ final class AlbumViewController: BaseViewController {
             }
             .store(in: &cancellables)
 
-        analysisButton.tapPublisher
-            .sink { [weak self] button in
+        naviView.rightPublisher
+            .sink { [weak self] type in
                 guard let self else {return}
-                self.viewModel.send(.analysis)
+                switch type {
+                case .analysis:
+                    self.viewModel.send(.analysis)
+                case .reset:
+                    self.viewModel.send(.clear)
+                default: break
+                }
             }
             .store(in: &cancellables)
         
-        clearButton.tapPublisher
+        dummyButton.tapPublisher
             .sink { [weak self] button in
                 guard let self else {return}
-                self.viewModel.send(.clear)
+                self.viewModel.send(.dummy)
             }
             .store(in: &cancellables)
         
@@ -249,4 +243,13 @@ extension AlbumViewController {
         snapshot.appendItems(folders)
         dataSource.apply(snapshot, animatingDifferences: true)
     }
+}
+
+extension AlbumViewController: UICollectionViewDelegate {
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard let cellViewModel = dataSource.itemIdentifier(for: indexPath) else { return }
+        viewModel.send(.selectItem(cellViewModel.folder))
+    }
+
 }

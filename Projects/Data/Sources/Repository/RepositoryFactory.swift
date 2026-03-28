@@ -19,35 +19,29 @@ public final class RepositoryFactory {
         self.serviceFactory = serviceFactory
     }
     
-    public func makeSplashRepository() {
-        
-    }
+//    public var makeSplashRepository
+//    public var makeMainRepository
     
-    public func makeMainRepository() {
-        
-    }
-    
-    public func makePhotoLibraryRepository() -> PhotoLibraryRepository {
+    public lazy var photoLibraryRepository: PhotoLibraryRepository = {
         DefaultPhotoLibraryRepository(
-            libraryService: serviceFactory.makePhotoLibraryService(),
-            permissionService: serviceFactory.makePermissionService()
+            libraryService: serviceFactory.photoLibraryService,
+            permissionService: serviceFactory.permissionService
         )
-    }
+    }()
     
-    public func makePhotoAnalysisRepository() -> PhotoAnalysisRepository {
+    public lazy var photoAnalysisRepository: PhotoAnalysisRepository = {
         DefaultPhotoAnalysisRepository(
-            analysisService: serviceFactory.makePhotoAnalysisService(),
-            libraryService: serviceFactory.makePhotoLibraryService(),
-            geocoderService: serviceFactory.makeGeocoderService()
+            analysisService: serviceFactory.photoAnalysisService,
+            libraryService: serviceFactory.photoLibraryService,
+            geocoderService: serviceFactory.geocoderService
         )
-    }
+    }()
     
-    public func makePhotoDataRepository() -> PhotoDataRepository {
+    public lazy var photoDataRepository: PhotoDataRepository = {
         DefaultPhotoDataRepository(container: container)
-    }
+    }()
     
-    public func makeFolderDataRepository() -> FolderDataRepository {
+    public lazy var folderDataRepository: FolderDataRepository = {
         DefaultFolderDataRepository(container: container)
-    }
-    
+    }()
 }

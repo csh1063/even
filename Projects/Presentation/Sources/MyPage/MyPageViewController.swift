@@ -29,6 +29,7 @@ final class MyPageViewController: BaseViewController {
     private func setupView() {
         
         mainLabel.text = "MY PAGE"
+        mainLabel.textColor = .Theme.primary
         
         view.addSubview(mainLabel)
         

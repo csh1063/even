@@ -52,10 +52,10 @@ final class FolderCell: UICollectionViewCell {
         self.mainImageView.contentMode = .scaleAspectFill
         
         self.nameLabel.textColor = .Theme.frost
-        self.nameLabel.font = .systemFont(ofSize: 12)
+        self.nameLabel.font = .systemFont(ofSize: 16)
         self.nameLabel.numberOfLines = 2
         self.countLabel.textColor = .Theme.frost
-        self.countLabel.font = .systemFont(ofSize: 12)
+        self.countLabel.font = .systemFont(ofSize: 16)
         
         self.contentView.addSubview(radiusView)
         self.radiusView.addSubview(mainImageView)

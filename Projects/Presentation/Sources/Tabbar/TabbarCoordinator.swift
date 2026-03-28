@@ -28,9 +28,21 @@ final class TabbarCoordinator: BaseCoordinator {
         
         self.tabbarViewController = TabbarViewController()
         
-        let photo = container.makePhotoLibraryCoordinator().startAndReturn()
-        let album = container.makeAlbumCoordinator().startAndReturn()
-        let myPage = container.makeMyPageCoordinator().startAndReturn()
+        let photoCoordinator = container.makePhotoLibraryCoordinator()
+        let albumCoordinator = container.makeAlbumCoordinator()
+        let myPageCoordinator = container.makeMyPageCoordinator()
+        [photoCoordinator, albumCoordinator, myPageCoordinator].forEach {
+            $0.hideTabBar = { [weak self] in
+                self?.tabbarViewController?.hideTabbar()
+            }
+            
+            $0.showTabBar = { [weak self] in
+                self?.tabbarViewController?.showTabbar()
+            }
+        }
+        let photo = photoCoordinator.startAndReturn()
+        let album = albumCoordinator.startAndReturn()
+        let myPage = myPageCoordinator.startAndReturn()
         
         self.tabbarViewController?.setTabBarItem("house", selectedImage: "house.fill", vc: photo)//, title: "홈")
         self.tabbarViewController?.setTabBarItem("list.bullet.rectangle.portrait", selectedImage: "list.bullet.rectangle.portrait.fill", vc: album)//, title: "리스트")

@@ -11,6 +11,7 @@ import Foundation
 public protocol FolderDataRepository {
     func saveFolder(folder: Folder) throws
     func fetchAll() throws -> [Folder]
+    func fetchPhotos(by folderId: UUID) throws -> [Photo]
     func updateFolder(folder: Folder) throws
     func delete(id: UUID) throws
     func deleteAutoFolders() throws  // 자동 폴더만 삭제

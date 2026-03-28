@@ -8,7 +8,13 @@
 
 import Foundation
 
-public final class PhotoAnalysisUseCase {
+public protocol PhotoAnalysisUseCase {
+    func analysis() -> AsyncThrowingStream<AnalysisProgress, Error>
+    func locationAnalysis() -> AsyncThrowingStream<AnalysisProgress, Error>
+    func deletePhotos() async throws
+}
+
+public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
     
     private let libraryRepository: PhotoLibraryRepository
     private let analysisRepository: PhotoAnalysisRepository

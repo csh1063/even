@@ -22,20 +22,19 @@ public final class ServiceFactory {
     public init() {
     }
     
-    
-    public func makePhotoLibraryService() -> PhotoLibraryService {
+    public var photoLibraryService: PhotoLibraryService = {
         PhotoLibraryService()
-    }
+    }()
     
-    public func makePermissionService() -> PermissionService {
+    public var permissionService: PermissionService = {
         PermissionService()
-    }
+    }()
     
-    public func makePhotoAnalysisService() -> PhotoAnalysisService {
+    public var photoAnalysisService: PhotoAnalysisService = {
         PhotoAnalysisService()
-    }
+    }()
     
-    public func makeGeocoderService() -> GeocoderService {
+    public var geocoderService: GeocoderService = {
         GeocoderService()
-    }
+    }()
 }

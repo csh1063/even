@@ -1,9 +1,9 @@
 //
-//  PhotoLibraryViewController.swift
+//  AlbumDetailViewController.swift
 //  Presentation
 //
-//  Created by sanghyeon on 12/22/25.
-//  Copyright © 2025 sanghyeon. All rights reserved.
+//  Created by sanghyeon on 3/26/26.
+//  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
 import Foundation
@@ -11,9 +11,10 @@ import UIKit
 import Combine
 import Domain
 
-final class PhotoLibraryViewController: BaseViewController {
+final class AlbumDetailViewController: BaseViewController {
     
     private var naviView: NaviBarView = NaviBarView(type: .title(.leading))
+    
     private var collectionView: UICollectionView = {
 
         let space: CGFloat = 2
@@ -25,25 +26,26 @@ final class PhotoLibraryViewController: BaseViewController {
         layout.minimumLineSpacing = space
         layout.minimumInteritemSpacing = space
         
-        let width = ((UIScreen.main.bounds.width - (space * (count + 1))) / count)
+        let width = (UIScreen.main.bounds.width - (space * (count + 1))) / count
         
         layout.itemSize = CGSize(width: width, height: width)
 
         let collectionView = UICollectionView(frame: CGRect.zero, collectionViewLayout: layout)
         collectionView.isScrollEnabled = true
         collectionView.showsVerticalScrollIndicator = false
+        collectionView.contentInset = UIEdgeInsets(top: 8, left: space, bottom: 0, right: space)
         collectionView.backgroundColor = .clear
-        collectionView.contentInset = UIEdgeInsets(top: 12, left: space, bottom: 0, right: space)
 
         return collectionView
     }()
+    
     private var dataSource: UICollectionViewDiffableDataSource<Int, PhotoCellItemViewModel>!
     
-    private let viewModel: PhotoLibraryViewModel
+    private let viewModel: AlbumDetailViewModel
     
     private var cancellables = Set<AnyCancellable>()
     
-    init(viewModel: PhotoLibraryViewModel) {
+    init(viewModel: AlbumDetailViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
@@ -57,39 +59,25 @@ final class PhotoLibraryViewController: BaseViewController {
         
         self.setupView()
         self.setupBindings()
-        self.checkPhotoPermission()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-    }
-    
-    private func checkPhotoPermission() {
-        
-        Task {
-            let status = try await self.viewModel.checkPermission()
-            if status.access {
-                self.viewModel.send(.appear)
-            } else {
-                // 설정앱으로 유도
-            }
-        }
+        self.viewModel.send(.appear)
     }
     
     private func setupView() {
         
-        naviView.setTitle("PHOTO LIBRARY", color: .Theme.primary)
-        naviView.translatesAutoresizingMaskIntoConstraints = false
+        naviView.addLeftButton(.back, color: .Theme.midnight)
         
         configureDataSource()
         
         view.addSubview(naviView)
-        
         view.addSubview(collectionView)
         
         naviView.snp.makeConstraints { make in
-            make.top.equalToSuperview()
+            make.top.equalTo(self.view.safeAreaLayoutGuide)
             make.leading.trailing.equalTo(self.view)
         }
         
@@ -100,7 +88,22 @@ final class PhotoLibraryViewController: BaseViewController {
     }
     
     private func setupBindings() {
+        
+        naviView.leftPublisher
+            .sink { [weak self] _ in
+                print("back!")
+                self?.viewModel.pop?()
+            }
+            .store(in: &cancellables)
+        
         let output = self.viewModel.transform()
+        
+        output.name
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] name in
+                self?.naviView.setTitle(name)
+            }
+            .store(in: &cancellables)
         
         output.photos
             .receive(on: DispatchQueue.main)
@@ -121,7 +124,7 @@ final class PhotoLibraryViewController: BaseViewController {
     }
 }
 
-extension PhotoLibraryViewController {
+extension AlbumDetailViewController {
     private func configureDataSource() {
         let cellRegistration = UICollectionView.CellRegistration<PhotoCell, PhotoCellItemViewModel> { cell, indexPath, cellViewModel in
             cell.configure(with: cellViewModel)   // weak self도 필요 없어짐

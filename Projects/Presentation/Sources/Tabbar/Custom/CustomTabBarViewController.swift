@@ -303,4 +303,19 @@ open class CustomTabBarController: UIViewController {
         item.title = title
         vc.tabBarItem = item
     }
+    
+    public func animateBottom(isShow: Bool) {
+        UIView.animate(withDuration: 0.2) {
+            self.tabBarBottom.constant = isShow ? self.margin.bottom:100
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    public func animateFade(isShow: Bool) {
+        UIView.animate(withDuration: 0.2) {
+            self.tabBarShadowView.alpha = isShow ? 1.0:0.0
+            self.tabBarView.alpha = isShow ? 1.0:0.0
+            self.view.layoutIfNeeded()
+        }
+    }
 }

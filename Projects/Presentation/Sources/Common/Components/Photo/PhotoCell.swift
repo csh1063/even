@@ -37,10 +37,9 @@ final class PhotoCell: UICollectionViewCell {
     
     func setupView() {
         
-        self.contentView.backgroundColor = .Theme.obsidian
-        
-        self.mainImageView.backgroundColor = .white
+        self.mainImageView.backgroundColor = .clear
         self.mainImageView.layer.masksToBounds = true
+        self.mainImageView.layer.cornerRadius = 4
         self.mainImageView.contentMode = .scaleAspectFill
         
         self.loadingView.backgroundColor = .Theme.charcoal
@@ -52,8 +51,7 @@ final class PhotoCell: UICollectionViewCell {
         self.contentView.addSubview(loadingView)
         
         self.mainImageView.snp.makeConstraints { make in
-            make.top.leading.equalTo(self.contentView).offset(1)
-            make.bottom.trailing.equalTo(self.contentView).offset(-1)
+            make.edges.equalTo(self.contentView)//.inset(1)
         }
         
         self.loadingView.snp.makeConstraints { make in
@@ -63,12 +61,12 @@ final class PhotoCell: UICollectionViewCell {
     }
     
     func configure(with viewModel: PhotoCellItemViewModel) {
-        self.assetIdentifier = viewModel.photo.localIdentifier
+        self.assetIdentifier = viewModel.localIdentifier
         self.loadingView.isHidden = false
         task = Task {
             let image = await viewModel.loadImage(size: self.frame.size)
             
-            if !Task.isCancelled && self.assetIdentifier == viewModel.photo.localIdentifier {
+            if !Task.isCancelled && self.assetIdentifier == viewModel.localIdentifier {
                 self.mainImageView.image = image
             }
             self.loadingView.isHidden = true
