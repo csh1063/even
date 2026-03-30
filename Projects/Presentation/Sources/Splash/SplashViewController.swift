@@ -69,7 +69,8 @@ final class SplashViewController: BaseViewController {
         view.addSubview(descLabel)
         
         nameLabel.snp.makeConstraints { make in
-            make.center.equalTo(self.view)
+            make.centerX.equalTo(self.view)
+            make.centerY.equalTo(self.view).offset(-80)
         }
         
         descLabel.snp.makeConstraints { make in

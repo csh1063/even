@@ -10,7 +10,7 @@ import Foundation
 import Combine
 
 @MainActor
-public final class SplashViewModel {
+public final class SplashViewModel: BaseViewModel {
     
     enum Input {
         case viewWillAppear
@@ -26,8 +26,11 @@ public final class SplashViewModel {
     private let finishedSubject = PassthroughSubject<Bool, Never>()
     private var cancellables = Set<AnyCancellable>()
     
-    public init() {
+    public override init() {
         self.output = Output(finished: finishedSubject.eraseToAnyPublisher())
+        
+        super.init()
+        
         self.bind()
     }
     
@@ -42,10 +45,17 @@ public final class SplashViewModel {
 
     private func start() {
         Task { [weak self] in
-            guard let self = self else { return }
-            
             try? await Task.sleep(nanoseconds: 3_000_000_000) // 3초 (1초 = 1_000_000_000 ns)
-            self.finishedSubject.send(true)
+//            showAlert(
+//                title: "진행?",
+//                message: "진행 고고?",
+//                buttons: [
+//                    AlertButtonConfig(title: "껃영", style: .destructive, action: nil),
+//                    AlertButtonConfig(title: "고고", style: .default) { [weak self] in
+                        self?.finishedSubject.send(true)
+//                    }
+//                ]
+//            )
         }
     }
 }

@@ -12,7 +12,7 @@ import Domain
 import UIKit
 
 @MainActor
-public final class AlbumViewModel {
+public final class AlbumViewModel: BaseViewModel {
     
     enum Input {
         case appear
@@ -59,6 +59,9 @@ public final class AlbumViewModel {
         self.analysisUseCase = analysisUseCase
         self.autoFolderUseCase = autoFolderUseCase
         self.folderUseCase = folderUseCase
+        
+        super.init()
+        
         self.bind()
     }
     
@@ -92,105 +95,42 @@ public final class AlbumViewModel {
         case .appear:
             _ = await self.loadFodlers()
         case .analysis:
-            self.isAnalyzing = true
-            do {
-
-                for try await progress in analysisUseCase.analysis() {
-                    switch progress.state {
-                    case .progress(let ratio):
-                        print("progress", ratio)
-                        self.progressRatio = ratio
-                    case .completed:
-                        print("completed")
-                        self.progressRatio = 1.0
-                    case .unavailable(let reason):
-//                        self.showUnavailableMessage(reason)
-                        print("reason", reason)
-                    }
-                }
- 
-                for try await progress in autoFolderUseCase.execute() {
-                    self.autoFolderProgressRatio = progress.ratio
-                    switch progress.step {
-                    case .analyzing: break
-//                        self.statusMessage = "라벨 분석 중..."
-                    case .creatingFolders: break
-//                        self.statusMessage = "폴더 생성 중..."
-                    case .classifying: break
-//                        self.statusMessage = "사진 분류 중..."
-                    case .completed:
-                        self.autoFolderProgressRatio = 1.0
-//                        self.statusMessage = "완료!"
-                    }
-                }
-                
-                let success = await self.loadFodlers()
-                guard success else {
-                    self.isAnalyzing = false
-                    return
-                }
-                
-//                 2차 - 위치 분석 (백그라운드)
-                Task.detached(priority: .background) {
-                    for try await progress in await self.analysisUseCase.locationAnalysis() {
-                        await MainActor.run {
-                            switch progress.state {
-                            case .progress(let ratio):
-                                print("progress", ratio)
-                                self.locationProgressRatio = ratio
-                            case .completed:
-                                print("completed")
-                                self.locationProgressRatio = 1.0
-//                                self.isAnalyzing = false
-                            case .unavailable(let reason):
-        //                        self.showUnavailableMessage(reason)
-                                print("reason", reason)
-//                                self.isAnalyzing = false
-                            }
+            showAlert(
+                title: "분석하기",
+                buttons: [
+                    AlertButtonConfig(title: "취소", style: .cancel, action: nil),
+                    AlertButtonConfig(title: "이어서 분석", style: .default) { [weak self] in
+                        Task {
+                            await self?.analysis(isFull: false)
+                        }
+                    },
+                    AlertButtonConfig(title: "전체 분석", style: .default) { [weak self] in
+                        Task {
+                            await self?.analysis(isFull: true)
                         }
                     }
-                    
-                    for try await progress in await self.autoFolderUseCase.execute() {
-                        await MainActor.run {
-                            self.locationFolderProgressRatio = progress.ratio
-                            switch progress.step {
-                            case .analyzing: break
-//                                self.statusMessage = "라벨 분석 중..."
-                            case .creatingFolders: break
-//                                self.statusMessage = "폴더 생성 중..."
-                            case .classifying: break
-//                                self.statusMessage = "사진 분류 중..."
-                            case .completed:
-                                self.locationFolderProgressRatio = 1.0
-//                                self.statusMessage = "완료!"
-                            }
-                        }
-                    }
-                    _ = await self.loadFodlers()
-                    await MainActor.run {
-                        self.isAnalyzing = false
-                    }
-                }
-            }
-            catch {
-                print("error", error.localizedDescription)
-                self.isAnalyzing = false
-            }
+                ]
+            )
         case .clear:
-            do {
-                try await self.analysisUseCase.deletePhotos()
-                _ = await self.loadFodlers()
-            }
-            catch {
-                print("error", error.localizedDescription)
-            }
+            showAlert(
+                title: "초기화",
+                message: "저장된 사진 및 앨범을 모두 삭제하시겠습니까?",
+                buttons: [
+                    AlertButtonConfig(title: "취소", style: .cancel, action: nil),
+                    AlertButtonConfig(title: "삭제", style: .destructive) { [weak self] in
+                        Task {
+                            await self?.clear()
+                        }
+                    }
+                ]
+            )
         case .dummy:
             do {
                 print("create dummy!")
-                try await self.folderUseCase.createDummy()
+//                try await self.folderUseCase.createDummy()
+                try await self.autoFolderUseCase.syncPhotoCount()
                 _ = await self.loadFodlers()
-            }
-            catch {
+            } catch {
                 
             }
         case .selectItem(let folder):
@@ -202,14 +142,102 @@ public final class AlbumViewModel {
         }
     }
     
+    private func analysis(isFull: Bool) async {
+        self.isAnalyzing = true
+        do {
+            let success = try await analysisPhotoBase(isFull: isFull)
+            guard success else {
+                self.isAnalyzing = false
+                return
+            }
+            
+            // 2차 - 위치 분석 (백그라운드)
+            Task.detached(priority: .background) { [weak self] in
+                guard let self else {return}
+                try await self.analysisPhotoLocation(isFull: isFull)
+                await MainActor.run {
+                    self.isAnalyzing = false
+                }
+            }
+        } catch {
+            print("error", error.localizedDescription)
+            self.isAnalyzing = false
+        }
+    }
+    
+    private func clear() async {
+        do {
+            try await self.analysisUseCase.deletePhotos()
+            _ = await self.loadFodlers()
+        } catch {
+            print("error", error.localizedDescription)
+        }
+    }
+    
+    private func analysisAndLoad(updateProgress: @MainActor (Double) -> Void) async throws -> Bool {
+        for try await progress in autoFolderUseCase.execute() {
+            await MainActor.run {
+                updateProgress(progress.ratio)
+                if case .completed = progress.step {
+                    updateProgress(1.0)
+                }
+            }
+        }
+        return await loadFodlers()
+    }
+    
+    private func analysisPhotoBase(isFull: Bool) async throws -> Bool {
+        
+        for try await progress in analysisUseCase.analysis(isFull: isFull) {
+            switch progress.state {
+            case .progress(let ratio):
+                print("progress", ratio)
+                self.progressRatio = ratio
+            case .completed:
+                print("completed")
+                self.progressRatio = 1.0
+            case .unavailable(let reason):
+//                        self.showUnavailableMessage(reason)
+                print("reason", reason)
+            }
+        }
+        
+        return try await analysisAndLoad {
+            self.autoFolderProgressRatio = $0
+        }
+        
+    }
+    
+    private func analysisPhotoLocation(isFull: Bool) async throws {
+        
+        for try await progress in self.analysisUseCase.locationAnalysis(isFull: isFull) {
+            await MainActor.run {
+                switch progress.state {
+                case .progress(let ratio):
+                    print("progress", ratio)
+                    self.locationProgressRatio = ratio
+                case .completed:
+                    print("completed")
+                    self.locationProgressRatio = 1.0
+                case .unavailable(let reason):
+//                        self.showUnavailableMessage(reason)
+                    print("reason", reason)
+                }
+            }
+        }
+        
+        _ = try await self.analysisAndLoad {
+            self.locationFolderProgressRatio = $0
+        }
+    }
+    
     private func loadFodlers() async -> Bool {
         do {
             print("load folders")
             let folders = try await self.folderUseCase.fetchAll()
             self.folders = folders
             return true
-        }
-        catch {
+        } catch {
             print("loadFodlers error")
             return false
         }

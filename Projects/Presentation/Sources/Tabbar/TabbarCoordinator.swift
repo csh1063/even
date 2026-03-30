@@ -22,6 +22,8 @@ final class TabbarCoordinator: BaseCoordinator {
     public init(container: TabbarDIContainer, window: UIWindow) {
         self.container = container
         self.window = window
+        
+        super.init()
     }
 
     public override func start() {

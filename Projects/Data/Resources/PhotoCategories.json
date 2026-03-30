@@ -1,0 +1,9 @@
+{
+    "사람": ["people", "person", "face", "portrait", "people_group", "adult", "child"],
+    "동물": ["animal", "dog", "cat", "canine", "mammal", "pomeranian"],
+    "음식": ["food", "dish", "cuisine", "meal", "spaghetti", "bowl", "plate"],
+    "풍경": ["landscape", "outdoor", "sky", "land", "nature", "beach", "mountain"],
+    "문서": ["document", "text", "screenshot", "paper"],
+    "교통": ["vehicle", "automobile", "conveyance", "car"],
+    "음악": ["music", "musical_instrument", "drum"],
+}

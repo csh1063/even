@@ -9,8 +9,8 @@
 import Foundation
 
 public protocol PhotoAnalysisUseCase {
-    func analysis() -> AsyncThrowingStream<AnalysisProgress, Error>
-    func locationAnalysis() -> AsyncThrowingStream<AnalysisProgress, Error>
+    func analysis(isFull: Bool) -> AsyncThrowingStream<AnalysisProgress, Error>
+    func locationAnalysis(isFull: Bool) -> AsyncThrowingStream<AnalysisProgress, Error>
     func deletePhotos() async throws
 }
 
@@ -31,16 +31,36 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
     }
     
     // 이미지 분석
-    public func analysis() -> AsyncThrowingStream<AnalysisProgress, Error> {
+    public func analysis(isFull: Bool) -> AsyncThrowingStream<AnalysisProgress, Error> {
         execute { [weak self] in
-            self?.analysisRepository.analyze()
+            
+            let analyzedIds: [String]?
+            if isFull {
+                analyzedIds = nil
+            } else {
+                analyzedIds = try self?.dataRepository.fetchAll()
+                    .filter { $0.analyzedAt != nil }
+                    .map { $0.localIdentifier }
+            }
+            
+            return self?.analysisRepository.analyze(excludingIds: analyzedIds)
         }
     }
     
     // 위치 분석
-    public func locationAnalysis() -> AsyncThrowingStream<AnalysisProgress, Error> {
+    public func locationAnalysis(isFull: Bool) -> AsyncThrowingStream<AnalysisProgress, Error> {
         execute { [weak self] in
-            self?.analysisRepository.locationAnalyze()
+            
+            let analyzedIds: [String]?
+            if isFull {
+                analyzedIds = nil
+            } else {
+                analyzedIds = try self?.dataRepository.fetchAll()
+                    .filter { $0.address != nil }
+                    .map { $0.localIdentifier }
+            }
+            
+            return self?.analysisRepository.locationAnalyze(excludingIds: analyzedIds)
         }
     }
     
@@ -50,12 +70,12 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
     
     // MARK: - Private
     private func execute(
-        _ stream: @escaping () -> AsyncThrowingStream<AnalysisProgress, Error>?
+        stream: @escaping () async throws  -> AsyncThrowingStream<AnalysisProgress, Error>?
     ) -> AsyncThrowingStream<AnalysisProgress, Error> {
         AsyncThrowingStream { continuation in
             Task {
                 do {
-                    guard let analysisStream = stream() else {
+                    guard let analysisStream = try await stream() else {
                         continuation.finish()
                         return
                     }

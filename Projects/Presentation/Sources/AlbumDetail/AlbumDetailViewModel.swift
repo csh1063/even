@@ -12,7 +12,7 @@ import Domain
 import UIKit
 
 @MainActor
-public final class AlbumDetailViewModel {
+public final class AlbumDetailViewModel: BaseViewModel {
     
     enum Input {
         case appear
@@ -52,6 +52,9 @@ public final class AlbumDetailViewModel {
         self.folderName = folder.displayName
         self.libraryUseCase = libraryUseCase
         self.detailUseCase = detailUseCase
+        
+        super.init()
+        
         self.bind()
         self.pop = pop
     }
@@ -110,8 +113,7 @@ public final class AlbumDetailViewModel {
             print("photos count: ", photos.count)
             self.photos = photos
             self.isLoading = true
-        }
-        catch {
+        } catch {
             
         }
     }

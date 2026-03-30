@@ -18,12 +18,16 @@ public final class AlbumCoordinator: BaseCoordinator {
     
     init(diContainer: AlbumDIContainer) {
         self.diContainer = diContainer
+        
+        super.init()
     }
 
     public override func start() {
         let viewModel = diContainer.makeAlbumViewModel(coordinator: self)
         let vc = AlbumViewController(viewModel: viewModel)
 
+        bindAlert(from: viewModel)
+        
         navigationController.delegate = self
         navigationController.viewControllers = [vc]
         self.viewController = vc

@@ -18,6 +18,8 @@ final class PhotoLibraryCoordinator: BaseCoordinator {
     
     init(diContainer: PhotoLibraryDIContainer) {
         self.diContainer = diContainer
+        
+        super.init()
     }
 
     override func start() {

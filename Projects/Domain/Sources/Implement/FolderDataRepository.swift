@@ -18,4 +18,5 @@ public protocol FolderDataRepository {
     func addPhoto(folderId: UUID, photoIdentifier: String) throws
     func addPhotos(folderId: UUID, photoIdentifiers: [String]) throws
     func removePhoto(folderId: UUID, photoIdentifier: String) throws
+    func syncPhotoCount() throws
 }

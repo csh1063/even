@@ -8,12 +8,13 @@
 
 /* Begin PBXBuildFile section */
 		01715CBADA677BCCFF831A1D /* Extension_UIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCD53CB3AA237E06A9C76764 /* Extension_UIViewController.swift */; };
+		0B1E106CE4651713AA754DD4 /* NaviBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F252FA414F730A843B69ED7 /* NaviBarView.swift */; };
 		10D3AACA8AFF3EC5491A1CD2 /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24F4C9EDD75B280BB4BE30A9 /* HomeViewModel.swift */; };
 		1105E8EA1D4E774E78877F9B /* ListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B74B54DBDDE8F00F62C6A60 /* ListViewModel.swift */; };
 		11FFD5B3C0735874B09006EB /* ListCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC48366424EBCDCD6592A9E3 /* ListCoordinator.swift */; };
 		13F779FE4F17BDBA660A1B35 /* UIView+Publisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3645708A5BAD77D391863C3 /* UIView+Publisher.swift */; };
 		17750AE257E622DD8E82133C /* Extension_UITextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C2998FAD7DD5077BD097DB /* Extension_UITextView.swift */; };
-		1987476D2F782E6D00A6AC8D /* NaviBarButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1987476C2F782E6D00A6AC8D /* NaviBarButton.swift */; };
+		198747822F796C3D00A6AC8D /* BaseViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 198747812F796C3D00A6AC8D /* BaseViewModel.swift */; };
 		1EB3782697E5D5765188E1DE /* Extension_UISegmentedControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AC6050EB2A12AA43E785BA5 /* Extension_UISegmentedControl.swift */; };
 		200C032581C4A24727FC0CE6 /* AlbumViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03112E88258FD411CDDBA6D3 /* AlbumViewController.swift */; };
 		22E9BE6A63E4C891FFBF6C76 /* UIGestureRecognizer+Publisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C1A7F457AF7CAC51AE3C6AB /* UIGestureRecognizer+Publisher.swift */; };
@@ -28,16 +29,21 @@
 		3ADFEEF985D7BC1626FD5643 /* MyPageDIContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55DFCE6EDBF9C396DD6D6E33 /* MyPageDIContainer.swift */; };
 		415FC59E52A77D8CF12C8565 /* BaseEventRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C06D9DFB2413E81BE06AAC41 /* BaseEventRouter.swift */; };
 		41D0A49F97489D468191FE54 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98AAFFF31B76C431F1139731 /* HomeViewController.swift */; };
+		47532F25612067B672BDF8F2 /* AlbumDetailDIContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8BAD0070B04CDF1EAB02CFB /* AlbumDetailDIContainer.swift */; };
 		4A52E7E23700C35233DF323F /* FolderCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E69CC04667D8CB8EA7C9A905 /* FolderCell.swift */; };
 		4CBB27F7B63BE0497C778288 /* SplashCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DFADB91C9C20B195DC6FDC /* SplashCoordinator.swift */; };
 		4F95FE8B7007302DEEECFC6E /* PhotoLibraryCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39ED3BC2474DC0F432EAFB85 /* PhotoLibraryCoordinator.swift */; };
 		503294F3FE598FB11A6F11EC /* CustomTabBarItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABC1E533AB4C8AAA8B48F1F3 /* CustomTabBarItem.swift */; };
+		51A80C8D542492F4A2AAC3F0 /* NaviBarButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10F1A991453FF9438018AFD /* NaviBarButton.swift */; };
 		550A378C83436838E543D472 /* SnapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEB9EB9C6C13C8F825E27E73 /* SnapKit.framework */; };
 		56AC79A47BE146CAF1BFF861 /* MainDIContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E90CD40C5DEBE648B0955EE /* MainDIContainer.swift */; };
 		56EB5C5AA484162372E08EA4 /* NibLoadable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D27F91A14AEB240D0A2E7D8 /* NibLoadable.swift */; };
+		5ADEAF4EFEF2800B08E732F9 /* AlbumDetailCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8F9AC182358D4FE2D5C299B /* AlbumDetailCoordinator.swift */; };
 		5D0E4EBBEE052080CE54F022 /* Extension_UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 719A054EFAF30746BAE3782E /* Extension_UIColor.swift */; };
 		60B1A9C19CF5718CE911F110 /* PhotoLibraryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80FC95C27373D8DD1543F125 /* PhotoLibraryViewModel.swift */; };
+		68F7B92E595CE29E2B5D931A /* AlbumDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B5DDF86843F2E3695365DF /* AlbumDetailViewModel.swift */; };
 		6B21C00E402B89F04AC73A81 /* Extension_UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D42EEB1F9EB444EE42BCE28 /* Extension_UIImage.swift */; };
+		6DFE320F438EC6EADEAB239B /* NaviBarType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C18C417DC62917A6F8651BD /* NaviBarType.swift */; };
 		7B8F2384F42C2803F7E26622 /* Extension_UITextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDC7E8CD06B312A92C2C3101 /* Extension_UITextField.swift */; };
 		7B99E8D8E3ABCF926B500889 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A9A8D16D9714C46AE871A3 /* MainViewController.swift */; };
 		7DBCAEB0D6433387E8F774BB /* PhotoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B86EE313B24249685CA4C2F7 /* PhotoCell.swift */; };
@@ -47,6 +53,7 @@
 		8724723A2379F5A075E0F080 /* TuistAssets+Presentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B0961E8873C1BFDA61108A2 /* TuistAssets+Presentation.swift */; };
 		875C5815D9B3DFD90807CE11 /* UIControl+Publisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00134F7BB613E1BD0B7516E7 /* UIControl+Publisher.swift */; };
 		88C25DA67A7DB6DCE4E5D779 /* Extension_UIFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE7BDBB893973544517AFFF /* Extension_UIFont.swift */; };
+		8F411F69699B691647FC02A2 /* AlbumDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDE0D246DE24CB8D997BAF99 /* AlbumDetailViewController.swift */; };
 		9348CE2627DFB62740A7ADC4 /* Extension_UILabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41CA43C4455F51F86D88B772 /* Extension_UILabel.swift */; };
 		9A38F45616541E23B2BD7536 /* Domain.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 82F0720D9B464CF8F3E51AD1 /* Domain.framework */; };
 		A06CBAC272797FFF34A85347 /* PhotoCellItemViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE93C7FE0E23AFE023F533E7 /* PhotoCellItemViewModel.swift */; };
@@ -54,7 +61,6 @@
 		AACDF3F26A678AE2F2E07660 /* AlbumCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E9D3650BE472E704D57EC89 /* AlbumCoordinator.swift */; };
 		AD90B623AC1F4BE0A892F9C4 /* BaseCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E474256CB4A9464026CD7F10 /* BaseCoordinator.swift */; };
 		B39A2D52E240C875E277CACA /* MyPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 976797041FBCEDED9606E242 /* MyPageViewController.swift */; };
-		B8C09E14F3A5F8E0FB2F40F8 /* NaviBarType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73E25FEC50A3C81F0A74A6B7 /* NaviBarType.swift */; };
 		BA9253A3F2CE033BEF480731 /* HomeDIContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E2CABAF8819D021ACBB6B23 /* HomeDIContainer.swift */; };
 		BDFCDBB439612F8BF6AF15D8 /* MyPageViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAA8E278CF92B6C39831515 /* MyPageViewModel.swift */; };
 		BE1C96F586291D0D02157D57 /* TuistBundle+Presentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDAD9FCDF00A8502F0CDC9F1 /* TuistBundle+Presentation.swift */; };
@@ -75,7 +81,6 @@
 		F31B82D5364624DC95B09D22 /* Extension_UIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 998E8B3484D5E811058E6E85 /* Extension_UIView.swift */; };
 		F5004F53B83FF7D04233484B /* Extension_NSMutableAttributedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CFD949F167607A72D1EA3AA /* Extension_NSMutableAttributedString.swift */; };
 		F60245781530ADB43E461B55 /* FolderCellItemViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB980785EF62986D70A11C49 /* FolderCellItemViewModel.swift */; };
-		F6320F0866170682543F0041 /* NaviBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09E98E6D79ADE571DE31617D /* NaviBarView.swift */; };
 		FC9A0BD427D721DDCC1B2AEB /* Regex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D028AB2DA0BB0AC69E334BB /* Regex.swift */; };
 /* End PBXBuildFile section */
 
@@ -95,11 +100,10 @@
 /* Begin PBXFileReference section */
 		00134F7BB613E1BD0B7516E7 /* UIControl+Publisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIControl+Publisher.swift"; sourceTree = "<group>"; };
 		03112E88258FD411CDDBA6D3 /* AlbumViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumViewController.swift; sourceTree = "<group>"; };
-		09E98E6D79ADE571DE31617D /* NaviBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaviBarView.swift; sourceTree = "<group>"; };
 		0CE527805A0FFC681F30F295 /* HomeCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeCoordinator.swift; sourceTree = "<group>"; };
 		0D27F91A14AEB240D0A2E7D8 /* NibLoadable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NibLoadable.swift; sourceTree = "<group>"; };
 		134AEE009D928C7E39EAF4CD /* Presentation-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Presentation-Info.plist"; sourceTree = "<group>"; };
-		1987476C2F782E6D00A6AC8D /* NaviBarButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaviBarButton.swift; sourceTree = "<group>"; };
+		198747812F796C3D00A6AC8D /* BaseViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseViewModel.swift; sourceTree = "<group>"; };
 		1B74B54DBDDE8F00F62C6A60 /* ListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListViewModel.swift; sourceTree = "<group>"; };
 		1E177AD797E6C5E5BD5A62BA /* PhotoLibraryDIContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryDIContainer.swift; sourceTree = "<group>"; };
 		24F4C9EDD75B280BB4BE30A9 /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
@@ -112,6 +116,7 @@
 		39ED3BC2474DC0F432EAFB85 /* PhotoLibraryCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryCoordinator.swift; sourceTree = "<group>"; };
 		3A1A9C282BE62BA859D280F2 /* SplashViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashViewController.swift; sourceTree = "<group>"; };
 		3AE7BDBB893973544517AFFF /* Extension_UIFont.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension_UIFont.swift; sourceTree = "<group>"; };
+		3C18C417DC62917A6F8651BD /* NaviBarType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaviBarType.swift; sourceTree = "<group>"; };
 		3D75BDA072F9E06E34DEB813 /* TabbarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabbarViewController.swift; sourceTree = "<group>"; };
 		3D8C733F1D7589153F1FFE1F /* TabbarCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabbarCoordinator.swift; sourceTree = "<group>"; };
 		41CA43C4455F51F86D88B772 /* Extension_UILabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension_UILabel.swift; sourceTree = "<group>"; };
@@ -127,9 +132,9 @@
 		6D42EEB1F9EB444EE42BCE28 /* Extension_UIImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension_UIImage.swift; sourceTree = "<group>"; };
 		6E2CABAF8819D021ACBB6B23 /* HomeDIContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeDIContainer.swift; sourceTree = "<group>"; };
 		719A054EFAF30746BAE3782E /* Extension_UIColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension_UIColor.swift; sourceTree = "<group>"; };
-		73E25FEC50A3C81F0A74A6B7 /* NaviBarType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaviBarType.swift; sourceTree = "<group>"; };
 		75D92F5115DB359614C13635 /* AlbumViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumViewModel.swift; sourceTree = "<group>"; };
 		7E9D3650BE472E704D57EC89 /* AlbumCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumCoordinator.swift; sourceTree = "<group>"; };
+		7F252FA414F730A843B69ED7 /* NaviBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaviBarView.swift; sourceTree = "<group>"; };
 		80FC95C27373D8DD1543F125 /* PhotoLibraryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryViewModel.swift; sourceTree = "<group>"; };
 		8283ED43F36B19F071F13E23 /* Extension_UIButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension_UIButton.swift; sourceTree = "<group>"; };
 		82F0720D9B464CF8F3E51AD1 /* Domain.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Domain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -142,6 +147,8 @@
 		998E8B3484D5E811058E6E85 /* Extension_UIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension_UIView.swift; sourceTree = "<group>"; };
 		9CFD949F167607A72D1EA3AA /* Extension_NSMutableAttributedString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension_NSMutableAttributedString.swift; sourceTree = "<group>"; };
 		9E90CD40C5DEBE648B0955EE /* MainDIContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainDIContainer.swift; sourceTree = "<group>"; };
+		A10F1A991453FF9438018AFD /* NaviBarButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaviBarButton.swift; sourceTree = "<group>"; };
+		A5B5DDF86843F2E3695365DF /* AlbumDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumDetailViewModel.swift; sourceTree = "<group>"; };
 		A88E58C42C31FEF9CF370989 /* Extension_MutableCollection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension_MutableCollection.swift; sourceTree = "<group>"; };
 		AA8471CE58E3472110984FC4 /* CustomTabBarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTabBarViewController.swift; sourceTree = "<group>"; };
 		ABC1E533AB4C8AAA8B48F1F3 /* CustomTabBarItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTabBarItem.swift; sourceTree = "<group>"; };
@@ -153,10 +160,12 @@
 		C1DFADB91C9C20B195DC6FDC /* SplashCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashCoordinator.swift; sourceTree = "<group>"; };
 		C3645708A5BAD77D391863C3 /* UIView+Publisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Publisher.swift"; sourceTree = "<group>"; };
 		C4A8AC47B813708FB8EBFCDE /* CustomTabBarDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTabBarDelegate.swift; sourceTree = "<group>"; };
+		C8F9AC182358D4FE2D5C299B /* AlbumDetailCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumDetailCoordinator.swift; sourceTree = "<group>"; };
 		CC48366424EBCDCD6592A9E3 /* ListCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListCoordinator.swift; sourceTree = "<group>"; };
 		CCD53CB3AA237E06A9C76764 /* Extension_UIViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension_UIViewController.swift; sourceTree = "<group>"; };
 		CEB9EB9C6C13C8F825E27E73 /* SnapKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SnapKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D8300BFD9F89CA11913EBBE1 /* Extension_String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension_String.swift; sourceTree = "<group>"; };
+		D8BAD0070B04CDF1EAB02CFB /* AlbumDetailDIContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumDetailDIContainer.swift; sourceTree = "<group>"; };
 		D950EBD5C5E8E6FB899C6E8A /* MyPageCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPageCoordinator.swift; sourceTree = "<group>"; };
 		DB980785EF62986D70A11C49 /* FolderCellItemViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderCellItemViewModel.swift; sourceTree = "<group>"; };
 		E40A6C338B0BC01EC436E06E /* Extension_Sequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension_Sequence.swift; sourceTree = "<group>"; };
@@ -165,10 +174,11 @@
 		EDC7E8CD06B312A92C2C3101 /* Extension_UITextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension_UITextField.swift; sourceTree = "<group>"; };
 		F26268DDAD4270C700F9F869 /* ListDIContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListDIContainer.swift; sourceTree = "<group>"; };
 		F9C2998FAD7DD5077BD097DB /* Extension_UITextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension_UITextView.swift; sourceTree = "<group>"; };
+		FDE0D246DE24CB8D997BAF99 /* AlbumDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumDetailViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		1987475F2F753CBD00A6AC8D /* AlbumDetail */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = AlbumDetail; sourceTree = "<group>"; };
+		198747742F796B7300A6AC8D /* Alert */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Alert; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -217,6 +227,7 @@
 		2EAA0AE8D17F6832885302E3 /* Base */ = {
 			isa = PBXGroup;
 			children = (
+				198747812F796C3D00A6AC8D /* BaseViewModel.swift */,
 				E474256CB4A9464026CD7F10 /* BaseCoordinator.swift */,
 				C06D9DFB2413E81BE06AAC41 /* BaseEventRouter.swift */,
 				48B5FBDDBDD95CCE3EE8EA9B /* BaseViewController.swift */,
@@ -273,9 +284,9 @@
 		94F20BCDAB30B75F08938EFA /* Navigation */ = {
 			isa = PBXGroup;
 			children = (
-				1987476C2F782E6D00A6AC8D /* NaviBarButton.swift */,
-				09E98E6D79ADE571DE31617D /* NaviBarView.swift */,
-				73E25FEC50A3C81F0A74A6B7 /* NaviBarType.swift */,
+				A10F1A991453FF9438018AFD /* NaviBarButton.swift */,
+				3C18C417DC62917A6F8651BD /* NaviBarType.swift */,
+				7F252FA414F730A843B69ED7 /* NaviBarView.swift */,
 			);
 			path = Navigation;
 			sourceTree = "<group>";
@@ -294,8 +305,9 @@
 		ACFC6E8F6D299B22A1D9900B /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				1987475F2F753CBD00A6AC8D /* AlbumDetail */,
+				198747742F796B7300A6AC8D /* Alert */,
 				B9397ABB0AF9E6EB341D382E /* Album */,
+				B6F0CB9BC97FA29087115603 /* AlbumDetail */,
 				1009B98B90CE1A80040E5A44 /* Common */,
 				214B132DB7D267861299AC15 /* Home */,
 				353560A8C0C235780BF94E02 /* List */,
@@ -318,6 +330,17 @@
 				BA01644556A6DF18A09808D1 /* Publisher */,
 			);
 			path = Components;
+			sourceTree = "<group>";
+		};
+		B6F0CB9BC97FA29087115603 /* AlbumDetail */ = {
+			isa = PBXGroup;
+			children = (
+				C8F9AC182358D4FE2D5C299B /* AlbumDetailCoordinator.swift */,
+				D8BAD0070B04CDF1EAB02CFB /* AlbumDetailDIContainer.swift */,
+				FDE0D246DE24CB8D997BAF99 /* AlbumDetailViewController.swift */,
+				A5B5DDF86843F2E3695365DF /* AlbumDetailViewModel.swift */,
+			);
+			path = AlbumDetail;
 			sourceTree = "<group>";
 		};
 		B87137E5C8044863B63641C9 /* PhotoLibrary */ = {
@@ -480,7 +503,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				1987475F2F753CBD00A6AC8D /* AlbumDetail */,
+				198747742F796B7300A6AC8D /* Alert */,
 			);
 			name = Presentation;
 			packageProductDependencies = (
@@ -538,6 +561,10 @@
 				ED7371441DF91ABCFC9CF214 /* AlbumDIContainer.swift in Sources */,
 				200C032581C4A24727FC0CE6 /* AlbumViewController.swift in Sources */,
 				352FCB5AD215C9EA0B1A709D /* AlbumViewModel.swift in Sources */,
+				5ADEAF4EFEF2800B08E732F9 /* AlbumDetailCoordinator.swift in Sources */,
+				47532F25612067B672BDF8F2 /* AlbumDetailDIContainer.swift in Sources */,
+				8F411F69699B691647FC02A2 /* AlbumDetailViewController.swift in Sources */,
+				68F7B92E595CE29E2B5D931A /* AlbumDetailViewModel.swift in Sources */,
 				AD90B623AC1F4BE0A892F9C4 /* BaseCoordinator.swift in Sources */,
 				415FC59E52A77D8CF12C8565 /* BaseEventRouter.swift in Sources */,
 				36AA397C26610437D42082A8 /* BaseViewController.swift in Sources */,
@@ -546,7 +573,6 @@
 				F5004F53B83FF7D04233484B /* Extension_NSMutableAttributedString.swift in Sources */,
 				292D2553A716A2C6634E1652 /* Extension_Sequence.swift in Sources */,
 				375EAC7FDF30102BB01AFF26 /* Extension_String.swift in Sources */,
-				1987476D2F782E6D00A6AC8D /* NaviBarButton.swift in Sources */,
 				E4ED77EBA3BFFDD5032E268D /* Extension_UIButton.swift in Sources */,
 				5D0E4EBBEE052080CE54F022 /* Extension_UIColor.swift in Sources */,
 				88C25DA67A7DB6DCE4E5D779 /* Extension_UIFont.swift in Sources */,
@@ -583,9 +609,11 @@
 				2D7787A92580939395AFAA41 /* MyPageCoordinator.swift in Sources */,
 				3ADFEEF985D7BC1626FD5643 /* MyPageDIContainer.swift in Sources */,
 				B39A2D52E240C875E277CACA /* MyPageViewController.swift in Sources */,
+				198747822F796C3D00A6AC8D /* BaseViewModel.swift in Sources */,
 				BDFCDBB439612F8BF6AF15D8 /* MyPageViewModel.swift in Sources */,
-				F6320F0866170682543F0041 /* NaviBarView.swift in Sources */,
-				B8C09E14F3A5F8E0FB2F40F8 /* NaviBarType.swift in Sources */,
+				51A80C8D542492F4A2AAC3F0 /* NaviBarButton.swift in Sources */,
+				6DFE320F438EC6EADEAB239B /* NaviBarType.swift in Sources */,
+				0B1E106CE4651713AA754DD4 /* NaviBarView.swift in Sources */,
 				4F95FE8B7007302DEEECFC6E /* PhotoLibraryCoordinator.swift in Sources */,
 				BFA74F069964E0281D75BC31 /* PhotoLibraryDIContainer.swift in Sources */,
 				CF81691B1D464F6197555282 /* PhotoLibraryViewController.swift in Sources */,

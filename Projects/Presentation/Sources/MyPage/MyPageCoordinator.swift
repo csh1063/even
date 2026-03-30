@@ -17,6 +17,8 @@ final class MyPageCoordinator: BaseCoordinator {
     
     init(diContainer: MyPageDIContainer) {
         self.diContainer = diContainer
+        
+        super.init()
     }
 
     override func start() {

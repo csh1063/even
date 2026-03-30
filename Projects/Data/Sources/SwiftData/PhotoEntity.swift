@@ -8,6 +8,7 @@
 
 import SwiftData
 import Foundation
+import Domain
 
 @Model
 public final class PhotoEntity {
@@ -16,23 +17,44 @@ public final class PhotoEntity {
     public var createdAt: Date
     public var analyzedAt: Date?
     
+    public var latitude: Double?
+    public var longitude: Double?
+    
+    // address
+    public var address: PhotoLocation?
+    public var addressEn: PhotoLocation?
+    
+    // date
+    public var year: String?
+    public var month: String?
+    
     @Relationship(deleteRule: .cascade)
     public var labels: [PhotoLabelEntity] = []
     
     @Relationship(deleteRule: .nullify)
     public var folders: [FolderEntity] = []
-//    @Relationship(deleteRule: .cascade, inverse: \FolderPhotoMapEntity.photo)
-//    public var folderMaps: [FolderPhotoMapEntity] = []
     
     public init(
         id: UUID = UUID(),
         localIdentifier: String,
         createdAt: Date = Date(),
-        analyzedAt: Date? = nil
+        analyzedAt: Date? = nil,
+        latitude: Double? = nil,
+        longitude: Double? = nil,
+        address: PhotoLocation? = nil,
+        addressEn: PhotoLocation? = nil,
+        year: String? = nil,
+        month: String? = nil
     ) {
         self.id = id
         self.localIdentifier = localIdentifier
         self.createdAt = createdAt
         self.analyzedAt = analyzedAt
+        self.latitude = latitude
+        self.longitude = longitude
+        self.address = address
+        self.addressEn = addressEn
+        self.year = year
+        self.month = month
     }
 }

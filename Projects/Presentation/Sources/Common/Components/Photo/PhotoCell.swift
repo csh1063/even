@@ -64,7 +64,11 @@ final class PhotoCell: UICollectionViewCell {
         self.assetIdentifier = viewModel.localIdentifier
         self.loadingView.isHidden = false
         task = Task {
-            let image = await viewModel.loadImage(size: self.frame.size)
+            let size = self.frame.size
+            let image = await viewModel.loadImage(size: CGSize(
+                width: size.width * 2,
+                height: size.height * 2
+            ))
             
             if !Task.isCancelled && self.assetIdentifier == viewModel.localIdentifier {
                 self.mainImageView.image = image

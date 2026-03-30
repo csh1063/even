@@ -65,8 +65,7 @@ final class FolderCell: UICollectionViewCell {
         self.contentView.addSubview(loadingView)
         
         self.radiusView.snp.makeConstraints { make in
-            make.top.leading.equalTo(self.contentView).offset(8)
-            make.trailing.bottom.equalTo(self.contentView).offset(-8)
+            make.edges.equalTo(self.contentView).inset(4)
         }
         
         self.mainImageView.snp.makeConstraints { make in
@@ -103,7 +102,11 @@ final class FolderCell: UICollectionViewCell {
         self.countLabel.text = "\(viewModel.folder.photoCount)"
         
         task = Task {
-            let image = await viewModel.loadImage(size: self.frame.size)
+            let size = self.frame.size
+            let image = await viewModel.loadImage(size: CGSize(
+                width: size.width * 2,
+                height: size.height * 2
+            ))
             
             if !Task.isCancelled && self.assetIdentifier == viewModel.localIdentifier {
                 self.mainImageView.image = image

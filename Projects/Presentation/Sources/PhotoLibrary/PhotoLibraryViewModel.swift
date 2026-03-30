@@ -12,7 +12,7 @@ import Domain
 import UIKit
 
 @MainActor
-public final class PhotoLibraryViewModel {
+public final class PhotoLibraryViewModel: BaseViewModel {
     
     enum Input {
         case appear
@@ -41,6 +41,9 @@ public final class PhotoLibraryViewModel {
     
     public init(useCase: PhotoLibraryUseCase) {
         self.useCase = useCase
+        
+        super.init()
+        
         self.bind()
     }
     
@@ -106,8 +109,7 @@ public final class PhotoLibraryViewModel {
             self.photos = photoList.photos
             self.hasNext = photoList.hasNext
             self.isLoading = true
-        }
-        catch {
+        } catch {
             
         }
     }

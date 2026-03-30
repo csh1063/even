@@ -29,19 +29,21 @@ final class AlbumViewController: BaseViewController {
 
         let space: CGFloat = 2
         let count: CGFloat = 2
+        let margin: CGFloat = 8
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
         layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         layout.minimumLineSpacing = space
         layout.minimumInteritemSpacing = space
         
-        let width = (UIScreen.main.bounds.width - (space * (count - 1))) / count
+        let width = ((UIScreen.main.bounds.width - (space * (count - 1))) - (margin * 2)) / count
         
         layout.itemSize = CGSize(width: width, height: width)
 
         let collectionView = UICollectionView(frame: CGRect.zero, collectionViewLayout: layout)
         collectionView.isScrollEnabled = true
         collectionView.showsVerticalScrollIndicator = false
+        collectionView.contentInset = UIEdgeInsets(top: 12, left: margin, bottom: 0, right: margin)
         collectionView.backgroundColor = .Theme.white
 
         return collectionView
@@ -116,30 +118,30 @@ final class AlbumViewController: BaseViewController {
         
         progressBar.snp.makeConstraints { make in
             make.leading.equalTo(view)
-            make.trailing.equalTo(view.snp.centerX)
+            make.width.equalTo(view).multipliedBy(0.8)
             make.top.equalTo(naviView.snp.bottom).offset(2)
         }
         
         folderProgressBar.snp.makeConstraints { make in
             make.trailing.equalTo(view)
-            make.leading.equalTo(view.snp.centerX)
+            make.leading.equalTo(progressBar.snp.trailing)
             make.top.equalTo(naviView.snp.bottom).offset(2)
         }
         
         locationProgressBar.snp.makeConstraints { make in
             make.leading.equalTo(view)
-            make.trailing.equalTo(view.snp.centerX)
+            make.width.equalTo(view).multipliedBy(0.8)
             make.top.equalTo(naviView.snp.bottom).offset(4)
         }
         
         locationFolderProgressBar.snp.makeConstraints { make in
             make.trailing.equalTo(view)
-            make.leading.equalTo(view.snp.centerX)
+            make.leading.equalTo(locationProgressBar.snp.trailing)
             make.top.equalTo(naviView.snp.bottom).offset(4)
         }
         
         dummyButton.snp.makeConstraints { make in
-            make.top.bottom.equalTo(self.naviView)
+            make.bottom.equalTo(self.naviView)
             make.trailing.equalTo(self.naviView).offset(-120)
             make.width.equalTo(60)
         }

@@ -36,11 +36,19 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
     
     // MARK: - Public
     /// 여러 사진 배치 분석 → 진행률 스트림 반환
-    public func analyze() -> AsyncThrowingStream<AnalysisProgress, Error> {
+    public func analyze(excludingIds: [String]? = nil) -> AsyncThrowingStream<AnalysisProgress, Error> {
         return AsyncThrowingStream { continuation in
             Task {
                 do {
-                    let photos = try await libraryService.getPhotoList(page: 0).photos
+                    let photos: [PhotoAssetEntity]
+
+                    if let excludingIds {
+                        let allAssets = try await libraryService.getPhotoList(page: 0).photos
+                        photos = allAssets.filter { !excludingIds.contains($0.asset.localIdentifier) }
+                    } else {
+                        photos = try await libraryService.getPhotoList(page: 0).photos
+                    }
+                    
                     let total = photos.count
                     var completed = 0
                     let batches = photos.chunked(into: batchSize)
@@ -59,11 +67,21 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                             for try await (photo, labels) in group {
                                 completed += 1
                                 let progress = Double(Double(completed)/Double(total))
+                                let (year, month): (String?, String?) = {
+                                    guard let date = photo.asset.creationDate else { return (nil, nil) }
+                                    let components = Calendar.current.dateComponents([.year, .month], from: date)
+                                    return (components.year.map { String($0) }, components.month.map { String($0) })
+                                }()
+                                
+                                print("id: ", photo.asset.localIdentifier, "/ year: ", year ?? "?", ", month:",month ?? "?")
                                 continuation.yield(
                                     AnalysisProgress(
                                         photo: Photo(
                                             localIdentifier: photo.asset.localIdentifier,
-                                            createdAt: photo.asset.creationDate ?? Date()),
+                                            createdAt: photo.asset.creationDate ?? Date(),
+                                            year: year,
+                                            month: month
+                                        ),
                                         labels: labels,
                                         completed: completed,
                                         total: total,
@@ -74,35 +92,61 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                         }
                     }
                     continuation.finish()
-                }
-                catch {
+                } catch {
                     continuation.finish(throwing: error)
                 }
             }
         }
     }
     
-    public func locationAnalyze() -> AsyncThrowingStream<AnalysisProgress, Error> {
+    public func locationAnalyze(excludingIds: [String]? = nil) -> AsyncThrowingStream<AnalysisProgress, Error> {
         
         return AsyncThrowingStream { continuation in
             Task.detached(priority: .userInitiated) {
                 do {
                     var completed = 0
                     let photos = try await self.libraryService.getPhotoList(page: 0).photos
-                    let photoIds = photos.map { $0.asset.localIdentifier }
+                    let photoIds: [String]
+
+                    if let excludingIds {
+                        let allIds = photos.map { $0.asset.localIdentifier }
+                        photoIds = allIds.filter { !excludingIds.contains($0) }
+                    } else {
+                        photoIds = photos.map { $0.asset.localIdentifier }
+                    }
+                    
                     let assets = try await self.libraryService.getPhoto(ids: photoIds)
                     let total = assets.count
                     
-                    for (_, asset) in assets.enumerated(){
-                        
-                        let localLabels: [PhotoLabel]
+                    for (_, asset) in assets.enumerated() {
+
+                        let latitude: Double?
+                        let longitude: Double?
+                        let address: PhotoLocation?
+                        let addressEn: PhotoLocation?
+
                         if let location = asset.location {
-                            print("location: ", "\(location.coordinate.latitude),\(location.coordinate.longitude)")
-                            localLabels = try await self.geocoderService.fetchAddress(from: location, id: asset.localIdentifier)
-                            print("localLabels: ", localLabels.map{$0.name}.joined(separator: ", "))
+                            latitude = location.coordinate.latitude
+                            longitude = location.coordinate.longitude
+                            
+                            address = try await self.geocoderService.fetchAddress(
+                                from: location,
+                                id: asset.localIdentifier,
+                                locale: Locale(identifier: "ko"))
+                            print(
+                                "id: ", asset.localIdentifier,
+                                "location:", "\(address?.country ?? ""), \(address?.locality ?? "")")
+//                            addressEn = try await self.geocoderService.fetchAddress(
+//                                from: location,
+//                                id: asset.localIdentifier,
+//                                locale: Locale(identifier: "en"))
                         } else {
-                            localLabels = []
+                            latitude = nil
+                            longitude = nil
+                            address = nil
+//                            addressEn = nil
                         }
+                        addressEn = nil
                         
                         completed += 1
                         let progress = Double(Double(completed)/Double(total))
@@ -110,8 +154,12 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                             AnalysisProgress(
                                 photo: Photo(
                                     localIdentifier: asset.localIdentifier,
-                                    createdAt: asset.creationDate ?? Date()),
-                                labels: localLabels,
+                                    createdAt: asset.creationDate ?? Date(),
+                                    latitude: latitude,
+                                    longitude: longitude,
+                                    address: address,
+                                    addressEn: addressEn),
+                                labels: [],
                                 completed: completed,
                                 total: total,
                                 state: progress == 1 ? .completed:.progress(progress)
@@ -121,8 +169,7 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                     }
                     
                     continuation.finish()
-                }
-                catch {
+                } catch {
                     continuation.finish(throwing: error)
                 }
             }
@@ -144,6 +191,7 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
             type: .specialSize(CGSize(width: 224, height: 224))
         )
     }
+    
 }
 
 // MARK: - Array Extension

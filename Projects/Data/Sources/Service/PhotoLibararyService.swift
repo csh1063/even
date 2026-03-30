@@ -9,7 +9,6 @@
 import Foundation
 import Domain
 import Photos
-import CoreLocation
 import PhotosUI
 
 public final class PhotoLibraryService {
@@ -145,7 +144,7 @@ public final class PhotoLibraryService {
             options.resizeMode = .fast
             options.deliveryMode = .opportunistic
             options.isSynchronous = false
-            options.isNetworkAccessAllowed = false
+            options.isNetworkAccessAllowed = true
             size = specialSize
             contentMode = .aspectFill
         }
@@ -183,39 +182,6 @@ public final class PhotoLibraryService {
         }
         return photosWithLocation
     }
-
-    private func fetchAddress(from location: CLLocation) async -> String? {
-        let geocoder = CLGeocoder()
-        
-        do {
-            let placemarks = try await geocoder.reverseGeocodeLocation(location)
-            guard let placemark = placemarks.first else { return nil }
-            
-            
-            // 주소 조합
-            let address = [
-                placemark.name, // 강남파이낸스센터
-                placemark.thoroughfare, // 테헤란로
-                placemark.subThoroughfare, // 152
-                placemark.locality, // 서울특별시
-                placemark.subLocality, // 강남구
-                placemark.administrativeArea, // 서울특별시
-                placemark.subAdministrativeArea,
-                placemark.postalCode, // 06236
-                placemark.isoCountryCode,  // KR
-                placemark.country, // 대한민국
-                placemark.inlandWater, // nil
-                placemark.ocean   // nil
-            ]
-            .compactMap { $0 }
-            .joined(separator: " ")
-            
-            return address
-        } catch {
-            return nil
-        }
-    }
-    
     
     private func getAsset(id: String) -> PHAsset? {
         

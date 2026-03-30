@@ -31,7 +31,13 @@ public final class DefaultPhotoDataRepository: PhotoDataRepository {
         let entity = PhotoEntity(
             id: photo.id,
             localIdentifier: photo.localIdentifier,
-            createdAt: photo.createdAt
+            createdAt: photo.createdAt,
+            latitude: photo.latitude,
+            longitude: photo.longitude,
+            address: photo.address,
+            addressEn: photo.addressEn,
+            year: photo.year,
+            month: photo.month
         )
         context.insert(entity)
         try context.save()
@@ -49,24 +55,39 @@ public final class DefaultPhotoDataRepository: PhotoDataRepository {
             let entity: PhotoEntity
             if let existing = try context.fetch(fetchDescriptor).first {
                 entity = existing
+                
+                if let latitude = photo.latitude { entity.latitude = latitude }
+                if let longitude = photo.longitude { entity.longitude = longitude }
+                if let address = photo.address { entity.address = address }
+                if let addressEn = photo.addressEn { entity.addressEn = addressEn }
+                if let year = photo.year { entity.year = year }
+                if let month = photo.month { entity.month = month }
             } else {
                 entity = PhotoEntity(
                     id: photo.id,
                     localIdentifier: photo.localIdentifier,
-                    createdAt: photo.createdAt
+                    createdAt: photo.createdAt,
+                    latitude: photo.latitude,
+                    longitude: photo.longitude,
+                    address: photo.address,
+                    addressEn: photo.addressEn,
+                    year: photo.year,
+                    month: photo.month
                 )
                 context.insert(entity)
             }
             
-            entity.labels.forEach { context.delete($0) }
-            
-            labels.forEach {
-                let labelEntity = PhotoLabelEntity(
-                    name: $0.name,
-                    confidence: $0.confidence,
-                    photo: entity
-                )
-                context.insert(labelEntity)
+            if labels.count > 0 {
+                entity.labels.forEach { context.delete($0) }
+                
+                labels.forEach {
+                    let labelEntity = PhotoLabelEntity(
+                        name: $0.name,
+                        confidence: $0.confidence,
+                        photo: entity
+                    )
+                    context.insert(labelEntity)
+                }
             }
             
             entity.analyzedAt = Date()
@@ -106,27 +127,27 @@ public final class DefaultPhotoDataRepository: PhotoDataRepository {
     
     public func deleteAll() throws {
         let context = ModelContext(container)
-        // keyword 삭제
+        print("keyword 삭제")
         let keywords = try context.fetch(FetchDescriptor<FolderKeywordEntity>())
         keywords.forEach { context.delete($0) }
         try context.save()
         
-        // label 삭제
+        print("label 삭제")
         let labels = try context.fetch(FetchDescriptor<PhotoLabelEntity>())
         labels.forEach { context.delete($0) }
         try context.save()
         
-        // photo-folder 연결 제거
+        print("photo-folder 연결 제거")
         let photos = try context.fetch(FetchDescriptor<PhotoEntity>())
         photos.forEach { $0.folders = [] }
         try context.save()
         
-        // folder 삭제
+        print("folder 삭제")
         let folders = try context.fetch(FetchDescriptor<FolderEntity>())
         folders.forEach { context.delete($0) }
         try context.save()
         
-        // photo 삭제
+        print("photo 삭제")
         photos.forEach { context.delete($0) }
         try context.save()
     }

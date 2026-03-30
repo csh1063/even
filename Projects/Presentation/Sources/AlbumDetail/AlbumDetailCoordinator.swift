@@ -20,6 +20,8 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
          navigationController: UINavigationController) {
         self.diContainer = diContainer
         self.navigationController = navigationController
+        
+        super.init()
     }
 
     public override func start() {

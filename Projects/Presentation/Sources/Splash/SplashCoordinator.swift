@@ -12,6 +12,7 @@ import Combine
 
 @MainActor
 public final class SplashCoordinator: BaseCoordinator {
+    
     private let container: AppDIContainer
     private let window: UIWindow
     public var finished = PassthroughSubject<Bool, Never>()
@@ -21,6 +22,8 @@ public final class SplashCoordinator: BaseCoordinator {
     public init(container: AppDIContainer, window: UIWindow) {
         self.container = container
         self.window = window
+        
+        super.init()
     }
 
     public override func start() {
@@ -31,6 +34,9 @@ public final class SplashCoordinator: BaseCoordinator {
                 self?.finished.send(isLogined)
             }
             .store(in: &cancellables)
+        
+        bindAlert(from: viewModel)
+        
         let viewController = SplashViewController(viewModel: viewModel)
 
         window.rootViewController = viewController

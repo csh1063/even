@@ -9,7 +9,7 @@
 import Foundation
 import Combine
 
-public final class MyPageViewModel {
+public final class MyPageViewModel: BaseViewModel {
     
     enum Input {
         
@@ -24,8 +24,11 @@ public final class MyPageViewModel {
     
     private var cancellable = Set<AnyCancellable>()
     
-    init() {
+    override init() {
         self.output = Output()
+        
+        super.init()
+        
         self.bind()
     }
     

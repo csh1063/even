@@ -9,7 +9,7 @@
 import Foundation
 import Combine
 
-public final class MainViewModel {
+public final class MainViewModel: BaseViewModel {
     
     enum Input {
         case clickLogout
@@ -26,10 +26,13 @@ public final class MainViewModel {
     
     private var cancellables = Set<AnyCancellable>()
     
-    public init() {
+    public override init() {
         self.output = Output(
             logout: logoutSubject.eraseToAnyPublisher()
         )
+        
+        super.init()
+        
         self.bind()
     }
     

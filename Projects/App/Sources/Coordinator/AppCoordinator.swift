@@ -22,6 +22,8 @@ final class AppCoordinator: BaseCoordinator {
     init(container: AppDIContainer, window: UIWindow) {
         self.container = container
         self.window = window
+        
+        super.init()
     }
 
     override func start() {

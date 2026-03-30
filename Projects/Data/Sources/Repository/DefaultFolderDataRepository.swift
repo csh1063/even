@@ -33,7 +33,7 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
         let entity = FolderEntity(
             id: folder.id,
             name: folder.name,
-            displayName: folder.name,
+            displayName: folder.displayName,
             isAuto: folder.isAuto,
             coverPhotoIdentifier: folder.coverPhotoIdentifier
         )
@@ -59,7 +59,8 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
             sortBy: [SortDescriptor(\.displayName, order: .forward)]
         )
         return try context.fetch(fetchDescriptor).sorted {
-            $0.photos.count > $1.photos.count
+//            $0.photos.count > $1.photos.count
+            $0.photoCount > $1.photoCount
         }.map {$0.toDomain()}
     }
     
@@ -168,6 +169,8 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
         
         let photos = try context.fetch(photoDescriptor)
         folder.photos = photos
+        folder.photoCount = photos.count
+        
         try context.save()
     }
     
@@ -194,6 +197,19 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
         let autoFolders = try context.fetch(folderDescriptor)
         
         autoFolders.forEach { context.delete($0) }
+        try context.save()
+    }
+    
+    public func syncPhotoCount() throws {
+        let context = ModelContext(container)
+        
+        let folderDescriptor = FetchDescriptor<FolderEntity>()
+        let folders = try context.fetch(folderDescriptor)
+        
+        folders.forEach { folder in
+            folder.photoCount = folder.photos.count
+        }
+        
         try context.save()
     }
 }

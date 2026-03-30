@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import Combine
 
 @MainActor
 open class BaseCoordinator: NSObject {
@@ -18,7 +19,14 @@ open class BaseCoordinator: NSObject {
     
     private var childCoordinators: [BaseCoordinator] = []
     
-    public override init() {}
+    private let alertManager: AlertManageable
+    private var cancellables = Set<AnyCancellable>()
+    
+//    public override init() {}
+    
+    public init(alertManager: AlertManageable = AlertManager.shared) {
+        self.alertManager = alertManager
+    }
     
     open func start() { }
     
@@ -31,6 +39,19 @@ open class BaseCoordinator: NSObject {
     func remove(coordinator: BaseCoordinator) {
         print("==== \(coordinator.self) start        ====================")
         childCoordinators.removeAll { $0 === coordinator }
+    }
+
+    func bindAlert(from viewModel: BaseViewModel) {
+        viewModel.alertPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] item in
+                self?.alertManager.enqueue(
+                    title: item.title,
+                    message: item.message,
+                    buttons: item.buttons
+                )
+            }
+            .store(in: &cancellables)
     }
 }
 

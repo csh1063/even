@@ -18,8 +18,7 @@ public final class FolderEntity {
     public var isAuto: Bool              // 자동 생성 폴더 여부
     public var coverPhotoIdentifier: String?
     
-//    @Relationship(deleteRule: .cascade, inverse: \FolderPhotoMapEntity.folder)
-//    public var folderMaps: [FolderPhotoMapEntity] = []
+    public var photoCount: Int = 0
     
     @Relationship(deleteRule: .nullify, inverse: \PhotoEntity.folders)
     public var photos: [PhotoEntity] = []

@@ -23,11 +23,11 @@ public final class PhotoAnalysisService {
     
     public func analyze(image: CGImage) async throws -> [PhotoLabel] {
         async let objectLabels = classifyImage(image)   // 방법 3 - Vision 분류기
-//        async let faceLabels = detectFace(image)        // 방법 2 - 얼굴 감지
+        async let faceLabels = detectFace(image)        // 방법 2 - 얼굴 감지
         async let textLabels = detectText(image)        // 방법 2 - 텍스트 감지
 //        async let barcodeLabels = detectBarcode(image)  // 방법 2 - 바코드 감지
         
-        let all = try await objectLabels + /*faceLabels +*/ textLabels //+ barcodeLabels
+        let all = try await objectLabels + faceLabels + textLabels //+ barcodeLabels
         
         // 중복 제거 (같은 name이면 confidence 높은 것 유지)
         return deduplicated(all)
@@ -114,8 +114,7 @@ public final class PhotoAnalysisService {
                     continuation.resume(returning: [
                         PhotoLabel(name: label, confidence: 1.0)
                     ])
-                }
-                catch {
+                } catch {
                     print("Vision detectText 에러:", error)
                     continuation.resume(returning: [])
                 }
@@ -144,8 +143,7 @@ public final class PhotoAnalysisService {
                     if hasQR { labels.append(PhotoLabel(name: "qrcode", confidence: 1.0)) }
                     
                     continuation.resume(returning: labels)
-                }
-                catch {
+                } catch {
                     print("Vision detectBarcode 에러:", error)
                     continuation.resume(returning: [])
                 }
