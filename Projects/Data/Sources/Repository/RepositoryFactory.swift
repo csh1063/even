@@ -44,4 +44,8 @@ public final class RepositoryFactory {
     public lazy var folderDataRepository: FolderDataRepository = {
         DefaultFolderDataRepository(container: container)
     }()
+    
+    public lazy var photoLabelDataRepository: PhotoLabelDataRepository = {
+        DefaultPhotoLabelDataRepository(container: container)
+    }()
 }

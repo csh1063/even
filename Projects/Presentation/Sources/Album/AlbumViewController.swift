@@ -13,7 +13,7 @@ import Vision
 
 final class AlbumViewController: BaseViewController {
     
-    private var naviView: NaviBarView = NaviBarView(type: .title(.leading))
+    private let naviView: NaviBarView = NaviBarView(type: .title(.leading))
     
     private let progressBar: UIProgressView = UIProgressView(progressViewStyle: .bar)
     private let folderProgressBar: UIProgressView = UIProgressView(progressViewStyle: .bar)
@@ -43,11 +43,47 @@ final class AlbumViewController: BaseViewController {
         let collectionView = UICollectionView(frame: CGRect.zero, collectionViewLayout: layout)
         collectionView.isScrollEnabled = true
         collectionView.showsVerticalScrollIndicator = false
-        collectionView.contentInset = UIEdgeInsets(top: 12, left: margin, bottom: 0, right: margin)
+        collectionView.contentInset = UIEdgeInsets(top: 12, left: margin, bottom: 80, right: margin)
         collectionView.backgroundColor = .Theme.white
 
         return collectionView
     }()
+    
+//    private var collectionView: UICollectionView = {
+//        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: makeLayout())
+//        collectionView.isScrollEnabled = true
+//        collectionView.showsVerticalScrollIndicator = false
+//        collectionView.backgroundColor = .Theme.white
+//        return collectionView
+//    }()
+//
+//    private static func makeLayout() -> UICollectionViewCompositionalLayout {
+//        let space: CGFloat = 2
+//        let count: CGFloat = 2
+//        let margin: CGFloat = 8
+//
+//        // Item: 그룹 너비의 1/2
+//        let itemSize = NSCollectionLayoutSize(
+//            widthDimension: .fractionalWidth(1 / count),
+//            heightDimension: .fractionalHeight(1.0)
+//        )
+//        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+//        item.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: space, trailing: space)
+//
+//        // Group: 화면 너비 100%, 높이 = 셀 너비 (정사각형)
+//        let itemWidth = (UIScreen.main.bounds.width - (space * (count - 1)) - (margin * 2)) / count
+//        let groupSize = NSCollectionLayoutSize(
+//            widthDimension: .fractionalWidth(1.0),
+//            heightDimension: .absolute(itemWidth)
+//        )
+//        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
+//
+//        // Section
+//        let section = NSCollectionLayoutSection(group: group)
+//        section.contentInsets = NSDirectionalEdgeInsets(top: 12, leading: margin, bottom: 80, trailing: margin - space)
+//
+//        return UICollectionViewCompositionalLayout(section: section)
+//    }
     
     private var dataSource: UICollectionViewDiffableDataSource<Int, FolderCellItemViewModel>!
     

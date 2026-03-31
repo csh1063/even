@@ -16,10 +16,12 @@ public protocol AppDIContainer {
     var photoAnalysisRepository: PhotoAnalysisRepository {get}
     var photoDataRepository: PhotoDataRepository {get}
     var folderDataRepository: FolderDataRepository {get}
+    var photoLabelDataRepository: PhotoLabelDataRepository {get}
     
     func makeSplashViewModel() -> SplashViewModel
     func makeMainViewModel() -> MainViewModel
     func makePhotoLibraryDIContainer() -> PhotoLibraryDIContainer
     func makeAlbumDIContainer() -> AlbumDIContainer
+    func makeMyPageDIContainer() -> MyPageDIContainer
 }
 

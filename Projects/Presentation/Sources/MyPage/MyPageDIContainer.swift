@@ -9,15 +9,15 @@
 import Foundation
 
 @MainActor
-final class MyPageDIContainer {
+public final class MyPageDIContainer {
 
     let appDIContainer: AppDIContainer
 
-    init(appDIContainer: AppDIContainer) {
+    public init(appDIContainer: AppDIContainer) {
         self.appDIContainer = appDIContainer
     }
 
-    func makeMyPageViewModel() -> MyPageViewModel {
+    func makeMyPageViewModel(coordinator: MyPageCoordinator) -> MyPageViewModel {
 //        let service = Tab1Service(
 //            provider: appDIContainer.providerFactory.makeProvider()
 //        )
@@ -29,15 +29,12 @@ final class MyPageDIContainer {
 
 //        let useCase = Tab1UseCase(repository: repository)
 
-        return MyPageViewModel()
+        return MyPageViewModel(coordinator: coordinator)
     }
 
-//    func makeDetailDIContainer(
-//        itemID: String
-//    ) -> Tab1DetailDIContainer {
-//        Tab1DetailDIContainer(
-//            appDIContainer: appDIContainer,
-//            itemID: itemID
-//        )
-//    }
+    func makeLabelsDIContainer() -> LabelsDIContainer {
+        LabelsDIContainer(
+            photoLabelDataRepository: appDIContainer.photoLabelDataRepository
+        )
+    }
 }

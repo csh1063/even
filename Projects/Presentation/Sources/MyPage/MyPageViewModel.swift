@@ -9,33 +9,65 @@
 import Foundation
 import Combine
 
-public final class MyPageViewModel: BaseViewModel {
+final class MyPageViewModel: BaseViewModel {
     
     enum Input {
-        
+        case appear
+        case selectItem(MyPageCellType)
     }
     
     struct Output {
-        
+        let cellTyps: AnyPublisher<[MyPageCellType], Never>
     }
     
-    let input = PassthroughSubject<Input, Never>()
-    var output: Output
+    @Published private var cellTypes: [MyPageCellType] = []
     
+    let input = PassthroughSubject<Input, Never>()
+    
+    private var coordinator: MyPageCoordinator?
     private var cancellable = Set<AnyCancellable>()
     
-    override init() {
-        self.output = Output()
+    init(coordinator: MyPageCoordinator) {
+        self.coordinator = coordinator
         
         super.init()
-        
+
+        self.cellTypes = fetchCellTypes()
         self.bind()
+    }
+    
+    func transform() -> Output {
+        return Output (
+            cellTyps: $cellTypes.eraseToAnyPublisher()
+        )
+    }
+    
+    func send(_ input: Input) {
+        self.input.send(input)
     }
     
     func bind() {
         self.input.sink { input in
-            
+            Task {
+                await self.handle(input)
+            }
         }
         .store(in: &cancellable)
+    }
+    
+    private func handle(_ input: Input) async {
+        switch input {
+        case .appear: break
+        case let .selectItem(type):
+            print("gogo", type)
+            self.coordinator?.moveLabels()
+            break
+        }
+    }
+    
+    private func fetchCellTypes() -> [MyPageCellType] {
+        return [
+            .labels
+        ]
     }
 }

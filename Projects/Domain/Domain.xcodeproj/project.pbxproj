@@ -3,11 +3,13 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 55;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		0FFF444A8B420D7E14FE74F6 /* PhotoLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56003B638FE18EC472358133 /* PhotoLocation.swift */; };
+		1987478D2F7BEBFE00A6AC8D /* PhotoLabelDataRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1987478C2F7BEBFE00A6AC8D /* PhotoLabelDataRepository.swift */; };
+		198747912F7BED7200A6AC8D /* PhotoLabelUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 198747902F7BED7200A6AC8D /* PhotoLabelUseCase.swift */; };
 		1D32E7B4A891C68E824A1F11 /* PhotoDataRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A738BCE2F1F1AEF9C6F0BB0 /* PhotoDataRepository.swift */; };
 		209A23984E931C57FD20AE16 /* PhotoRepositoryError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30EAF667B0530265E87C006C /* PhotoRepositoryError.swift */; };
 		2DF8152AB83C5B1C2D7B07AC /* AnalysisState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7035B3F5CCA14BE834C07C6B /* AnalysisState.swift */; };
@@ -47,6 +49,8 @@
 
 /* Begin PBXFileReference section */
 		135C338F8688EFFC198158A2 /* FolderDataRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderDataRepository.swift; sourceTree = "<group>"; };
+		1987478C2F7BEBFE00A6AC8D /* PhotoLabelDataRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLabelDataRepository.swift; sourceTree = "<group>"; };
+		198747902F7BED7200A6AC8D /* PhotoLabelUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLabelUseCase.swift; sourceTree = "<group>"; };
 		1A738BCE2F1F1AEF9C6F0BB0 /* PhotoDataRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDataRepository.swift; sourceTree = "<group>"; };
 		1ABAD620DB6CE1F6BB3F5625 /* AutoFolderUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoFolderUseCase.swift; sourceTree = "<group>"; };
 		1E766E86BC730F636DD2C6E2 /* FolderRepositoryError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderRepositoryError.swift; sourceTree = "<group>"; };
@@ -99,6 +103,7 @@
 				E254DA4A96027924005958BD /* PhotoAnalysisRepository.swift */,
 				1A738BCE2F1F1AEF9C6F0BB0 /* PhotoDataRepository.swift */,
 				6A1A054299145447B23B4DFA /* PhotoLibararyRepository.swift */,
+				1987478C2F7BEBFE00A6AC8D /* PhotoLabelDataRepository.swift */,
 			);
 			path = Implement;
 			sourceTree = "<group>";
@@ -150,6 +155,7 @@
 				9CD523D448654F28B80C431E /* FolderUseCase.swift */,
 				37FB8C508EC691855A938CFE /* PhotoAnalysisUseCase.swift */,
 				B6E622A066C4FB9C9D7D2D5B /* PhotoLibraryUseCase.swift */,
+				198747902F7BED7200A6AC8D /* PhotoLabelUseCase.swift */,
 			);
 			path = UseCase;
 			sourceTree = "<group>";
@@ -259,6 +265,7 @@
 				D330D67BBB407D7A8738EF47 /* Folder.swift in Sources */,
 				5FA46B9904E886591798DEC1 /* FolderKeyword.swift in Sources */,
 				4D50952CB002BF52660C25F7 /* FolderProgress.swift in Sources */,
+				198747912F7BED7200A6AC8D /* PhotoLabelUseCase.swift in Sources */,
 				FF215CC76366F64494FC69ED /* FolderRepositoryError.swift in Sources */,
 				5E09CC05A4D61725322FFE4F /* ImageData.swift in Sources */,
 				53303865F07D78019523C147 /* Photo.swift in Sources */,
@@ -275,6 +282,7 @@
 				629A5A6D0E1DF5196A2AEA14 /* FolderUseCase.swift in Sources */,
 				41CE5AF87EC51A4CAC05D152 /* PhotoAnalysisUseCase.swift in Sources */,
 				D0361B33286CE7C84AB9B6D2 /* PhotoLibraryUseCase.swift in Sources */,
+				1987478D2F7BEBFE00A6AC8D /* PhotoLabelDataRepository.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -305,10 +313,7 @@
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = (
-					"$(inherited)",
-					DEBUG,
-				);
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
 				SWIFT_COMPILATION_MODE = singlefile;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;

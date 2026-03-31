@@ -54,7 +54,7 @@ final class NaviBarView: UIView {
     private var cancellables = Set<AnyCancellable>()
 
     init(
-        type: NaviBarType,
+        type: NaviBarType = .title(.leading),
         isBlur: Bool = true
     ) {
         self.type = type

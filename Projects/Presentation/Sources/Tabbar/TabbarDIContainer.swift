@@ -28,7 +28,7 @@ public final class TabbarDIContainer {
     }
     
     func makeMyPageCoordinator() -> MyPageCoordinator {
-        let diContainer = MyPageDIContainer(appDIContainer: appDiContainer)
+        let diContainer = appDiContainer.makeMyPageDIContainer()
         return MyPageCoordinator(diContainer: diContainer)
     }
 }

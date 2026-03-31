@@ -33,6 +33,10 @@ final class DefaultAppDIContainer: AppDIContainer {
         repositoryFactory.folderDataRepository
     }
     
+    var photoLabelDataRepository: PhotoLabelDataRepository {
+        repositoryFactory.photoLabelDataRepository
+    }
+    
     private lazy var serviceFactory = ServiceFactory()
     private lazy var repositoryFactory = RepositoryFactory(
         container: container,
@@ -84,5 +88,9 @@ final class DefaultAppDIContainer: AppDIContainer {
 //                         photoAnalysisRepository: photoAnalysisRepository,
 //                         photoDataRepository: photoDataRepository,
 //                         folderDataRepository: folderDataRepository)
+    }
+    
+    func makeMyPageDIContainer() -> MyPageDIContainer {
+        MyPageDIContainer(appDIContainer: self)
     }
 }
