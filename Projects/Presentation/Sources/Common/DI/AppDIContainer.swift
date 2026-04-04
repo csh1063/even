@@ -17,6 +17,7 @@ public protocol AppDIContainer {
     var photoDataRepository: PhotoDataRepository {get}
     var folderDataRepository: FolderDataRepository {get}
     var photoLabelDataRepository: PhotoLabelDataRepository {get}
+    var photoCategoryRepository: PhotoCategoryRepository {get}
     
     func makeSplashViewModel() -> SplashViewModel
     func makeMainViewModel() -> MainViewModel

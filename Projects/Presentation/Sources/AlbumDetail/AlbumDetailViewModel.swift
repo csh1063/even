@@ -32,7 +32,6 @@ public final class AlbumDetailViewModel: BaseViewModel {
     @Published private var folderName: String
     @Published private var photos: [Photo] = []
     @Published private var hasNext: Bool = false
-    @Published private var isLoading: Bool = false
     @Published private var errorMessage: String?
     
     private let input = PassthroughSubject<Input, Never>()

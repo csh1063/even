@@ -9,8 +9,9 @@
 import Foundation
 
 public protocol FolderDataRepository {
-    func saveFolder(folder: Folder) throws
+    func saveFolder(folder: Folder) throws -> Folder?
     func fetchAll() throws -> [Folder]
+    func fetchAutoAll() throws -> [Folder]
     func fetchPhotos(by folderId: UUID) throws -> [Photo]
     func updateFolder(folder: Folder) throws
     func delete(id: UUID) throws

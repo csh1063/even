@@ -8,43 +8,101 @@
 
 import Foundation
 import Combine
+import Domain
 
 @MainActor
 public final class SplashViewModel: BaseViewModel {
     
     enum Input {
-        case viewWillAppear
+        case appear
     }
     
     struct Output {
         let finished: AnyPublisher<Bool, Never>
     }
     
-    let input = PassthroughSubject<Input, Never>()
-    var output: Output
     
-    private let finishedSubject = PassthroughSubject<Bool, Never>()
+    private let input = PassthroughSubject<Input, Never>()
+    @Published private var finished: Bool = false
+    
+    private let useCase: PhotoCheckUseCase
+    
     private var cancellables = Set<AnyCancellable>()
     
-    public override init() {
-        self.output = Output(finished: finishedSubject.eraseToAnyPublisher())
+    public init(useCase: PhotoCheckUseCase) {
+        self.useCase = useCase
         
         super.init()
         
         self.bind()
     }
     
-    func bind() {
+    func transform() -> Output {
+        Output(finished: $finished.eraseToAnyPublisher())
+    }
+    
+    func send(_ input: Input) {
+        self.input.send(input)
+    }
+    
+    private func bind() {
         input.sink { [weak self] input in
-            switch input {
-            case .viewWillAppear: self?.start()
+            Task {
+                await self?.handler(input)
             }
         }
         .store(in: &cancellables)
     }
+    
+    private func handler(_ input: Input) async {
+        switch input {
+        case .appear:
+            await self.checkDeletedPhoto()
+        }
+    }
+    
+    private func checkDeletedPhoto() async {
+        do {
+            print("checkDeletedPhoto")
+            for try await progress in try await self.useCase.checkDeletedPhoto() {
+                switch progress {
+                case .progress(let ratio):
+                    print("check progress:", ratio)
+                case .completed:
+                    print("check completed")
+                    await self.syncData()
+                case .unavailable(let reason):
+                    print("check reason:", reason)
+                }
+            }
+            
+        } catch {
+            print("error:",error.localizedDescription)
+        }
+    }
+    
+    private func syncData() async {
+        do {
+            print("syncData")
+            for try await progress in try await self.useCase.syncCoverAndCount() {
+                switch progress {
+                case .progress(let ratio):
+                    print("syncData progress:", ratio)
+                case .completed:
+                    print("syncData completed")
+                    await self.start()
+                case .unavailable(let reason):
+                    print("syncData reason:", reason)
+                }
+            }
+        } catch {
+            print("error:",error.localizedDescription)
+        }
+    }
 
-    private func start() {
-        Task { [weak self] in
+    private func start() async {
+        print("start")
+//        Task { [weak self] in
             try? await Task.sleep(nanoseconds: 3_000_000_000) // 3초 (1초 = 1_000_000_000 ns)
 //            showAlert(
 //                title: "진행?",
@@ -52,10 +110,10 @@ public final class SplashViewModel: BaseViewModel {
 //                buttons: [
 //                    AlertButtonConfig(title: "껃영", style: .destructive, action: nil),
 //                    AlertButtonConfig(title: "고고", style: .default) { [weak self] in
-                        self?.finishedSubject.send(true)
+                        self.finished = true
 //                    }
 //                ]
 //            )
-        }
+//        }
     }
 }

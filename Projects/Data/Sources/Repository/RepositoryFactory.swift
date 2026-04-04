@@ -48,4 +48,8 @@ public final class RepositoryFactory {
     public lazy var photoLabelDataRepository: PhotoLabelDataRepository = {
         DefaultPhotoLabelDataRepository(container: container)
     }()
+    
+    public lazy var photoCategoryRepository: PhotoCategoryRepository = {
+        DefaultPhotoCategoryRepository(service: serviceFactory.photoCategoryService)
+    }()
 }

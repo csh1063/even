@@ -60,7 +60,7 @@ final class SplashViewController: BaseViewController {
     public override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        self.viewModel.input.send(.viewWillAppear)
+        self.viewModel.send(.appear)
     }
     
     private func setupView() {

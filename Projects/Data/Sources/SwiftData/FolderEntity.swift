@@ -20,7 +20,7 @@ public final class FolderEntity {
     
     public var photoCount: Int = 0
     
-    @Relationship(deleteRule: .nullify, inverse: \PhotoEntity.folders)
+    @Relationship(deleteRule: .nullify)
     public var photos: [PhotoEntity] = []
     
     @Relationship(deleteRule: .cascade)

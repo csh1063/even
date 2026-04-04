@@ -16,11 +16,13 @@ public final class PhotoEntity {
     @Attribute(.unique) public var localIdentifier: String
     public var createdAt: Date
     public var analyzedAt: Date?
+    public var locationAnalyzedAt: Date?
     
     public var latitude: Double?
     public var longitude: Double?
     
     // address
+    public var isoCountryCode: String?
     public var address: PhotoLocation?
     public var addressEn: PhotoLocation?
     
@@ -31,7 +33,7 @@ public final class PhotoEntity {
     @Relationship(deleteRule: .cascade)
     public var labels: [PhotoLabelEntity] = []
     
-    @Relationship(deleteRule: .nullify)
+    @Relationship(deleteRule: .nullify, inverse: \FolderEntity.photos)
     public var folders: [FolderEntity] = []
     
     public init(
@@ -41,6 +43,7 @@ public final class PhotoEntity {
         analyzedAt: Date? = nil,
         latitude: Double? = nil,
         longitude: Double? = nil,
+        isoCountryCode: String? = nil,
         address: PhotoLocation? = nil,
         addressEn: PhotoLocation? = nil,
         year: String? = nil,
@@ -52,6 +55,7 @@ public final class PhotoEntity {
         self.analyzedAt = analyzedAt
         self.latitude = latitude
         self.longitude = longitude
+        self.isoCountryCode = isoCountryCode
         self.address = address
         self.addressEn = addressEn
         self.year = year

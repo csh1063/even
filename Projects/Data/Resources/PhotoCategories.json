@@ -1,9 +1,99 @@
 {
-    "사람": ["people", "person", "face", "portrait", "people_group", "adult", "child"],
-    "동물": ["animal", "dog", "cat", "canine", "mammal", "pomeranian"],
-    "음식": ["food", "dish", "cuisine", "meal", "spaghetti", "bowl", "plate"],
-    "풍경": ["landscape", "outdoor", "sky", "land", "nature", "beach", "mountain"],
-    "문서": ["document", "text", "screenshot", "paper"],
-    "교통": ["vehicle", "automobile", "conveyance", "car"],
-    "음악": ["music", "musical_instrument", "drum"],
+  "음식": [
+    "food", "pizza", "sushi", "ramen", "cake", "coffee", "dessert", "bread",
+    "hamburger", "pasta", "salad", "sandwich", "soup", "steak", "rice",
+    "fruit", "vegetable", "seafood", "meat", "cheese", "egg", "chocolate",
+    "ice_cream", "donut", "croissant", "baked_goods", "drink", "juice",
+    "beer", "wine", "candy", "taco", "nachos", "dumpling", "paella",
+    "biryani", "kebab", "satay", "tempura", "teriyaki", "spaghetti",
+    "fries", "fried_chicken", "hotdog", "pepperoni", "meatball",
+    "salmon", "tuna", "lobster", "crab", "mussel", "oyster", "clam",
+    "scallop", "seabass", "roe", "cheesecake", "birthday_cake", "cupcake",
+    "pretzel", "popcorn", "cereal", "grain", "bean", "corn", "pea",
+    "edamame", "mushroom", "tomato", "potato", "carrot", "broccoli",
+    "lettuce", "spinach", "avocado", "cucumber", "asparagus", "arugula",
+    "cilantro", "rosemary", "herb", "apple", "banana", "grape",
+    "strawberry", "blueberry", "lemon", "lime", "citrus_fruit", "cherry",
+    "mandarine", "berry", "red_wine", "white_wine", "sparkling_wine",
+    "soda", "milkshake", "liquid", "condiment", "seasonings", "sauce",
+    "stir_fry", "casserole", "scrambled_eggs", "fried_egg", "yolk",
+    "frozen_dessert", "flan", "souvlaki", "quesadilla", "tortilla",
+    "white_bread", "wasabi", "sesame", "chopsticks", "bowl", "plate",
+    "cup", "mug", "drinking_glass", "fork", "spoon", "knife", "utensil",
+    "tableware", "cutting_board", "pan", "cookware", "pot_cooking",
+    "steamer_cookware", "grill", "stove", "kitchen_oven", "microwave"
+  ],
+  "여행/풍경": [
+    "mountain", "ocean", "beach", "sunset_sunrise", "forest", "sky",
+    "waterfall", "lake", "river", "island", "desert", "cliff", "cave",
+    "aurora", "snow", "cityscape", "harbour", "lighthouse", "landscape",
+    "blue_sky", "cloudy", "haze", "storm", "blizzard", "night_sky",
+    "daytime", "sun", "moon", "celestial_body", "sand", "sand_dune",
+    "rocks", "hill", "land", "shore", "dock", "pier", "path", "trail",
+    "creek", "waterways", "water_body", "water", "ice", "moss",
+    "vegetation", "foliage", "plant", "tree", "oak_tree", "maple_tree",
+    "palm_tree", "willow", "grass", "shrub", "branch", "blossom",
+    "flower", "garden", "greenhouse", "farm", "agriculture", "field",
+    "wetland", "underwater", "outdoor", "park", "patio", "deck"
+  ],
+  "사람": [
+    "people", "portrait", "baby", "child", "teen", "adult", "crowd",
+    "people_group", "bride", "groom", "entertainer", "singer", "performer",
+    "santa_claus"
+  ],
+  "동물": [
+    "dog", "cat", "bird", "rabbit", "panda", "kitten", "husky", "dolphin",
+    "whale", "penguin", "tiger", "deer", "kangaroo", "chihuahua", "bulldog",
+    "bichon", "pomeranian", "animal", "feline", "canine", "mammal",
+    "marsupial", "cetacean", "reptile", "rodent", "ferret", "fish",
+    "shellfish", "ungulates"
+  ],
+  "일상/실내": [
+    "living_room", "bedroom", "kitchen", "desk", "phone", "computer",
+    "television", "lamp", "window", "door", "stairs", "bathroom", "closet",
+    "sofa", "book", "bookshelf", "chair", "table", "bed", "pillow",
+    "bedding", "curtain", "computer_monitor", "computer_keyboard", "laptop",
+    "armchair", "swivel_chair", "folding_chair", "stool", "high_chair",
+    "cabinet", "refrigerator", "laundry_machine", "electric_fan",
+    "chandelier", "light", "lamppost", "interior_room", "dining_room",
+    "domicile", "apartment", "house_single", "balcony", "porch",
+    "kitchen_countertop", "kitchen_sink", "washbasin", "toilet_seat",
+    "housewares", "appliance", "consumer_electronics", "headphones",
+    "speakers_music", "microwave", "oven", "office_supplies", "vase",
+    "frame", "painting", "clock", "timepiece", "watch", "calendar",
+    "sticky_note", "toy", "stuffed_animals", "figurine", "candle",
+    "fireplace", "decoration", "decorative_plant", "cactus", "flower_arrangement"
+  ],
+  "특별한 날": [
+    "celebration", "wedding", "graduation", "birthday_cake", "ceremony",
+    "concert", "parade", "performance", "christmas_tree",
+    "christmas_decoration", "poinsettia", "wedding_dress", "wedding_cake",
+    "gown", "tuxedo", "suit", "costume", "balloon", "banner", "trophy",
+    "podium", "confetti", "fireworks", "karaoke", "music",
+    "musical_instrument", "microphone", "drum", "flute", "violin",
+    "string_instrument", "woodwind", "tambourine", "spotlight", "stage",
+    "auditorium", "arena", "nightclub"
+  ],
+  "운동/스포츠": [
+    "sport", "golf", "soccer", "swimming", "hiking", "cycling", "skating",
+    "watersport", "golf_course", "rink", "ballgames", "ice_skating",
+    "sunbathing", "fishing", "juggling", "dartboard", "sports_equipment",
+    "helmet", "lifejacket", "wetsuit", "swimsuit", "sneaker", "boot",
+    "footwear", "bicycle", "scooter"
+  ],
+  "문서/스크린샷": [
+    "screenshot", "document", "receipt", "ticket", "text", "handwriting",
+    "map", "calendar", "sticky_note", "whiteboard", "chalkboard", "sign",
+    "license_plate", "printed_page", "street_sign", "road_safety_equipment",
+    "billboard", "banner", "keypad", "dial", "thermostat"
+  ],
+  "탈것": [
+    "car", "bicycle", "airplane", "boat", "bus", "train", "train_real",
+    "truck", "van", "suv", "yacht", "speedboat", "jetski", "convertible",
+    "sportscar", "scooter", "motorcycle", "vehicle", "watercraft",
+    "aircraft", "conveyance", "warship", "automobile", "airport",
+    "train_station", "railroad", "track_rail", "parking_lot", "road",
+    "street", "crosswalk", "traffic_light", "cableway", "escalator",
+    "elevator", "cart", "shopping_cart", "stroller", "luggage", "suitcase"
+  ]
 }

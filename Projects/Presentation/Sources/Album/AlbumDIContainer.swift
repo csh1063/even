@@ -33,7 +33,8 @@ public final class AlbumDIContainer {
         
         let autoFolderUseCase = DefaultAutoFolderUseCase(
             photoDataRepository: appDIContainer.photoDataRepository,
-            folderDataRepository: appDIContainer.folderDataRepository)
+            folderDataRepository: appDIContainer.folderDataRepository,
+            photoCategoryRepository: appDIContainer.photoCategoryRepository)
         
         let folderUseCase = DefaultFolderUseCase(
             folderRepository: appDIContainer.folderDataRepository

@@ -10,4 +10,5 @@ import Foundation
 
 public protocol PhotoLabelDataRepository {
     func fetchAll() throws -> [PhotoLabel]
+    func fetchUniqueNames() throws -> [String]
 }

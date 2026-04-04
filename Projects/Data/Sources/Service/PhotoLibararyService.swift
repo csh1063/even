@@ -18,7 +18,8 @@ public final class PhotoLibraryService {
     private var pHResultMap: [PHCollection: PHFetchResult<PHAsset>] = [:]
     private var allPhotos: PHFetchResult<PHAsset>?
     
-    private var assetCache: [String: PHAsset] = [:]
+//    private var assetCache: [String: PHAsset] = [:]
+    private let assetCache = AssetCache()
     
     public init() {}
     
@@ -76,7 +77,7 @@ public final class PhotoLibraryService {
         let realPage = max(1, page)
         let countPerPage = 300
         let start = (realPage - 1) * countPerPage
-        let end = start + countPerPage
+//        let end = start + countPerPage
         
         let result: PHFetchResult<PHAsset>
         
@@ -103,7 +104,10 @@ public final class PhotoLibraryService {
         let photos = (rangeStart..<rangeEnd).map { index -> PhotoAssetEntity in
             let asset = result.object(at: index)
             
-            self.assetCache[asset.localIdentifier] = asset
+//            self.assetCache[asset.localIdentifier] = asset
+            Task {
+                await self.assetCache.set(asset.localIdentifier, asset: asset)
+            }
             return PhotoAssetEntity(asset: asset)
         }
         
@@ -127,7 +131,7 @@ public final class PhotoLibraryService {
     }
     
     public func loadImage(id: String, type: LoadPhotoOptionType) async throws -> CGImage? {
-        guard let asset = getAsset(id: id) else { return nil }
+        guard let asset = await getAsset(id: id) else { return nil }
         
         let options = PHImageRequestOptions()
         let size: CGSize
@@ -183,14 +187,18 @@ public final class PhotoLibraryService {
         return photosWithLocation
     }
     
-    private func getAsset(id: String) -> PHAsset? {
+    private func getAsset(id: String) async -> PHAsset? {
         
-        if let cached = assetCache[id] { return cached }
+//        if let cached = assetCache[id] { return cached }
+        if let cached = await assetCache.get(id) { return cached }
         
         let fetched = PHAsset.fetchAssets(withLocalIdentifiers: [id], options: nil).firstObject
         if let asset = fetched {
-            self.assetCache[id] = asset
+            await assetCache.set(id, asset: asset)
         }
+//        if let asset = fetched {
+//            self.assetCache[id] = asset
+//        }
         return fetched
     }
     
@@ -213,4 +221,11 @@ extension PHFetchOptions {
         option.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.image.rawValue)
         return option
     }
+}
+
+actor AssetCache {
+    private var cache: [String: PHAsset] = [:]
+    
+    func get(_ id: String) -> PHAsset? { cache[id] }
+    func set(_ id: String, asset: PHAsset) { cache[id] = asset }
 }

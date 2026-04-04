@@ -11,7 +11,9 @@ import Combine
 
 @MainActor
 open class BaseViewModel {
-    // 모든 ViewModel이 공유하는 alert 스트림
+    
+    @Published var isLoading: Bool = false
+    
     let alertPublisher = PassthroughSubject<AlertItem, Never>()
 
     func showAlert(title: String?, message: String? = nil, buttons: [AlertButtonConfig]) {

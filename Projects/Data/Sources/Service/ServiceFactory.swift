@@ -37,4 +37,8 @@ public final class ServiceFactory {
     public var geocoderService: GeocoderService = {
         GeocoderService()
     }()
+    
+    public var photoCategoryService: PhotoCategoryService = {
+        PhotoCategoryService()
+    }()
 }

@@ -17,6 +17,7 @@ public struct Photo {
     // address
     public var latitude: Double?
     public var longitude: Double?
+    public var isoCountryCode: String?
     public var address: PhotoLocation?
     public var addressEn: PhotoLocation?
     
@@ -33,6 +34,7 @@ public struct Photo {
         analyzedAt: Date? = nil,
         latitude: Double? = nil,
         longitude: Double? = nil,
+        isoCountryCode: String? = nil,
         address: PhotoLocation? = nil,
         addressEn: PhotoLocation? = nil,
         year: String? = nil,
@@ -45,6 +47,7 @@ public struct Photo {
         self.analyzedAt = analyzedAt
         self.latitude = latitude
         self.longitude = longitude
+        self.isoCountryCode = isoCountryCode
         self.address = address
         self.addressEn = addressEn
         self.year = year

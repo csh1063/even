@@ -16,7 +16,7 @@ final class LabelsViewController: BaseViewController {
     private let naviView: NaviBarView = NaviBarView()
     
     private lazy var collectionView: UICollectionView = {
-        let layout = UICollectionViewFlowLayout()
+        let layout = LeftAlignedFlowLayout()
         layout.scrollDirection = .vertical
         layout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize  // 자동 크기
         layout.minimumInteritemSpacing = 8
@@ -30,7 +30,7 @@ final class LabelsViewController: BaseViewController {
         return collectionView
     }()
     
-    private var dataSource: UICollectionViewDiffableDataSource<Int, PhotoLabel>!
+    private var dataSource: UICollectionViewDiffableDataSource<Int, String>!
     private let viewModel: LabelsViewModel
     private var cancellables = Set<AnyCancellable>()
     
@@ -109,18 +109,18 @@ final class LabelsViewController: BaseViewController {
 
 extension LabelsViewController {
     private func configureDataSource() {
-        let cellRegistration = UICollectionView.CellRegistration<PhotoLabelCell, PhotoLabel> { cell, indexPath, cellViewModel in
+        let cellRegistration = UICollectionView.CellRegistration<PhotoLabelCell, String> { cell, indexPath, cellViewModel in
             cell.configure(with: cellViewModel)
         }
         
-        dataSource = UICollectionViewDiffableDataSource<Int, PhotoLabel>(collectionView: collectionView) {
+        dataSource = UICollectionViewDiffableDataSource<Int, String>(collectionView: collectionView) {
             collectionView, indexPath, cellViewModel in
             return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: cellViewModel)
         }
     }
     
-    private func applySnapshot(with labels: [PhotoLabel]) {
-        var snapshot = NSDiffableDataSourceSnapshot<Int, PhotoLabel>()
+    private func applySnapshot(with labels: [String]) {
+        var snapshot = NSDiffableDataSourceSnapshot<Int, String>()
         snapshot.appendSections([0])
         snapshot.appendItems(labels)
         dataSource.apply(snapshot, animatingDifferences: true)

@@ -18,6 +18,48 @@ extension FolderEntity {
             createdAt: createdAt,
             isAuto: isAuto,
             coverPhotoIdentifier: coverPhotoIdentifier,
+            keywords: [],
+            photos: [],
+            photoCount: photoCount
+        )
+    }
+    
+    func toDomainWithKey() -> Folder {
+        Folder(
+            id: id,
+            name: name,
+            displayName: displayName,
+            createdAt: createdAt,
+            isAuto: isAuto,
+            coverPhotoIdentifier: coverPhotoIdentifier,
+            keywords: keywords.map { $0.keyword },
+            photos: [],
+            photoCount: photoCount
+        )
+    }
+    
+    func toDomainWithPhoto() -> Folder {
+        Folder(
+            id: id,
+            name: name,
+            displayName: displayName,
+            createdAt: createdAt,
+            isAuto: isAuto,
+            coverPhotoIdentifier: coverPhotoIdentifier,
+            keywords: [],
+            photos: photos.sorted { $0.createdAt > $1.createdAt} .prefix(4).map {$0.toDomain()},
+            photoCount: photoCount
+        )
+    }
+    
+    func toDomainAll() -> Folder {
+        Folder(
+            id: id,
+            name: name,
+            displayName: displayName,
+            createdAt: createdAt,
+            isAuto: isAuto,
+            coverPhotoIdentifier: coverPhotoIdentifier,
             keywords: keywords.map { $0.keyword },
             photos: photos.sorted { $0.createdAt > $1.createdAt} .prefix(4).map {$0.toDomain()},
             photoCount: photoCount

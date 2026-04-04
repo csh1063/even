@@ -1,5 +1,5 @@
 //
-//  FolderProgress.swift
+//  ProgressFolder.swift
 //  Domain
 //
 //  Created by sanghyeon on 3/22/26.
@@ -7,7 +7,7 @@
 //
 
 
-public struct FolderProgress {
+public struct ProgressFolder {
     public let step: FolderStep
     public let ratio: Double
     

@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		025400DBA1FBCED05EECA3ED /* PhotoModelMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D23287CAC9A15F1CD81389D /* PhotoModelMapper.swift */; };
 		1987478F2F7BEC1B00A6AC8D /* DefaultPhotoLabelDataRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1987478E2F7BEC1B00A6AC8D /* DefaultPhotoLabelDataRepository.swift */; };
+		198747A42F7E77BD00A6AC8D /* DefaultPhotoCategoryRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 198747A32F7E77BD00A6AC8D /* DefaultPhotoCategoryRepository.swift */; };
 		2169AA2311BA60ACAA3F77E2 /* FolderEntityMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13D68148ECEC00D5F0D873BA /* FolderEntityMapper.swift */; };
 		22AD151C6F8F526A63C49DF8 /* GeocoderService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34FC610C922DCAAD54F6B871 /* GeocoderService.swift */; };
 		43B044BA23904FB3BCE5C9BA /* DefaultPhotoAnalysisRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C189B2600E5ECFA19EE3FD77 /* DefaultPhotoAnalysisRepository.swift */; };
@@ -56,6 +57,7 @@
 		13D68148ECEC00D5F0D873BA /* FolderEntityMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderEntityMapper.swift; sourceTree = "<group>"; };
 		15E0F3D1A2F015968E4FBB6A /* SwiftDataStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDataStack.swift; sourceTree = "<group>"; };
 		1987478E2F7BEC1B00A6AC8D /* DefaultPhotoLabelDataRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultPhotoLabelDataRepository.swift; sourceTree = "<group>"; };
+		198747A32F7E77BD00A6AC8D /* DefaultPhotoCategoryRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultPhotoCategoryRepository.swift; sourceTree = "<group>"; };
 		1D6BD6C0BFFB08B0574D32AF /* PhotoCategoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCategoryService.swift; sourceTree = "<group>"; };
 		1E0A1E65D202F027E3B90C53 /* PhotoLabelEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLabelEntity.swift; sourceTree = "<group>"; };
 		2FEE537A6453D74F3910F7C2 /* DefaultFolderDataRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultFolderDataRepository.swift; sourceTree = "<group>"; };
@@ -132,10 +134,11 @@
 			children = (
 				2FEE537A6453D74F3910F7C2 /* DefaultFolderDataRepository.swift */,
 				C189B2600E5ECFA19EE3FD77 /* DefaultPhotoAnalysisRepository.swift */,
+				198747A32F7E77BD00A6AC8D /* DefaultPhotoCategoryRepository.swift */,
 				6276A561BC623AC921892190 /* DefaultPhotoDataRepository.swift */,
+				1987478E2F7BEC1B00A6AC8D /* DefaultPhotoLabelDataRepository.swift */,
 				C6A8AB3F6B0730FFBB675B3D /* DefaultPhotoLibararyRepository.swift */,
 				7BC3964C1050C327995A40EE /* RepositoryFactory.swift */,
-				1987478E2F7BEC1B00A6AC8D /* DefaultPhotoLabelDataRepository.swift */,
 			);
 			path = Repository;
 			sourceTree = "<group>";
@@ -311,6 +314,7 @@
 				43B044BA23904FB3BCE5C9BA /* DefaultPhotoAnalysisRepository.swift in Sources */,
 				67B51411B975AD891A559CDE /* DefaultPhotoDataRepository.swift in Sources */,
 				9213BC1672F5ED20BE34BFAC /* DefaultPhotoLibararyRepository.swift in Sources */,
+				198747A42F7E77BD00A6AC8D /* DefaultPhotoCategoryRepository.swift in Sources */,
 				624A8672322CB6244B15B398 /* RepositoryFactory.swift in Sources */,
 				22AD151C6F8F526A63C49DF8 /* GeocoderService.swift in Sources */,
 				B5A3754A0C97B4B4F6603D4F /* PermissionService.swift in Sources */,

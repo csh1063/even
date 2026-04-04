@@ -51,7 +51,7 @@ final class PhotoLabelCell: UICollectionViewCell {
         return layoutAttributes
     }
     
-    func configure(with photoLabel: PhotoLabel) {
-        label.text = "\(photoLabel.name), \(photoLabel.confidence)"
+    func configure(with photoLabel: String) {
+        label.text = photoLabel
     }
 }

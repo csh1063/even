@@ -186,6 +186,7 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		198747742F796B7300A6AC8D /* Alert */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Alert; sourceTree = "<group>"; };
 		198747872F7BEBBF00A6AC8D /* Labels */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Labels; sourceTree = "<group>"; };
+		1987479E2F7CAAC500A6AC8D /* LeftCollectionLayout */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = LeftCollectionLayout; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -332,6 +333,7 @@
 		B18E3960CEEA5B6DBA69504B /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				1987479E2F7CAAC500A6AC8D /* LeftCollectionLayout */,
 				CCA86452BF30CF37BB75F7B3 /* Extension */,
 				F7D59083D68E7B3DF3F40F6B /* Folder */,
 				7473BC3AABB7D89AF08035C0 /* Photo */,
@@ -516,6 +518,7 @@
 			fileSystemSynchronizedGroups = (
 				198747742F796B7300A6AC8D /* Alert */,
 				198747872F7BEBBF00A6AC8D /* Labels */,
+				1987479E2F7CAAC500A6AC8D /* LeftCollectionLayout */,
 			);
 			name = Presentation;
 			packageProductDependencies = (

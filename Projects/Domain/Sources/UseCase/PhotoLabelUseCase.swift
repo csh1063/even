@@ -10,6 +10,7 @@ import Foundation
 
 public protocol PhotoLabelUseCase {
     func fetchAll() async throws -> [PhotoLabel]
+    func fetchUniqueNames() async throws -> [String]
 }
 
 public final class DefaultPhotoLabelUseCase: PhotoLabelUseCase {
@@ -22,5 +23,9 @@ public final class DefaultPhotoLabelUseCase: PhotoLabelUseCase {
     
     public func fetchAll() async throws -> [PhotoLabel] {
         try repository.fetchAll()
+    }
+    
+    public func fetchUniqueNames() async throws -> [String] {
+        try repository.fetchUniqueNames()
     }
 }

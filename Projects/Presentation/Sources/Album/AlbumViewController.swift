@@ -21,9 +21,9 @@ final class AlbumViewController: BaseViewController {
     private let locationFolderProgressBar: UIProgressView = UIProgressView(progressViewStyle: .bar)
     
     // for simulator test
-    private let dummyButton: UIButton = UIButton()
-        .withTitle("더미", for: .normal)
-        .withTitleColor(.Theme.nickel, for: .normal)
+//    private let dummyButton: UIButton = UIButton()
+//        .withTitle("더미", for: .normal)
+//        .withTitleColor(.Theme.nickel, for: .normal)
     
     private var collectionView: UICollectionView = {
 
@@ -143,7 +143,7 @@ final class AlbumViewController: BaseViewController {
         view.addSubview(locationFolderProgressBar)
         
         view.addSubview(naviView)
-        view.addSubview(dummyButton)
+//        view.addSubview(dummyButton)
         
         self.configureDataSource()
         
@@ -176,11 +176,11 @@ final class AlbumViewController: BaseViewController {
             make.top.equalTo(naviView.snp.bottom).offset(4)
         }
         
-        dummyButton.snp.makeConstraints { make in
-            make.bottom.equalTo(self.naviView)
-            make.trailing.equalTo(self.naviView).offset(-120)
-            make.width.equalTo(60)
-        }
+//        dummyButton.snp.makeConstraints { make in
+//            make.bottom.equalTo(self.naviView)
+//            make.trailing.equalTo(self.naviView).offset(-120)
+//            make.width.equalTo(60)
+//        }
         
         collectionView.snp.makeConstraints { make in
             make.top.equalTo(naviView.snp.bottom)
@@ -242,12 +242,12 @@ final class AlbumViewController: BaseViewController {
             }
             .store(in: &cancellables)
         
-        dummyButton.tapPublisher
-            .sink { [weak self] button in
-                guard let self else {return}
-                self.viewModel.send(.dummy)
-            }
-            .store(in: &cancellables)
+//        dummyButton.tapPublisher
+//            .sink { [weak self] button in
+//                guard let self else {return}
+//                self.viewModel.send(.dummy)
+//            }
+//            .store(in: &cancellables)
         
         output.folders
             .receive(on: DispatchQueue.main)

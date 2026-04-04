@@ -30,14 +30,14 @@ public final class MyPageCoordinator: BaseCoordinator {
 //        }
         
         bindAlert(from: viewModel)
-
+        
+        navigationController.delegate = self
         navigationController.viewControllers = [vc]
+        self.viewController = vc
     }
 
     func startAndReturn() -> UINavigationController {
-        start()
-//        navigationController.tabBarItem =
-//            UITabBarItem(title: "Tab1", image: nil, selectedImage: nil)
+        start(coordinator: self)
         return navigationController
     }
     

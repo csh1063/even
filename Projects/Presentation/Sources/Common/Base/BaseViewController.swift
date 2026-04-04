@@ -11,6 +11,19 @@ import UIKit
 
 open class BaseViewController: UIViewController {
     
+    private lazy var loadingView: UIView = {
+        let view = UIView()
+        let actor = UIActivityIndicatorView()
+        view.backgroundColor = .black.withAlphaComponent(0.3)
+        view.addSubview(actor)
+        
+        actor.snp.makeConstraints { make in
+            make.center.equalTo(view)
+        }
+        
+        return view
+    }()
+    
     static var fatalMessage: String {
         return "\(Self.self) does not support NSCoding"
     }

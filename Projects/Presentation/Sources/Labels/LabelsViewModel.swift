@@ -17,10 +17,10 @@ public final class LabelsViewModel: BaseViewModel {
     }
     
     struct Output {
-        var photoLabels: AnyPublisher<[PhotoLabel], Never>
+        var photoLabels: AnyPublisher<[String], Never>
     }
     
-    @Published private var photoLabels: [PhotoLabel] = []
+    @Published private var photoLabels: [String] = []
     
     private let input = PassthroughSubject<Input, Never>()
     private let useCase: PhotoLabelUseCase
@@ -68,8 +68,9 @@ public final class LabelsViewModel: BaseViewModel {
         
         do {
             print("start loadLabels")
-            self.photoLabels = try await self.useCase.fetchAll()
+            self.photoLabels = try await self.useCase.fetchUniqueNames()
             print("end loadLabels")
+            print(photoLabels)
         } catch {
             print("error:", error.localizedDescription)
         }

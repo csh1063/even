@@ -22,6 +22,22 @@ extension PhotoEntity {
             addressEn: addressEn,
             year: year,
             month: month,
+            labels: []
+        )
+    }
+    
+    func toDomainAll() -> Photo {
+        return Photo(
+            id: id,
+            localIdentifier: localIdentifier,
+            createdAt: createdAt,
+            analyzedAt: analyzedAt,
+            latitude: latitude,
+            longitude: longitude,
+            address: address,
+            addressEn: addressEn,
+            year: year,
+            month: month,
             labels: labels.map { $0.toDomain() }
         )
     }

@@ -30,6 +30,8 @@ final class MyCell: UITableViewCell {
     
     func setupView() {
         
+        contentView.backgroundColor = .Theme.white
+        
         label.textColor = .Theme.midnight
         label.font = UIFont.systemFont(ofSize: 16)
         

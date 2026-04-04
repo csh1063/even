@@ -29,6 +29,7 @@ public final class AlbumViewModel: BaseViewModel {
         let locationProgressRatio: AnyPublisher<Double, Never>
         let locationFolderProgressRatio: AnyPublisher<Double, Never>
         let isAnalyzing: AnyPublisher<Bool, Never>
+        let isLoading: AnyPublisher<Bool, Never>
     }
     
     @Published private var folders: [Folder] = []
@@ -72,7 +73,8 @@ public final class AlbumViewModel: BaseViewModel {
             autoFolderProgressRatio: $autoFolderProgressRatio.eraseToAnyPublisher(),
             locationProgressRatio: $locationProgressRatio.eraseToAnyPublisher(),
             locationFolderProgressRatio: $locationFolderProgressRatio.eraseToAnyPublisher(),
-            isAnalyzing: $isAnalyzing.eraseToAnyPublisher()
+            isAnalyzing: $isAnalyzing.eraseToAnyPublisher(),
+            isLoading: $isLoading.eraseToAnyPublisher()
         )
     }
     
@@ -90,23 +92,35 @@ public final class AlbumViewModel: BaseViewModel {
     }
     
     private func handle(_ input: Input) async {
-        
         switch input {
         case .appear:
+            self.isLoading = true
             _ = await self.loadFodlers()
+            self.isLoading = false
         case .analysis:
             showAlert(
                 title: "분석하기",
                 buttons: [
                     AlertButtonConfig(title: "취소", style: .cancel, action: nil),
+                    AlertButtonConfig(title: "이어서 위치 분석", style: .default) { [weak self] in
+                        Task {
+                            self?.isLoading = true
+                            await self?.locationAnalysis(isFull: false)
+                            self?.isLoading = false
+                        }
+                    },
                     AlertButtonConfig(title: "이어서 분석", style: .default) { [weak self] in
                         Task {
+                            self?.isLoading = true
                             await self?.analysis(isFull: false)
+                            self?.isLoading = false
                         }
                     },
                     AlertButtonConfig(title: "전체 분석", style: .default) { [weak self] in
                         Task {
+                            self?.isLoading = true
                             await self?.analysis(isFull: true)
+                            self?.isLoading = false
                         }
                     }
                 ]
@@ -119,7 +133,9 @@ public final class AlbumViewModel: BaseViewModel {
                     AlertButtonConfig(title: "취소", style: .cancel, action: nil),
                     AlertButtonConfig(title: "삭제", style: .destructive) { [weak self] in
                         Task {
+                            self?.isLoading = true
                             await self?.clear()
+                            self?.isLoading = false
                         }
                     }
                 ]
@@ -151,17 +167,29 @@ public final class AlbumViewModel: BaseViewModel {
                 return
             }
             
+            await locationAnalysis(isFull: isFull)
             // 2차 - 위치 분석 (백그라운드)
-            Task.detached(priority: .background) { [weak self] in
-                guard let self else {return}
-                try await self.analysisPhotoLocation(isFull: isFull)
-                await MainActor.run {
-                    self.isAnalyzing = false
-                }
-            }
+//            Task.detached(priority: .background) { [weak self] in
+//                guard let self else {return}
+//                try await self.analysisPhotoLocation(isFull: isFull)
+//                await MainActor.run {
+//                    self.isAnalyzing = false
+//                }
+//            }
         } catch {
             print("error", error.localizedDescription)
             self.isAnalyzing = false
+        }
+    }
+    
+    private func locationAnalysis(isFull: Bool) async {
+        self.isAnalyzing = true
+        Task.detached(priority: .background) { [weak self] in
+            guard let self else {return}
+            try await self.analysisPhotoLocation(isFull: isFull)
+            await MainActor.run {
+                self.isAnalyzing = false
+            }
         }
     }
     
@@ -201,6 +229,7 @@ public final class AlbumViewModel: BaseViewModel {
                 print("reason", reason)
             }
         }
+        self.progressRatio = 1.0
         
         return try await analysisAndLoad {
             self.autoFolderProgressRatio = $0
@@ -225,6 +254,7 @@ public final class AlbumViewModel: BaseViewModel {
                 }
             }
         }
+        self.locationProgressRatio = 1.0
         
         _ = try await self.analysisAndLoad {
             self.locationFolderProgressRatio = $0

@@ -92,14 +92,14 @@ final class NaviBarView: UIView {
         }
         
         if leftType != .none {
+            coverView.snp.updateConstraints { make in
+                make.leading.equalToSuperview()
+            }
             stackView.insertArrangedSubview(leftButton, at: 0)
             leftButton.snp.makeConstraints { make in
                 make.width.equalTo(44)
             }
             
-            coverView.snp.updateConstraints { make in
-                make.leading.equalToSuperview()
-            }
         }
     }
     

@@ -63,7 +63,7 @@ final class NaviBarButton: UIView {
         }
         
         dot.snp.makeConstraints { make in
-            make.height.right.equalTo(4)
+            make.height.width.equalTo(4)
             make.top.equalTo(self).offset(12)
             make.trailing.equalTo(self).offset(-12)
         }

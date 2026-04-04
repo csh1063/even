@@ -22,6 +22,7 @@ final class MyPageViewController: BaseViewController {
         tableView.alwaysBounceVertical = true
         
         tableView.register(MyCell.self, forCellReuseIdentifier: MyCell.cellName)
+        tableView.backgroundColor = .Theme.white
         
         return tableView
     }()

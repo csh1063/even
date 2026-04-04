@@ -28,4 +28,15 @@ final public class DefaultPhotoLabelDataRepository: PhotoLabelDataRepository {
         
         return try context.fetch(fetchDescriptor).map {$0.toDomain()}
     }
+    
+    public func fetchUniqueNames() throws -> [String] {
+        let context = ModelContext(self.container)
+        let descriptor = FetchDescriptor<PhotoLabelEntity>(
+            sortBy: [SortDescriptor(\.name, order: .forward)]
+        )
+        var seen = Set<String>()
+        return try context.fetch(descriptor)
+            .filter { seen.insert($0.name).inserted }
+            .map { $0.toDomain().name }
+    }
 }

@@ -27,8 +27,9 @@ public final class SplashCoordinator: BaseCoordinator {
     }
 
     public override func start() {
+        
         let viewModel = container.makeSplashViewModel()
-        viewModel.output.finished
+        viewModel.transform().finished
             .sink { [weak self] isLogined in
                 print("SplashCoordinator finished")
                 self?.finished.send(isLogined)

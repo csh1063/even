@@ -7,8 +7,9 @@
 //
 
 import Foundation
+import Domain
 
-final class PhotoCategoryService {
+public final class PhotoCategoryService {
     
     // MARK: - 단어 목록 로드
     private var photoCategories: [String: [String]] = {
@@ -20,4 +21,10 @@ final class PhotoCategoryService {
         return array
     }()
     
+    public init() {
+    }
+    
+    public func fetchCategories() async throws-> [String: [String]] {
+        return photoCategories
+    }
 }

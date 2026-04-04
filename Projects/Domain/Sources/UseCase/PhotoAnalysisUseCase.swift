@@ -9,8 +9,8 @@
 import Foundation
 
 public protocol PhotoAnalysisUseCase {
-    func analysis(isFull: Bool) -> AsyncThrowingStream<AnalysisProgress, Error>
-    func locationAnalysis(isFull: Bool) -> AsyncThrowingStream<AnalysisProgress, Error>
+    func analysis(isFull: Bool) -> AsyncThrowingStream<ProgressAnalysis, Error>
+    func locationAnalysis(isFull: Bool) -> AsyncThrowingStream<ProgressAnalysis, Error>
     func deletePhotos() async throws
 }
 
@@ -31,16 +31,14 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
     }
     
     // 이미지 분석
-    public func analysis(isFull: Bool) -> AsyncThrowingStream<AnalysisProgress, Error> {
+    public func analysis(isFull: Bool) -> AsyncThrowingStream<ProgressAnalysis, Error> {
         execute { [weak self] in
             
             let analyzedIds: [String]?
             if isFull {
                 analyzedIds = nil
             } else {
-                analyzedIds = try self?.dataRepository.fetchAll()
-                    .filter { $0.analyzedAt != nil }
-                    .map { $0.localIdentifier }
+                analyzedIds = try self?.dataRepository.fetchAnalyzed()
             }
             
             return self?.analysisRepository.analyze(excludingIds: analyzedIds)
@@ -48,16 +46,14 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
     }
     
     // 위치 분석
-    public func locationAnalysis(isFull: Bool) -> AsyncThrowingStream<AnalysisProgress, Error> {
+    public func locationAnalysis(isFull: Bool) -> AsyncThrowingStream<ProgressAnalysis, Error> {
         execute { [weak self] in
             
             let analyzedIds: [String]?
             if isFull {
                 analyzedIds = nil
             } else {
-                analyzedIds = try self?.dataRepository.fetchAll()
-                    .filter { $0.address != nil }
-                    .map { $0.localIdentifier }
+                analyzedIds = try self?.dataRepository.fetchLocationAnalyzed()
             }
             
             return self?.analysisRepository.locationAnalyze(excludingIds: analyzedIds)
@@ -70,8 +66,8 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
     
     // MARK: - Private
     private func execute(
-        stream: @escaping () async throws  -> AsyncThrowingStream<AnalysisProgress, Error>?
-    ) -> AsyncThrowingStream<AnalysisProgress, Error> {
+        stream: @escaping () async throws  -> AsyncThrowingStream<ProgressAnalysis, Error>?
+    ) -> AsyncThrowingStream<ProgressAnalysis, Error> {
         AsyncThrowingStream { continuation in
             Task {
                 do {

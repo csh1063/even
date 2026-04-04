@@ -68,6 +68,7 @@ public final class GeocoderService {
             locality: replaceAddress(placemark.locality),
             subLocality: replaceAddress(placemark.subLocality),
             thoroughfare: replaceAddress(placemark.thoroughfare),
-            ocean: replaceAddress(placemark.ocean))
+            ocean: replaceAddress(placemark.ocean),
+            isoCountryCode: placemark.isoCountryCode)
     }
 }

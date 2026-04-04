@@ -31,7 +31,6 @@ public final class PhotoLibraryViewModel: BaseViewModel {
 //    @Published private var photoList: PhotoList?
     @Published private var photos: [PhotoInAlbum] = []
     @Published private var hasNext: Bool = false
-    @Published private var isLoading: Bool = false
     @Published private var errorMessage: String?
     @Published private var photoPermission: PhotoPermission = .notDetermined
     

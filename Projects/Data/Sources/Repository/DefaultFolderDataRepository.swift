@@ -18,7 +18,7 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
         self.container = container
     }
     
-    public func saveFolder(folder: Folder) throws {
+    public func saveFolder(folder: Folder) throws -> Folder? {
         
         let context = ModelContext(container)
         
@@ -28,7 +28,7 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
         )
         
         let existing = try context.fetch(fetchDescriptor)
-        guard existing.isEmpty else { return }
+        guard existing.isEmpty else { return nil }
         
         let entity = FolderEntity(
             id: folder.id,
@@ -49,37 +49,42 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
         }
         
         try context.save()
+        return folder
     }
     
-    public func fetchAll() throws -> [Folder] {
+    public func  fetchAll() throws -> [Folder] {
         
         let context = ModelContext(container)
         
         let fetchDescriptor = FetchDescriptor<FolderEntity>(
-            sortBy: [SortDescriptor(\.displayName, order: .forward)]
+            sortBy: [SortDescriptor(\.photoCount, order: .reverse),
+                     SortDescriptor(\.displayName, order: .forward)]
         )
-        return try context.fetch(fetchDescriptor).sorted {
-//            $0.photos.count > $1.photos.count
-            $0.photoCount > $1.photoCount
-        }.map {$0.toDomain()}
+        return try context.fetch(fetchDescriptor).map {$0.toDomain()}
+    }
+    
+    public func fetchAutoAll() throws -> [Folder] {
+        
+        let context = ModelContext(container)
+        
+        let fetchDescriptor = FetchDescriptor<FolderEntity>(
+            predicate: #Predicate { $0.isAuto == true }
+        )
+        return try context.fetch(fetchDescriptor).map {$0.toDomainWithKey()}
     }
     
     public func fetchPhotos(by folderId: UUID) throws -> [Photo] {
         
         let context = ModelContext(container)
-        
-        let fetchDescriptor = FetchDescriptor<FolderEntity>.init(
-            predicate: #Predicate { $0.id == folderId }
+        let photoFetchDescriptor = FetchDescriptor<PhotoEntity>(
+            predicate: #Predicate { photo in
+                photo.folders.contains { $0.id == folderId }
+            },
+            sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
         )
-        
-        guard let folder = try context.fetch(fetchDescriptor).first else {
-            throw FolderRepositoryError.folderNotFound
-        }
-        
-        return folder.photos.sorted {
-            $0.createdAt > $1.createdAt
-        }
-        .map {$0.toDomain()}
+
+        let photos = try context.fetch(photoFetchDescriptor)
+        return photos.map { $0.toDomain() }
     }
     
     public func updateFolder(folder: Folder) throws {
@@ -97,6 +102,7 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
         
         entity.name = folder.name
         entity.coverPhotoIdentifier = folder.coverPhotoIdentifier
+        entity.photoCount = folder.photoCount
         
         entity.keywords.forEach { context.delete($0) }
         folder.keywords.forEach {
@@ -134,15 +140,19 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
         let folderDescriptor = FetchDescriptor<FolderEntity>(
             predicate: #Predicate { $0.id == folderId }
         )
+        
         let photoDescriptor = FetchDescriptor<PhotoEntity>(
             predicate: #Predicate { $0.localIdentifier == photoIdentifier }
         )
+        
         guard let folder = try context.fetch(folderDescriptor).first else {
             throw FolderRepositoryError.folderNotFound
         }
+        
         guard let photo = try context.fetch(photoDescriptor).first else {
             throw FolderRepositoryError.photoNotFound
         }
+        
         // 중복 체크
         guard !folder.photos.contains(where: { $0.localIdentifier == photoIdentifier }) else { return }
         
@@ -168,8 +178,15 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
         )
         
         let photos = try context.fetch(photoDescriptor)
-        folder.photos = photos
-        folder.photoCount = photos.count
+        
+        let existingIds = Set(folder.photos.map { $0.localIdentifier })
+        let uniqueNewPhotos = photos.filter { !existingIds.contains($0.localIdentifier) }
+        
+        folder.photos.append(contentsOf: uniqueNewPhotos)
+        folder.photoCount = folder.photos.count
+        folder.coverPhotoIdentifier = folder.photos.sorted {
+            $0.createdAt > $1.createdAt
+        }.first?.localIdentifier
         
         try context.save()
     }

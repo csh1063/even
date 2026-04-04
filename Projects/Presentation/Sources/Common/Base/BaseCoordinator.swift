@@ -67,6 +67,7 @@ extension BaseCoordinator: UINavigationControllerDelegate {
         
         if navigationController.viewControllers.contains(fromViewController) { return }
         
+        print("vc count:", navigationController.viewControllers.count)
         if navigationController.viewControllers.count == 1 {
             showTabBar?()
         }

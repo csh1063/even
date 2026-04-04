@@ -36,7 +36,7 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
     
     // MARK: - Public
     /// 여러 사진 배치 분석 → 진행률 스트림 반환
-    public func analyze(excludingIds: [String]? = nil) -> AsyncThrowingStream<AnalysisProgress, Error> {
+    public func analyze(excludingIds: [String]? = nil) -> AsyncThrowingStream<ProgressAnalysis, Error> {
         return AsyncThrowingStream { continuation in
             Task {
                 do {
@@ -59,7 +59,6 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                                 group.addTask {
                                     let photoId = photo.asset.localIdentifier
                                     let labels = try await self.analyzeSingle(photoId: photoId)
-                                    print("id: ", photoId, "/ labels: ", (labels).map{ $0.name }.joined(separator: ", "))
                                     return (photo, labels)
                                 }
                             }
@@ -74,8 +73,9 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                                 }()
                                 
                                 print("id: ", photo.asset.localIdentifier, "/ year: ", year ?? "?", ", month:",month ?? "?")
+                                print("labels: ", (labels).map{ $0.name }.joined(separator: ", "))
                                 continuation.yield(
-                                    AnalysisProgress(
+                                    ProgressAnalysis(
                                         photo: Photo(
                                             localIdentifier: photo.asset.localIdentifier,
                                             createdAt: photo.asset.creationDate ?? Date(),
@@ -83,8 +83,6 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                                             month: month
                                         ),
                                         labels: labels,
-                                        completed: completed,
-                                        total: total,
                                         state: progress == 1 ? .completed:.progress(progress)
                                     )
                                 )
@@ -99,7 +97,7 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
         }
     }
     
-    public func locationAnalyze(excludingIds: [String]? = nil) -> AsyncThrowingStream<AnalysisProgress, Error> {
+    public func locationAnalyze(excludingIds: [String]? = nil) -> AsyncThrowingStream<ProgressAnalysis, Error> {
         
         return AsyncThrowingStream { continuation in
             Task.detached(priority: .userInitiated) {
@@ -151,17 +149,16 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                         completed += 1
                         let progress = Double(Double(completed)/Double(total))
                         continuation.yield(
-                            AnalysisProgress(
+                            ProgressAnalysis(
                                 photo: Photo(
                                     localIdentifier: asset.localIdentifier,
                                     createdAt: asset.creationDate ?? Date(),
                                     latitude: latitude,
                                     longitude: longitude,
+                                    isoCountryCode: address?.isoCountryCode,
                                     address: address,
                                     addressEn: addressEn),
                                 labels: [],
-                                completed: completed,
-                                total: total,
                                 state: progress == 1 ? .completed:.progress(progress)
                             )
                         )

@@ -37,6 +37,10 @@ final class DefaultAppDIContainer: AppDIContainer {
         repositoryFactory.photoLabelDataRepository
     }
     
+    var photoCategoryRepository: PhotoCategoryRepository{
+        repositoryFactory.photoCategoryRepository
+    }
+    
     private lazy var serviceFactory = ServiceFactory()
     private lazy var repositoryFactory = RepositoryFactory(
         container: container,
@@ -57,12 +61,15 @@ final class DefaultAppDIContainer: AppDIContainer {
     }
     
     // MARK: Splash
-    func makeSplashUseCase() {
-        
+    func makePhotoCheckUseCase() -> PhotoCheckUseCase {
+        DefaultPhotoCheckUseCase(photoLibraryRepository: photoLibraryRepository,
+                                 photoDataRepository: photoDataRepository,
+                                 folderDataRepository: folderDataRepository
+        )
     }
     
     func makeSplashViewModel() -> SplashViewModel {
-        SplashViewModel()
+        SplashViewModel(useCase: makePhotoCheckUseCase())
     }
     
     // MARK: Main

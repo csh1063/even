@@ -25,7 +25,7 @@ struct FolderCellItemViewModel: Hashable {
     
     init(folder: Folder, imageLoader: any ImageLoadable) {
         self.id = folder.id
-        self.localIdentifier = folder.photos.first?.localIdentifier ?? ""
+        self.localIdentifier = folder.coverPhotoIdentifier ?? ""
         self.displayName = folder.displayName.replacingOccurrences(of: "_", with: " ")
         self.formattedDate = ""
         self.folder = folder
