@@ -52,7 +52,7 @@ final class NaviBarButton: UIView {
     
     private func setupView() {
         
-        self.backgroundColor = .Theme.white
+        self.backgroundColor = .clear // .Theme.background
         dot.isHidden = true
         
         addSubview(button)
@@ -73,7 +73,12 @@ final class NaviBarButton: UIView {
         case .text(let text):
             self.button.setTitle(text, for: .normal)
         default:
-            self.button.setImage(UIImage(systemName: type.imageName), for: .normal)
+            let config = UIImage.SymbolConfiguration(hierarchicalColor: .Theme.primary)
+            let image = UIImage(systemName: type.imageName, withConfiguration: config)
+
+//            let image = UIImage(systemName: type.imageName)?.withRenderingMode(.alwaysTemplate)
+            self.button.setImage(image, for: .normal)
+            self.button.tintColor = .Theme.primary
         }
     }
 }

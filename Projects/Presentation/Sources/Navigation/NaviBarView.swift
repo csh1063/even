@@ -55,7 +55,7 @@ final class NaviBarView: UIView {
 
     init(
         type: NaviBarType = .title(.leading),
-        isBlur: Bool = true
+        isBlur: Bool = false
     ) {
         self.type = type
 
@@ -70,7 +70,7 @@ final class NaviBarView: UIView {
     }
     
     public func setTitle(_ title: String,
-                         color: UIColor = .Theme.midnight,
+                         color: UIColor = .Theme.primary,
                          font: UIFont = .systemFont(ofSize: 20)) {
         self.titleLabel.text = title
         self.titleLabel.textColor = color
@@ -84,22 +84,19 @@ final class NaviBarView: UIView {
         }
     }
     
-    public func addLeftButton(_ type: NaviBarButtonType, color: UIColor? = nil) {
+    public func addLeftButton(_ type: NaviBarButtonType, color: UIColor = .Theme.primary) {
         
         self.leftType = type
-        if let color {
-            self.leftButton.buttonTintColor = color
-        }
+        self.leftButton.buttonTintColor = color
         
         if leftType != .none {
-            coverView.snp.updateConstraints { make in
-                make.leading.equalToSuperview()
-            }
             stackView.insertArrangedSubview(leftButton, at: 0)
             leftButton.snp.makeConstraints { make in
                 make.width.equalTo(44)
             }
-            
+            coverView.snp.updateConstraints { make in
+                make.leading.equalToSuperview()
+            }
         }
     }
     
@@ -125,10 +122,10 @@ final class NaviBarView: UIView {
     // MARK: - Setup
     private func setupAppearance(isBlur: Bool) {
         if isBlur {
-            backgroundColor = UIColor.Theme.white.withAlphaComponent(0.7)
+            backgroundColor = UIColor.Theme.background.withAlphaComponent(0.7)
             blurView.setBlur(style: .light)
         } else {
-            backgroundColor = UIColor.Theme.white
+            backgroundColor = UIColor.Theme.background
         }
     }
 

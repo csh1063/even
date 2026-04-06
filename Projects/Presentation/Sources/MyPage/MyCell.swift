@@ -30,14 +30,14 @@ final class MyCell: UITableViewCell {
     
     func setupView() {
         
-        contentView.backgroundColor = .Theme.white
+        contentView.backgroundColor = .Theme.background
         
-        label.textColor = .Theme.midnight
+        label.textColor = .Theme.text
         label.font = UIFont.systemFont(ofSize: 16)
         
         let image = UIImage(systemName: "chevron.forward")
         arrowImageView.image = image?.withRenderingMode(.alwaysTemplate)
-        arrowImageView.tintColor = .Theme.midnight
+        arrowImageView.tintColor = .Theme.text
         
         addSubview(label)
         addSubview(arrowImageView)

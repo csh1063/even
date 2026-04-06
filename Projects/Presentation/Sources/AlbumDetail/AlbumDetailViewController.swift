@@ -69,7 +69,7 @@ final class AlbumDetailViewController: BaseViewController {
     
     private func setupView() {
         
-        naviView.addLeftButton(.back, color: .Theme.midnight)
+        naviView.addLeftButton(.back, color: .Theme.text)
         
         configureDataSource()
         

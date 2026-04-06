@@ -28,7 +28,7 @@ final class PhotoLabelCell: UICollectionViewCell {
         contentView.layer.cornerRadius = 16
         contentView.backgroundColor = .Theme.primary.withAlphaComponent(0.2)
         
-        label.textColor = .Theme.midnight
+        label.textColor = .Theme.text
         
         contentView.addSubview(label)
         

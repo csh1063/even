@@ -41,20 +41,20 @@ final class FolderCell: UICollectionViewCell {
     
     func setupView() {
         
-        self.contentView.backgroundColor = .Theme.white
+        self.contentView.backgroundColor = .Theme.background
         
-        self.textCoverView.backgroundColor = .Theme.obsidian.withAlphaComponent(0.5)
+        self.textCoverView.backgroundColor = .Theme.secondary.withAlphaComponent(0.7)
         
         self.radiusView.layer.cornerRadius = 12
         self.radiusView.layer.masksToBounds = true
         
-        self.mainImageView.backgroundColor = .Theme.obsidian
+        self.mainImageView.backgroundColor = .Theme.tertiary
         self.mainImageView.contentMode = .scaleAspectFill
         
-        self.nameLabel.textColor = .Theme.frost
+        self.nameLabel.textColor = .Theme.surface
         self.nameLabel.font = .systemFont(ofSize: 16)
         self.nameLabel.numberOfLines = 2
-        self.countLabel.textColor = .Theme.frost
+        self.countLabel.textColor = .Theme.surface
         self.countLabel.font = .systemFont(ofSize: 16)
         
         self.contentView.addSubview(radiusView)

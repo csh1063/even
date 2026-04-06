@@ -42,7 +42,7 @@ final class PhotoCell: UICollectionViewCell {
         self.mainImageView.layer.cornerRadius = 4
         self.mainImageView.contentMode = .scaleAspectFill
         
-        self.loadingView.backgroundColor = .Theme.charcoal
+        self.loadingView.backgroundColor = .Theme.tertiary
         self.loadingView.isHidden = true
         self.loadingView.layer.cornerRadius = 10
         self.loadingView.layer.masksToBounds = true

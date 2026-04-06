@@ -24,7 +24,7 @@ final class AlertViewController: BaseViewController {
 
     private let containerView: UIView = {
         let containerView = UIView()
-        containerView.backgroundColor = .Theme.white
+        containerView.backgroundColor = .Theme.background
         containerView.layer.cornerRadius = 20
         containerView.layer.masksToBounds = true
         containerView.transform = CGAffineTransform(scaleX: 1.12, y: 1.12)
@@ -34,7 +34,7 @@ final class AlertViewController: BaseViewController {
 
     private let titleLabel: UILabel = {
         let titleLabel = UILabel()
-        titleLabel.textColor = .Theme.midnight
+        titleLabel.textColor = .Theme.text
         titleLabel.font = .systemFont(ofSize: 17, weight: .bold)
         titleLabel.textAlignment = .center
         titleLabel.numberOfLines = 0
@@ -43,7 +43,7 @@ final class AlertViewController: BaseViewController {
 
     private let messageLabel: UILabel = {
         let messageLabel = UILabel()
-        messageLabel.textColor = .Theme.midnight
+        messageLabel.textColor = .Theme.text
         messageLabel.font = .systemFont(ofSize: 14)
         messageLabel.textAlignment = .center
         messageLabel.numberOfLines = 0
@@ -168,7 +168,7 @@ final class AlertViewController: BaseViewController {
     private func makeSeparator(_ axis: NSLayoutConstraint.Axis, height: CGFloat = 0.5, inset: CGFloat = 12) -> UIView {
         let backView = UIView()
         let view = UIView()
-        view.backgroundColor = .Theme.charcoal.withAlphaComponent(0.2)
+        view.backgroundColor = .Theme.tertiary.withAlphaComponent(0.2)
         backView.addSubview(view)
         switch axis {
         case .horizontal:

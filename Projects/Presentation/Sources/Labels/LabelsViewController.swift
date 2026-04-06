@@ -26,7 +26,7 @@ final class LabelsViewController: BaseViewController {
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.isScrollEnabled = true
         collectionView.showsVerticalScrollIndicator = false
-        collectionView.backgroundColor = .Theme.white
+        collectionView.backgroundColor = .Theme.background
         return collectionView
     }()
     

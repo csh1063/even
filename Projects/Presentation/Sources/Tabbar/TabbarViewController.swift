@@ -13,10 +13,10 @@ final class TabbarViewController: CustomTabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.setBackgroundColor(.Theme.white)
+        self.setBackgroundColor(.Theme.background)
         
         self.setItemColors(
-            normal: .Theme.gray,
+            normal: .Theme.tertiary,
             selected: .Theme.primary)
         
         self.setLayoutMargin(height: 56,

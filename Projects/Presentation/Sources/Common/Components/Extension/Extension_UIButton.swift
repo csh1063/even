@@ -153,7 +153,7 @@ extension UIButton {
         }
     }
 
-    func setNaviButtonForm(title: String, color: UIColor = UIColor.Theme.midnight,
+    func setNaviButtonForm(title: String, color: UIColor = UIColor.Theme.text,
                            image: UIImage, disabledImage: UIImage? = nil,
                            contentHorizontalAlignment: UIControl.ContentHorizontalAlignment = .left) {
         let label = UILabel().withText(title).withTextColor(color)

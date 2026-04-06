@@ -22,7 +22,7 @@ final class MyPageViewController: BaseViewController {
         tableView.alwaysBounceVertical = true
         
         tableView.register(MyCell.self, forCellReuseIdentifier: MyCell.cellName)
-        tableView.backgroundColor = .Theme.white
+        tableView.backgroundColor = .Theme.background
         
         return tableView
     }()
@@ -47,7 +47,7 @@ final class MyPageViewController: BaseViewController {
     private func setupView() {
         
         naviView.setTitle("MY PAGE")
-        naviView.addRightButtons([(.setting, .Theme.midnight)])
+        naviView.addRightButtons([(.setting, .Theme.text)])
         
         tableView.dataSource = self
         tableView.delegate = self

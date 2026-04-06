@@ -12,42 +12,45 @@ import UIKit
 extension UIColor {
     
     class Theme {
-    
-        class var primary: UIColor { // DeepIndigo
-            return UIColor(named: "primary") ?? UIColor("#5856D6")
+        /// 메인 액션, 브랜드 색 WarmSand
+        class var primary: UIColor {
+            return UIColor(named: "primary") ?? UIColor("#C8A882")
         }
-        class var secondary: UIColor { // SoftSlate
-            return UIColor(named: "secondary") ?? UIColor("#8E8E93")
+        /// 보조 요소 DustyRose
+        class var secondary: UIColor {
+            return UIColor(named: "secondary") ?? UIColor("#A07868")
         }
-        class var positive: UIColor { // MintGlass
-            return UIColor(named: "positive") ?? UIColor("#34C759")
+        /// 힌트/비활성 WarmTaupe / MutedStone
+        class var tertiary: UIColor {
+            return UIColor(named: "tertiary") ?? UIColor("#8E8278")
         }
-        class var negative: UIColor { // RoseMadder
-            return UIColor(named: "negative") ?? UIColor("#FF3B30")
+        /// 배경 WarmIvory / InkBlack
+        class var background: UIColor {
+            return UIColor(named: "background") ?? UIColor("#EDE5D8")
         }
-        class var white: UIColor { // PureWhite
-            return UIColor(named: "white") ?? UIColor("#FFFFFF")
+        /// 카드/시트 배경 CreamIvory / SoftCharcoal
+        class var surface: UIColor {
+            return UIColor(named: "surface") ?? UIColor("#F5EFE4")
         }
-        class var midnight: UIColor {
-            return UIColor(named: "midnight") ?? UIColor("#1C1C1E")
+        /// 텍스트 DeepEspresso /. ParchmentWhite
+        class var text: UIColor {
+            return UIColor(named: "text") ?? UIColor("#1E1612")
         }
-        class var obsidian: UIColor {
-            return UIColor(named: "obsidian") ?? UIColor("#1F2021")
+        /// 텍스트 서브 SoftEspresso / WarmGray
+        class var textSecond: UIColor {
+            return UIColor(named: "textSecond") ?? UIColor("#5A4A3C")
         }
-        class var nickel: UIColor {
-            return UIColor(named: "nickel") ?? UIColor("#93989E")
+        /// 테두리/분리선 WarmBorder / DimBorder
+        class var border: UIColor {
+            return UIColor(named: "border") ?? UIColor("#CEC4B4")
         }
-        class var charcoal: UIColor {
-            return UIColor(named: "charcoal") ?? UIColor("#4A4A4A")
+        /// 긍정 SageGreen
+        class var positive: UIColor {
+            return UIColor(named: "positive") ?? UIColor("#7A9E7E")
         }
-        class var gray: UIColor {
-            return UIColor(named: "gray") ?? UIColor("#C0C3CC")
-        }
-        class var frost: UIColor {
-            return UIColor(named: "frost") ?? UIColor("#EFF1F6")
-        }
-        class var platinum: UIColor {
-            return UIColor(named: "platinum") ?? UIColor("#E5E7EF")
+        /// 부정 WarmCrimson
+        class var negative: UIColor {
+            return UIColor(named: "negative") ?? UIColor("#C0392B")
         }
     }
 

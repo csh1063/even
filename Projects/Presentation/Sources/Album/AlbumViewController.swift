@@ -44,7 +44,7 @@ final class AlbumViewController: BaseViewController {
         collectionView.isScrollEnabled = true
         collectionView.showsVerticalScrollIndicator = false
         collectionView.contentInset = UIEdgeInsets(top: 12, left: margin, bottom: 80, right: margin)
-        collectionView.backgroundColor = .Theme.white
+        collectionView.backgroundColor = .Theme.background
 
         return collectionView
     }()
@@ -53,7 +53,7 @@ final class AlbumViewController: BaseViewController {
 //        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: makeLayout())
 //        collectionView.isScrollEnabled = true
 //        collectionView.showsVerticalScrollIndicator = false
-//        collectionView.backgroundColor = .Theme.white
+//        collectionView.backgroundColor = .Theme.background
 //        return collectionView
 //    }()
 //
@@ -116,7 +116,7 @@ final class AlbumViewController: BaseViewController {
     private func setupView() {
         
         naviView.setTitle("Albums")
-        naviView.addRightButtons([(.reset, .Theme.secondary), (.analysis, .Theme.primary)])
+        naviView.addRightButtons([(.reset, .Theme.negative), (.analysis, .Theme.primary)])
         
         collectionView.delegate = self
         
@@ -125,10 +125,10 @@ final class AlbumViewController: BaseViewController {
         locationProgressBar.isHidden = true
         locationFolderProgressBar.isHidden = true
         
-        progressBar.trackTintColor = .Theme.gray
-        folderProgressBar.trackTintColor = .Theme.gray
-        locationProgressBar.trackTintColor = .Theme.gray
-        locationFolderProgressBar.trackTintColor = .Theme.gray
+        progressBar.trackTintColor = .Theme.tertiary
+        folderProgressBar.trackTintColor = .Theme.tertiary
+        locationProgressBar.trackTintColor = .Theme.tertiary
+        locationFolderProgressBar.trackTintColor = .Theme.tertiary
         
         progressBar.progressTintColor = .Theme.primary
         folderProgressBar.progressTintColor = .Theme.primary
