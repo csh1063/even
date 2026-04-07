@@ -116,7 +116,9 @@ final class AlbumViewController: BaseViewController {
     private func setupView() {
         
         naviView.setTitle("Albums")
-        naviView.addRightButtons([(.reset, .Theme.negative), (.analysis, .Theme.primary)])
+//        naviView.addRightButtons([(.reset, .Theme.negative), (.analysis, .Theme.primary)])
+        naviView.addButtons([RightButton(type: .reset, color: .Theme.negative),
+                             RightButton(type: .analysis, color: .Theme.primary)])
         
         collectionView.delegate = self
         
@@ -229,7 +231,7 @@ final class AlbumViewController: BaseViewController {
             }
             .store(in: &cancellables)
 
-        naviView.rightPublisher
+        naviView.publisher
             .sink { [weak self] type in
                 guard let self else {return}
                 switch type {

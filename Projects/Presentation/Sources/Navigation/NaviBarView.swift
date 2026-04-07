@@ -15,8 +15,6 @@ import Combine
 final class NaviBarView: UIView {
 
     private let type: NaviBarType
-    private lazy var leftType: NaviBarButtonType = .none
-//    private lazy var rightTypes: [NaviBarButtonType] = []
     
     private let blurView = UIView()
     private let coverView = UIView()
@@ -30,24 +28,14 @@ final class NaviBarView: UIView {
         return stackView
     }()
     
-    private lazy var leftButton: NaviBarButton = {
-        NaviBarButton(type: self.leftType)
-    }()
-    private var rightButtons: [NaviBarButton] = []
-//    private lazy var innerRightButton: NaviBarButton = {
-//        NaviBarButton(type: self.innerRightType)
-//    }()
+    private var buttons: [NaviBarButton] = []
     
     private lazy var logoImageView = UIImageView()
     
     private lazy var titleLabel: UILabel = UILabel()
     
-    var leftPublisher: AnyPublisher<NaviBarButtonType, Never> {
-        leftButton.publisher.eraseToAnyPublisher()
-    }
-    
-    var rightPublisher: AnyPublisher<NaviBarButtonType, Never> {
-        let publishers = rightButtons.map { $0.publisher }
+    var publisher: AnyPublisher<NaviBarButtonType, Never> {
+        let publishers = buttons.map { $0.publisher }
         return Publishers.MergeMany(publishers).eraseToAnyPublisher()
     }
 
@@ -84,41 +72,35 @@ final class NaviBarView: UIView {
         }
     }
     
-    public func addLeftButton(_ type: NaviBarButtonType, color: UIColor = .Theme.primary) {
-        
-        self.leftType = type
-        self.leftButton.buttonTintColor = color
-        
-        if leftType != .none {
-            stackView.insertArrangedSubview(leftButton, at: 0)
-            leftButton.snp.makeConstraints { make in
-                make.width.equalTo(44)
-            }
-            coverView.snp.updateConstraints { make in
-                make.leading.equalToSuperview()
+    public func addButtons(_ settings: [NaviButtonSetting]) {
+        self.buttons = settings.map { [weak self] setting in
+            
+            let button = NaviBarButton(type: setting.type)
+            button.tintAdjustmentMode = .normal
+            button.buttonTintColor = setting.color
+            
+            if setting.isLeft {
+                self?.stackView.insertArrangedSubview(button, at: 0)
+                button.snp.makeConstraints { make in
+                    make.width.equalTo(44)
+                }
+                self?.coverView.snp.updateConstraints { make in
+                    make.leading.equalToSuperview()
+                }
+                return button
+            } else {
+                self?.stackView.addArrangedSubview(button)
+                button.snp.makeConstraints { make in
+                    make.width.equalTo(44)
+                }
+                self?.coverView.snp.updateConstraints { make in
+                    make.trailing.equalToSuperview()
+                }
+                return button
             }
         }
     }
     
-    public func addRightButtons(
-        _ settings: [(NaviBarButtonType, UIColor)]
-    ) {
-        self.rightButtons = settings.map { [weak self] (type, color) in
-            let button = NaviBarButton(type: type)
-            button.buttonTintColor = color
-            
-            self?.stackView.addArrangedSubview(button)
-            button.snp.makeConstraints { make in
-                make.width.equalTo(44)
-            }
-            return button
-        }
-        
-        coverView.snp.updateConstraints { make in
-            make.trailing.equalToSuperview()
-        }
-    }
-
     // MARK: - Setup
     private func setupAppearance(isBlur: Bool) {
         if isBlur {

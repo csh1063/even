@@ -69,7 +69,7 @@ final class AlbumDetailViewController: BaseViewController {
     
     private func setupView() {
         
-        naviView.addLeftButton(.back, color: .Theme.text)
+        naviView.addButtons([LeftButton(type: .back, color: .Theme.primary)])
         
         configureDataSource()
         
@@ -77,7 +77,7 @@ final class AlbumDetailViewController: BaseViewController {
         view.addSubview(collectionView)
         
         naviView.snp.makeConstraints { make in
-            make.top.equalTo(self.view.safeAreaLayoutGuide)
+            make.top.equalToSuperview()
             make.leading.trailing.equalTo(self.view)
         }
         
@@ -89,7 +89,7 @@ final class AlbumDetailViewController: BaseViewController {
     
     private func setupBindings() {
         
-        naviView.leftPublisher
+        naviView.publisher
             .sink { [weak self] _ in
                 print("back!")
                 self?.viewModel.pop?()

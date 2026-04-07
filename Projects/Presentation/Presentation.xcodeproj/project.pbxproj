@@ -18,6 +18,8 @@
 		198747842F7BC5ED00A6AC8D /* MyCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 198747832F7BC5ED00A6AC8D /* MyCell.swift */; };
 		198747862F7BEA0C00A6AC8D /* test.xib in Resources */ = {isa = PBXBuildFile; fileRef = 198747852F7BEA0C00A6AC8D /* test.xib */; };
 		198747952F7BF0AA00A6AC8D /* MyPageCellType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 198747942F7BF0AA00A6AC8D /* MyPageCellType.swift */; };
+		198747AA2F857C2700A6AC8D /* NaviButtonSetting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 198747A92F857C2700A6AC8D /* NaviButtonSetting.swift */; };
+		198747AC2F8585D400A6AC8D /* PhotoGridViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 198747AB2F8585D400A6AC8D /* PhotoGridViewController.swift */; };
 		1EB3782697E5D5765188E1DE /* Extension_UISegmentedControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AC6050EB2A12AA43E785BA5 /* Extension_UISegmentedControl.swift */; };
 		200C032581C4A24727FC0CE6 /* AlbumViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03112E88258FD411CDDBA6D3 /* AlbumViewController.swift */; };
 		22E9BE6A63E4C891FFBF6C76 /* UIGestureRecognizer+Publisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C1A7F457AF7CAC51AE3C6AB /* UIGestureRecognizer+Publisher.swift */; };
@@ -110,6 +112,8 @@
 		198747832F7BC5ED00A6AC8D /* MyCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyCell.swift; sourceTree = "<group>"; };
 		198747852F7BEA0C00A6AC8D /* test.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = test.xib; sourceTree = "<group>"; };
 		198747942F7BF0AA00A6AC8D /* MyPageCellType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPageCellType.swift; sourceTree = "<group>"; };
+		198747A92F857C2700A6AC8D /* NaviButtonSetting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaviButtonSetting.swift; sourceTree = "<group>"; };
+		198747AB2F8585D400A6AC8D /* PhotoGridViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoGridViewController.swift; sourceTree = "<group>"; };
 		1B74B54DBDDE8F00F62C6A60 /* ListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListViewModel.swift; sourceTree = "<group>"; };
 		1E177AD797E6C5E5BD5A62BA /* PhotoLibraryDIContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryDIContainer.swift; sourceTree = "<group>"; };
 		24F4C9EDD75B280BB4BE30A9 /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
@@ -235,6 +239,7 @@
 		2EAA0AE8D17F6832885302E3 /* Base */ = {
 			isa = PBXGroup;
 			children = (
+				198747AB2F8585D400A6AC8D /* PhotoGridViewController.swift */,
 				198747812F796C3D00A6AC8D /* BaseViewModel.swift */,
 				E474256CB4A9464026CD7F10 /* BaseCoordinator.swift */,
 				C06D9DFB2413E81BE06AAC41 /* BaseEventRouter.swift */,
@@ -292,6 +297,7 @@
 		94F20BCDAB30B75F08938EFA /* Navigation */ = {
 			isa = PBXGroup;
 			children = (
+				198747A92F857C2700A6AC8D /* NaviButtonSetting.swift */,
 				A10F1A991453FF9438018AFD /* NaviBarButton.swift */,
 				3C18C417DC62917A6F8651BD /* NaviBarType.swift */,
 				7F252FA414F730A843B69ED7 /* NaviBarView.swift */,
@@ -612,10 +618,12 @@
 				22E9BE6A63E4C891FFBF6C76 /* UIGestureRecognizer+Publisher.swift in Sources */,
 				13F779FE4F17BDBA660A1B35 /* UIView+Publisher.swift in Sources */,
 				DF40F78A11997062375AF294 /* AppDIContainer.swift in Sources */,
+				198747AA2F857C2700A6AC8D /* NaviButtonSetting.swift in Sources */,
 				7F0DB89FCC63AE28726DD967 /* HomeCoordinator.swift in Sources */,
 				BA9253A3F2CE033BEF480731 /* HomeDIContainer.swift in Sources */,
 				41D0A49F97489D468191FE54 /* HomeViewController.swift in Sources */,
 				10D3AACA8AFF3EC5491A1CD2 /* HomeViewModel.swift in Sources */,
+				198747AC2F8585D400A6AC8D /* PhotoGridViewController.swift in Sources */,
 				11FFD5B3C0735874B09006EB /* ListCoordinator.swift in Sources */,
 				A5AF8E35A7D71873FD5C39E4 /* ListDIContainer.swift in Sources */,
 				C299895D2B0BDB02B887AF4E /* ListViewController.swift in Sources */,

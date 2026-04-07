@@ -60,6 +60,7 @@ final class LabelsViewController: BaseViewController {
     func setupView() {
         
         naviView.setTitle("사진 라벨")
+        naviView.addButtons([LeftButton(type: .back, color: .Theme.primary)])
         
         view.addSubview(naviView)
         view.addSubview(collectionView)
@@ -79,7 +80,7 @@ final class LabelsViewController: BaseViewController {
     
     func setupBindings() {
         
-        naviView.leftPublisher
+        naviView.publisher
             .sink { [weak self] _ in
                 print("back!")
                 self?.viewModel.pop?()

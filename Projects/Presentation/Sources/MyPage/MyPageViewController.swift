@@ -47,7 +47,8 @@ final class MyPageViewController: BaseViewController {
     private func setupView() {
         
         naviView.setTitle("MY PAGE")
-        naviView.addRightButtons([(.setting, .Theme.text)])
+//        naviView.addRightButtons([(.setting, .Theme.text)])
+        naviView.addButtons([RightButton(type: .setting, color: .Theme.text)])
         
         tableView.dataSource = self
         tableView.delegate = self

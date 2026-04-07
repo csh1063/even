@@ -73,10 +73,10 @@ final class NaviBarButton: UIView {
         case .text(let text):
             self.button.setTitle(text, for: .normal)
         default:
-            let config = UIImage.SymbolConfiguration(hierarchicalColor: .Theme.primary)
-            let image = UIImage(systemName: type.imageName, withConfiguration: config)
+//            let config = UIImage.SymbolConfiguration(hierarchicalColor: .Theme.primary)
+//            let image = UIImage(systemName: type.imageName, withConfiguration: config)
 
-//            let image = UIImage(systemName: type.imageName)?.withRenderingMode(.alwaysTemplate)
+            let image = UIImage(systemName: type.imageName)?.withRenderingMode(.alwaysTemplate)
             self.button.setImage(image, for: .normal)
             self.button.tintColor = .Theme.primary
         }
