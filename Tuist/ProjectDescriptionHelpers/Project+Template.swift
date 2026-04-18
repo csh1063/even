@@ -103,8 +103,8 @@ extension Project {
 
 public extension TargetDependency {
 //    static let alamofire: TargetDependency       = .external(name: "Alamofire")
-//    static let moya: TargetDependency            = .external(name: "Moya")
-//    static let combineMoya: TargetDependency     = .external(name: "CombineMoya")
+    static let moya: TargetDependency            = .external(name: "Moya")
+    static let combineMoya: TargetDependency     = .external(name: "CombineMoya")
     static let snapKit: TargetDependency         = .external(name: "SnapKit")
 //    static let kingfisher: TargetDependency      = .external(name: "Kingfisher")
 //    static let lottie: TargetDependency          = .external(name: "Lottie")

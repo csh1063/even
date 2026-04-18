@@ -41,23 +41,33 @@ final class DefaultAppDIContainer: AppDIContainer {
         repositoryFactory.photoCategoryRepository
     }
     
-    private lazy var serviceFactory = ServiceFactory()
+    var geoRepository: GeoRepository {
+        repositoryFactory.geoRepository
+    }
+    
+    private let providerFactory: ProviderFactory
+    private lazy var executor: DefaultNetworkExecutor = {
+        DefaultNetworkExecutor(providerFactory: providerFactory)
+    }()
+    
+    private lazy var serviceFactory = ServiceFactory(executor: executor)
     private lazy var repositoryFactory = RepositoryFactory(
         container: container,
         serviceFactory: serviceFactory
     )
     
     init() {
-       do {
-           container = try ModelContainer(
-               for: PhotoEntity.self,
-               FolderEntity.self,
-               PhotoLabelEntity.self,
-               FolderKeywordEntity.self
-           )
-       } catch {
-           fatalError("ModelContainer 생성 실패: \(error)")
-       }
+        do {
+            container = try ModelContainer(
+                for: PhotoEntity.self,
+                FolderEntity.self,
+                PhotoLabelEntity.self,
+                FolderKeywordEntity.self
+            )
+        } catch {
+            fatalError("ModelContainer 생성 실패: \(error)")
+        }
+        self.providerFactory = ProviderFactory()
     }
     
     // MARK: Splash

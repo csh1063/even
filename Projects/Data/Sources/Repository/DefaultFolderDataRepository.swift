@@ -52,7 +52,7 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
         return folder
     }
     
-    public func  fetchAll() throws -> [Folder] {
+    public func fetchAll() throws -> [Folder] {
         
         let context = ModelContext(container)
         

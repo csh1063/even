@@ -18,6 +18,7 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
     private let analysisService: PhotoAnalysisService
     private let libraryService: PhotoLibraryService  // 이미지 로드용
     private let geocoderService: GeocoderService
+    private let geoAddressService: GeoAddressService
     private let batchSize: Int
     
     // MARK: - Init
@@ -26,11 +27,13 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
         analysisService: PhotoAnalysisService,
         libraryService: PhotoLibraryService,
         geocoderService: GeocoderService,
+        geoAddressService: GeoAddressService,
         batchSize: Int = 20
     ) {
         self.analysisService = analysisService
         self.libraryService = libraryService
         self.geocoderService = geocoderService
+        self.geoAddressService = geoAddressService
         self.batchSize = batchSize
     }
     
@@ -74,11 +77,14 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                                 
                                 print("id: ", photo.asset.localIdentifier, "/ year: ", year ?? "?", ", month:",month ?? "?")
                                 print("labels: ", (labels).map{ $0.name }.joined(separator: ", "))
+                                print("location: ", photo.asset.location?.coordinate ?? "")
                                 continuation.yield(
                                     ProgressAnalysis(
                                         photo: Photo(
                                             localIdentifier: photo.asset.localIdentifier,
                                             createdAt: photo.asset.creationDate ?? Date(),
+                                            latitude: photo.asset.location?.coordinate.latitude,
+                                            longitude: photo.asset.location?.coordinate.longitude,
                                             year: year,
                                             month: month
                                         ),
@@ -97,23 +103,30 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
         }
     }
     
-    public func locationAnalyze(excludingIds: [String]? = nil) -> AsyncThrowingStream<ProgressAnalysis, Error> {
+    public func geocoderAnalyze(_ photo: Photo) async throws -> PhotoLocation? {
+        
+        guard let latitude = photo.latitude, let longitude = photo.longitude else {
+            return nil
+        }
+            
+        let address = try await self.geocoderService.fetchAddress(
+            latitude: latitude, longitude: longitude,
+            id: photo.localIdentifier,
+            locale: Locale(identifier: "ko"))
+        
+        try await Task.sleep(nanoseconds: 1_500_000_000)
+        
+        return address
+    }
+    
+    public func locationAnalyze(_ unanalyzedIds: [String]) -> AsyncThrowingStream<ProgressAnalysis, Error> {
         
         return AsyncThrowingStream { continuation in
             Task.detached(priority: .userInitiated) {
                 do {
                     var completed = 0
-                    let photos = try await self.libraryService.getPhotoList(page: 0).photos
-                    let photoIds: [String]
-
-                    if let excludingIds {
-                        let allIds = photos.map { $0.asset.localIdentifier }
-                        photoIds = allIds.filter { !excludingIds.contains($0) }
-                    } else {
-                        photoIds = photos.map { $0.asset.localIdentifier }
-                    }
                     
-                    let assets = try await self.libraryService.getPhoto(ids: photoIds)
+                    let assets = try await self.libraryService.getLocationPhoto(ids: unanalyzedIds)
                     let total = assets.count
                     
                     for (_, asset) in assets.enumerated() {
@@ -131,9 +144,9 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                                 from: location,
                                 id: asset.localIdentifier,
                                 locale: Locale(identifier: "ko"))
-                            print(
-                                "id: ", asset.localIdentifier,
-                                "location:", "\(address?.country ?? ""), \(address?.locality ?? "")")
+//                            print(
+//                                "id: ", asset.localIdentifier,
+//                                "location:", "\(address?.country ?? ""), \(address?.locality ?? ""), \(address?.subLocality ?? ""), \(address?.thoroughfare ?? ""),  \(address?.administrativeArea ?? "")")
 //                            addressEn = try await self.geocoderService.fetchAddress(
 //                                from: location,
 //                                id: asset.localIdentifier,
@@ -142,7 +155,6 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                             latitude = nil
                             longitude = nil
                             address = nil
-//                            addressEn = nil
                         }
                         addressEn = nil
                         

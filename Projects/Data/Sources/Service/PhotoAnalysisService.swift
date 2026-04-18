@@ -53,7 +53,6 @@ public final class PhotoAnalysisService {
                     continuation.resume(returning: labels)
                     
                 } catch {
-//                    continuation.resume(throwing: error)
                     print("Vision classifyImage 에러:", error)
                     continuation.resume(returning: [])
                 }

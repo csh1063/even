@@ -46,8 +46,27 @@ public final class GeocoderService {
             let location = mapping(of: data)
             return location
         } catch {
-            print("error")
-            return PhotoLocation()
+            print("error CLGeocoder")
+            return nil
+        }
+    }
+    
+    func fetchAddress(latitude: Double, longitude: Double, id: String, locale: Locale = .current) async throws -> PhotoLocation? {
+        
+        let geocoder = CLGeocoder()
+        do {
+            let placemarks = try await geocoder.reverseGeocodeLocation(
+                CLLocation(latitude: latitude, longitude: longitude),
+                preferredLocale: locale
+            )
+            
+            guard let data = placemarks.first else { return PhotoLocation() }
+            
+            let location = mapping(of: data)
+            return location
+        } catch {
+            print("error CLGeocoder")
+            return nil
         }
     }
 
@@ -63,12 +82,26 @@ public final class GeocoderService {
 
     private func mapping(of placemark: CLPlacemark) -> PhotoLocation {
         PhotoLocation(
-            country: replaceAddress(placemark.country),
-            administrativeArea: replaceAddress(placemark.administrativeArea),
+            name: replaceAddress(placemark.name),
+            thoroughfare: replaceAddress(placemark.thoroughfare),
+            subThoroughfare: replaceAddress(placemark.subThoroughfare),
             locality: replaceAddress(placemark.locality),
             subLocality: replaceAddress(placemark.subLocality),
-            thoroughfare: replaceAddress(placemark.thoroughfare),
-            ocean: replaceAddress(placemark.ocean),
-            isoCountryCode: placemark.isoCountryCode)
+            administrativeArea: replaceAddress(placemark.administrativeArea),
+            subAdministrativeArea: replaceAddress(placemark.subAdministrativeArea),
+            postalCode: replaceAddress(placemark.postalCode),
+            isoCountryCode: placemark.isoCountryCode,
+            country: replaceAddress(placemark.country),
+            inlandWater: replaceAddress(placemark.inlandWater),
+            ocean: replaceAddress(placemark.ocean)
+            
+//            country: replaceAddress(placemark.country),
+//            administrativeArea: replaceAddress(placemark.administrativeArea),
+//            locality: replaceAddress(placemark.locality),
+//            subLocality: replaceAddress(placemark.subLocality),
+//            thoroughfare: replaceAddress(placemark.thoroughfare),
+//            ocean: replaceAddress(placemark.ocean),
+//            isoCountryCode: placemark.isoCountryCode)
+            )
     }
 }

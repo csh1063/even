@@ -28,7 +28,8 @@ public final class AlbumDIContainer {
         let analysisUseCase = DefaultPhotoAnalysisUseCase(
             libraryRepository: appDIContainer.photoLibraryRepository,
             analysisRepository: appDIContainer.photoAnalysisRepository,
-            dataRepository: appDIContainer.photoDataRepository
+            dataRepository: appDIContainer.photoDataRepository,
+            geoRepository: appDIContainer.geoRepository
         )
         
         let autoFolderUseCase = DefaultAutoFolderUseCase(

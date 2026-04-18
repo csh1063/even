@@ -19,8 +19,15 @@ import Foundation
 
 public final class ServiceFactory {
 
-    public init() {
+    private let executor: DefaultNetworkExecutor
+    
+    public init(executor: DefaultNetworkExecutor) {
+        self.executor = executor
     }
+    
+    public lazy var geoAddressService: GeoAddressService = {
+        GeoAddressService(excuteor: self.executor)
+    }()
     
     public var photoLibraryService: PhotoLibraryService = {
         PhotoLibraryService()

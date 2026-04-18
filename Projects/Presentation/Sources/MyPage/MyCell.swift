@@ -52,7 +52,7 @@ final class MyCell: UITableViewCell {
             make.centerY.equalTo(self)
             make.leading.equalTo(label.snp.trailing)
             make.trailing.equalTo(self).inset(20)
-            make.width.height.equalTo(20)
+            make.width.height.equalTo(12)
         }
     }
     

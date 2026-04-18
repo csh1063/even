@@ -58,7 +58,7 @@ final class NaviBarView: UIView {
     }
     
     public func setTitle(_ title: String,
-                         color: UIColor = .Theme.primary,
+                         color: UIColor = .Theme.text,
                          font: UIFont = .systemFont(ofSize: 20)) {
         self.titleLabel.text = title
         self.titleLabel.textColor = color

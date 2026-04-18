@@ -78,7 +78,7 @@ final class NaviBarButton: UIView {
 
             let image = UIImage(systemName: type.imageName)?.withRenderingMode(.alwaysTemplate)
             self.button.setImage(image, for: .normal)
-            self.button.tintColor = .Theme.primary
+//            self.button.tintColor = .Theme.primary
         }
     }
 }

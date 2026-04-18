@@ -25,10 +25,6 @@ public final class MyPageCoordinator: BaseCoordinator {
         let viewModel = diContainer.makeMyPageViewModel(coordinator: self)
         let vc = MyPageViewController(viewModel: viewModel)
 
-//        vc.onSelectItem = { [weak self] id in
-//            self?.showDetail(id: id)
-//        }
-        
         bindAlert(from: viewModel)
         
         navigationController.delegate = self
@@ -52,13 +48,16 @@ public final class MyPageCoordinator: BaseCoordinator {
         self.hideTabBar?()
         self.start(coordinator: detailCoordinator)
     }
-
-//    private func showDetail(id: String) {
-//        let detailDI = diContainer.makeDetailDIContainer(itemID: id)
-//        let coordinator = Tab1DetailCoordinator(
-//            navigationController: navigationController,
-//            diContainer: detailDI
-//        )
-//        coordinator.start()
-//    }
+    
+    func moveTest() {
+        print("test!")
+        let detailDI = diContainer.makePhotoTestDIContainer()
+        
+        let detailCoordinator = PhotoTestCoordinator(
+            diContainer: detailDI,
+            navigationController: self.navigationController
+        )
+        self.hideTabBar?()
+        self.start(coordinator: detailCoordinator)
+    }
 }

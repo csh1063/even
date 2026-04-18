@@ -150,12 +150,12 @@ public final class DefaultPhotoDataRepository: PhotoDataRepository {
         return try context.fetch(fetchDescriptor).map { $0.localIdentifier }
     }
     
-    public func fetchLocationAnalyzed() throws -> [String] {
+    public func fetchLocationUnanalyzed() throws -> [Photo] {
         let context = ModelContext(container)
         let fetchDescriptor = FetchDescriptor<PhotoEntity>(
-            predicate: #Predicate { $0.isoCountryCode != nil }
+            predicate: #Predicate { $0.analyzedAt != nil && $0.isoCountryCode == nil }
         )
-        return try context.fetch(fetchDescriptor).map { $0.localIdentifier }
+        return try context.fetch(fetchDescriptor).map { $0.toDomain() }
     }
     
     public func fetchSyncPhotoId(byFolder localIdentifier: UUID) throws -> String {

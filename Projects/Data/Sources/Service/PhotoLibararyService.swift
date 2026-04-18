@@ -150,7 +150,7 @@ public final class PhotoLibraryService {
             options.isSynchronous = false
             options.isNetworkAccessAllowed = true
             size = specialSize
-            contentMode = .aspectFill
+            contentMode = .aspectFit
         }
         
         return try await withCheckedThrowingContinuation { continuation in
@@ -172,7 +172,7 @@ public final class PhotoLibraryService {
         }
     }
 
-    public func getPhoto(ids: [String]) async throws -> [PHAsset] {
+    public func getLocationPhoto(ids: [String]) async throws -> [PHAsset] {
         let assets = PHAsset.fetchAssets(
             withLocalIdentifiers: ids,
             options: nil

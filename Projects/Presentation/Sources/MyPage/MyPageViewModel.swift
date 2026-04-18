@@ -25,14 +25,14 @@ final class MyPageViewModel: BaseViewModel {
     let input = PassthroughSubject<Input, Never>()
     
     private var coordinator: MyPageCoordinator?
-    private var cancellable = Set<AnyCancellable>()
+    private var cancellables = Set<AnyCancellable>()
     
     init(coordinator: MyPageCoordinator) {
         self.coordinator = coordinator
         
         super.init()
 
-        self.cellTypes = fetchCellTypes()
+        self.cellTypes = MyPageCellType.allCases// fetchCellTypes()
         self.bind()
     }
     
@@ -52,7 +52,7 @@ final class MyPageViewModel: BaseViewModel {
                 await self.handle(input)
             }
         }
-        .store(in: &cancellable)
+        .store(in: &cancellables)
     }
     
     private func handle(_ input: Input) async {
@@ -60,14 +60,18 @@ final class MyPageViewModel: BaseViewModel {
         case .appear: break
         case let .selectItem(type):
             print("gogo", type)
-            self.coordinator?.moveLabels()
-            break
+            switch type {
+            case .labels:
+                self.coordinator?.moveLabels()
+            case .test:
+                self.coordinator?.moveTest()
+            }
         }
     }
     
-    private func fetchCellTypes() -> [MyPageCellType] {
-        return [
-            .labels
-        ]
-    }
+//    private func fetchCellTypes() -> [MyPageCellType] {
+//        return [
+//            .labels, .test
+//        ]
+//    }
 }

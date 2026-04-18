@@ -20,7 +20,7 @@ struct LeftButton: NaviButtonSetting {
     var type: NaviBarButtonType
     var color: UIColor
     
-    init(type: NaviBarButtonType, color: UIColor) {
+    init(type: NaviBarButtonType, color: UIColor = .Theme.text) {
         self.type = type
         self.color = color
     }

@@ -37,4 +37,11 @@ public final class MyPageDIContainer {
             photoLabelDataRepository: appDIContainer.photoLabelDataRepository
         )
     }
+    
+    func makePhotoTestDIContainer() -> PhotoTestDIContainer {
+        PhotoTestDIContainer(
+            photoDataRepository: appDIContainer.photoDataRepository,
+            geoRepository: appDIContainer.geoRepository
+        )
+    }
 }

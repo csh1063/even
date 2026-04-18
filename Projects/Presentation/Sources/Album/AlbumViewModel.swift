@@ -47,7 +47,7 @@ public final class AlbumViewModel: BaseViewModel {
     private let autoFolderUseCase: AutoFolderUseCase
     private let folderUseCase: FolderUseCase
     
-    private var cancellable = Set<AnyCancellable>()
+    private var cancellables = Set<AnyCancellable>()
     
     public init(coordinator: AlbumCoordinator,
                 photoUseCase: PhotoLibraryUseCase,
@@ -88,7 +88,7 @@ public final class AlbumViewModel: BaseViewModel {
             guard let self else { return }
             Task { await self.handle(input) }
         }
-        .store(in: &cancellable)
+        .store(in: &cancellables)
     }
     
     private func handle(_ input: Input) async {
@@ -186,7 +186,7 @@ public final class AlbumViewModel: BaseViewModel {
         self.isAnalyzing = true
         Task.detached(priority: .background) { [weak self] in
             guard let self else {return}
-            try await self.analysisPhotoLocation(isFull: isFull)
+            try await self.analysisPhotoLocation()
             await MainActor.run {
                 self.isAnalyzing = false
             }
@@ -237,9 +237,9 @@ public final class AlbumViewModel: BaseViewModel {
         
     }
     
-    private func analysisPhotoLocation(isFull: Bool) async throws {
+    private func analysisPhotoLocation() async throws {
         
-        for try await progress in self.analysisUseCase.locationAnalysis(isFull: isFull) {
+        for try await progress in self.analysisUseCase.locationAnalysis() {
             await MainActor.run {
                 switch progress.state {
                 case .progress(let ratio):

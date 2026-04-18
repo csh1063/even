@@ -39,7 +39,7 @@ public final class AlbumDetailViewModel: BaseViewModel {
     private let libraryUseCase: PhotoLibraryUseCase
     private let detailUseCase: FolderDetailUseCase
     
-    private var cancellable = Set<AnyCancellable>()
+    private var cancellables = Set<AnyCancellable>()
     
     var pop: (() -> Void)?
     
@@ -93,7 +93,7 @@ public final class AlbumDetailViewModel: BaseViewModel {
             guard let self else { return }
             Task { await self.handle(input) }
         }
-        .store(in: &cancellable)
+        .store(in: &cancellables)
     }
     
     private func handle(_ input: Input) async {

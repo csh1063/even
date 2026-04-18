@@ -36,7 +36,7 @@ public final class PhotoLibraryViewModel: BaseViewModel {
     
     private let input = PassthroughSubject<Input, Never>()
     private let useCase: PhotoLibraryUseCase
-    private var cancellable = Set<AnyCancellable>()
+    private var cancellables = Set<AnyCancellable>()
     
     public init(useCase: PhotoLibraryUseCase) {
         self.useCase = useCase
@@ -86,7 +86,7 @@ public final class PhotoLibraryViewModel: BaseViewModel {
             guard let self else { return }
             Task { await self.handle(input) }
         }
-        .store(in: &cancellable)
+        .store(in: &cancellables)
     }
     
     private func handle(_ input: Input) async {

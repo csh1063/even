@@ -10,6 +10,7 @@ import Foundation
 
 public protocol PhotoAnalysisRepository {
     func analyze(excludingIds: [String]?) -> AsyncThrowingStream<ProgressAnalysis, Error>
-    func locationAnalyze(excludingIds: [String]?) -> AsyncThrowingStream<ProgressAnalysis, Error>
+    func locationAnalyze(_ unanalyzedIds: [String]) -> AsyncThrowingStream<ProgressAnalysis, Error>
+    func geocoderAnalyze(_ photo: Photo) async throws -> PhotoLocation?
     func analyzeSingle(photoId: String) async throws  -> [PhotoLabel]
 }

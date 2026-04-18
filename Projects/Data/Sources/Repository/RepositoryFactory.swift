@@ -19,9 +19,6 @@ public final class RepositoryFactory {
         self.serviceFactory = serviceFactory
     }
     
-//    public var makeSplashRepository
-//    public var makeMainRepository
-    
     public lazy var photoLibraryRepository: PhotoLibraryRepository = {
         DefaultPhotoLibraryRepository(
             libraryService: serviceFactory.photoLibraryService,
@@ -33,7 +30,8 @@ public final class RepositoryFactory {
         DefaultPhotoAnalysisRepository(
             analysisService: serviceFactory.photoAnalysisService,
             libraryService: serviceFactory.photoLibraryService,
-            geocoderService: serviceFactory.geocoderService
+            geocoderService: serviceFactory.geocoderService,
+            geoAddressService: serviceFactory.geoAddressService
         )
     }()
     
@@ -51,5 +49,9 @@ public final class RepositoryFactory {
     
     public lazy var photoCategoryRepository: PhotoCategoryRepository = {
         DefaultPhotoCategoryRepository(service: serviceFactory.photoCategoryService)
+    }()
+    
+    public lazy var geoRepository: GeoRepository = {
+        DefaultGeoRepository(service: serviceFactory.geoAddressService)
     }()
 }
