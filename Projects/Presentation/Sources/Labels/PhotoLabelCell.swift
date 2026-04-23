@@ -26,9 +26,9 @@ final class PhotoLabelCell: UICollectionViewCell {
     private func setupView() {
         
         contentView.layer.cornerRadius = 16
-        contentView.backgroundColor = .Theme.primary.withAlphaComponent(0.2)
+        contentView.backgroundColor = Theme.primary.withAlphaComponent(0.2)
         
-        label.textColor = .Theme.text
+        label.textColor = Theme.text
         
         contentView.addSubview(label)
         

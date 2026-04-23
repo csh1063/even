@@ -33,6 +33,7 @@ final class NaviBarView: UIView {
     private lazy var logoImageView = UIImageView()
     
     private lazy var titleLabel: UILabel = UILabel()
+    private lazy var messageLabel: UILabel = UILabel()
     
     var publisher: AnyPublisher<NaviBarButtonType, Never> {
         let publishers = buttons.map { $0.publisher }
@@ -58,11 +59,19 @@ final class NaviBarView: UIView {
     }
     
     public func setTitle(_ title: String,
-                         color: UIColor = .Theme.text,
+                         color: UIColor = Theme.text,
                          font: UIFont = .systemFont(ofSize: 20)) {
         self.titleLabel.text = title
         self.titleLabel.textColor = color
         self.titleLabel.font = font
+    }
+    
+    public func setMessage(_ message: String,
+                           color: UIColor = Theme.text,
+                           font: UIFont = .systemFont(ofSize: 20)) {
+        self.messageLabel.text = message
+        self.messageLabel.textColor = color
+        self.messageLabel.font = font
     }
     
     public func setHeight(_ height: CGFloat) {
@@ -104,10 +113,10 @@ final class NaviBarView: UIView {
     // MARK: - Setup
     private func setupAppearance(isBlur: Bool) {
         if isBlur {
-            backgroundColor = UIColor.Theme.background.withAlphaComponent(0.7)
+            backgroundColor = Theme.background.withAlphaComponent(0.7)
             blurView.setBlur(style: .light)
         } else {
-            backgroundColor = UIColor.Theme.background
+            backgroundColor = Theme.background
         }
     }
 
@@ -123,8 +132,8 @@ final class NaviBarView: UIView {
         coverView.snp.makeConstraints { make in
             make.leading.equalToSuperview().offset(16)
             make.trailing.equalToSuperview().offset(-16)
-            make.top.equalTo(self.safeAreaLayoutGuide)
-            make.bottom.equalToSuperview()
+            make.top.equalTo(self.safeAreaLayoutGuide).offset(20)
+            make.bottom.lessThanOrEqualToSuperview()
             make.height.equalTo(44)
         }
         
@@ -153,8 +162,13 @@ final class NaviBarView: UIView {
             case .leading:
                 titleLabel.textAlignment = .left
                 stackView.addArrangedSubview(titleLabel)
+                coverView.addSubview(messageLabel)
+                messageLabel.snp.makeConstraints { make in
+                    make.top.equalTo(coverView.snp.bottom).offset(6)
+                    make.bottom.equalTo(self)
+                    make.leading.equalTo(titleLabel)
+                }
             }
-            
         }
     }
     

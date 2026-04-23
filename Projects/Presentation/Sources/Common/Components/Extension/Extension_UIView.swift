@@ -123,7 +123,7 @@ extension UIView {
 
     // 뷰의 내부로 shadow 생성
     func addInnerShadow(edges: [Edge], shadowRadius radius: CGFloat = 5.0,
-                        toColor: UIColor = UIColor.Theme.background,
+                        toColor: UIColor = Theme.background,
                         fromColor: UIColor = UIColor("#E7E7E7", alpha: 0.2)) {
         for edge in edges {
             let shadow = EdgeShadowLayer(forView: self, edge: edge, shadowRadius: radius,
@@ -302,7 +302,7 @@ enum Edge {
 fileprivate final class EdgeShadowLayer: CAGradientLayer {
 
     init(forView view: UIView, edge: Edge, shadowRadius radius: CGFloat = 5.0,
-         toColor: UIColor = UIColor.Theme.background,
+         toColor: UIColor = Theme.background,
          fromColor: UIColor = UIColor("#E7E7E7", alpha: 0.2)) {
         super.init()
         self.colors = [fromColor.cgColor, toColor.cgColor]

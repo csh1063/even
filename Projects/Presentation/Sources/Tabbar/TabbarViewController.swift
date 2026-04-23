@@ -13,14 +13,14 @@ final class TabbarViewController: CustomTabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.setBackgroundColor(.Theme.background)
+        self.setBackgroundColor(Theme.surface.withAlphaComponent(0.72))
         
         self.setItemColors(
-            normal: .Theme.tertiary,
-            selected: .Theme.primary)
+            normal: Theme.textSecond,
+            selected: .white)
         
-        self.setLayoutMargin(height: 56,
-                             margin: .init(leading: 20, trailing: 200, bottom: 4),
+        self.setLayoutMargin(height: 68,
+                             margin: .init(leading: 20, trailing: 20, bottom: 10),
                              padding: .init(leading: 12, trailing: 12),
                              cornerRadius: 28)
 //        self.setLayoutMargin(height: 56, bottom: 4,
@@ -28,7 +28,14 @@ final class TabbarViewController: CustomTabBarController {
         
         self.setShadow(color: .black, alpha: 0.1, x: 0, y: 4, blur: 16)
         
-        self.selectedIndex = 1
+        self.setSelectedBox(radius: 26, color: Theme.primary)
+        
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        self.selectedIndex = 0
     }
     
     func showTabbar() {
@@ -38,4 +45,8 @@ final class TabbarViewController: CustomTabBarController {
     func hideTabbar() {
         self.animateFade(isShow: false)
     }
+}
+
+extension TabbarViewController: CustomTabBarDelegate {
+    
 }

@@ -32,6 +32,11 @@ enum NaviBarButtonType: Equatable {
     case analysis
     case reset
     case text(String)
+    case sectionGrid
+    case grid
+    case more
+    case edit
+    case delete
     
     var imageName: String {
         switch self {
@@ -50,6 +55,11 @@ enum NaviBarButtonType: Equatable {
         case .analysis: return "sparkles.tv"
         case .reset: return "arrow.clockwise"
         case .text: return ""
+        case .sectionGrid: return "square.grid.3x1.below.line.grid.1x2"
+        case .grid: return "square.grid.3x3"
+        case .more: return "ellipsis"
+        case .edit: return "pencil.line"
+        case .delete: return "trash"
         }
     }
 }

@@ -21,7 +21,8 @@ extension AlbumAssetEntity {
 extension PhotoAssetEntity {
     func toDomain() -> PhotoInAlbum {
         return PhotoInAlbum(
-            id: self.asset.localIdentifier
+            id: self.asset.localIdentifier,
+            createdDate: self.asset.creationDate
         )
     }
 }

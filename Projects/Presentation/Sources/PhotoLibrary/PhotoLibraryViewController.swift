@@ -15,35 +15,11 @@ final class PhotoLibraryViewController: BaseViewController {
     
     private var naviView: NaviBarView = NaviBarView(type: .title(.leading))
     
-    //    private var collectionView: UICollectionView = {
-    //
-    //        let space: CGFloat = 2
-    //        let count: CGFloat = 3
-    ////        let height = AppInfo.shared.bannerHeight
-    //        let layout = UICollectionViewFlowLayout()
-    //        layout.scrollDirection = .vertical
-    //        layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-    //        layout.minimumLineSpacing = space
-    //        layout.minimumInteritemSpacing = space
-    //
-    //        let width = ((UIScreen.main.bounds.width - (space * (count + 1))) / count)
-    //
-    //        layout.itemSize = CGSize(width: width, height: width)
-    //
-    //        let collectionView = UICollectionView(frame: CGRect.zero, collectionViewLayout: layout)
-    //        collectionView.isScrollEnabled = true
-    //        collectionView.showsVerticalScrollIndicator = false
-    //        collectionView.backgroundColor = .clear
-    //        collectionView.contentInset = UIEdgeInsets(top: 12, left: space, bottom: 0, right: space)
-    //
-    //        return collectionView
-    //    }()
-    
     private var collectionView: UICollectionView!
+    private var dataSource: UICollectionViewDiffableDataSource<PhotoHeader, PhotoCellItemViewModel>!
     
     private var columnCount: Int = 3
-    
-    private var dataSource: UICollectionViewDiffableDataSource<Int, PhotoCellItemViewModel>!
+    private var pinchBeginScale: CGFloat = 1.0
     
     private let viewModel: PhotoLibraryViewModel
     
@@ -86,12 +62,16 @@ final class PhotoLibraryViewController: BaseViewController {
     
     private func setupView() {
         
-        collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: createDynamicLayout(columns: columnCount, scale: 1.0))
+        collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: createDynamicLayout(columns: columnCount))
         collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        collectionView.backgroundColor = .Theme.background
+        collectionView.backgroundColor = Theme.background
         
-        naviView.setTitle("PHOTO LIBRARY", color: .Theme.text)
-        naviView.translatesAutoresizingMaskIntoConstraints = false
+        naviView.setTitle("사진첩",
+                          color: Theme.text,
+                          font: .systemFont(ofSize: 32, weight: .bold))
+        naviView.setMessage("사진첩의 사진들",
+                            color: Theme.text,
+                            font: .systemFont(ofSize: 14, weight: .regular))
         
         configureDataSource()
         
@@ -115,18 +95,19 @@ final class PhotoLibraryViewController: BaseViewController {
         
         output.photos
             .receive(on: DispatchQueue.main)
-            .map { [weak self] photos -> [PhotoCellItemViewModel] in
-                guard let self else { return [] }
-                return photos.map {
-                    PhotoCellItemViewModel(
-                        localIdentifier: $0.localIdentifier,
-                        imageLoader: self.viewModel
-                    )
-                }
-            }
             .sink { [weak self] photos in
                 print("photos sink: ", photos.count)
                 self?.applySnapshot(with: photos)
+            }
+            .store(in: &cancellables)
+        
+        output.totalCount
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] totalCount in
+                
+                self?.naviView.setMessage("사진 \(totalCount.formatted())장이 정렬되었습니다.",
+                      color: Theme.text,
+                      font: .systemFont(ofSize: 14, weight: .regular))
             }
             .store(in: &cancellables)
     }
@@ -135,8 +116,6 @@ final class PhotoLibraryViewController: BaseViewController {
         let pinch = UIPinchGestureRecognizer(target: self, action: #selector(handlePinch(_:)))
         collectionView.addGestureRecognizer(pinch)
     }
-    
-    private var pinchBeginScale: CGFloat = 1.0
 
     @objc private func handlePinch(_ gesture: UIPinchGestureRecognizer) {
         switch gesture.state {
@@ -150,7 +129,7 @@ final class PhotoLibraryViewController: BaseViewController {
             collectionView.setCollectionViewLayout(newLayout, animated: false)
 
             // 임계점마다 columnCount 업데이트 + 기준 리셋 → 계속 진행 가능
-            if scale < 0.75 && columnCount < 11 {
+            if scale < 0.65 && columnCount < 11 {
                 columnCount += 2
                 pinchBeginScale = gesture.scale
             } else if scale > 1.35 && columnCount > 1 {
@@ -165,7 +144,7 @@ final class PhotoLibraryViewController: BaseViewController {
             
             // 방향별로 다르게
             collectionView.setCollectionViewLayout(
-                createLayout(columns: columnCount),
+                createDynamicLayout(columns: columnCount),
                 animated: isZoomingIn  // 확대는 animated, 축소는 false
             )
         default:
@@ -173,22 +152,23 @@ final class PhotoLibraryViewController: BaseViewController {
         }
     }
 
-    private func createDynamicLayout(columns: Int, scale: CGFloat) -> UICollectionViewLayout {
+    private func createDynamicLayout(columns: Int, scale: CGFloat = 1.0) -> UICollectionViewLayout {
         UICollectionViewCompositionalLayout { _, env in
-            let contentWidth = env.container.contentSize.width
+            let spacing = 4.0
+            let sectionInset = 20.0
             let baseCount = CGFloat(columns)
-            let isZoomingIn = scale > 1.0
-//            let progress = isZoomingIn ? min(scale - 1.0, 1.0) : min(1.0 - scale, 1.0)
-            let progress = isZoomingIn
-                ? min((scale - 1.0) / 0.35, 1.0)   // 1.0 → 1.35 구간
-                : min((1.0 - scale) / 0.25, 1.0)   // 1.0 → 0.75 구간
-            
-            print("progress", progress)
+            let isZoomingIn = scale >= 1.0
 
-            // 확대 시 높이 고정 (baseCount 기준), 축소 시에만 높이 변화
+            let progress = isZoomingIn
+                ? min((scale - 1.0) / 0.6, 1.0)
+                : min((1.0 - scale) / 0.6, 1.0)
+            
             let dynamicColumnCount = isZoomingIn
-                ? baseCount  // 확대 시 높이 고정
+                ? baseCount
                 : baseCount + (progress * 2.0)
+            
+            let contentWidth = env.container.contentSize.width
+            - (sectionInset * 2) - (spacing * (dynamicColumnCount - 1))
             
             let groupHeight: CGFloat
             let sideItemWidth: CGFloat
@@ -222,58 +202,71 @@ final class PhotoLibraryViewController: BaseViewController {
                 for i in 0..<totalItemsInRow {
                     let isEdge = !isZoomingIn && (i == 0 || i == totalItemsInRow - 1)
                     let width = isEdge ? sideItemWidth : normalItemWidth
-                    items.append(NSCollectionLayoutGroupCustomItem(frame: CGRect(x: currentX, y: 0, width: width, height: groupHeight)))
-                    currentX += width
+                    let frame = CGRect(
+                        x: currentX + sectionInset,
+                        y: spacing,
+                        width: width,
+                        height: groupHeight - spacing
+                    )
+                    items.append(NSCollectionLayoutGroupCustomItem(frame: frame))
+                    currentX += width + spacing // 다음 아이템 이동 시 간격만큼 더 이동
                 }
                 return items
             }
-
-            return NSCollectionLayoutSection(group: group)
+            
+            let headerSize = NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1.0),
+                heightDimension: .estimated(50)
+            )
+            let header = NSCollectionLayoutBoundarySupplementaryItem(
+                layoutSize: headerSize,
+                elementKind: UICollectionView.elementKindSectionHeader,
+                alignment: .top
+            )
+            header.pinToVisibleBounds = true
+            let section = NSCollectionLayoutSection(group: group)
+            section.boundarySupplementaryItems = [header]
+            section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0)
+            
+            return section
         }
-    }
-    
-    private func createLayout(columns: Int) -> UICollectionViewLayout {
-        // 1. 아이템 너비: 1.0이 아니라 반드시 1/n로 직접 지정
-        let itemSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(1.0 / CGFloat(columns)),
-            heightDimension: .fractionalHeight(1.0)
-        )
-        let item = NSCollectionLayoutItem(layoutSize: itemSize)
-        item.contentInsets = .init(top: 1, leading: 1, bottom: 1, trailing: 1)
-        
-        // 2. 그룹 높이: 너비 대비 1/n로 지정해서 정사각형 유지
-        let groupSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(1.0),
-            heightDimension: .fractionalWidth(1.0 / CGFloat(columns))
-        )
-        
-        // 3. iOS 16+ : count 명시해서 강제 분할
-        let group = NSCollectionLayoutGroup.horizontal(
-            layoutSize: groupSize,
-            repeatingSubitem: item,
-            count: columns
-        )
-        
-        return UICollectionViewCompositionalLayout(section: NSCollectionLayoutSection(group: group))
     }
 }
 
 extension PhotoLibraryViewController {
     private func configureDataSource() {
         let cellRegistration = UICollectionView.CellRegistration<PhotoCell, PhotoCellItemViewModel> { cell, indexPath, cellViewModel in
-            cell.configure(with: cellViewModel)   // weak self도 필요 없어짐
+            cell.configure(with: cellViewModel, index: indexPath.row)   // weak self도 필요 없어짐
         }
         
-        dataSource = UICollectionViewDiffableDataSource<Int, PhotoCellItemViewModel>(collectionView: collectionView) {
+        let headerRegistration = UICollectionView.SupplementaryRegistration<PhotoSectionHeaderView>(
+            elementKind: UICollectionView.elementKindSectionHeader
+        ) { headerView, _, indexPath in
+            let sections = Array(self.dataSource.snapshot().sectionIdentifiers)
+            headerView.configure(with: sections[indexPath.section])
+        }
+        
+        dataSource = UICollectionViewDiffableDataSource<PhotoHeader, PhotoCellItemViewModel>(collectionView: collectionView) {
             collectionView, indexPath, cellViewModel in
             return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: cellViewModel)
         }
+        
+        dataSource.supplementaryViewProvider = { collectionView, kind, indexPath in
+            return collectionView.dequeueConfiguredReusableSupplementary(using: headerRegistration, for: indexPath)
+        }
     }
     
-    private func applySnapshot(with photos: [PhotoCellItemViewModel]) {
-        var snapshot = NSDiffableDataSourceSnapshot<Int, PhotoCellItemViewModel>()
-        snapshot.appendSections([0])
-        snapshot.appendItems(photos)
+    private func applySnapshot(with photos: [PhotoHeader: [PhotoCellItemViewModel]]) {
+        var snapshot = NSDiffableDataSourceSnapshot<PhotoHeader, PhotoCellItemViewModel>()
+
+        let sections: [PhotoHeader] = Array(photos.keys).sorted { $0.title > $1.title}
+        
+        snapshot.appendSections(sections)
+        
+        sections.forEach { section in
+            snapshot.appendItems(photos[section] ?? [], toSection: section)
+        }
+
         dataSource.apply(snapshot, animatingDifferences: true)
     }
 }

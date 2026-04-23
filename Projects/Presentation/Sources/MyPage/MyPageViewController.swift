@@ -22,7 +22,7 @@ final class MyPageViewController: BaseViewController {
         tableView.alwaysBounceVertical = true
         
         tableView.register(MyCell.self, forCellReuseIdentifier: MyCell.cellName)
-        tableView.backgroundColor = .Theme.background
+        tableView.backgroundColor = Theme.background
         
         return tableView
     }()
@@ -46,9 +46,14 @@ final class MyPageViewController: BaseViewController {
     
     private func setupView() {
         
-        naviView.setTitle("MY PAGE")
-//        naviView.addRightButtons([(.setting, .Theme.text)])
-        naviView.addButtons([RightButton(type: .setting, color: .Theme.text)])
+        naviView.setTitle("마이 페이지",
+                          color: Theme.text,
+                          font: .systemFont(ofSize: 32, weight: .bold))
+        naviView.setMessage("사진들이 개 앨범으로 정리되었어요",
+                            color: Theme.text,
+                            font: .systemFont(ofSize: 14, weight: .regular))
+        
+        naviView.addButtons([RightButton(type: .setting, color: Theme.text)])
         
         tableView.dataSource = self
         tableView.delegate = self

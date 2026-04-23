@@ -23,7 +23,7 @@ final class AlbumViewController: BaseViewController {
     // for simulator test
 //    private let dummyButton: UIButton = UIButton()
 //        .withTitle("더미", for: .normal)
-//        .withTitleColor(.Theme.nickel, for: .normal)
+//        .withTitleColor(Theme.nickel, for: .normal)
     
     private var collectionView: UICollectionView = {
 
@@ -38,13 +38,14 @@ final class AlbumViewController: BaseViewController {
         
         let width = ((UIScreen.main.bounds.width - (space * (count - 1))) - (margin * 2)) / count
         
-        layout.itemSize = CGSize(width: width, height: width)
+        layout.estimatedItemSize = CGSize(width: floor(width), height: width) // 대략적인 높이
+        layout.itemSize = UICollectionViewFlowLayout.automaticSize
 
         let collectionView = UICollectionView(frame: CGRect.zero, collectionViewLayout: layout)
         collectionView.isScrollEnabled = true
         collectionView.showsVerticalScrollIndicator = false
         collectionView.contentInset = UIEdgeInsets(top: 12, left: margin, bottom: 80, right: margin)
-        collectionView.backgroundColor = .Theme.background
+        collectionView.backgroundColor = Theme.background
 
         return collectionView
     }()
@@ -53,7 +54,7 @@ final class AlbumViewController: BaseViewController {
 //        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: makeLayout())
 //        collectionView.isScrollEnabled = true
 //        collectionView.showsVerticalScrollIndicator = false
-//        collectionView.backgroundColor = .Theme.background
+//        collectionView.backgroundColor = Theme.background
 //        return collectionView
 //    }()
 //
@@ -115,10 +116,16 @@ final class AlbumViewController: BaseViewController {
     
     private func setupView() {
         
-        naviView.setTitle("Albums")
-//        naviView.addRightButtons([(.reset, .Theme.negative), (.analysis, .Theme.primary)])
-        naviView.addButtons([RightButton(type: .reset, color: .Theme.negative),
-                             RightButton(type: .analysis, color: .Theme.primary)])
+        naviView.setTitle("주제별 앨범",
+                          color: Theme.text,
+                          font: .systemFont(ofSize: 32, weight: .bold))
+        naviView.setMessage("사진들이 개 앨범으로 정리되었어요",
+                            color: Theme.text,
+                            font: .systemFont(ofSize: 14, weight: .regular))
+        
+//        naviView.addRightButtons([(.reset, Theme.negative), (.analysis, Theme.primary)])
+        naviView.addButtons([RightButton(type: .reset, color: Theme.negative),
+                             RightButton(type: .analysis, color: Theme.text)])
         
         collectionView.delegate = self
         
@@ -127,15 +134,15 @@ final class AlbumViewController: BaseViewController {
         locationProgressBar.isHidden = true
         locationFolderProgressBar.isHidden = true
         
-        progressBar.trackTintColor = .Theme.tertiary
-        folderProgressBar.trackTintColor = .Theme.tertiary
-        locationProgressBar.trackTintColor = .Theme.tertiary
-        locationFolderProgressBar.trackTintColor = .Theme.tertiary
+        progressBar.trackTintColor = Theme.surface
+        folderProgressBar.trackTintColor = Theme.surface
+        locationProgressBar.trackTintColor = Theme.surface
+        locationFolderProgressBar.trackTintColor = Theme.surface
         
-        progressBar.progressTintColor = .Theme.primary
-        folderProgressBar.progressTintColor = .Theme.primary
-        locationProgressBar.progressTintColor = .Theme.primary
-        locationFolderProgressBar.progressTintColor = .Theme.primary
+        progressBar.progressTintColor = Theme.primary
+        folderProgressBar.progressTintColor = Theme.primary
+        locationProgressBar.progressTintColor = Theme.primary
+        locationFolderProgressBar.progressTintColor = Theme.primary
         
         view.addSubview(collectionView)
         
@@ -255,6 +262,12 @@ final class AlbumViewController: BaseViewController {
             .receive(on: DispatchQueue.main)
             .map { [weak self] folders -> [FolderCellItemViewModel] in
                 guard let self else { return [] }
+                
+                self.naviView.setMessage(
+                    "사진들이 \(folders.count)개 앨범으로 정리되었어요",
+                    color: Theme.text,
+                    font: .systemFont(ofSize: 14, weight: .regular))
+                
                 return folders.map { FolderCellItemViewModel(folder: $0, imageLoader: self.viewModel) }
             }
             .sink { [weak self] folders in
@@ -268,7 +281,7 @@ final class AlbumViewController: BaseViewController {
 extension AlbumViewController {
     private func configureDataSource() {
         let cellRegistration = UICollectionView.CellRegistration<FolderCell, FolderCellItemViewModel> { cell, indexPath, cellViewModel in
-            cell.configure(with: cellViewModel)   // weak self도 필요 없어짐
+            cell.configure(with: cellViewModel, index: indexPath.row)   // weak self도 필요 없어짐
         }
         
         dataSource = UICollectionViewDiffableDataSource<Int, FolderCellItemViewModel>(collectionView: collectionView) {

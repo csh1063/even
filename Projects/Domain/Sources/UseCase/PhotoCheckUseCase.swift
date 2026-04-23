@@ -72,14 +72,11 @@ public class DefaultPhotoCheckUseCase: PhotoCheckUseCase {
         AsyncThrowingStream { continuation in
             Task {
                 do {
-                    
                     let folders = try folderDataRepository.fetchAll()
                     
                     for (index, folder) in folders.enumerated() {
-                        
                         let coverPhotoIdentifier = try photoDataRepository.fetchSyncPhotoId(byFolder: folder.id)
                         let photoCount = try photoDataRepository.fetchSyncPhotoCount(byFolder: folder.id)
-                        
                         let newFolder = Folder(id: folder.id,
                                                name: folder.name,
                                                displayName: folder.displayName,

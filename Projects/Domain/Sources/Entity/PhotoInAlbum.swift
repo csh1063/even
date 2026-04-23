@@ -40,9 +40,11 @@ public struct PhotoInAlbum: Hashable {
     
     public let localIdentifier: String
 //    public var cropInfo: CropInfo?
+    public let createdDate: Date?
     
-    public init(id: String) {
+    public init(id: String, createdDate: Date? = nil) {
         self.localIdentifier = id
+        self.createdDate = createdDate
     }
 }
 

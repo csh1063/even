@@ -33,9 +33,11 @@ final class AppCoordinator: BaseCoordinator {
     private func showSplash() {
         let splashCoordinator = SplashCoordinator(container: container, window: window)
         splashCoordinator.finished
-            .sink { [weak self] isLogined in
-                print("splashCoordinator finished")
-                self?.showMain()
+            .sink { [weak self] isFinished in
+                if isFinished {
+                    print("splashCoordinator finished")
+                    self?.showMain()
+                }
             }
             .store(in: &cancellables)
         start(coordinator: splashCoordinator)

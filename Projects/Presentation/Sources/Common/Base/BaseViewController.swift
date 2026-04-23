@@ -31,7 +31,7 @@ open class BaseViewController: UIViewController {
     open override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.view.backgroundColor = .Theme.background
+        self.view.backgroundColor = Theme.background
         print("==== \(Self.self) viewDidLoad        ====================")
     }
     

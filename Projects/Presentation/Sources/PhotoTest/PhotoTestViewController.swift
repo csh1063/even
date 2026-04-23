@@ -40,16 +40,16 @@ final class PhotoTestViewController: BaseViewController {
     private func setupView() {
         
         naviView.setTitle("laboratory".uppercased())
-        naviView.addButtons([LeftButton(type: .back, color: .Theme.text)])
+        naviView.addButtons([LeftButton(type: .back, color: Theme.text)])
         
         test1Button.setTitle("좌표별 갯수", for: .normal)
-        test1Button.setTitleColor(.Theme.text, for: .normal)
+        test1Button.setTitleColor(Theme.text, for: .normal)
         
         test2Button.setTitle("한국 갯수", for: .normal)
-        test2Button.setTitleColor(.Theme.text, for: .normal)
+        test2Button.setTitleColor(Theme.text, for: .normal)
         
         test3Button.setTitle("주소 변환", for: .normal)
-        test3Button.setTitleColor(.Theme.text, for: .normal)
+        test3Button.setTitleColor(Theme.text, for: .normal)
         
         view.addSubview(test1Button)
         view.addSubview(test2Button)

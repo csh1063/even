@@ -12,9 +12,12 @@ import Domain
 
 final class PhotoCell: UICollectionViewCell {
     
-    private let mainImageView: UIImageView = UIImageView()
+    private let colors: [UIColor] = [.red, .orange, .yellow, .green, .blue, .cyan, .purple]
     
-    private let loadingView: UIView = UIView()
+    private let coverView: UIView = UIView()
+    
+    private let mainImageView: UIImageView = UIImageView()
+    private let noImageView: GradientCardView = GradientCardView()
     
     private var task: Task<Void, Never>?
     private var assetIdentifier: String?
@@ -37,32 +40,36 @@ final class PhotoCell: UICollectionViewCell {
     
     func setupView() {
         
+        self.coverView.addBorder(color: Theme.border, borderWidth: 1)
+        self.coverView.layer.masksToBounds = true
+        self.coverView.layer.cornerRadius = 12
+        
         self.mainImageView.backgroundColor = .clear
-        self.mainImageView.layer.masksToBounds = true
-        self.mainImageView.layer.cornerRadius = 4
         self.mainImageView.contentMode = .scaleAspectFill
         
-        self.loadingView.backgroundColor = .Theme.tertiary
-        self.loadingView.isHidden = true
-        self.loadingView.layer.cornerRadius = 10
-        self.loadingView.layer.masksToBounds = true
+        self.noImageView.color = Theme.accent
         
-        self.contentView.addSubview(mainImageView)
-        self.contentView.addSubview(loadingView)
+        self.contentView.addSubview(coverView)
+        self.coverView.addSubview(noImageView)
+        self.coverView.addSubview(mainImageView)
         
-        self.mainImageView.snp.makeConstraints { make in
-            make.edges.equalTo(self.contentView)//.inset(1)
+        self.coverView.snp.makeConstraints { make in
+            make.edges.equalTo(self.contentView)
         }
         
-        self.loadingView.snp.makeConstraints { make in
-            make.width.height.equalTo(20)
-            make.center.equalTo(self.contentView)
+        self.mainImageView.snp.makeConstraints { make in
+            make.edges.equalTo(self.coverView)
+        }
+        
+        self.noImageView.snp.makeConstraints { make in
+            make.edges.equalTo(self.coverView)
         }
     }
     
-    func configure(with viewModel: PhotoCellItemViewModel) {
+    func configure(with viewModel: PhotoCellItemViewModel, index: Int) {
         self.assetIdentifier = viewModel.localIdentifier
-        self.loadingView.isHidden = false
+        self.noImageView.color = colors[index % colors.count]
+        self.noImageView.startShimmer()
         task = Task {
             let size = self.frame.size
             let image = await viewModel.loadImage(size: CGSize(
@@ -73,7 +80,7 @@ final class PhotoCell: UICollectionViewCell {
             if !Task.isCancelled && self.assetIdentifier == viewModel.localIdentifier {
                 self.mainImageView.image = image
             }
-            self.loadingView.isHidden = true
+            self.noImageView.stopShimmer()
         }
     }
 }

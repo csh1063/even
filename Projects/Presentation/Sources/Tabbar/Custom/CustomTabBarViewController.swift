@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import SnapKit
 
 open class CustomTabBarController: UIViewController {
     
@@ -41,15 +42,16 @@ open class CustomTabBarController: UIViewController {
     
     private var tabBarStackView: UIStackView = UIStackView()
     
+    private var selectedBox: UIView?
+    private var selectedBoxCenter: Constraint?
+    private var isFirst: Bool = true
+    
     private var viewControllers: [UIViewController] = []
     private var items: [CustomTabBarItem] = []
     private var previewsIndex = 0
     
     private var margin: Margin = .zero
     private var padding: Padding = .zero
-//    private var leading: CGFloat = 0
-//    private var trailing: CGFloat = 0
-//    private var bottom: CGFloat = 0
     private var height: CGFloat = 50
     private var cornerRadius: CGFloat?
     
@@ -102,7 +104,7 @@ open class CustomTabBarController: UIViewController {
         super.viewWillAppear(animated)
         print("==== \(Self.self) viewWillAppear     ====================")
         
-        self.updateView()
+//        self.updateView()
     }
     
     open override func viewDidAppear(_ animated: Bool) {
@@ -214,11 +216,31 @@ open class CustomTabBarController: UIViewController {
             view.insertSubview(selectedVC.view, at: 0)
             
             selectedVC.view.frame = view.bounds
+            selectedVC.view.layoutIfNeeded()
             selectedVC.didMove(toParent: self)
             
             self.delegate?.tabBarController(self, didSelect: selectedVC)
             
             self.items.forEach { $0.isSelected = ($0.tag == selectedIndex) }
+            
+            if let box = self.selectedBox {
+                if self.items.count > selectedIndex {
+                    let item = self.items[selectedIndex]
+                    
+                    selectedBoxCenter?.deactivate()
+                    box.snp.makeConstraints { make in
+                        selectedBoxCenter = make.leading.trailing.equalTo(item).inset(8).constraint
+                    }
+                    if isFirst {
+                        self.view.layoutIfNeeded()
+                        self.isFirst = false
+                    } else {
+                        UIView.animate(withDuration: 0.3) {
+                            self.view.layoutIfNeeded()
+                        }
+                    }
+                }
+            }
         }
     }
     
@@ -296,10 +318,10 @@ open class CustomTabBarController: UIViewController {
         self.blur = blur
     }
     
-    public func setTabBarItem(_ image: String, selectedImage: String, vc: UIViewController, title: String? = nil) {
+    public func setTabBarItem(_ image: String, selectedImage: String = "", vc: UIViewController, title: String? = nil) {
         let item = UITabBarItem()
         item.image = UIImage(systemName: image)
-        item.selectedImage = UIImage(systemName: selectedImage)
+        item.selectedImage = UIImage(systemName: selectedImage) ?? UIImage(systemName: image)
         item.title = title
         vc.tabBarItem = item
     }
@@ -317,5 +339,20 @@ open class CustomTabBarController: UIViewController {
             self.tabBarView.alpha = isShow ? 1.0:0.0
             self.view.layoutIfNeeded()
         }
+    }
+    
+    public func setSelectedBox(radius: CGFloat, color: UIColor) {
+        let box = UIView()
+        box.backgroundColor = color
+        box.layer.cornerRadius = radius
+        
+        self.tabBarView.insertSubview(box, belowSubview: tabBarStackView)
+        
+        box.snp.makeConstraints { make in
+//            make.width.equalTo(60)
+            make.top.bottom.equalTo(self.tabBarView).inset(8)
+        }
+        
+        self.selectedBox = box
     }
 }

@@ -26,7 +26,7 @@ final class LabelsViewController: BaseViewController {
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.isScrollEnabled = true
         collectionView.showsVerticalScrollIndicator = false
-        collectionView.backgroundColor = .Theme.background
+        collectionView.backgroundColor = Theme.background
         return collectionView
     }()
     
@@ -60,7 +60,7 @@ final class LabelsViewController: BaseViewController {
     func setupView() {
         
         naviView.setTitle("사진 라벨")
-        naviView.addButtons([LeftButton(type: .back, color: .Theme.text)])
+        naviView.addButtons([LeftButton(type: .back, color: Theme.text)])
         
         view.addSubview(naviView)
         view.addSubview(collectionView)

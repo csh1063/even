@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 55;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -15,6 +15,9 @@
 		13F779FE4F17BDBA660A1B35 /* UIView+Publisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3645708A5BAD77D391863C3 /* UIView+Publisher.swift */; };
 		14143B565EE1025E86B4A457 /* LabelsDIContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D7B5780986C5EECD1B78992 /* LabelsDIContainer.swift */; };
 		17750AE257E622DD8E82133C /* Extension_UITextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C2998FAD7DD5077BD097DB /* Extension_UITextView.swift */; };
+		19EDE62E2F95143D000D6218 /* PhotoSectionHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19EDE62D2F95143D000D6218 /* PhotoSectionHeaderView.swift */; };
+		19EDE65F2F97F4BD000D6218 /* PhotoHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19EDE65E2F97F4BD000D6218 /* PhotoHeader.swift */; };
+		19EDE6612F987859000D6218 /* GradientCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19EDE6602F987859000D6218 /* GradientCardView.swift */; };
 		1EB3782697E5D5765188E1DE /* Extension_UISegmentedControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AC6050EB2A12AA43E785BA5 /* Extension_UISegmentedControl.swift */; };
 		200C032581C4A24727FC0CE6 /* AlbumViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03112E88258FD411CDDBA6D3 /* AlbumViewController.swift */; };
 		22E9BE6A63E4C891FFBF6C76 /* UIGestureRecognizer+Publisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C1A7F457AF7CAC51AE3C6AB /* UIGestureRecognizer+Publisher.swift */; };
@@ -128,6 +131,9 @@
 		0EC98997474D5ABEA1E71B7D /* PhotoLabelCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLabelCell.swift; sourceTree = "<group>"; };
 		125FEEE52CEDA2092E747AB0 /* AlertItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertItem.swift; sourceTree = "<group>"; };
 		134AEE009D928C7E39EAF4CD /* Presentation-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Presentation-Info.plist"; sourceTree = "<group>"; };
+		19EDE62D2F95143D000D6218 /* PhotoSectionHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoSectionHeaderView.swift; sourceTree = "<group>"; };
+		19EDE65E2F97F4BD000D6218 /* PhotoHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoHeader.swift; sourceTree = "<group>"; };
+		19EDE6602F987859000D6218 /* GradientCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradientCardView.swift; sourceTree = "<group>"; };
 		1B18F8EDBD5425ACC9D7811D /* MyPageCellType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPageCellType.swift; sourceTree = "<group>"; };
 		1B74B54DBDDE8F00F62C6A60 /* ListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListViewModel.swift; sourceTree = "<group>"; };
 		1E177AD797E6C5E5BD5A62BA /* PhotoLibraryDIContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryDIContainer.swift; sourceTree = "<group>"; };
@@ -338,8 +344,11 @@
 		7473BC3AABB7D89AF08035C0 /* Photo */ = {
 			isa = PBXGroup;
 			children = (
+				19EDE6602F987859000D6218 /* GradientCardView.swift */,
+				19EDE62D2F95143D000D6218 /* PhotoSectionHeaderView.swift */,
 				B86EE313B24249685CA4C2F7 /* PhotoCell.swift */,
 				BE93C7FE0E23AFE023F533E7 /* PhotoCellItemViewModel.swift */,
+				19EDE65E2F97F4BD000D6218 /* PhotoHeader.swift */,
 			);
 			path = Photo;
 			sourceTree = "<group>";
@@ -663,6 +672,8 @@
 				415FC59E52A77D8CF12C8565 /* BaseEventRouter.swift in Sources */,
 				36AA397C26610437D42082A8 /* BaseViewController.swift in Sources */,
 				D16F155FE2E16F2C9B1B6748 /* BaseViewModel.swift in Sources */,
+				19EDE62E2F95143D000D6218 /* PhotoSectionHeaderView.swift in Sources */,
+				19EDE65F2F97F4BD000D6218 /* PhotoHeader.swift in Sources */,
 				802B12E33E2A659E054052E4 /* ImageLoadable.swift in Sources */,
 				3FD4388F6DDF7F78C9C42159 /* PhotoGridViewController.swift in Sources */,
 				F2DB447ECE3D685355A8300E /* Extension_MutableCollection.swift in Sources */,
@@ -689,6 +700,7 @@
 				A06CBAC272797FFF34A85347 /* PhotoCellItemViewModel.swift in Sources */,
 				875C5815D9B3DFD90807CE11 /* UIControl+Publisher.swift in Sources */,
 				22E9BE6A63E4C891FFBF6C76 /* UIGestureRecognizer+Publisher.swift in Sources */,
+				19EDE6612F987859000D6218 /* GradientCardView.swift in Sources */,
 				13F779FE4F17BDBA660A1B35 /* UIView+Publisher.swift in Sources */,
 				DF40F78A11997062375AF294 /* AppDIContainer.swift in Sources */,
 				7F0DB89FCC63AE28726DD967 /* HomeCoordinator.swift in Sources */,
@@ -877,10 +889,7 @@
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = (
-					"$(inherited)",
-					DEBUG,
-				);
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
 				SWIFT_COMPILATION_MODE = singlefile;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;

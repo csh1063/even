@@ -30,9 +30,11 @@ public final class SplashCoordinator: BaseCoordinator {
         
         let viewModel = container.makeSplashViewModel()
         viewModel.transform().finished
-            .sink { [weak self] isLogined in
-                print("SplashCoordinator finished")
-                self?.finished.send(isLogined)
+            .sink { [weak self] isFinished in
+                if isFinished {
+                    print("SplashCoordinator finished")
+                    self?.finished.send(isFinished)
+                }
             }
             .store(in: &cancellables)
         

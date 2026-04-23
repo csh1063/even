@@ -69,7 +69,9 @@ final class AlbumDetailViewController: BaseViewController {
     
     private func setupView() {
         
-        naviView.addButtons([LeftButton(type: .back, color: .Theme.text)])
+        naviView.addButtons([LeftButton(type: .back, color: Theme.text),
+                             RightButton(type: .edit, color: Theme.text),
+                             RightButton(type: .delete, color: Theme.negative)])
         
         configureDataSource()
         
@@ -90,9 +92,19 @@ final class AlbumDetailViewController: BaseViewController {
     private func setupBindings() {
         
         naviView.publisher
-            .sink { [weak self] _ in
-                print("back!")
-                self?.viewModel.pop?()
+            .sink { [weak self] type in
+                switch type {
+                case .back:
+                    print("back!")
+                    self?.viewModel.pop?()
+                case .edit:
+                    print("edit!")
+                    self?.viewModel.send(.edit)
+                case .delete:
+                    print("delete!")
+                    self?.viewModel.send(.delete)
+                default: break
+                }
             }
             .store(in: &cancellables)
         
@@ -127,7 +139,7 @@ final class AlbumDetailViewController: BaseViewController {
 extension AlbumDetailViewController {
     private func configureDataSource() {
         let cellRegistration = UICollectionView.CellRegistration<PhotoCell, PhotoCellItemViewModel> { cell, indexPath, cellViewModel in
-            cell.configure(with: cellViewModel)   // weak self도 필요 없어짐
+            cell.configure(with: cellViewModel, index: indexPath.row)   // weak self도 필요 없어짐
         }
         
         dataSource = UICollectionViewDiffableDataSource<Int, PhotoCellItemViewModel>(collectionView: collectionView) {

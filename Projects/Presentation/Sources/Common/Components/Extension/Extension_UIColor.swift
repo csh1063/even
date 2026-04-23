@@ -9,49 +9,27 @@
 import Foundation
 import UIKit
 
+enum Theme {
+    static let primary: UIColor = UIColor.named("primary")
+    static let secondary: UIColor = UIColor.named("secondary")
+    static let accent: UIColor = UIColor.named("accent")
+    static let support: UIColor = UIColor.named("support")
+    static let background: UIColor = UIColor.named("background")
+    static let surface: UIColor = UIColor.named("surface")
+    static let surfaceAlt: UIColor = UIColor.named("surface_alt")
+    static let text: UIColor = UIColor.named("text")
+    static let textSecond: UIColor = UIColor.named("textSecond")
+    static let border: UIColor = UIColor.named("border")
+    static let positive: UIColor = UIColor.named("positive")
+    static let negative: UIColor = UIColor.named("negative")
+    static let warning: UIColor = UIColor.named("warning")
+    static let info: UIColor = UIColor.named("info")
+}
+
 extension UIColor {
     
-    class Theme {
-        /// 메인 액션, 브랜드 색 WarmSand
-        class var primary: UIColor {
-            return UIColor(named: "primary") ?? UIColor("#C8A882")
-        }
-        /// 보조 요소 DustyRose
-        class var secondary: UIColor {
-            return UIColor(named: "secondary") ?? UIColor("#A07868")
-        }
-        /// 힌트/비활성 WarmTaupe / MutedStone
-        class var tertiary: UIColor {
-            return UIColor(named: "tertiary") ?? UIColor("#8E8278")
-        }
-        /// 배경 WarmIvory / InkBlack
-        class var background: UIColor {
-            return UIColor(named: "background") ?? UIColor("#EDE5D8")
-        }
-        /// 카드/시트 배경 CreamIvory / SoftCharcoal
-        class var surface: UIColor {
-            return UIColor(named: "surface") ?? UIColor("#F5EFE4")
-        }
-        /// 텍스트 DeepEspresso /. ParchmentWhite
-        class var text: UIColor {
-            return UIColor(named: "text") ?? UIColor("#1E1612")
-        }
-        /// 텍스트 서브 SoftEspresso / WarmGray
-        class var textSecond: UIColor {
-            return UIColor(named: "textSecond") ?? UIColor("#5A4A3C")
-        }
-        /// 테두리/분리선 WarmBorder / DimBorder
-        class var border: UIColor {
-            return UIColor(named: "border") ?? UIColor("#CEC4B4")
-        }
-        /// 긍정 SageGreen
-        class var positive: UIColor {
-            return UIColor(named: "positive") ?? UIColor("#7A9E7E")
-        }
-        /// 부정 WarmCrimson
-        class var negative: UIColor {
-            return UIColor(named: "negative") ?? UIColor("#C0392B")
-        }
+    static func named(_ name: String) -> UIColor {
+        UIColor(named: name, in: .module, compatibleWith: nil) ?? .clear
     }
 
     convenience init(redInt: Int, greenInt: Int, blueInt: Int, alpha: CGFloat) {

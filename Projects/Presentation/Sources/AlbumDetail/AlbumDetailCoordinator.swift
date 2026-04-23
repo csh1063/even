@@ -29,6 +29,9 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
         let viewModel = diContainer.makeAlbumViewModel { [weak self] in
             self?.pop()
         }
+        
+        bindAlert(from: viewModel)
+        
         let vc = AlbumDetailViewController(viewModel: viewModel)
 
         navigationController.pushViewController(vc, animated: true)

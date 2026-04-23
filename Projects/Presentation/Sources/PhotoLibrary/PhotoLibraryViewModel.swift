@@ -21,15 +21,16 @@ public final class PhotoLibraryViewModel: BaseViewModel {
     }
     
     public struct Output {
-        let photos: AnyPublisher<[PhotoInAlbum], Never>
+        let photos: AnyPublisher<[PhotoHeader: [PhotoCellItemViewModel]], Never>
+        let totalCount: AnyPublisher<Int, Never>
         let isLoading: AnyPublisher<Bool, Never>
         let errorMessage: AnyPublisher<String?, Never>
         let photoPermission: AnyPublisher<PhotoPermission, Never>
     }
  
     // 내부 상태값
-//    @Published private var photoList: PhotoList?
-    @Published private var photos: [PhotoInAlbum] = []
+    @Published private var photos: [PhotoHeader: [PhotoCellItemViewModel]] = [:]
+    @Published private var totalCount: Int = 0
     @Published private var hasNext: Bool = false
     @Published private var errorMessage: String?
     @Published private var photoPermission: PhotoPermission = .notDetermined
@@ -49,6 +50,7 @@ public final class PhotoLibraryViewModel: BaseViewModel {
     public func transform() -> Output {
         return Output(
             photos: $photos.eraseToAnyPublisher(),
+            totalCount: $totalCount.eraseToAnyPublisher(),
             isLoading: $isLoading.eraseToAnyPublisher(),
             errorMessage: $errorMessage.eraseToAnyPublisher(),
             photoPermission: $photoPermission.eraseToAnyPublisher()
@@ -105,13 +107,57 @@ public final class PhotoLibraryViewModel: BaseViewModel {
             self.isLoading = false
             let photoList = try await self.useCase.fetchData(page: page)
             print("photos count: ", photoList.photos.count)
-            self.photos = photoList.photos
+            
+//            self.photos = photoList.photos
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy년 MM월"
+            formatter.locale = Locale(identifier: "ko_KR")
+            let grouped = Dictionary(grouping: photoList.photos) { photo in
+                photo.createdDate.map { formatter.string(from: $0) } ?? "날짜 없음"
+            }
+            self.totalCount = photoList.photos.count
+            self.photos = Dictionary(uniqueKeysWithValues: grouped.map { key, values in
+                (
+                    PhotoHeader(title: key, count: values.count),
+                    values.map {
+                        PhotoCellItemViewModel(
+                            localIdentifier: $0.localIdentifier,
+                            imageLoader: self
+                        )
+                    }
+                )
+            })
+            
             self.hasNext = photoList.hasNext
+            
             self.isLoading = true
         } catch {
             
         }
     }
+    
+//    private func changeForm() {
+//        self.photoMonth = $photos
+//            .map { [weak self] photos -> [String: [PhotoCellItemViewModel]] in
+//                guard let self else { return [:] }
+//                
+//                let formatter = DateFormatter()
+//                formatter.dateFormat = "yyyy년 MM월"
+//                formatter.locale = Locale(identifier: "ko_KR")
+//                
+//                return Dictionary(grouping: photos) { photo in
+//                    photo.createdDate.map { formatter.string(from: $0) } ?? "날짜 없음"
+//                }
+//                .mapValues { photos in
+//                    photos.map {
+//                        PhotoCellItemViewModel(
+//                            localIdentifier: $0.localIdentifier,
+//                            imageLoader: self
+//                        )
+//                    }
+//                }
+//            }
+//    }
 }
 
 extension PhotoLibraryViewModel: ImageLoadable { }

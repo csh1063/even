@@ -16,7 +16,7 @@ final class SplashViewController: BaseViewController {
         let label = UILabel()
         
         label.font = UIFont.systemFont(ofSize: 32)
-        label.textColor = .black
+        label.textColor = Theme.text
         label.textAlignment = .center
         label.text = "MOA"
         
@@ -30,12 +30,12 @@ final class SplashViewController: BaseViewController {
         
         let attriString = NSMutableAttributedString(string: "모아\n\n\n",
                                                     attributes: [
-                                                        .foregroundColor: UIColor.black,
+                                                        .foregroundColor: Theme.text,
                                                         .font: UIFont.systemFont(ofSize: 12)
                                                     ])
         attriString.append(NSMutableAttributedString(string: "당신의 순간을 모으다",
                                                      attributes: [
-                                                        .foregroundColor: UIColor.darkGray,
+                                                        .foregroundColor: Theme.textSecond,
                                                         .font: UIFont.systemFont(ofSize: 16)
                                                      ]))
         label.attributedText = attriString

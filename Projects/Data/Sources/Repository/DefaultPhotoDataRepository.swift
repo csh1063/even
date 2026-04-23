@@ -158,7 +158,7 @@ public final class DefaultPhotoDataRepository: PhotoDataRepository {
         return try context.fetch(fetchDescriptor).map { $0.toDomain() }
     }
     
-    public func fetchSyncPhotoId(byFolder localIdentifier: UUID) throws -> String {
+    public func fetchSyncPhotoId(byFolder localIdentifier: UUID) throws -> String? {
         let context = ModelContext(container)
         var fetchDescriptor = FetchDescriptor<PhotoEntity>(
             predicate: #Predicate<PhotoEntity> {
@@ -169,7 +169,7 @@ public final class DefaultPhotoDataRepository: PhotoDataRepository {
         fetchDescriptor.fetchLimit = 1
         
         guard let entity = try context.fetch(fetchDescriptor).first else {
-            throw PhotoRepositoryError.photoNotFound
+            return nil
         }
         
         return entity.localIdentifier

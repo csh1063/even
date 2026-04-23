@@ -17,6 +17,8 @@ public final class AlbumDetailViewModel: BaseViewModel {
     enum Input {
         case appear
         case refresh
+        case edit
+        case delete
     }
     
     public struct Output {
@@ -101,6 +103,10 @@ public final class AlbumDetailViewModel: BaseViewModel {
         switch input {
         case .appear, .refresh:
             await self.loadPhotos()
+        case .edit:
+            self.showEditView()
+        case .delete:
+            self.deleteAlert()
         }
     }
     
@@ -115,6 +121,23 @@ public final class AlbumDetailViewModel: BaseViewModel {
         } catch {
             
         }
+    }
+    
+    private func showEditView() {
+        print("showEditView!!")
+    }
+    
+    private func deleteAlert() {
+        showAlert(title: "폴더 삭제",
+                  message: "폴더를 삭제 할까요?",
+                  buttons: [
+                    AlertButtonConfig(title: "취소", style: .default, action: {
+                        print("취소")
+                    }),
+                    AlertButtonConfig(title: "삭제", style: .destructive, action: {
+                        print("삭제")
+                    })
+                  ])
     }
 }
 
