@@ -10,6 +10,7 @@
 		01309DA478AC22159D054601 /* Moya.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E38D43CEE696BFEF020903BE /* Moya.framework */; };
 		025400DBA1FBCED05EECA3ED /* PhotoModelMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D23287CAC9A15F1CD81389D /* PhotoModelMapper.swift */; };
 		113EC0295E5F35367F42DFB8 /* ProviderFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF420FD928A623DCD3CA5C99 /* ProviderFactory.swift */; };
+		1989135D2D6A2C2BA17A6B60 /* PhotoAssetEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1818CB29A1914B6416E20D3E /* PhotoAssetEntity.swift */; };
 		1A9938F2B9F9AD2825A0FC20 /* DefaultPhotoLabelDataRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76713B0DD0063DA264DCB484 /* DefaultPhotoLabelDataRepository.swift */; };
 		2169AA2311BA60ACAA3F77E2 /* FolderEntityMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13D68148ECEC00D5F0D873BA /* FolderEntityMapper.swift */; };
 		22AD151C6F8F526A63C49DF8 /* GeocoderService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34FC610C922DCAAD54F6B871 /* GeocoderService.swift */; };
@@ -38,7 +39,6 @@
 		9213BC1672F5ED20BE34BFAC /* DefaultPhotoLibararyRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6A8AB3F6B0730FFBB675B3D /* DefaultPhotoLibararyRepository.swift */; };
 		96A50F032D49210391F99B80 /* PhotoCategoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D6BD6C0BFFB08B0574D32AF /* PhotoCategoryService.swift */; };
 		98C778E7CF34CCB1FC6331F5 /* AddressDTOMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77D143AFFAE68E9F71239BDF /* AddressDTOMapper.swift */; };
-		9B112AC7348361AEC6F345D0 /* PhotoAssetEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300B0CAC1CF1EB8E0B5D5697 /* PhotoAssetEntity.swift */; };
 		A21C03FB170C3F03BC3DE2AB /* DefaultFolderDataRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FEE537A6453D74F3910F7C2 /* DefaultFolderDataRepository.swift */; };
 		AD69ED776BF945A29DC4CBC1 /* PhotoAnalysisService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A17E0B5CA585E3F519C606 /* PhotoAnalysisService.swift */; };
 		AD861DF5503B4403B94CBB97 /* GeoJsonAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59ACAB8AA8E582CA0A62794 /* GeoJsonAPI.swift */; };
@@ -70,10 +70,10 @@
 		06FAA1459D11CCE724C34195 /* Domain.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Domain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		13D68148ECEC00D5F0D873BA /* FolderEntityMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderEntityMapper.swift; sourceTree = "<group>"; };
 		15E0F3D1A2F015968E4FBB6A /* SwiftDataStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDataStack.swift; sourceTree = "<group>"; };
+		1818CB29A1914B6416E20D3E /* PhotoAssetEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoAssetEntity.swift; sourceTree = "<group>"; };
 		1D6BD6C0BFFB08B0574D32AF /* PhotoCategoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCategoryService.swift; sourceTree = "<group>"; };
 		1E0A1E65D202F027E3B90C53 /* PhotoLabelEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLabelEntity.swift; sourceTree = "<group>"; };
 		2FEE537A6453D74F3910F7C2 /* DefaultFolderDataRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultFolderDataRepository.swift; sourceTree = "<group>"; };
-		300B0CAC1CF1EB8E0B5D5697 /* PhotoAssetEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoAssetEntity.swift; sourceTree = "<group>"; };
 		34FC610C922DCAAD54F6B871 /* GeocoderService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeocoderService.swift; sourceTree = "<group>"; };
 		4BC6624C7821755E8B610FA7 /* BaseAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseAPI.swift; sourceTree = "<group>"; };
 		4D23287CAC9A15F1CD81389D /* PhotoModelMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoModelMapper.swift; sourceTree = "<group>"; };
@@ -159,7 +159,7 @@
 				5BC6B88EC3E842B3E1E181DF /* AddressDTO.swift */,
 				FA2C733233FE6C2AD8240B99 /* BaseDTO.swift */,
 				796BED270FC1A8E67F8083F2 /* LocationParam.swift */,
-				300B0CAC1CF1EB8E0B5D5697 /* PhotoAssetEntity.swift */,
+				1818CB29A1914B6416E20D3E /* PhotoAssetEntity.swift */,
 			);
 			path = DTO;
 			sourceTree = "<group>";
@@ -361,12 +361,12 @@
 				ADA6AE621778E96DDFC27980 /* AddressDTO.swift in Sources */,
 				54A2E62D0EC1FE15C4EC0D50 /* BaseDTO.swift in Sources */,
 				45FC4CF5DEB152A9EE9903F2 /* LocationParam.swift in Sources */,
+				1989135D2D6A2C2BA17A6B60 /* PhotoAssetEntity.swift in Sources */,
 				98C778E7CF34CCB1FC6331F5 /* AddressDTOMapper.swift in Sources */,
 				2169AA2311BA60ACAA3F77E2 /* FolderEntityMapper.swift in Sources */,
 				43FADE1F1CA4BF5AFFE68B08 /* PhotoEntityMapper.swift in Sources */,
 				8FEFDFB6A3E14CB6A276BC77 /* PhotoLabelEntityMapper.swift in Sources */,
 				025400DBA1FBCED05EECA3ED /* PhotoModelMapper.swift in Sources */,
-				9B112AC7348361AEC6F345D0 /* PhotoAssetEntity.swift in Sources */,
 				88C3254258A9147BB32522D0 /* BaseProvider.swift in Sources */,
 				7FB70958E7BF4019A5C80763 /* MoyaLoggingPlugin.swift in Sources */,
 				6E426C1732C4F413AC7A8218 /* NetworkExecutor.swift in Sources */,

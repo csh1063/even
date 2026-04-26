@@ -10,20 +10,29 @@ import Foundation
 import UIKit
 
 enum Theme {
-    static let primary: UIColor = UIColor.named("primary")
-    static let secondary: UIColor = UIColor.named("secondary")
-    static let accent: UIColor = UIColor.named("accent")
-    static let support: UIColor = UIColor.named("support")
-    static let background: UIColor = UIColor.named("background")
-    static let surface: UIColor = UIColor.named("surface")
-    static let surfaceAlt: UIColor = UIColor.named("surface_alt")
-    static let text: UIColor = UIColor.named("text")
-    static let textSecond: UIColor = UIColor.named("textSecond")
-    static let border: UIColor = UIColor.named("border")
-    static let positive: UIColor = UIColor.named("positive")
-    static let negative: UIColor = UIColor.named("negative")
-    static let warning: UIColor = UIColor.named("warning")
-    static let info: UIColor = UIColor.named("info")
+    static let primary = UIColor.named("primary")
+    static let secondary = UIColor.named("secondary")
+    static let accent = UIColor.named("accent")
+
+    static let positive = UIColor.named("positive")
+    static let warning = UIColor.named("warning")
+    static let negative = UIColor.named("negative")
+
+    static let background = UIColor.named("background")
+    static let surface = UIColor.named("surface")
+    static let surfaceElevated = UIColor.named("surfaceElevated")
+    static let surfaceWarm = UIColor.named("surfaceWarm")
+    static let surfaceCool = UIColor.named("surfaceCool")
+
+    static let textPrimary = UIColor.named("textPrimary")
+    static let textSecondary = UIColor.named("textSecondary")
+    static let textTertiary = UIColor.named("textTertiary")
+
+    static let strokeSoft = UIColor.named("strokeSoft")
+    static let strokeStrong = UIColor.named("strokeStrong")
+    static let divider = UIColor.named("divider")
+
+    static let viewerBackground = UIColor.named("viewerBackground")
 }
 
 extension UIColor {

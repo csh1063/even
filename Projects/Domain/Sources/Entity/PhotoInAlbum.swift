@@ -39,8 +39,8 @@ public struct PhotoList {
 public struct PhotoInAlbum: Hashable {
     
     public let localIdentifier: String
-//    public var cropInfo: CropInfo?
     public let createdDate: Date?
+    public var isUnanalysis: Bool = false
     
     public init(id: String, createdDate: Date? = nil) {
         self.localIdentifier = id

@@ -7,13 +7,18 @@
 //
 
 import Foundation
+import Combine
 
 public protocol FolderDataRepository {
+    
+    var foldersPublisher: AnyPublisher<[Folder], Never> {get}
+    
     func saveFolder(folder: Folder) throws -> Folder?
     func fetchAll() throws -> [Folder]
     func fetchAutoAll() throws -> [Folder]
     func fetchPhotos(by folderId: UUID) throws -> [Photo]
     func updateFolder(folder: Folder) throws
+    func updateFolderName(new name: String, id: UUID) throws
     func delete(id: UUID) throws
     func deleteAutoFolders() throws  // 자동 폴더만 삭제
     func addPhoto(folderId: UUID, photoIdentifier: String) throws

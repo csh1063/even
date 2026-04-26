@@ -11,14 +11,25 @@ import Combine
 import Domain
 import UIKit
 
+enum AlbumDetailViewModelAction {
+    case options(folder: Folder)
+    case pop
+}
+
+@MainActor
+protocol AlbumDetailViewModelDelegate: AnyObject {
+    func save(name: String)
+    func deleteAlert()
+}
+
 @MainActor
 public final class AlbumDetailViewModel: BaseViewModel {
     
     enum Input {
         case appear
         case refresh
-        case edit
-        case delete
+        case more
+        case dismiss
     }
     
     public struct Output {
@@ -36,28 +47,26 @@ public final class AlbumDetailViewModel: BaseViewModel {
     @Published private var hasNext: Bool = false
     @Published private var errorMessage: String?
     
+    var onAction: ((AlbumDetailViewModelAction) -> Void)?
+    
     private let input = PassthroughSubject<Input, Never>()
     
-    private let libraryUseCase: PhotoLibraryUseCase
+    private let imageUseCase: PhotoImageUseCase
     private let detailUseCase: FolderDetailUseCase
     
     private var cancellables = Set<AnyCancellable>()
     
-    var pop: (() -> Void)?
-    
     public init(folder: Folder,
-                libraryUseCase: PhotoLibraryUseCase,
-                detailUseCase: FolderDetailUseCase,
-                pop: @escaping () -> Void) {
+                imageUseCase: PhotoImageUseCase,
+                detailUseCase: FolderDetailUseCase) {
         self.folder = folder
         self.folderName = folder.displayName
-        self.libraryUseCase = libraryUseCase
+        self.imageUseCase = imageUseCase
         self.detailUseCase = detailUseCase
         
         super.init()
         
         self.bind()
-        self.pop = pop
     }
     
     public func transform() -> Output {
@@ -76,7 +85,7 @@ public final class AlbumDetailViewModel: BaseViewModel {
     
     func loadImage(id: String, size: CGSize) async -> UIImage? {
         do {
-            guard let cgImage: CGImage = try await libraryUseCase.loadImage(
+            guard let cgImage: CGImage = try await imageUseCase.loadImage(
                 id: id,
                 type: .specialSize(size)
             ).cgImage else {
@@ -103,31 +112,57 @@ public final class AlbumDetailViewModel: BaseViewModel {
         switch input {
         case .appear, .refresh:
             await self.loadPhotos()
-        case .edit:
-            self.showEditView()
-        case .delete:
-            self.deleteAlert()
+        case .more:
+//            self.showEditView()
+            print("more!")
+            self.onAction?(.options(folder: self.folder))
+        case .dismiss:
+            self.onAction?(.pop)
         }
     }
     
     private func loadPhotos() async {
         print("loadPhotos")
         do {
-            self.isLoading = false
+            self.isLoading = true
             let photos = try await self.detailUseCase.fetchPhotos(by: folder.id)
             print("photos count: ", photos.count)
             self.photos = photos
-            self.isLoading = true
+            self.isLoading = false
         } catch {
             
         }
     }
     
-    private func showEditView() {
-        print("showEditView!!")
+    private func changeName(name: String) async {
+        do {
+            self.isLoading = false
+            try await self.detailUseCase.editFolderName(new: name, id: folder.id)
+            
+            self.folderName = name
+
+            self.isLoading = false
+        } catch {
+            
+        }
     }
     
-    private func deleteAlert() {
+    private func deleteFolder() {
+        print("삭제")
+    }
+}
+
+extension AlbumDetailViewModel: ImageLoadable { }
+
+extension AlbumDetailViewModel: AlbumDetailViewModelDelegate {
+    func save(name: String) {
+        print("\(name) 저장")
+        Task {
+            await self.changeName(name: name)
+        }
+    }
+    
+    func deleteAlert() {
         showAlert(title: "폴더 삭제",
                   message: "폴더를 삭제 할까요?",
                   buttons: [
@@ -135,10 +170,8 @@ public final class AlbumDetailViewModel: BaseViewModel {
                         print("취소")
                     }),
                     AlertButtonConfig(title: "삭제", style: .destructive, action: {
-                        print("삭제")
+                        self.deleteFolder()
                     })
                   ])
     }
 }
-
-extension AlbumDetailViewModel: ImageLoadable { }

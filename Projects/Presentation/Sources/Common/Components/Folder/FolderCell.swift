@@ -26,6 +26,7 @@ final class FolderCell: UICollectionViewCell {
         return imageView
     }()
     
+    private let contentsView: UIView = UIView()
     private let nameLabel: UILabel = UILabel()
     private let countLabel: UILabel = UILabel()
     private let descLabel: UILabel = UILabel()
@@ -66,8 +67,8 @@ final class FolderCell: UICollectionViewCell {
         self.radiusView.backgroundColor = Theme.surface
         self.radiusView.layer.cornerRadius = 20
         self.radiusView.layer.masksToBounds = true
-        self.radiusView.addBorder(color: Theme.border, borderWidth: 1)
-        self.radiusView.addShadow(color: .black, opacity: 0.05, offset: CGSize(width: 0, height: 8), radius: 18)
+        self.radiusView.addBorder(color: Theme.strokeSoft, borderWidth: 1)
+        self.radiusView.addShadow(color: .black, opacity: 1, offset: CGSize(width: 0, height: 8), radius: 18)
         
         self.gradientView.layer.cornerRadius = 16
         self.gradientView.layer.masksToBounds = true
@@ -79,14 +80,16 @@ final class FolderCell: UICollectionViewCell {
         self.mainImageView.backgroundColor = .clear
         self.mainImageView.contentMode = .scaleAspectFill
         
-        self.nameLabel.textColor = Theme.text
+        self.contentsView.backgroundColor = Theme.surfaceWarm
+        
+        self.nameLabel.textColor = Theme.textPrimary
         self.nameLabel.font = .systemFont(ofSize: 16, weight: .semibold)
         self.nameLabel.numberOfLines = 2
         
-        self.countLabel.textColor = Theme.text
+        self.countLabel.textColor = Theme.textPrimary
         self.countLabel.font = .systemFont(ofSize: 14, weight: .semibold)
         
-        self.descLabel.textColor = Theme.textSecond
+        self.descLabel.textColor = Theme.textSecondary
         self.descLabel.font = .systemFont(ofSize: 13, weight: .regular)
         
         self.contentView.addSubview(radiusView)
@@ -94,16 +97,17 @@ final class FolderCell: UICollectionViewCell {
         self.radiusView.addSubview(gradientView)
         self.radiusView.addSubview(imageIconView)
         self.radiusView.addSubview(mainImageView)
-        self.radiusView.addSubview(nameLabel)
-        self.radiusView.addSubview(countLabel)
-        self.radiusView.addSubview(descLabel)
+        self.radiusView.addSubview(contentsView)
+        self.contentsView.addSubview(nameLabel)
+        self.contentsView.addSubview(countLabel)
+        self.contentsView.addSubview(descLabel)
         
         self.radiusView.snp.makeConstraints { make in
             make.edges.equalTo(self.contentView)
         }
         
         self.gradientView.snp.makeConstraints { make in
-            make.edges.equalTo(self.mainImageView)
+            make.edges.equalTo(self.mainImageView).inset(-1)
         }
         
         self.imageIconView.snp.makeConstraints { make in
@@ -112,34 +116,45 @@ final class FolderCell: UICollectionViewCell {
         
         self.mainImageView.snp.makeConstraints { make in
             make.top.leading.trailing.equalTo(self.radiusView).inset(12)
-            make.height.equalTo(self.mainImageView.snp.width).multipliedBy(3.0/4.0)
-//            make.height.equalTo(50)
+            make.height.equalTo(self.mainImageView.snp.width).multipliedBy(4.0/5.0)
+//            make.height.equalTo(136)
+        }
+        
+        self.contentsView.snp.makeConstraints { make in
+            make.top.equalTo(self.mainImageView.snp.bottom).offset(10)
+            make.bottom.leading.trailing.equalTo(self.radiusView)
         }
         
         self.nameLabel.snp.makeConstraints { make in
-            make.top.equalTo(self.mainImageView.snp.bottom).offset(10)
-            make.leading.trailing.equalTo(self.radiusView).inset(12)
+            make.top.equalTo(self.contentsView).inset(12)
+            make.leading.trailing.equalTo(self.contentsView).inset(12)
         }
         
         self.countLabel.snp.makeConstraints { make in
-            make.leading.trailing.equalTo(self.nameLabel)
-            make.top.equalTo(self.nameLabel.snp.bottom).offset(4)
+            make.leading.trailing.equalTo(contentsView).inset(12)
+            make.top.equalTo(self.nameLabel.snp.bottom).offset(6)
         }
         
         self.descLabel.snp.makeConstraints { make in
             make.leading.trailing.equalTo(self.nameLabel)
-            make.top.equalTo(self.countLabel.snp.bottom).offset(4)
-            make.bottom.equalTo(self.radiusView).inset(12)
+            make.top.equalTo(self.countLabel.snp.bottom).offset(6)
+            make.bottom.equalTo(self.contentsView).inset(12)
         }
     }
     
     func configure(with viewModel: FolderCellItemViewModel, index: Int) {
         self.assetIdentifier = viewModel.localIdentifier
+        
+        self.gradientView.colors = [
+            Theme.accent,
+            Theme.primary,
+            Theme.secondary
+        ].map {$0.withAlphaComponent(0.8)}
         self.gradientView.isHidden = false
         self.imageIconView.isHidden = false
         
         self.nameLabel.text = viewModel.folder.displayName
-        self.countLabel.text = "\(viewModel.folder.photoCount)"
+        self.countLabel.text = "\(viewModel.folder.photoCount.formatted())장"
         self.descLabel.text = "설명설명"
         
         task = Task {
@@ -151,8 +166,15 @@ final class FolderCell: UICollectionViewCell {
             
             if !Task.isCancelled && self.assetIdentifier == viewModel.localIdentifier {
                 self.mainImageView.image = image
+                
+//                self.gradientView.colors = [
+//                    Theme.accent,
+//                    Theme.primary,
+//                    Theme.secondary
+//                ].map {$0.withAlphaComponent(0.5)}
+                
             }
-            self.gradientView.isHidden = true
+//            self.gradientView.isHidden = true
             self.imageIconView.isHidden = true
         }
     }

@@ -34,7 +34,7 @@ final class AlertViewController: BaseViewController {
 
     private let titleLabel: UILabel = {
         let titleLabel = UILabel()
-        titleLabel.textColor = Theme.text
+        titleLabel.textColor = Theme.textPrimary
         titleLabel.font = .systemFont(ofSize: 17, weight: .bold)
         titleLabel.textAlignment = .center
         titleLabel.numberOfLines = 0
@@ -43,7 +43,7 @@ final class AlertViewController: BaseViewController {
 
     private let messageLabel: UILabel = {
         let messageLabel = UILabel()
-        messageLabel.textColor = Theme.text
+        messageLabel.textColor = Theme.textSecondary
         messageLabel.font = .systemFont(ofSize: 14)
         messageLabel.textAlignment = .center
         messageLabel.numberOfLines = 0
@@ -168,7 +168,7 @@ final class AlertViewController: BaseViewController {
     private func makeSeparator(_ axis: NSLayoutConstraint.Axis, height: CGFloat = 0.5, inset: CGFloat = 12) -> UIView {
         let backView = UIView()
         let view = UIView()
-        view.backgroundColor = Theme.border.withAlphaComponent(0.2)
+        view.backgroundColor = Theme.strokeSoft//.withAlphaComponent(0.5)
         backView.addSubview(view)
         switch axis {
         case .horizontal:

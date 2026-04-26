@@ -66,11 +66,11 @@ final class PhotoLibraryViewController: BaseViewController {
         collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         collectionView.backgroundColor = Theme.background
         
-        naviView.setTitle("사진첩",
-                          color: Theme.text,
+        naviView.setTitle("전체 사진첩",
+                          color: Theme.textPrimary,
                           font: .systemFont(ofSize: 32, weight: .bold))
-        naviView.setMessage("사진첩의 사진들",
-                            color: Theme.text,
+        naviView.setMessage("최근 사진부터 빠르게 확인할 수 있어요",
+                            color: Theme.textSecondary,
                             font: .systemFont(ofSize: 14, weight: .regular))
         
         configureDataSource()
@@ -106,7 +106,7 @@ final class PhotoLibraryViewController: BaseViewController {
             .sink { [weak self] totalCount in
                 
                 self?.naviView.setMessage("사진 \(totalCount.formatted())장이 정렬되었습니다.",
-                      color: Theme.text,
+                                          color: Theme.textSecondary,
                       font: .systemFont(ofSize: 14, weight: .regular))
             }
             .store(in: &cancellables)
@@ -155,7 +155,7 @@ final class PhotoLibraryViewController: BaseViewController {
     private func createDynamicLayout(columns: Int, scale: CGFloat = 1.0) -> UICollectionViewLayout {
         UICollectionViewCompositionalLayout { _, env in
             let spacing = 4.0
-            let sectionInset = 20.0
+            let sectionInset = 4.0//20.0
             let baseCount = CGFloat(columns)
             let isZoomingIn = scale >= 1.0
 
@@ -167,8 +167,7 @@ final class PhotoLibraryViewController: BaseViewController {
                 ? baseCount
                 : baseCount + (progress * 2.0)
             
-            let contentWidth = env.container.contentSize.width
-            - (sectionInset * 2) - (spacing * (dynamicColumnCount - 1))
+            let contentWidth = env.container.contentSize.width - (sectionInset * 2) - (spacing * (dynamicColumnCount - 1))
             
             let groupHeight: CGFloat
             let sideItemWidth: CGFloat

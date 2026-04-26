@@ -52,6 +52,7 @@ public final class AlertManager {
         window.windowLevel     = .alert + 1
         window.backgroundColor = .clear
         window.rootViewController = UIViewController()
+        window.overrideUserInterfaceStyle = .light
 
         alertWindow = window
         window.makeKeyAndVisible()

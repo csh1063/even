@@ -11,26 +11,48 @@ import Foundation
 public protocol PhotoLibraryUseCase {
     func fetchData(page: Int) async throws -> PhotoList
     func checkPermission() async throws -> PhotoPermission
-    func loadImage<T>(id: String, type: LoadPhotoOptionType) async throws -> ImageData<T>
+//    func loadImage<T>(id: String, type: LoadPhotoOptionType) async throws -> ImageData<T>
 }
 
 public class DefaultPhotoLibraryUseCase: PhotoLibraryUseCase {
     
-    let repository: PhotoLibraryRepository
+    private let repository: PhotoLibraryRepository
+    private let dataRepository: PhotoDataRepository
     
-    public init(repository: PhotoLibraryRepository) {
+    public init(repository: PhotoLibraryRepository, dataRepository: PhotoDataRepository) {
         self.repository = repository
+        self.dataRepository = dataRepository
     }
     
     public func fetchData(page: Int) async throws -> PhotoList {
-        try await self.repository.fetchPhotos(page: page)
+        
+        let photoList = try await self.repository.fetchPhotos(page: page)
+        let analyzedIds = Set(try dataRepository.fetchAnalyzed())
+        let updatedPhotos = photoList.photos.map { photo -> PhotoInAlbum in
+            var updatedPhoto = photo
+            
+            if !analyzedIds.contains(photo.localIdentifier) {
+                updatedPhoto.isUnanalysis = true
+            } else {
+                updatedPhoto.isUnanalysis = false
+            }
+            
+            return updatedPhoto
+        }
+        
+        return PhotoList(
+            title: photoList.title,
+            photos: updatedPhotos,
+            hasNext: photoList.hasNext
+        )
+        
     }
     
     public func checkPermission() async throws -> PhotoPermission {
         try await self.repository.checkPermission()
     }
     
-    public func loadImage<T>(id: String, type: LoadPhotoOptionType) async throws -> ImageData<T> {
-        return try await self.repository.loadImage(id: id, type: type)
-    }
+//    public func loadImage<T>(id: String, type: LoadPhotoOptionType) async throws -> ImageData<T> {
+//        return try await self.repository.loadImage(id: id, type: type)
+//    }
 }

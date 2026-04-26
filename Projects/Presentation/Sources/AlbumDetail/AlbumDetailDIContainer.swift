@@ -25,9 +25,9 @@ public final class AlbumDetailDIContainer {
         self.folderDataRepository = folderDataRepository
     }
 
-    func makeAlbumViewModel(pop: @escaping () -> Void) -> AlbumDetailViewModel {
+    func makeAlbumDetailViewModel() -> AlbumDetailViewModel {
         
-        let photoUseCase = DefaultPhotoLibraryUseCase(
+        let imageUseCase = DefaultPhotoImageUseCase(
             repository: photoLibraryRepository
         )
         
@@ -36,8 +36,7 @@ public final class AlbumDetailDIContainer {
         )
         
         return AlbumDetailViewModel(folder: folder,
-                                    libraryUseCase: photoUseCase,
-                                    detailUseCase: folderDetailUseCase,
-                                    pop: pop)
+                                    imageUseCase: imageUseCase,
+                                    detailUseCase: folderDetailUseCase)
     }
 }

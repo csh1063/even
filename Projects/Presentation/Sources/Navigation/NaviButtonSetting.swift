@@ -11,18 +11,18 @@ import UIKit
 protocol NaviButtonSetting {
     var isLeft: Bool { get }
     var type: NaviBarButtonType { get }
-    var color: UIColor { get }
+//    var color: UIColor { get }
 }
 
 struct LeftButton: NaviButtonSetting {
     
     let isLeft = true
     var type: NaviBarButtonType
-    var color: UIColor
+//    var color: UIColor
     
-    init(type: NaviBarButtonType, color: UIColor = Theme.text) {
+    init(type: NaviBarButtonType) {//}, color: UIColor = Theme.textPrimary) {
         self.type = type
-        self.color = color
+//        self.color = color
     }
 }
 
@@ -30,10 +30,10 @@ struct RightButton: NaviButtonSetting {
     
     let isLeft = false
     var type: NaviBarButtonType
-    var color: UIColor
+//    var color: UIColor
     
-    init(type: NaviBarButtonType, color: UIColor) {
+    init(type: NaviBarButtonType) {//}, color: UIColor) {
         self.type = type
-        self.color = color
+//        self.color = color
     }
 }

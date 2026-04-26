@@ -7,8 +7,11 @@
 //
 
 import Foundation
+import Combine
 
 public protocol FolderUseCase {
+    var foldersPublisher: AnyPublisher<[Folder], Never> {get}
+    
     func fetchAll() async throws -> [Folder]
     func createDummy() async throws
 }
@@ -16,6 +19,10 @@ public protocol FolderUseCase {
 public final class DefaultFolderUseCase: FolderUseCase {
     
     private let folderRepository: FolderDataRepository
+    
+    public var foldersPublisher: AnyPublisher<[Folder], Never> {
+        self.folderRepository.foldersPublisher
+    }
     
     public init(folderRepository: FolderDataRepository) {
         self.folderRepository = folderRepository
@@ -36,7 +43,7 @@ public final class DefaultFolderUseCase: FolderUseCase {
         ]
     
         for folder in folders {
-            try folderRepository.saveFolder(folder: folder)
+            _ = try folderRepository.saveFolder(folder: folder)
         }
     }
 }

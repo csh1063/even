@@ -18,9 +18,9 @@ public final class AlbumDIContainer {
         self.appDIContainer = appDIContainer
     }
     
-    func makeAlbumViewModel(coordinator: AlbumCoordinator) -> AlbumViewModel {
+    func makeAlbumViewModel() -> AlbumViewModel {
         
-        let photoUseCase = DefaultPhotoLibraryUseCase(
+        let imageUseCase = DefaultPhotoImageUseCase(
             repository: appDIContainer.photoLibraryRepository
         )
         
@@ -41,8 +41,7 @@ public final class AlbumDIContainer {
             folderRepository: appDIContainer.folderDataRepository
         )
         
-        return AlbumViewModel(coordinator: coordinator,
-                              photoUseCase: photoUseCase,
+        return AlbumViewModel(imageUseCase: imageUseCase,
                               analysisUseCase: analysisUseCase,
                               autoFolderUseCase: autoFolderUseCase,
                               folderUseCase: folderUseCase)

@@ -16,7 +16,7 @@ final class TabbarViewController: CustomTabBarController {
         self.setBackgroundColor(Theme.surface.withAlphaComponent(0.72))
         
         self.setItemColors(
-            normal: Theme.textSecond,
+            normal: Theme.textSecondary,
             selected: .white)
         
         self.setLayoutMargin(height: 68,
@@ -35,7 +35,7 @@ final class TabbarViewController: CustomTabBarController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        self.selectedIndex = 0
+        self.selectedIndex = 1
     }
     
     func showTabbar() {

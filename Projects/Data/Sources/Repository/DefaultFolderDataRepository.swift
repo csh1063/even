@@ -9,10 +9,16 @@
 import Foundation
 import SwiftData
 import Domain
+import Combine
 
 public final class DefaultFolderDataRepository: FolderDataRepository {
     
     private let container: ModelContainer
+    
+    private let foldersSubject = CurrentValueSubject<[Folder], Never>([])
+    public var foldersPublisher: AnyPublisher<[Folder], Never> {
+        foldersSubject.eraseToAnyPublisher()
+    }
     
     public init(container: ModelContainer) {
         self.container = container
@@ -101,20 +107,31 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
         }
         
         entity.name = folder.name
+        entity.displayName = folder.displayName
         entity.coverPhotoIdentifier = folder.coverPhotoIdentifier
         entity.photoCount = folder.photoCount
         
-        entity.keywords.forEach { context.delete($0) }
-        folder.keywords.forEach {
-            let keywordEntity = FolderKeywordEntity(
-                keyword: $0,
-                weight: 1.0,
-                folder: entity
-            )
-            context.insert(keywordEntity)
+        try context.save()
+    }
+    
+    public func updateFolderName(new name: String, id: UUID) throws {
+        
+        let context = ModelContext(container)
+        
+        let fetchDescriptor = FetchDescriptor<FolderEntity>(
+            predicate: #Predicate { $0.id == id }
+        )
+        
+        guard let entity = try context.fetch(fetchDescriptor).first else {
+            throw FolderRepositoryError.folderNotFound
         }
         
+        entity.displayName = name
+        
         try context.save()
+        
+        let updated = try fetchAll()
+        foldersSubject.send(updated)
     }
     
     public func delete(id: UUID) throws {

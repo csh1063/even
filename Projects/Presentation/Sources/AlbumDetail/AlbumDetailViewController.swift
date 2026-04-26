@@ -69,9 +69,8 @@ final class AlbumDetailViewController: BaseViewController {
     
     private func setupView() {
         
-        naviView.addButtons([LeftButton(type: .back, color: Theme.text),
-                             RightButton(type: .edit, color: Theme.text),
-                             RightButton(type: .delete, color: Theme.negative)])
+        naviView.addButtons([LeftButton(type: .back),
+                             RightButton(type: .more)])
         
         configureDataSource()
         
@@ -96,13 +95,10 @@ final class AlbumDetailViewController: BaseViewController {
                 switch type {
                 case .back:
                     print("back!")
-                    self?.viewModel.pop?()
-                case .edit:
-                    print("edit!")
-                    self?.viewModel.send(.edit)
-                case .delete:
-                    print("delete!")
-                    self?.viewModel.send(.delete)
+                    self?.viewModel.send(.dismiss)
+                case .more:
+                    print("more!")
+                    self?.viewModel.send(.more)
                 default: break
                 }
             }

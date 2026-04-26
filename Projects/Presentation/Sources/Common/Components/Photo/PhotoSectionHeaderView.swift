@@ -31,10 +31,10 @@ final class PhotoSectionHeaderView: UICollectionReusableView {
         
         self.backgroundColor = Theme.background
         
-        titleLabel.textColor = Theme.text
+        titleLabel.textColor = Theme.textPrimary
         titleLabel.font = .systemFont(ofSize: 22, weight: .semibold)
         
-        countLabel.textColor = Theme.textSecond
+        countLabel.textColor = Theme.textSecondary
         countLabel.font = .systemFont(ofSize: 14)
         countLabel.textAlignment = .right
         

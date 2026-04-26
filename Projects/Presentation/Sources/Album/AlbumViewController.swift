@@ -27,7 +27,7 @@ final class AlbumViewController: BaseViewController {
     
     private var collectionView: UICollectionView = {
 
-        let space: CGFloat = 2
+        let space: CGFloat = 10
         let count: CGFloat = 2
         let margin: CGFloat = 8
         let layout = UICollectionViewFlowLayout()
@@ -117,15 +117,15 @@ final class AlbumViewController: BaseViewController {
     private func setupView() {
         
         naviView.setTitle("주제별 앨범",
-                          color: Theme.text,
+                          color: Theme.textPrimary,
                           font: .systemFont(ofSize: 32, weight: .bold))
-        naviView.setMessage("사진들이 개 앨범으로 정리되었어요",
-                            color: Theme.text,
+        naviView.setMessage("사진이 개 앨범으로 정리되었어요",
+                            color: Theme.textPrimary,
                             font: .systemFont(ofSize: 14, weight: .regular))
         
 //        naviView.addRightButtons([(.reset, Theme.negative), (.analysis, Theme.primary)])
-        naviView.addButtons([RightButton(type: .reset, color: Theme.negative),
-                             RightButton(type: .analysis, color: Theme.text)])
+        naviView.addButtons([RightButton(type: .reset),
+                             RightButton(type: .analysis)])
         
         collectionView.delegate = self
         
@@ -264,8 +264,8 @@ final class AlbumViewController: BaseViewController {
                 guard let self else { return [] }
                 
                 self.naviView.setMessage(
-                    "사진들이 \(folders.count)개 앨범으로 정리되었어요",
-                    color: Theme.text,
+                    "\(folders.count)개 앨범으로 정리되었어요",
+                    color: Theme.textPrimary,
                     font: .systemFont(ofSize: 14, weight: .regular))
                 
                 return folders.map { FolderCellItemViewModel(folder: $0, imageLoader: self.viewModel) }
@@ -294,7 +294,7 @@ extension AlbumViewController {
         var snapshot = NSDiffableDataSourceSnapshot<Int, FolderCellItemViewModel>()
         snapshot.appendSections([0])
         snapshot.appendItems(folders)
-        dataSource.apply(snapshot, animatingDifferences: true)
+        dataSource.apply(snapshot, animatingDifferences: false)
     }
 }
 
@@ -305,4 +305,10 @@ extension AlbumViewController: UICollectionViewDelegate {
         viewModel.send(.selectItem(cellViewModel.folder))
     }
 
+}
+
+extension AlbumViewController: UIScrollViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        
+    }
 }

@@ -60,7 +60,7 @@ final class LabelsViewController: BaseViewController {
     func setupView() {
         
         naviView.setTitle("사진 라벨")
-        naviView.addButtons([LeftButton(type: .back, color: Theme.text)])
+        naviView.addButtons([LeftButton(type: .back)])
         
         view.addSubview(naviView)
         view.addSubview(collectionView)

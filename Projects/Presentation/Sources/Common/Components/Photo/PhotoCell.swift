@@ -12,7 +12,7 @@ import Domain
 
 final class PhotoCell: UICollectionViewCell {
     
-    private let colors: [UIColor] = [.red, .orange, .yellow, .green, .blue, .cyan, .purple]
+    private let colors: [UIColor] = [Theme.primary, Theme.secondary, Theme.accent]
     
     private let coverView: UIView = UIView()
     
@@ -40,14 +40,11 @@ final class PhotoCell: UICollectionViewCell {
     
     func setupView() {
         
-        self.coverView.addBorder(color: Theme.border, borderWidth: 1)
         self.coverView.layer.masksToBounds = true
         self.coverView.layer.cornerRadius = 12
         
         self.mainImageView.backgroundColor = .clear
         self.mainImageView.contentMode = .scaleAspectFill
-        
-        self.noImageView.color = Theme.accent
         
         self.contentView.addSubview(coverView)
         self.coverView.addSubview(noImageView)
@@ -67,9 +64,25 @@ final class PhotoCell: UICollectionViewCell {
     }
     
     func configure(with viewModel: PhotoCellItemViewModel, index: Int) {
-        self.assetIdentifier = viewModel.localIdentifier
-        self.noImageView.color = colors[index % colors.count]
+        
+        self.noImageView.colors = [
+            colors[index % colors.count].withAlphaComponent(0.8),
+            Theme.surfaceWarm
+        ]
         self.noImageView.startShimmer()
+        
+        guard viewModel.localIdentifier.count > 3 else {
+            return
+        }
+        
+        self.assetIdentifier = viewModel.localIdentifier
+        
+        if viewModel.isUnanalysis {
+            self.coverView.addBorder(color: Theme.negative, borderWidth: 1)
+        } else {
+            self.coverView.addBorder(color: Theme.strokeSoft, borderWidth: 1)
+        }
+        
         task = Task {
             let size = self.frame.size
             let image = await viewModel.loadImage(size: CGSize(

@@ -11,6 +11,10 @@ import Combine
 import Domain
 import UIKit
 
+enum AlbumViewModelAction {
+    case moveDetail(folder: Folder)
+}
+
 @MainActor
 public final class AlbumViewModel: BaseViewModel {
     
@@ -39,24 +43,23 @@ public final class AlbumViewModel: BaseViewModel {
     @Published private var locationFolderProgressRatio: Double = 0
     @Published private var isAnalyzing : Bool = false
     
+    var onAction: ((AlbumViewModelAction) -> Void)?
+    
     let input = PassthroughSubject<Input, Never>()
     
-    private weak var coordinator: AlbumCoordinator?
-    private let photoUseCase: PhotoLibraryUseCase
+    private let imageUseCase: PhotoImageUseCase
     private let analysisUseCase: PhotoAnalysisUseCase
     private let autoFolderUseCase: AutoFolderUseCase
     private let folderUseCase: FolderUseCase
     
     private var cancellables = Set<AnyCancellable>()
     
-    public init(coordinator: AlbumCoordinator,
-                photoUseCase: PhotoLibraryUseCase,
+    public init(imageUseCase: PhotoImageUseCase,
                 analysisUseCase: PhotoAnalysisUseCase,
                 autoFolderUseCase: AutoFolderUseCase,
                 folderUseCase: FolderUseCase) {
         
-        self.coordinator = coordinator
-        self.photoUseCase = photoUseCase
+        self.imageUseCase = imageUseCase
         self.analysisUseCase = analysisUseCase
         self.autoFolderUseCase = autoFolderUseCase
         self.folderUseCase = folderUseCase
@@ -64,6 +67,10 @@ public final class AlbumViewModel: BaseViewModel {
         super.init()
         
         self.bind()
+        
+//        folderUseCase.foldersPublisher
+//            .receive(on: DispatchQueue.main)
+//            .assign(to: &$folders)
     }
     
     public func transform() -> Output {
@@ -99,30 +106,31 @@ public final class AlbumViewModel: BaseViewModel {
             self.isLoading = false
         case .analysis:
             showAlert(
-                title: "분석하기",
+                title: "사진 분석",
+                message: (self.folders.count == 0 ? "사진첩의 모든 사진을 분석합니다.":"추가된 사진을 분석합니다."),
                 buttons: [
                     AlertButtonConfig(title: "취소", style: .cancel, action: nil),
-                    AlertButtonConfig(title: "이어서 위치 분석", style: .default) { [weak self] in
-                        Task {
-                            self?.isLoading = true
-                            await self?.locationAnalysis(isFull: false)
-                            self?.isLoading = false
-                        }
-                    },
-                    AlertButtonConfig(title: "이어서 분석", style: .default) { [weak self] in
+//                    AlertButtonConfig(title: "이어서 위치 분석", style: .default) { [weak self] in
+//                        Task {
+//                            self?.isLoading = true
+//                            await self?.locationAnalysis(isFull: false)
+//                            self?.isLoading = false
+//                        }
+//                    },
+                    AlertButtonConfig(title: "분석하기", style: .default) { [weak self] in
                         Task {
                             self?.isLoading = true
                             await self?.analysis(isFull: false)
                             self?.isLoading = false
                         }
-                    },
-                    AlertButtonConfig(title: "전체 분석", style: .default) { [weak self] in
-                        Task {
-                            self?.isLoading = true
-                            await self?.analysis(isFull: true)
-                            self?.isLoading = false
-                        }
                     }
+//                    , AlertButtonConfig(title: "전체 분석", style: .default) { [weak self] in
+//                        Task {
+//                            self?.isLoading = true
+//                            await self?.analysis(isFull: true)
+//                            self?.isLoading = false
+//                        }
+//                    }
                 ]
             )
         case .clear:
@@ -151,10 +159,7 @@ public final class AlbumViewModel: BaseViewModel {
             }
         case .selectItem(let folder):
             print("!!!")
-            if self.coordinator == nil {
-                    print("🚨 에러: Coordinator가 nil입니다!")
-                }
-            self.coordinator?.moveDetail(folder: folder)
+            self.onAction?(.moveDetail(folder: folder))
         }
     }
     
@@ -275,7 +280,7 @@ public final class AlbumViewModel: BaseViewModel {
     
     func loadImage(id: String, size: CGSize) async -> UIImage? {
         do {
-            guard let cgImage: CGImage = try await photoUseCase.loadImage(
+            guard let cgImage: CGImage = try await imageUseCase.loadImage(
                 id: id,
                 type: .specialSize(size)
             ).cgImage else {

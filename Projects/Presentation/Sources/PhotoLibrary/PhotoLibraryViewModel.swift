@@ -37,12 +37,23 @@ public final class PhotoLibraryViewModel: BaseViewModel {
     
     private let input = PassthroughSubject<Input, Never>()
     private let useCase: PhotoLibraryUseCase
+    private let imageUseCase: PhotoImageUseCase
     private var cancellables = Set<AnyCancellable>()
     
-    public init(useCase: PhotoLibraryUseCase) {
+    public init(useCase: PhotoLibraryUseCase,
+                imageUseCase: PhotoImageUseCase) {
         self.useCase = useCase
+        self.imageUseCase = imageUseCase
         
         super.init()
+        
+        var items = [PhotoCellItemViewModel]()
+        
+        for i in 0..<20 {
+            items.append(PhotoCellItemViewModel(localIdentifier: "\(i)", imageLoader: self))
+        }
+        
+        self.photos = [PhotoHeader(title: "-", count: 0):items]
         
         self.bind()
     }
@@ -69,7 +80,7 @@ public final class PhotoLibraryViewModel: BaseViewModel {
     
     func loadImage(id: String, size: CGSize) async -> UIImage? {
         do {
-            guard let cgImage: CGImage = try await useCase.loadImage(
+            guard let cgImage: CGImage = try await imageUseCase.loadImage(
                 id: id,
                 type: .specialSize(size)
             ).cgImage else {
@@ -122,7 +133,8 @@ public final class PhotoLibraryViewModel: BaseViewModel {
                     values.map {
                         PhotoCellItemViewModel(
                             localIdentifier: $0.localIdentifier,
-                            imageLoader: self
+                            imageLoader: self,
+                            isUnanalysis: $0.isUnanalysis
                         )
                     }
                 )

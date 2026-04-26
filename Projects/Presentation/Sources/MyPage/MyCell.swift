@@ -32,12 +32,12 @@ final class MyCell: UITableViewCell {
         
         contentView.backgroundColor = Theme.background
         
-        label.textColor = Theme.text
+        label.textColor = Theme.textPrimary
         label.font = UIFont.systemFont(ofSize: 16)
         
         let image = UIImage(systemName: "chevron.forward")
         arrowImageView.image = image?.withRenderingMode(.alwaysTemplate)
-        arrowImageView.tintColor = Theme.text
+        arrowImageView.tintColor = Theme.textPrimary
         
         addSubview(label)
         addSubview(arrowImageView)
@@ -52,7 +52,8 @@ final class MyCell: UITableViewCell {
             make.centerY.equalTo(self)
             make.leading.equalTo(label.snp.trailing)
             make.trailing.equalTo(self).inset(20)
-            make.width.height.equalTo(12)
+//            make.width.equalTo(4)
+//            make.height.equalTo(16)
         }
     }
     

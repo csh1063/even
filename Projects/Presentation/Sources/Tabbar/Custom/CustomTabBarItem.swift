@@ -115,7 +115,7 @@ class CustomTabBarItem: UIView {
             
             self.label = {
                 let label = UILabel()
-                label.font = UIFont.systemFont(ofSize: 8)
+                label.font = UIFont.systemFont(ofSize: 10)
                 label.textAlignment = .center
                 return label
             }()

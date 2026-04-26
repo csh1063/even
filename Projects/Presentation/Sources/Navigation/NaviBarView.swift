@@ -59,7 +59,7 @@ final class NaviBarView: UIView {
     }
     
     public func setTitle(_ title: String,
-                         color: UIColor = Theme.text,
+                         color: UIColor = Theme.textPrimary,
                          font: UIFont = .systemFont(ofSize: 20)) {
         self.titleLabel.text = title
         self.titleLabel.textColor = color
@@ -67,7 +67,7 @@ final class NaviBarView: UIView {
     }
     
     public func setMessage(_ message: String,
-                           color: UIColor = Theme.text,
+                           color: UIColor = Theme.textPrimary,
                            font: UIFont = .systemFont(ofSize: 20)) {
         self.messageLabel.text = message
         self.messageLabel.textColor = color
@@ -86,25 +86,25 @@ final class NaviBarView: UIView {
             
             let button = NaviBarButton(type: setting.type)
             button.tintAdjustmentMode = .normal
-            button.buttonTintColor = setting.color
+//            button.buttonTintColor = setting.color
             
             if setting.isLeft {
                 self?.stackView.insertArrangedSubview(button, at: 0)
-                button.snp.makeConstraints { make in
-                    make.width.equalTo(44)
-                }
+//                button.snp.makeConstraints { make in
+//                    make.width.equalTo(44)
+//                }
                 self?.coverView.snp.updateConstraints { make in
                     make.leading.equalToSuperview()
                 }
                 return button
             } else {
                 self?.stackView.addArrangedSubview(button)
-                button.snp.makeConstraints { make in
-                    make.width.equalTo(44)
-                }
-                self?.coverView.snp.updateConstraints { make in
-                    make.trailing.equalToSuperview()
-                }
+//                button.snp.makeConstraints { make in
+//                    make.width.equalTo(44)
+//                }
+//                self?.coverView.snp.updateConstraints { make in
+//                    make.trailing.equalToSuperview()
+//                }
                 return button
             }
         }

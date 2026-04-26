@@ -23,7 +23,14 @@ public final class AlbumCoordinator: BaseCoordinator {
     }
 
     public override func start() {
-        let viewModel = diContainer.makeAlbumViewModel(coordinator: self)
+        let viewModel = diContainer.makeAlbumViewModel()
+        viewModel.onAction = { [weak self] type in
+            switch type {
+            case .moveDetail(let folder):
+                self?.moveDetail(folder: folder)
+            }
+        }
+        
         let vc = AlbumViewController(viewModel: viewModel)
 
         bindAlert(from: viewModel)

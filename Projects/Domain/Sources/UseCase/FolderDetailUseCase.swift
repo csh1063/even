@@ -10,6 +10,7 @@ import Foundation
 
 public protocol FolderDetailUseCase {
     func fetchPhotos(by folderId: UUID) async throws -> [Photo]
+    func editFolderName(new name: String, id: UUID) async throws
 }
 
 public final class DefaultFolderDetailUseCase: FolderDetailUseCase {
@@ -22,5 +23,9 @@ public final class DefaultFolderDetailUseCase: FolderDetailUseCase {
     
     public func fetchPhotos(by folderId: UUID) async throws -> [Photo] {
         try repository.fetchPhotos(by: folderId)
+    }
+    
+    public func editFolderName(new name: String, id: UUID) async throws {
+        try repository.updateFolderName(new: name, id: id)
     }
 }

@@ -18,18 +18,25 @@ public final class PhotoLibraryDIContainer {
 //        self.appDIContainer = appDIContainer
 //    }
     
-    let photoLibraryRepository: PhotoLibraryRepository
+    private let photoLibraryRepository: PhotoLibraryRepository
+    private let photoDataRepository: PhotoDataRepository
     
-    public init(photoLibraryRepository: PhotoLibraryRepository) {
+    public init(photoLibraryRepository: PhotoLibraryRepository,
+                photoDataRepository: PhotoDataRepository) {
         self.photoLibraryRepository = photoLibraryRepository
+        self.photoDataRepository = photoDataRepository
     }
 
     func makePhotoLibraryViewModel() -> PhotoLibraryViewModel {
-        let usecase = DefaultPhotoLibraryUseCase(
+        let useCase = DefaultPhotoLibraryUseCase(
+            repository: photoLibraryRepository,
+            dataRepository: photoDataRepository
+        )
+        let imageUseCase = DefaultPhotoImageUseCase(
             repository: photoLibraryRepository
         )
         
-        return PhotoLibraryViewModel(useCase: usecase)
+        return PhotoLibraryViewModel(useCase: useCase, imageUseCase: imageUseCase)
     }
 
 //    func makeHomeDetailViewModel(

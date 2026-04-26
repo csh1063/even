@@ -65,6 +65,8 @@ final class MyPageViewModel: BaseViewModel {
                 self.coordinator?.moveLabels()
             case .test:
                 self.coordinator?.moveTest()
+            case .data:
+                print("!!")
             }
         }
     }

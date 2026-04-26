@@ -12,7 +12,7 @@ class GradientCardView: UIView {
     
     private var shimmerLayer: CAGradientLayer?
     
-    var color: UIColor = .systemBlue {
+    var colors: [UIColor] = [.systemBlue, .white] {
         didSet { updateGradient() }
     }
     
@@ -39,22 +39,19 @@ class GradientCardView: UIView {
         layer.addSublayer(mainGradientLayer)
         
         // overlay gradient
-        overlayGradientLayer.startPoint = CGPoint(x: 0.5, y: 0)
-        overlayGradientLayer.endPoint = CGPoint(x: 0.5, y: 1)
-        overlayGradientLayer.colors = [
-            UIColor.clear.cgColor,
-            UIColor.black.withAlphaComponent(0.10).cgColor
-        ]
-        layer.addSublayer(overlayGradientLayer)
+//        overlayGradientLayer.startPoint = CGPoint(x: 0.5, y: 0)
+//        overlayGradientLayer.endPoint = CGPoint(x: 0.5, y: 1)
+//        overlayGradientLayer.colors = [
+//            UIColor.clear.cgColor,
+//            UIColor.black.withAlphaComponent(0.10).cgColor
+//        ]
+//        layer.addSublayer(overlayGradientLayer)
         
         updateGradient()
     }
     
     private func updateGradient() {
-        mainGradientLayer.colors = [
-            color.withAlphaComponent(0.8).cgColor,
-            UIColor(named: "surfaceAlt")?.cgColor ?? UIColor.systemBackground.cgColor
-        ]
+        mainGradientLayer.colors = colors.map{$0.cgColor}
     }
     
     override func layoutSubviews() {

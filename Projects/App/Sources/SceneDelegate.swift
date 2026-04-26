@@ -16,7 +16,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         // UIWindow 생성
         let window = UIWindow(windowScene: windowScene)
-//        window.overrideUserInterfaceStyle = .light
+        window.overrideUserInterfaceStyle = .light
         self.window = window
 
 //        let tokenRepository = DefaultTokenRepository()

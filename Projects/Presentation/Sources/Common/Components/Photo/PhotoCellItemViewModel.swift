@@ -16,14 +16,16 @@ struct PhotoCellItemViewModel: Hashable {
     let labels: [String] = []               // CoreML 분석 라벨
     var isSelected: Bool = false            // 선택 상태
     var isFavorite: Bool = false            // 즐겨찾기
+    var isUnanalysis: Bool
     
 //    let photo: PhotoInAlbum
     private let imageLoader: any ImageLoadable
     
-    init(localIdentifier: String, imageLoader: any ImageLoadable) {
+    init(localIdentifier: String, imageLoader: any ImageLoadable, isUnanalysis: Bool = false) {
         self.localIdentifier = localIdentifier
         self.formattedDate = ""
         self.imageLoader = imageLoader
+        self.isUnanalysis = isUnanalysis
     }
 //    init(photo: PhotoInAlbum, imageLoader: any ImageLoadable) {
 //        self.localIdentifier = photo.localIdentifier

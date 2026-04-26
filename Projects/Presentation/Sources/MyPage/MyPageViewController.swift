@@ -47,13 +47,10 @@ final class MyPageViewController: BaseViewController {
     private func setupView() {
         
         naviView.setTitle("마이 페이지",
-                          color: Theme.text,
+                          color: Theme.textPrimary,
                           font: .systemFont(ofSize: 32, weight: .bold))
-        naviView.setMessage("사진들이 개 앨범으로 정리되었어요",
-                            color: Theme.text,
-                            font: .systemFont(ofSize: 14, weight: .regular))
         
-        naviView.addButtons([RightButton(type: .setting, color: Theme.text)])
+        naviView.addButtons([RightButton(type: .setting)])
         
         tableView.dataSource = self
         tableView.delegate = self

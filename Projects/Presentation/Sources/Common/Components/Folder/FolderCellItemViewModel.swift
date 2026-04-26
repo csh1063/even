@@ -37,7 +37,7 @@ struct FolderCellItemViewModel: Hashable {
     }
     
     static func == (lhs: FolderCellItemViewModel, rhs: FolderCellItemViewModel) -> Bool {
-        lhs.id == rhs.id
+        lhs.id == rhs.id && lhs.displayName == rhs.displayName
     }
     
     func hash(into hasher: inout Hasher) {

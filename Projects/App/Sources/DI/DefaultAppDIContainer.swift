@@ -94,17 +94,14 @@ final class DefaultAppDIContainer: AppDIContainer {
     // MARK: Photo Library
     func makePhotoLibraryDIContainer() -> PhotoLibraryDIContainer {
         PhotoLibraryDIContainer(
-            photoLibraryRepository: photoLibraryRepository
+            photoLibraryRepository: photoLibraryRepository,
+            photoDataRepository: photoDataRepository
         )
     }
     
     // MARK: Album
     func makeAlbumDIContainer() -> AlbumDIContainer {
         AlbumDIContainer(appDIContainer: self)
-//        AlbumDIContainer(photoLibraryRepository: photoLibraryRepository,
-//                         photoAnalysisRepository: photoAnalysisRepository,
-//                         photoDataRepository: photoDataRepository,
-//                         folderDataRepository: folderDataRepository)
     }
     
     func makeMyPageDIContainer() -> MyPageDIContainer {
