@@ -14,8 +14,8 @@ import Combine
 final class TabbarCoordinator: BaseCoordinator {
     
     private let container: TabbarDIContainer
-    private let window: UIWindow
     private var tabbarViewController: TabbarViewController?
+    private let window: UIWindow
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -28,11 +28,21 @@ final class TabbarCoordinator: BaseCoordinator {
 
     public override func start() {
         
-        self.tabbarViewController = TabbarViewController()
+        let viewModel = container.makeTabbarViewModel()
+        viewModel.onAction = { [weak self] type in
+            switch type {
+            case .progressSheet(let progress):
+                self?.showAnalysisSheet(progress: progress)
+            }
+        }
         
-        let photoCoordinator = container.makePhotoLibraryCoordinator()
-        let albumCoordinator = container.makeAlbumCoordinator()
-        let myPageCoordinator = container.makeMyPageCoordinator()
+        bindAlert(from: viewModel)
+        
+        self.tabbarViewController = TabbarViewController(viewModel: viewModel)
+        
+        let photoCoordinator = makePhotoLibraryCoordinator()
+        let albumCoordinator = makeAlbumCoordinator(viewModel: viewModel)
+        let myPageCoordinator = makeMyPageCoordinator(viewModel: viewModel)
         [photoCoordinator, albumCoordinator, myPageCoordinator].forEach {
             $0.hideTabBar = { [weak self] in
                 self?.tabbarViewController?.hideTabbar()
@@ -58,5 +68,37 @@ final class TabbarCoordinator: BaseCoordinator {
         
         window.rootViewController = self.tabbarViewController
         window.makeKeyAndVisible()
+    }
+    
+    private func makePhotoLibraryCoordinator() -> PhotoLibraryCoordinator {
+        let diContainer = container.makePhotoLibraryDIContainer()
+        return PhotoLibraryCoordinator(diContainer: diContainer)
+    }
+
+    private func makeAlbumCoordinator(viewModel: TabbarViewModel) -> AlbumCoordinator {
+        let diContainer = container.makeAlbumDIContainer()
+        return AlbumCoordinator(diContainer: diContainer, tabbarViewModel: viewModel)
+    }
+
+    private func makeMyPageCoordinator(viewModel: TabbarViewModel) -> MyPageCoordinator {
+        let diContainer = container.makeMyPageDIContainer()
+        return MyPageCoordinator(diContainer: diContainer, tabbarViewModel: viewModel)
+    }
+    
+    private func showAnalysisSheet(progress: AnalyzeProgress) {
+        let sheet = AlbumAnalysisSheet(progress: progress)
+        sheet.isModalInPresentation = true
+        if let presentation = sheet.sheetPresentationController {
+            presentation.detents = [.medium()]
+            presentation.preferredCornerRadius = 28
+        }
+        sheet.onEnd = {
+            AnalysisProgressManager.shared.show(
+                locationProgress: progress.locationProgress,
+                folderProgress: progress.locationFolderProgress
+            )
+        }
+
+        tabbarViewController?.present(sheet, animated: true)
     }
 }

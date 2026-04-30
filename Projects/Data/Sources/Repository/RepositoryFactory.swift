@@ -54,4 +54,8 @@ public final class RepositoryFactory {
     public lazy var geoRepository: GeoRepository = {
         DefaultGeoRepository(service: serviceFactory.geoAddressService)
     }()
+    
+    public lazy var userDefaultRepository: UserDefaultRepository = {
+        DefaultUserDefaultRepository(service: serviceFactory.userDefaultsService)
+    }()
 }

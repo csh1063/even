@@ -39,18 +39,12 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
     
     // MARK: - Public
     /// 여러 사진 배치 분석 → 진행률 스트림 반환
-    public func analyze(excludingIds: [String]? = nil) -> AsyncThrowingStream<ProgressAnalysis, Error> {
+    public func analyze(excludingIds: [String]) -> AsyncThrowingStream<ProgressAnalysis, Error> {
         return AsyncThrowingStream { continuation in
             Task {
                 do {
-                    let photos: [PhotoAssetEntity]
-
-                    if let excludingIds {
-                        let allAssets = try await libraryService.getPhotoList(page: 0).photos
-                        photos = allAssets.filter { !excludingIds.contains($0.asset.localIdentifier) }
-                    } else {
-                        photos = try await libraryService.getPhotoList(page: 0).photos
-                    }
+                    let allAssets = try await libraryService.getPhotoList(page: 0).photos
+                    let photos = allAssets.filter { !excludingIds.contains($0.asset.localIdentifier) }
                     
                     let total = photos.count
                     var completed = 0

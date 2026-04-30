@@ -76,11 +76,10 @@ final class AlbumOptionsSheet: UIViewController {
         let rowStack = UIStackView(arrangedSubviews: [renameRow, deleteRow])
         rowStack.axis = .vertical
         rowStack.spacing = 12
-
-        [grabberView, headerStack, rowStack].forEach {
-            view.addSubview($0)
-            $0.translatesAutoresizingMaskIntoConstraints = false
-        }
+        
+        view.addSubview(grabberView)
+        view.addSubview(headerStack)
+        view.addSubview(rowStack)
 
         grabberView.snp.makeConstraints { make in
             make.top.equalTo(view).offset(10)
@@ -170,10 +169,6 @@ final class OptionRow: UIControl {
     private func setupLayout() {
         iconBackground.isUserInteractionEnabled = false
         iconBackground.layer.cornerRadius = 18
-        iconBackground.translatesAutoresizingMaskIntoConstraints = false
-
-        iconView.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
 
         addSubview(iconBackground)
         iconBackground.addSubview(iconView)

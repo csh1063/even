@@ -14,16 +14,19 @@ import Domain
 public final class AlbumCoordinator: BaseCoordinator {
     
     private let diContainer: AlbumDIContainer
+    private let tabbarViewModel: TabbarViewModel
+    
     private let navigationController = UINavigationController()
     
-    init(diContainer: AlbumDIContainer) {
+    init(diContainer: AlbumDIContainer, tabbarViewModel: TabbarViewModel) {
         self.diContainer = diContainer
+        self.tabbarViewModel = tabbarViewModel
         
         super.init()
     }
 
     public override func start() {
-        let viewModel = diContainer.makeAlbumViewModel()
+        let viewModel = diContainer.makeAlbumViewModel(tabbarViewModel: tabbarViewModel)
         viewModel.onAction = { [weak self] type in
             switch type {
             case .moveDetail(let folder):

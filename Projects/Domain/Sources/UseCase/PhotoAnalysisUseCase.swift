@@ -9,7 +9,7 @@
 import Foundation
 
 public protocol PhotoAnalysisUseCase {
-    func analysis(isFull: Bool) -> AsyncThrowingStream<ProgressAnalysis, Error>
+    func analysis() -> AsyncThrowingStream<ProgressAnalysis, Error>
     func locationAnalysis() -> AsyncThrowingStream<ProgressAnalysis, Error>
     func deletePhotos() async throws
 }
@@ -34,17 +34,11 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
     }
     
     // 이미지 분석
-    public func analysis(isFull: Bool) -> AsyncThrowingStream<ProgressAnalysis, Error> {
+    public func analysis() -> AsyncThrowingStream<ProgressAnalysis, Error> {
         execute { [weak self] in
-            
-            let analyzedIds: [String]?
-            if isFull {
-                analyzedIds = nil
-            } else {
-                analyzedIds = try self?.dataRepository.fetchAnalyzed()
-            }
-            
-            return self?.analysisRepository.analyze(excludingIds: analyzedIds)
+            guard let self else {throw PhotoRepositoryError.photoNotFound}
+            let analyzedIds: [String] = try self.dataRepository.fetchAnalyzed()
+            return self.analysisRepository.analyze(excludingIds: analyzedIds)
         }
     }
     

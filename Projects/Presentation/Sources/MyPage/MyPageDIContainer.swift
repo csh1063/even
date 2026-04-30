@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Domain
 
 @MainActor
 public final class MyPageDIContainer {
@@ -17,19 +18,15 @@ public final class MyPageDIContainer {
         self.appDIContainer = appDIContainer
     }
 
-    func makeMyPageViewModel(coordinator: MyPageCoordinator) -> MyPageViewModel {
-//        let service = Tab1Service(
-//            provider: appDIContainer.providerFactory.makeProvider()
-//        )
+    func makeMyPageViewModel(tabbarViewModel: TabbarViewModel) -> MyPageViewModel {
 
-//        let repository = Tab1Repository(
-//            service: service,
-//            tokenRepository: appDIContainer.tokenRepository
-//        )
+        let useCase = DefaultMyPageUseCase(
+            photoLibraryRepository: appDIContainer.photoLibraryRepository,
+            photoDataRepository: appDIContainer.photoDataRepository,
+            userDefaultRepository: appDIContainer.userDefaultRepository
+        )
 
-//        let useCase = Tab1UseCase(repository: repository)
-
-        return MyPageViewModel(coordinator: coordinator)
+        return MyPageViewModel(tabbarViewModel: tabbarViewModel, myPageUseCase: useCase)
     }
 
     func makeLabelsDIContainer() -> LabelsDIContainer {

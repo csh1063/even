@@ -149,6 +149,10 @@ public final class AlbumDetailViewModel: BaseViewModel {
     
     private func deleteFolder() {
         print("삭제")
+        Task {
+            try await detailUseCase.deleteFolder(folder.id)
+            self.onAction?(.pop)
+        }
     }
 }
 

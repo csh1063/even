@@ -15,16 +15,6 @@ final class AlbumViewController: BaseViewController {
     
     private let naviView: NaviBarView = NaviBarView(type: .title(.leading))
     
-    private let progressBar: UIProgressView = UIProgressView(progressViewStyle: .bar)
-    private let folderProgressBar: UIProgressView = UIProgressView(progressViewStyle: .bar)
-    private let locationProgressBar: UIProgressView = UIProgressView(progressViewStyle: .bar)
-    private let locationFolderProgressBar: UIProgressView = UIProgressView(progressViewStyle: .bar)
-    
-    // for simulator test
-//    private let dummyButton: UIButton = UIButton()
-//        .withTitle("더미", for: .normal)
-//        .withTitleColor(Theme.nickel, for: .normal)
-    
     private var collectionView: UICollectionView = {
 
         let space: CGFloat = 10
@@ -50,41 +40,7 @@ final class AlbumViewController: BaseViewController {
         return collectionView
     }()
     
-//    private var collectionView: UICollectionView = {
-//        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: makeLayout())
-//        collectionView.isScrollEnabled = true
-//        collectionView.showsVerticalScrollIndicator = false
-//        collectionView.backgroundColor = Theme.background
-//        return collectionView
-//    }()
-//
-//    private static func makeLayout() -> UICollectionViewCompositionalLayout {
-//        let space: CGFloat = 2
-//        let count: CGFloat = 2
-//        let margin: CGFloat = 8
-//
-//        // Item: 그룹 너비의 1/2
-//        let itemSize = NSCollectionLayoutSize(
-//            widthDimension: .fractionalWidth(1 / count),
-//            heightDimension: .fractionalHeight(1.0)
-//        )
-//        let item = NSCollectionLayoutItem(layoutSize: itemSize)
-//        item.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: space, trailing: space)
-//
-//        // Group: 화면 너비 100%, 높이 = 셀 너비 (정사각형)
-//        let itemWidth = (UIScreen.main.bounds.width - (space * (count - 1)) - (margin * 2)) / count
-//        let groupSize = NSCollectionLayoutSize(
-//            widthDimension: .fractionalWidth(1.0),
-//            heightDimension: .absolute(itemWidth)
-//        )
-//        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
-//
-//        // Section
-//        let section = NSCollectionLayoutSection(group: group)
-//        section.contentInsets = NSDirectionalEdgeInsets(top: 12, leading: margin, bottom: 80, trailing: margin - space)
-//
-//        return UICollectionViewCompositionalLayout(section: section)
-//    }
+    private var emptyView: AlbumEmtpyView = AlbumEmtpyView()
     
     private var dataSource: UICollectionViewDiffableDataSource<Int, FolderCellItemViewModel>!
     
@@ -106,10 +62,6 @@ final class AlbumViewController: BaseViewController {
         
         self.setupView()
         self.setupBindings()
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
         
         self.viewModel.send(.appear)
     }
@@ -123,73 +75,26 @@ final class AlbumViewController: BaseViewController {
                             color: Theme.textPrimary,
                             font: .systemFont(ofSize: 14, weight: .regular))
         
-//        naviView.addRightButtons([(.reset, Theme.negative), (.analysis, Theme.primary)])
         naviView.addButtons([RightButton(type: .reset),
                              RightButton(type: .analysis)])
         
         collectionView.delegate = self
         
-        progressBar.isHidden = true
-        folderProgressBar.isHidden = true
-        locationProgressBar.isHidden = true
-        locationFolderProgressBar.isHidden = true
-        
-        progressBar.trackTintColor = Theme.surface
-        folderProgressBar.trackTintColor = Theme.surface
-        locationProgressBar.trackTintColor = Theme.surface
-        locationFolderProgressBar.trackTintColor = Theme.surface
-        
-        progressBar.progressTintColor = Theme.primary
-        folderProgressBar.progressTintColor = Theme.primary
-        locationProgressBar.progressTintColor = Theme.primary
-        locationFolderProgressBar.progressTintColor = Theme.primary
-        
         view.addSubview(collectionView)
-        
-        view.addSubview(progressBar)
-        view.addSubview(folderProgressBar)
-        view.addSubview(locationProgressBar)
-        view.addSubview(locationFolderProgressBar)
-        
         view.addSubview(naviView)
-//        view.addSubview(dummyButton)
+        view.addSubview(emptyView)
         
         self.configureDataSource()
+        
+        emptyView.snp.makeConstraints { make in
+            make.top.equalTo(self.view.safeAreaLayoutGuide)
+            make.leading.trailing.equalTo(self.view)
+        }
         
         naviView.snp.makeConstraints { make in
             make.top.equalToSuperview()
             make.leading.trailing.equalTo(self.view)
         }
-        
-        progressBar.snp.makeConstraints { make in
-            make.leading.equalTo(view)
-            make.width.equalTo(view).multipliedBy(0.8)
-            make.top.equalTo(naviView.snp.bottom).offset(2)
-        }
-        
-        folderProgressBar.snp.makeConstraints { make in
-            make.trailing.equalTo(view)
-            make.leading.equalTo(progressBar.snp.trailing)
-            make.top.equalTo(naviView.snp.bottom).offset(2)
-        }
-        
-        locationProgressBar.snp.makeConstraints { make in
-            make.leading.equalTo(view)
-            make.width.equalTo(view).multipliedBy(0.8)
-            make.top.equalTo(naviView.snp.bottom).offset(4)
-        }
-        
-        locationFolderProgressBar.snp.makeConstraints { make in
-            make.trailing.equalTo(view)
-            make.leading.equalTo(locationProgressBar.snp.trailing)
-            make.top.equalTo(naviView.snp.bottom).offset(4)
-        }
-        
-//        dummyButton.snp.makeConstraints { make in
-//            make.bottom.equalTo(self.naviView)
-//            make.trailing.equalTo(self.naviView).offset(-120)
-//            make.width.equalTo(60)
-//        }
         
         collectionView.snp.makeConstraints { make in
             make.top.equalTo(naviView.snp.bottom)
@@ -199,45 +104,6 @@ final class AlbumViewController: BaseViewController {
     
     private func setupBindings() {
         
-        let output = self.viewModel.transform()
-        output.progressRatio
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] ratio in
-                self?.progressBar.progress = Float(ratio)
-            }
-            .store(in: &cancellables)
-        
-        output.autoFolderProgressRatio
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] ratio in
-                self?.folderProgressBar.progress = Float(ratio)
-            }
-            .store(in: &cancellables)
-        
-        output.locationProgressRatio
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] ratio in
-                self?.locationProgressBar.progress = Float(ratio)
-            }
-            .store(in: &cancellables)
-        
-        output.locationFolderProgressRatio
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] ratio in
-                self?.locationFolderProgressBar.progress = Float(ratio)
-            }
-            .store(in: &cancellables)
-        
-        output.isAnalyzing
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] isLoading in
-                self?.progressBar.isHidden = !isLoading
-                self?.folderProgressBar.isHidden = !isLoading
-                self?.locationProgressBar.isHidden = !isLoading
-                self?.locationFolderProgressBar.isHidden = !isLoading
-            }
-            .store(in: &cancellables)
-
         naviView.publisher
             .sink { [weak self] type in
                 guard let self else {return}
@@ -251,24 +117,32 @@ final class AlbumViewController: BaseViewController {
             }
             .store(in: &cancellables)
         
-//        dummyButton.tapPublisher
-//            .sink { [weak self] button in
-//                guard let self else {return}
-//                self.viewModel.send(.dummy)
-//            }
-//            .store(in: &cancellables)
+        emptyView.publisher
+            .sink { [weak self] _ in
+                self?.viewModel.send(.analysis)
+            }
+            .store(in: &cancellables)
         
+        let output = self.viewModel.transform()
         output.folders
             .receive(on: DispatchQueue.main)
             .map { [weak self] folders -> [FolderCellItemViewModel] in
                 guard let self else { return [] }
                 
-                self.naviView.setMessage(
-                    "\(folders.count)개 앨범으로 정리되었어요",
-                    color: Theme.textPrimary,
-                    font: .systemFont(ofSize: 14, weight: .regular))
-                
-                return folders.map { FolderCellItemViewModel(folder: $0, imageLoader: self.viewModel) }
+                if folders.count == 0 {
+                    self.emptyView.isHidden = false
+                    self.naviView.isHidden = true
+                    return []
+                } else {
+                    self.emptyView.isHidden = true
+                    self.naviView.isHidden = false
+                    self.naviView.setMessage(
+                        "\(folders.count)개 앨범으로 정리되었어요",
+                        color: Theme.textPrimary,
+                        font: .systemFont(ofSize: 14, weight: .regular))
+                    
+                    return folders.map { FolderCellItemViewModel(folder: $0, imageLoader: self.viewModel) }
+                }
             }
             .sink { [weak self] folders in
                 print("folders sink: ", folders.count)
@@ -294,7 +168,7 @@ extension AlbumViewController {
         var snapshot = NSDiffableDataSourceSnapshot<Int, FolderCellItemViewModel>()
         snapshot.appendSections([0])
         snapshot.appendItems(folders)
-        dataSource.apply(snapshot, animatingDifferences: false)
+        dataSource.apply(snapshot, animatingDifferences: true)
     }
 }
 

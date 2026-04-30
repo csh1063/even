@@ -13,16 +13,31 @@ import UIKit
 public final class MyPageCoordinator: BaseCoordinator {
     
     private let diContainer: MyPageDIContainer
+    private let tabbarViewModel: TabbarViewModel
     private let navigationController = UINavigationController()
     
-    init(diContainer: MyPageDIContainer) {
+    init(diContainer: MyPageDIContainer, tabbarViewModel: TabbarViewModel) {
         self.diContainer = diContainer
+        self.tabbarViewModel = tabbarViewModel
         
         super.init()
     }
 
     public override func start() {
-        let viewModel = diContainer.makeMyPageViewModel(coordinator: self)
+        let viewModel = diContainer.makeMyPageViewModel(tabbarViewModel: tabbarViewModel)
+        viewModel.onAction = { [weak self] action in
+            switch action {
+            case .move(let type):
+                switch type {
+                case .labels:
+                    self?.moveLabels()
+                case .test:
+                    self?.moveTest()
+                default: break
+                }
+            }
+        }
+        
         let vc = MyPageViewController(viewModel: viewModel)
 
         bindAlert(from: viewModel)

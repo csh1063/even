@@ -18,32 +18,18 @@ public final class AlbumDIContainer {
         self.appDIContainer = appDIContainer
     }
     
-    func makeAlbumViewModel() -> AlbumViewModel {
+    func makeAlbumViewModel(tabbarViewModel: TabbarViewModel) -> AlbumViewModel {
         
         let imageUseCase = DefaultPhotoImageUseCase(
             repository: appDIContainer.photoLibraryRepository
         )
         
-        // MARK: Album
-        let analysisUseCase = DefaultPhotoAnalysisUseCase(
-            libraryRepository: appDIContainer.photoLibraryRepository,
-            analysisRepository: appDIContainer.photoAnalysisRepository,
-            dataRepository: appDIContainer.photoDataRepository,
-            geoRepository: appDIContainer.geoRepository
-        )
-        
-        let autoFolderUseCase = DefaultAutoFolderUseCase(
-            photoDataRepository: appDIContainer.photoDataRepository,
-            folderDataRepository: appDIContainer.folderDataRepository,
-            photoCategoryRepository: appDIContainer.photoCategoryRepository)
-        
         let folderUseCase = DefaultFolderUseCase(
             folderRepository: appDIContainer.folderDataRepository
         )
         
-        return AlbumViewModel(imageUseCase: imageUseCase,
-                              analysisUseCase: analysisUseCase,
-                              autoFolderUseCase: autoFolderUseCase,
+        return AlbumViewModel(tabbarViewModel: tabbarViewModel,
+                              imageUseCase: imageUseCase,
                               folderUseCase: folderUseCase)
     }
 

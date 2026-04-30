@@ -140,7 +140,6 @@ final class AlbumRenameSheet: UIViewController {
 
         [grabberView, headerStack, fieldStack, buttonStack].forEach {
             view.addSubview($0)
-            $0.translatesAutoresizingMaskIntoConstraints = false
         }
 
         grabberView.snp.makeConstraints { make in

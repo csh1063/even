@@ -130,6 +130,22 @@ public final class PhotoLibraryService {
         )
     }
     
+    public func getPhotoIds() async throws -> [String] {
+        
+        let result: PHFetchResult<PHAsset>
+        if let savedAll = self.allPhotos {
+            result = savedAll
+        } else {
+            result = PHAsset.fetchAssets(with: .image, options: .defaultOptions)
+        }
+        
+        let totalCount = result.count
+        
+        return (0..<totalCount).map { index -> String in
+            return result.object(at: index).localIdentifier
+        }
+    }
+    
     public func loadImage(id: String, type: LoadPhotoOptionType) async throws -> CGImage? {
         guard let asset = await getAsset(id: id) else { return nil }
         

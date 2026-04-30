@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Domain
 
 @MainActor
 public final class TabbarDIContainer {
@@ -17,18 +18,37 @@ public final class TabbarDIContainer {
         self.appDiContainer = appDiContainer
     }
     
-    func makePhotoLibraryCoordinator() -> PhotoLibraryCoordinator {
-        let diContainer = appDiContainer.makePhotoLibraryDIContainer()
-        return PhotoLibraryCoordinator(diContainer: diContainer)
+    func makeTabbarViewModel() -> TabbarViewModel {
+        
+        let analysisUseCase = DefaultPhotoAnalysisUseCase(
+            libraryRepository: appDiContainer.photoLibraryRepository,
+            analysisRepository: appDiContainer.photoAnalysisRepository,
+            dataRepository: appDiContainer.photoDataRepository,
+            geoRepository: appDiContainer.geoRepository
+        )
+        
+        let autoFolderUseCase = DefaultAutoFolderUseCase(
+            photoDataRepository: appDiContainer.photoDataRepository,
+            folderDataRepository: appDiContainer.folderDataRepository,
+            photoCategoryRepository: appDiContainer.photoCategoryRepository
+        )
+        
+        return TabbarViewModel(analysisUseCase: analysisUseCase,
+                               autoFolderUseCase: autoFolderUseCase)
     }
     
-    func makeAlbumCoordinator() -> AlbumCoordinator {
-        let diContainer = appDiContainer.makeAlbumDIContainer()
-        return AlbumCoordinator(diContainer: diContainer)
+    func makePhotoLibraryDIContainer() -> PhotoLibraryDIContainer {
+        PhotoLibraryDIContainer(
+            photoLibraryRepository: appDiContainer.photoLibraryRepository,
+            photoDataRepository: appDiContainer.photoDataRepository
+        )
     }
     
-    func makeMyPageCoordinator() -> MyPageCoordinator {
-        let diContainer = appDiContainer.makeMyPageDIContainer()
-        return MyPageCoordinator(diContainer: diContainer)
+    func makeAlbumDIContainer() -> AlbumDIContainer {
+        AlbumDIContainer(appDIContainer: appDiContainer)
+    }
+    
+    func makeMyPageDIContainer() -> MyPageDIContainer {
+        MyPageDIContainer(appDIContainer: appDiContainer)
     }
 }

@@ -49,6 +49,18 @@ final class AlertViewController: BaseViewController {
         messageLabel.numberOfLines = 0
         return messageLabel
     }()
+    
+    private let textStack: UIStackView = {
+        let textStack = UIStackView()
+        textStack.axis    = .vertical
+        textStack.spacing = 6
+        textStack.alignment = .center
+        return textStack
+    }()
+
+    private lazy var topSeparator = {
+        makeSeparator(.vertical, height: 1)
+    }()
 
     private let buttonStack: UIStackView = {
         let buttonStack = UIStackView()
@@ -68,11 +80,13 @@ final class AlertViewController: BaseViewController {
         modalTransitionStyle   = .crossDissolve
     }
 
-    required init?(coder: NSCoder) { fatalError("AlertViewController does not support NSCoding.") }
+    required init?(coder: NSCoder) {
+        fatalError("AlertViewController does not support NSCoding.")
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupLayout()
+        setupView()
         configure()
         addDimTapGestureIfNeeded()
         
@@ -84,8 +98,7 @@ final class AlertViewController: BaseViewController {
         animateIn()
     }
 
-    // MARK: - Layout
-    private func setupLayout() {
+    private func setupView() {
         view.addSubview(dimView)
         view.addSubview(containerView)
 
@@ -97,15 +110,11 @@ final class AlertViewController: BaseViewController {
             make.center.equalToSuperview()
             make.leading.trailing.equalToSuperview().inset(40)
         }
-
-        let textStack = UIStackView(arrangedSubviews: [titleLabel, messageLabel])
-        textStack.axis    = .vertical
-        textStack.spacing = 6
-        textStack.alignment = .center
-
-        let topSeparator = makeSeparator(.vertical, height: 1)
-
+        
         containerView.addSubview(textStack)
+        textStack.addArrangedSubview(titleLabel)
+        textStack.addArrangedSubview(messageLabel)
+
         containerView.addSubview(topSeparator)
         containerView.addSubview(buttonStack)
 
@@ -126,7 +135,6 @@ final class AlertViewController: BaseViewController {
         }
     }
 
-    // MARK: - Configure
     private func configure() {
         titleLabel.text   = viewModel.title
         messageLabel.text = viewModel.message
@@ -142,10 +150,15 @@ final class AlertViewController: BaseViewController {
             }
         } else {
             buttonStack.axis = .horizontal
-            buttonStack.distribution = .fillProportionally
+            buttonStack.distribution = .fillEqually
             viewModel.buttons.enumerated().forEach { index, config in
                 if index > 0 {
-                    buttonStack.addArrangedSubview(makeSeparator(.horizontal, height: 1, inset: 4))
+                    let view = makeSeparator(.horizontal, height: 1, inset: 4)
+                    buttonStack.addSubview(view)
+                    view.snp.makeConstraints { make in
+                        make.top.bottom.equalTo(buttonStack)
+                        make.centerX.equalTo(buttonStack)
+                    }
                 }
                 buttonStack.addArrangedSubview(makeButton(for: config, index: index))
             }
@@ -158,6 +171,7 @@ final class AlertViewController: BaseViewController {
         button.setTitleColor(config.style.titleColor, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: config.style.fontWeight)
         button.tag = index
+        button.backgroundColor = .clear
         button.snp.makeConstraints { make in
             make.height.equalTo(51.5)
         }
@@ -192,7 +206,6 @@ final class AlertViewController: BaseViewController {
         return backView
     }
 
-    // MARK: - Actions
     @objc private func buttonTapped(_ sender: UIButton) {
         let config = viewModel.buttons[sender.tag]
         performDismiss(action: config.action)
@@ -218,7 +231,6 @@ final class AlertViewController: BaseViewController {
         }
     }
 
-    // MARK: - Animation
     private func animateIn() {
         UIView.animate(
             withDuration: 0.3,

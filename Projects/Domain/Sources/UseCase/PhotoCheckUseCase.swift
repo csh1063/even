@@ -41,6 +41,7 @@ public class DefaultPhotoCheckUseCase: PhotoCheckUseCase {
                     var deletedPhoto: [String] = []
                     while true {
                         let savedPhotos = try photoDataRepository.fetchIds(page: page, pageSize: countPerPage)
+                        print("savedPhotos", "page: \(page)", "count:", savedPhotos.count)
                         if savedPhotos.isEmpty { break }
                         
                         deletedPhoto.append(contentsOf: savedPhotos.filter { !libraryIds.contains($0) })
@@ -50,6 +51,8 @@ public class DefaultPhotoCheckUseCase: PhotoCheckUseCase {
                         let ratio = Double(page) / maxPage * 0.8
                         continuation.yield(.progress(ratio))
                     }
+                    
+                    print("deletedPhoto", deletedPhoto.count)
                     
                     for (index, localIdentifier) in deletedPhoto.enumerated() {
                         try photoDataRepository.delete(identifier: localIdentifier)

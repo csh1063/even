@@ -10,6 +10,18 @@ import Foundation
 
 final class TabbarViewController: CustomTabBarController {
     
+    private let viewModel: TabbarViewModel
+    
+    init(viewModel: TabbarViewModel) {
+        self.viewModel = viewModel
+        
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("TabbarViewController does not support NSCoding.")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -35,7 +47,7 @@ final class TabbarViewController: CustomTabBarController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        self.selectedIndex = 1
+        self.selectedIndex = 2
     }
     
     func showTabbar() {

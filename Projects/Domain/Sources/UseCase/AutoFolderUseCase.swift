@@ -147,7 +147,7 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
                             folderPhotoMap[folder.id, default: []].append(contentsOf: matchedIdentifiers)
                         }
                         
-                        let ratio = Double(page) / (Double(photoCount) / Double(countPerPage)) * 4 / 5
+                        let ratio = Double(page) / (Double(photoCount) / Double(countPerPage)) * 4.0 / 5.0
                         print("analyzing ratio:", ratio)
                         continuation.yield(ProgressFolder(step: .analyzing, ratio: ratio))
                         page += 1
@@ -160,7 +160,7 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
                             photoIdentifiers: photos
                         )
                         
-                        let ratio = (Double(index) / Double(folderPhotoMap.count)) * 1 / 5 + 0.8
+                        let ratio = (Double(index) / Double(folderPhotoMap.count)) * 1.0 / 5.0 + 0.8
                         print("classifying ratio:", ratio)
                         continuation.yield(ProgressFolder(step: .classifying, ratio: ratio))
                     }

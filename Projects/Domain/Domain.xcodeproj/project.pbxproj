@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		0FFF444A8B420D7E14FE74F6 /* PhotoLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56003B638FE18EC472358133 /* PhotoLocation.swift */; };
 		19EDE6742F9BCB6C000D6218 /* PhotoImageUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19EDE6732F9BCB6C000D6218 /* PhotoImageUseCase.swift */; };
+		19EDE6D12FA380A2000D6218 /* MyPageUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19EDE6D02FA380A2000D6218 /* MyPageUseCase.swift */; };
+		19EDE6D72FA3CADB000D6218 /* UserDefaultRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19EDE6D62FA3CADB000D6218 /* UserDefaultRepository.swift */; };
 		1D32E7B4A891C68E824A1F11 /* PhotoDataRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A738BCE2F1F1AEF9C6F0BB0 /* PhotoDataRepository.swift */; };
 		209A23984E931C57FD20AE16 /* PhotoRepositoryError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30EAF667B0530265E87C006C /* PhotoRepositoryError.swift */; };
 		21027B31EC06337CCD82FBBB /* ProgressFolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287561C66C690B7D25A1EB49 /* ProgressFolder.swift */; };
@@ -57,6 +59,8 @@
 		070EF8A7FC77D8F70307E3AC /* GeoRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeoRepository.swift; sourceTree = "<group>"; };
 		135C338F8688EFFC198158A2 /* FolderDataRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderDataRepository.swift; sourceTree = "<group>"; };
 		19EDE6732F9BCB6C000D6218 /* PhotoImageUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoImageUseCase.swift; sourceTree = "<group>"; };
+		19EDE6D02FA380A2000D6218 /* MyPageUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPageUseCase.swift; sourceTree = "<group>"; };
+		19EDE6D62FA3CADB000D6218 /* UserDefaultRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultRepository.swift; sourceTree = "<group>"; };
 		1A738BCE2F1F1AEF9C6F0BB0 /* PhotoDataRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDataRepository.swift; sourceTree = "<group>"; };
 		1ABAD620DB6CE1F6BB3F5625 /* AutoFolderUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoFolderUseCase.swift; sourceTree = "<group>"; };
 		1E766E86BC730F636DD2C6E2 /* FolderRepositoryError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderRepositoryError.swift; sourceTree = "<group>"; };
@@ -118,6 +122,7 @@
 				1A738BCE2F1F1AEF9C6F0BB0 /* PhotoDataRepository.swift */,
 				EF4338B120DAA681FD44C489 /* PhotoLabelDataRepository.swift */,
 				6A1A054299145447B23B4DFA /* PhotoLibararyRepository.swift */,
+				19EDE6D62FA3CADB000D6218 /* UserDefaultRepository.swift */,
 			);
 			path = Implement;
 			sourceTree = "<group>";
@@ -174,6 +179,7 @@
 				B6E622A066C4FB9C9D7D2D5B /* PhotoLibraryUseCase.swift */,
 				3C4506CAFECDB17EE138CDBC /* PhotoTestUseCase.swift */,
 				19EDE6732F9BCB6C000D6218 /* PhotoImageUseCase.swift */,
+				19EDE6D02FA380A2000D6218 /* MyPageUseCase.swift */,
 			);
 			path = UseCase;
 			sourceTree = "<group>";
@@ -297,11 +303,13 @@
 				B5400DE2CF879DE2D0CB097B /* PhotoAnalysisRepository.swift in Sources */,
 				6B218BF80805B485ECDEF27E /* PhotoCategoryRepository.swift in Sources */,
 				1D32E7B4A891C68E824A1F11 /* PhotoDataRepository.swift in Sources */,
+				19EDE6D72FA3CADB000D6218 /* UserDefaultRepository.swift in Sources */,
 				44005A011991E8A60BFEC6D6 /* PhotoLabelDataRepository.swift in Sources */,
 				A8DA2D60CCA77601209BD409 /* PhotoLibararyRepository.swift in Sources */,
 				D113D03D51F072987EDF4B66 /* AutoFolderUseCase.swift in Sources */,
 				ADB72A9D2F74BA240F492FCC /* FolderDetailUseCase.swift in Sources */,
 				629A5A6D0E1DF5196A2AEA14 /* FolderUseCase.swift in Sources */,
+				19EDE6D12FA380A2000D6218 /* MyPageUseCase.swift in Sources */,
 				41CE5AF87EC51A4CAC05D152 /* PhotoAnalysisUseCase.swift in Sources */,
 				F34EBE9576F8CB9E40296EE2 /* PhotoCheckUseCase.swift in Sources */,
 				89B116F69496103FA351FB6A /* PhotoLabelUseCase.swift in Sources */,

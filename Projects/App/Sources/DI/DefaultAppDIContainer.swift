@@ -45,6 +45,10 @@ final class DefaultAppDIContainer: AppDIContainer {
         repositoryFactory.geoRepository
     }
     
+    var userDefaultRepository: UserDefaultRepository {
+        repositoryFactory.userDefaultRepository
+    }
+    
     private let providerFactory: ProviderFactory
     private lazy var executor: DefaultNetworkExecutor = {
         DefaultNetworkExecutor(providerFactory: providerFactory)
@@ -89,22 +93,5 @@ final class DefaultAppDIContainer: AppDIContainer {
     
     func makeMainViewModel() -> MainViewModel {
         MainViewModel()
-    }
-    
-    // MARK: Photo Library
-    func makePhotoLibraryDIContainer() -> PhotoLibraryDIContainer {
-        PhotoLibraryDIContainer(
-            photoLibraryRepository: photoLibraryRepository,
-            photoDataRepository: photoDataRepository
-        )
-    }
-    
-    // MARK: Album
-    func makeAlbumDIContainer() -> AlbumDIContainer {
-        AlbumDIContainer(appDIContainer: self)
-    }
-    
-    func makeMyPageDIContainer() -> MyPageDIContainer {
-        MyPageDIContainer(appDIContainer: self)
     }
 }

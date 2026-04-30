@@ -10,6 +10,7 @@ import Foundation
 
 public protocol PhotoLibraryRepository {
     func fetchPhotos(page: Int) async throws -> PhotoList
+    func fetchPhotoIds() async throws -> [String]
     func checkPermission() async throws -> PhotoPermission
     func loadImage<T>(id: String, type: LoadPhotoOptionType) async throws -> ImageData<T>
 }

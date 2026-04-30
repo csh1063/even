@@ -15,6 +15,12 @@
 		13F779FE4F17BDBA660A1B35 /* UIView+Publisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3645708A5BAD77D391863C3 /* UIView+Publisher.swift */; };
 		14143B565EE1025E86B4A457 /* LabelsDIContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D7B5780986C5EECD1B78992 /* LabelsDIContainer.swift */; };
 		17750AE257E622DD8E82133C /* Extension_UITextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C2998FAD7DD5077BD097DB /* Extension_UITextView.swift */; };
+		19EDE6B92F9F171F000D6218 /* AlbumEmtpyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19EDE6B82F9F171F000D6218 /* AlbumEmtpyView.swift */; };
+		19EDE6C72FA24924000D6218 /* TabbarViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19EDE6C62FA24924000D6218 /* TabbarViewModel.swift */; };
+		19EDE6C92FA31DF2000D6218 /* MyHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19EDE6C82FA31DF2000D6218 /* MyHeaderView.swift */; };
+		19EDE6CB2FA32243000D6218 /* MyPageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19EDE6CA2FA32243000D6218 /* MyPageCell.swift */; };
+		19EDE6CD2FA32B73000D6218 /* BoxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19EDE6CC2FA32B73000D6218 /* BoxView.swift */; };
+		19EDE6CF2FA32FD6000D6218 /* MyPageSwitchCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19EDE6CE2FA32FD6000D6218 /* MyPageSwitchCell.swift */; };
 		1EB3782697E5D5765188E1DE /* Extension_UISegmentedControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AC6050EB2A12AA43E785BA5 /* Extension_UISegmentedControl.swift */; };
 		200C032581C4A24727FC0CE6 /* AlbumViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03112E88258FD411CDDBA6D3 /* AlbumViewController.swift */; };
 		22E9BE6A63E4C891FFBF6C76 /* UIGestureRecognizer+Publisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C1A7F457AF7CAC51AE3C6AB /* UIGestureRecognizer+Publisher.swift */; };
@@ -133,6 +139,12 @@
 		0EC98997474D5ABEA1E71B7D /* PhotoLabelCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLabelCell.swift; sourceTree = "<group>"; };
 		125FEEE52CEDA2092E747AB0 /* AlertItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertItem.swift; sourceTree = "<group>"; };
 		134AEE009D928C7E39EAF4CD /* Presentation-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Presentation-Info.plist"; sourceTree = "<group>"; };
+		19EDE6B82F9F171F000D6218 /* AlbumEmtpyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumEmtpyView.swift; sourceTree = "<group>"; };
+		19EDE6C62FA24924000D6218 /* TabbarViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabbarViewModel.swift; sourceTree = "<group>"; };
+		19EDE6C82FA31DF2000D6218 /* MyHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyHeaderView.swift; sourceTree = "<group>"; };
+		19EDE6CA2FA32243000D6218 /* MyPageCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPageCell.swift; sourceTree = "<group>"; };
+		19EDE6CC2FA32B73000D6218 /* BoxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoxView.swift; sourceTree = "<group>"; };
+		19EDE6CE2FA32FD6000D6218 /* MyPageSwitchCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPageSwitchCell.swift; sourceTree = "<group>"; };
 		1B18F8EDBD5425ACC9D7811D /* MyPageCellType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPageCellType.swift; sourceTree = "<group>"; };
 		1B74B54DBDDE8F00F62C6A60 /* ListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListViewModel.swift; sourceTree = "<group>"; };
 		1E177AD797E6C5E5BD5A62BA /* PhotoLibraryDIContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryDIContainer.swift; sourceTree = "<group>"; };
@@ -230,8 +242,9 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		19EDE6B22F9DE24A000D6218 /* AlbumRename */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = AlbumRename; sourceTree = "<group>"; };
-		19EDE6B52F9DE291000D6218 /* AlbumOptions */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = AlbumOptions; sourceTree = "<group>"; };
+		19EDE6BB2F9F27DF000D6218 /* Sheet */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Sheet; sourceTree = "<group>"; };
+		19EDE6BC2F9F280C000D6218 /* AlbumAnalysisSheet */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = AlbumAnalysisSheet; sourceTree = "<group>"; };
+		19EDE6C12F9F8C92000D6218 /* MiniProgress */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = MiniProgress; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -396,6 +409,7 @@
 				3D8C733F1D7589153F1FFE1F /* TabbarCoordinator.swift */,
 				67BC566822730766F3AE64D4 /* TabbarDIContainer.swift */,
 				3D75BDA072F9E06E34DEB813 /* TabbarViewController.swift */,
+				19EDE6C62FA24924000D6218 /* TabbarViewModel.swift */,
 			);
 			path = Tabbar;
 			sourceTree = "<group>";
@@ -403,8 +417,8 @@
 		ACFC6E8F6D299B22A1D9900B /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				19EDE6B52F9DE291000D6218 /* AlbumOptions */,
-				19EDE6B22F9DE24A000D6218 /* AlbumRename */,
+				19EDE6C12F9F8C92000D6218 /* MiniProgress */,
+				19EDE6BC2F9F280C000D6218 /* AlbumAnalysisSheet */,
 				B9397ABB0AF9E6EB341D382E /* Album */,
 				B6F0CB9BC97FA29087115603 /* AlbumDetail */,
 				48C3BB372FC706C0D62EA950 /* Alert */,
@@ -451,6 +465,7 @@
 		B6F0CB9BC97FA29087115603 /* AlbumDetail */ = {
 			isa = PBXGroup;
 			children = (
+				19EDE6BB2F9F27DF000D6218 /* Sheet */,
 				C8F9AC182358D4FE2D5C299B /* AlbumDetailCoordinator.swift */,
 				D8BAD0070B04CDF1EAB02CFB /* AlbumDetailDIContainer.swift */,
 				FDE0D246DE24CB8D997BAF99 /* AlbumDetailViewController.swift */,
@@ -477,6 +492,7 @@
 				8F123E57E42305BA2907FE13 /* AlbumDIContainer.swift */,
 				03112E88258FD411CDDBA6D3 /* AlbumViewController.swift */,
 				75D92F5115DB359614C13635 /* AlbumViewModel.swift */,
+				19EDE6B82F9F171F000D6218 /* AlbumEmtpyView.swift */,
 			);
 			path = Album;
 			sourceTree = "<group>";
@@ -596,12 +612,16 @@
 		FDD6A6D8B7F0AE959F360B77 /* MyPage */ = {
 			isa = PBXGroup;
 			children = (
+				19EDE6CE2FA32FD6000D6218 /* MyPageSwitchCell.swift */,
+				19EDE6CC2FA32B73000D6218 /* BoxView.swift */,
 				B17589FEE05ACDB5C24C1C19 /* MyCell.swift */,
 				1B18F8EDBD5425ACC9D7811D /* MyPageCellType.swift */,
 				D950EBD5C5E8E6FB899C6E8A /* MyPageCoordinator.swift */,
 				55DFCE6EDBF9C396DD6D6E33 /* MyPageDIContainer.swift */,
 				976797041FBCEDED9606E242 /* MyPageViewController.swift */,
 				2CAA8E278CF92B6C39831515 /* MyPageViewModel.swift */,
+				19EDE6C82FA31DF2000D6218 /* MyHeaderView.swift */,
+				19EDE6CA2FA32243000D6218 /* MyPageCell.swift */,
 			);
 			path = MyPage;
 			sourceTree = "<group>";
@@ -623,8 +643,9 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				19EDE6B22F9DE24A000D6218 /* AlbumRename */,
-				19EDE6B52F9DE291000D6218 /* AlbumOptions */,
+				19EDE6BB2F9F27DF000D6218 /* Sheet */,
+				19EDE6BC2F9F280C000D6218 /* AlbumAnalysisSheet */,
+				19EDE6C12F9F8C92000D6218 /* MiniProgress */,
 			);
 			name = Presentation;
 			packageProductDependencies = (
@@ -709,11 +730,14 @@
 				6B21C00E402B89F04AC73A81 /* Extension_UIImage.swift in Sources */,
 				9348CE2627DFB62740A7ADC4 /* Extension_UILabel.swift in Sources */,
 				1EB3782697E5D5765188E1DE /* Extension_UISegmentedControl.swift in Sources */,
+				19EDE6CF2FA32FD6000D6218 /* MyPageSwitchCell.swift in Sources */,
 				DEE1DB91C73ABE77DF724469 /* Extension_UIStackView.swift in Sources */,
 				7B8F2384F42C2803F7E26622 /* Extension_UITextField.swift in Sources */,
 				17750AE257E622DD8E82133C /* Extension_UITextView.swift in Sources */,
 				F31B82D5364624DC95B09D22 /* Extension_UIView.swift in Sources */,
+				19EDE6C72FA24924000D6218 /* TabbarViewModel.swift in Sources */,
 				01715CBADA677BCCFF831A1D /* Extension_UIViewController.swift in Sources */,
+				19EDE6C92FA31DF2000D6218 /* MyHeaderView.swift in Sources */,
 				56EB5C5AA484162372E08EA4 /* NibLoadable.swift in Sources */,
 				FC9A0BD427D721DDCC1B2AEB /* Regex.swift in Sources */,
 				4A52E7E23700C35233DF323F /* FolderCell.swift in Sources */,
@@ -742,6 +766,7 @@
 				11FFD5B3C0735874B09006EB /* ListCoordinator.swift in Sources */,
 				A5AF8E35A7D71873FD5C39E4 /* ListDIContainer.swift in Sources */,
 				C299895D2B0BDB02B887AF4E /* ListViewController.swift in Sources */,
+				19EDE6CB2FA32243000D6218 /* MyPageCell.swift in Sources */,
 				1105E8EA1D4E774E78877F9B /* ListViewModel.swift in Sources */,
 				816DA425CF89A37BB407B2E7 /* MainCoordinator.swift in Sources */,
 				56AC79A47BE146CAF1BFF861 /* MainDIContainer.swift in Sources */,
@@ -750,6 +775,7 @@
 				7289EFA4AFBD4C70FB862366 /* MyCell.swift in Sources */,
 				EBD0790F3D06646595CD4E7A /* MyPageCellType.swift in Sources */,
 				2D7787A92580939395AFAA41 /* MyPageCoordinator.swift in Sources */,
+				19EDE6CD2FA32B73000D6218 /* BoxView.swift in Sources */,
 				3ADFEEF985D7BC1626FD5643 /* MyPageDIContainer.swift in Sources */,
 				B39A2D52E240C875E277CACA /* MyPageViewController.swift in Sources */,
 				BDFCDBB439612F8BF6AF15D8 /* MyPageViewModel.swift in Sources */,
@@ -761,6 +787,7 @@
 				BFA74F069964E0281D75BC31 /* PhotoLibraryDIContainer.swift in Sources */,
 				CF81691B1D464F6197555282 /* PhotoLibraryViewController.swift in Sources */,
 				60B1A9C19CF5718CE911F110 /* PhotoLibraryViewModel.swift in Sources */,
+				19EDE6B92F9F171F000D6218 /* AlbumEmtpyView.swift in Sources */,
 				FD72876B346CBB1594A8774A /* PhotoTestCoordinator.swift in Sources */,
 				FFDB23C771BFE626931A589E /* PhotoTestDIContainer.swift in Sources */,
 				729B91FE44EF04E9EE610439 /* PhotoTestViewController.swift in Sources */,

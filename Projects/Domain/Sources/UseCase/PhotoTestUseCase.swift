@@ -32,7 +32,6 @@ final public class DefaultPhotoTestUseCase: PhotoTestUseCase {
                 let lat = (latitude * 10000).rounded() / 10000
                 let lng = (longitude * 10000).rounded() / 10000
                 return "lat: \(lat), long: \(lng)"
-//                return "lat: \(latitude), long: \(longitude)"
             } else {
                 return ""
             }

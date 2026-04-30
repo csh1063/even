@@ -148,6 +148,9 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
         
         context.delete(entity)
         try context.save()
+        
+        let updated = try fetchAll()
+        foldersSubject.send(updated)
     }
     
     public func addPhoto(folderId: UUID, photoIdentifier: String) throws {

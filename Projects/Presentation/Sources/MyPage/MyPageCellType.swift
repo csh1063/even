@@ -6,16 +6,84 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
-enum MyPageCellType: CaseIterable {
+enum MyPageCellType {
+    
+    // library
+    case allPhoto
+    case analysisDate
+    case unanalysisPhoto
+    
+    // background
+    case locationAnalysis
+    case locationAutoFolder
+    
+    // switch
+    case autoAnalysis
+    case blarblar
+    
+    // privacy
+    case terms
+    case privacy
+    case photoPermission
+    
+    // app settings
+    case displayMode
+    case feedback
+    case version
+    
     case labels
     case test
-    case data
+    
+    var icon: String {
+        switch self {
+        case .allPhoto: return "photo.on.rectangle.angled"
+        case .analysisDate: return "clock.arrow.circlepath"
+        case .unanalysisPhoto: return "sparkles"
+        case .locationAnalysis: return ""
+        case .locationAutoFolder: return ""
+        case .autoAnalysis: return "sparkles"
+        case .blarblar: return "location"
+        case .terms: return "doc.text"
+        case .privacy: return "person.2"
+        case .photoPermission: return "photo.badge.checkmark"
+        case .displayMode: return "moon.fill"
+        case .feedback: return "questionmark.circle"
+        case .version: return "info.circle"
+        case .labels: return ""
+        case .test: return ""
+        }
+    }
     
     var text: String {
         switch self {
+        case .allPhoto: return "총 사진 수"
+        case .analysisDate: return "최근 분석"
+        case .unanalysisPhoto: return "미분석 사진"
+        case .locationAnalysis: return "사진 좌표를 주소로 변환"
+        case .locationAutoFolder: return "장소 기반 앨범 생성"
+        case .autoAnalysis: return "새 사진 자동 분석"
+        case .blarblar: return "새 사진 자동 분석"
+        case .terms: return "이용 약관"
+        case .privacy: return "개인 정보 처리 방침"
+        case .photoPermission: return "사진 접근 범위"
+        case .displayMode: return "다크 모드"
+        case .feedback: return "문의 / 피드백"
+        case .version: return "앱 버전"
         case .labels: return "사진 라벨 목록"
         case .test: return "연구소"
-        case .data: return "데이터 관리"
         }
     }
+}
+
+struct MyCellData: Hashable {
+    var type: MyPageCellType
+    var value: String = ""
+    var isOn: Bool = false
+    
+    var isPrimary: Bool = true
+}
+
+struct MyCellHeader: Hashable {
+    var name: String
+    var order: Int
 }

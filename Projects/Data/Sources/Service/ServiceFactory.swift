@@ -48,4 +48,8 @@ public final class ServiceFactory {
     public var photoCategoryService: PhotoCategoryService = {
         PhotoCategoryService()
     }()
+    
+    public var userDefaultsService: UserDefaultsService = {
+        UserDefaultsService()
+    }()
 }
