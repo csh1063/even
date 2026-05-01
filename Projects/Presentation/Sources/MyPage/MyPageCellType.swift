@@ -6,12 +6,33 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
+enum MyPageCellStyle {
+    case info
+    case open // chevron.right
+    case toggle
+    case link // arrow.up.right
+    case button
+    
+    var icon: String {
+        switch self {
+        case .open: return "chevron.right"
+        case .link: return "arrow.up.right"
+        default: return ""
+        }
+    }
+}
+
 enum MyPageCellType {
     
     // library
+    case allLibraryPhoto
     case allPhoto
-    case analysisDate
     case unanalysisPhoto
+    
+    // analysis
+    case analyzedDate
+    case analysis
+    case reAnalysis
     
     // background
     case locationAnalysis
@@ -19,7 +40,6 @@ enum MyPageCellType {
     
     // switch
     case autoAnalysis
-    case blarblar
     
     // privacy
     case terms
@@ -36,13 +56,15 @@ enum MyPageCellType {
     
     var icon: String {
         switch self {
+        case .allLibraryPhoto: return "photoLibrary"
         case .allPhoto: return "photo.on.rectangle.angled"
-        case .analysisDate: return "clock.arrow.circlepath"
-        case .unanalysisPhoto: return "sparkles"
-        case .locationAnalysis: return ""
-        case .locationAutoFolder: return ""
+        case .unanalysisPhoto: return "lasso.badge.sparkles"
+        case .analyzedDate: return "clock.arrow.circlepath"
+        case .analysis: return "sparkles"
+        case .reAnalysis: return "arrow.clockwise"
+        case .locationAnalysis: return "location.fill.viewfinder"
+        case .locationAutoFolder: return "map.fill"
         case .autoAnalysis: return "sparkles"
-        case .blarblar: return "location"
         case .terms: return "doc.text"
         case .privacy: return "person.2"
         case .photoPermission: return "photo.badge.checkmark"
@@ -56,13 +78,15 @@ enum MyPageCellType {
     
     var text: String {
         switch self {
-        case .allPhoto: return "총 사진 수"
-        case .analysisDate: return "최근 분석"
-        case .unanalysisPhoto: return "미분석 사진"
+        case .allLibraryPhoto: return "사진첩 사진 수"
+        case .allPhoto: return "분석한 사진 수"
+        case .unanalysisPhoto: return "미분석 사진 수"
+        case .analyzedDate: return "최근 분석"
+        case .analysis: return "이어서 분석하기"
+        case .reAnalysis: return "리셋 후 재분석하기"
         case .locationAnalysis: return "사진 좌표를 주소로 변환"
         case .locationAutoFolder: return "장소 기반 앨범 생성"
         case .autoAnalysis: return "새 사진 자동 분석"
-        case .blarblar: return "새 사진 자동 분석"
         case .terms: return "이용 약관"
         case .privacy: return "개인 정보 처리 방침"
         case .photoPermission: return "사진 접근 범위"
@@ -71,6 +95,23 @@ enum MyPageCellType {
         case .version: return "앱 버전"
         case .labels: return "사진 라벨 목록"
         case .test: return "연구소"
+        }
+    }
+    
+    var style: MyPageCellStyle {
+        switch self {
+        case .allLibraryPhoto, .allPhoto, .unanalysisPhoto, .analyzedDate:
+            return .info
+        case .analysis, .reAnalysis:
+            return .button
+        case .locationAnalysis, .locationAutoFolder:
+            return .info
+        case .autoAnalysis:
+            return .toggle
+        case .terms, .privacy, .photoPermission, .displayMode, .feedback, .version:
+            return .open
+        case .labels, .test:
+            return .info
         }
     }
 }

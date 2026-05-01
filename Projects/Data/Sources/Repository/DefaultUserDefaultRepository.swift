@@ -13,18 +13,30 @@ public final class DefaultUserDefaultRepository: UserDefaultRepository {
     
     private let service: UserDefaultsService
     
+    private var now: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        return formatter.string(from: Date())
+    }
+    
     init(service: UserDefaultsService) {
         self.service = service
     }
     
     public func saveAnalyzedDate() async throws {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        service.set(formatter.string(from: Date()), forK: UserDefaultsKey.lastAnalyzedDate)
+        service.set(now, forK: UserDefaultsKey.lastAnalyzedDate)
     }
     
     public func fetchAnalyzedDate() async throws -> String {
         service.string(UserDefaultsKey.lastAnalyzedDate)
+    }
+    
+    public func saveLocationAnalyzedDate() async throws {
+        service.set(now, forK: UserDefaultsKey.lastLocationAnalyzedDate)
+    }
+    
+    public func fetchLocationAnalyzedDate() async throws -> String {
+        service.string(UserDefaultsKey.lastLocationAnalyzedDate)
     }
     
     public func saveDisplayMode(_ mode: String) async throws {

@@ -1,5 +1,6 @@
 import UIKit
 import Presentation
+import Data
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -16,7 +17,18 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         // UIWindow 생성
         let window = UIWindow(windowScene: windowScene)
-        window.overrideUserInterfaceStyle = .light
+        
+        // 다크모드 적용
+        let mode = UserDefaults.standard.string(forKey: UserDefaultsKey.displayMode) ?? ""
+        switch mode {
+        case "dark":
+            window.overrideUserInterfaceStyle = .dark
+        case "light":
+            window.overrideUserInterfaceStyle = .light
+        default:
+            window.overrideUserInterfaceStyle = .unspecified
+        }
+        
         self.window = window
 
 //        let tokenRepository = DefaultTokenRepository()

@@ -28,6 +28,7 @@ final class MyPageViewModel: BaseViewModel {
     }
     
     @Published private var cellTypes: [MyCellHeader: [MyCellData]] = [:]
+    private var libraryCount: Int = 0
     private var photoCount: Int = 0
     private var analyzedDate: String = ""
     private var unanalysisCount: Int = 0
@@ -88,10 +89,12 @@ final class MyPageViewModel: BaseViewModel {
     
     private func loadAll() async {
         do {
+            async let library = myPageUseCase.libraryCount()
             async let count = myPageUseCase.photoCount()
             async let date = myPageUseCase.lastAnalyzeDate()
             async let unanalysis = myPageUseCase.photoUnanalysisCount()
             async let displayMode = myPageUseCase.getDisplayMode()
+            self.libraryCount = try await library
             self.photoCount = try await count
             self.analyzedDate = relativeDate(from: try await date)
             self.unanalysisCount = try await unanalysis
@@ -116,30 +119,34 @@ final class MyPageViewModel: BaseViewModel {
     
     private func cells() {
         self.cellTypes = [
-            MyCellHeader(name: "내 라이브러리", order: 1): [
+            MyCellHeader(name: "내 라이브러리", order: 0): [
+                MyCellData(type: .allLibraryPhoto, value: "\(libraryCount.formatted())장"),
                 MyCellData(type: .allPhoto, value: "\(photoCount.formatted())장"),
-                MyCellData(type: .analysisDate, value: analyzedDate),
                 MyCellData(type: .unanalysisPhoto, value: "\(unanalysisCount.formatted())장")
             ],
-            MyCellHeader(name: "백 그라운드 작업", order: 2): [
+            MyCellHeader(name: "사진 분석", order: 10): [
+                MyCellData(type: .analyzedDate, value: analyzedDate),
+                MyCellData(type: .analysis, value: "\(unanalysisCount.formatted())장"),
+                MyCellData(type: .reAnalysis, value: "\(unanalysisCount.formatted())장")
+            ],
+            MyCellHeader(name: "백 그라운드 작업", order: 20): [
                 MyCellData(type: .locationAnalysis, value: "-", isOn: false),
                 MyCellData(type: .locationAutoFolder, value: "-", isOn: false)
             ],
-            MyCellHeader(name: "정리 옵션", order: 3): [
+            MyCellHeader(name: "정리 옵션", order: 30): [
                 MyCellData(type: .autoAnalysis, isOn: true, isPrimary: false),
-//                MyCellData(type: .blarblar, value: "-", isOn: false, isPrimary: false)
             ],
-            MyCellHeader(name: "접근 및 권한", order: 4): [
+            MyCellHeader(name: "접근 및 권한", order: 40): [
                 MyCellData(type: .terms),
                 MyCellData(type: .privacy),
                 MyCellData(type: .photoPermission, value: self.photoPermission)
             ],
-            MyCellHeader(name: "앱 설정", order: 5): [
+            MyCellHeader(name: "앱 설정", order: 50): [
                 MyCellData(type: .displayMode, value: displayMode),
                 MyCellData(type: .feedback),
                 MyCellData(type: .version, value: version)
             ],
-            MyCellHeader(name: "실험실", order: 6): [
+            MyCellHeader(name: "실험실", order: 60): [
                 MyCellData(type: .labels),
                 MyCellData(type: .test)
             ]

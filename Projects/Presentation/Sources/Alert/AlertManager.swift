@@ -47,12 +47,24 @@ public final class AlertManager {
             isPresenting = false
             return
         }
+        
+        let style: UIUserInterfaceStyle
+        if let keyWindow = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .flatMap({ $0.windows })
+            .first(where: { $0.isKeyWindow }) {
+            
+            style = keyWindow.overrideUserInterfaceStyle
+            
+        } else {
+            style = .unspecified
+        }
 
         let window = UIWindow(windowScene: windowScene)
         window.windowLevel     = .alert + 1
         window.backgroundColor = .clear
         window.rootViewController = UIViewController()
-        window.overrideUserInterfaceStyle = .light
+        window.overrideUserInterfaceStyle = style
 
         alertWindow = window
         window.makeKeyAndVisible()

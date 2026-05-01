@@ -163,9 +163,9 @@ public final class TabbarViewModel: BaseViewModel {
         }
     }
     
-    private func createdAutoFolder(updateProgress: @MainActor (Double) -> Void) async -> Bool {
+    private func createdAutoFolder(isPhoto: Bool, updateProgress: @MainActor (Double) -> Void) async -> Bool {
         do {
-            for try await progress in autoFolderUseCase.execute() {
+            for try await progress in autoFolderUseCase.execute(isPhoto) {
                 await MainActor.run {
                     updateProgress(progress.ratio)
                     if case .completed = progress.step {
@@ -196,7 +196,7 @@ public final class TabbarViewModel: BaseViewModel {
         }
         self.progressRatio = 1.0
         
-        return await createdAutoFolder {
+        return await createdAutoFolder(isPhoto: true) {
             self.autoFolderProgressRatio = $0
         }
         
@@ -224,7 +224,7 @@ public final class TabbarViewModel: BaseViewModel {
             self.locationProgressRatio = 1.0
         }
         
-        _ = await self.createdAutoFolder {
+        _ = await self.createdAutoFolder(isPhoto: false) {
             self.locationFolderProgressRatio = $0
         }
     }

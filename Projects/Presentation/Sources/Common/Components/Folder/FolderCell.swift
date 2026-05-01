@@ -149,7 +149,7 @@ final class FolderCell: UICollectionViewCell {
             Theme.accent,
             Theme.primary,
             Theme.secondary
-        ].map {$0.withAlphaComponent(0.8)}
+        ].map {$0.withAlphaComponent(0.5)}
         self.gradientView.isHidden = false
         self.imageIconView.isHidden = false
         

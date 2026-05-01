@@ -9,6 +9,7 @@
 import Foundation
 
 public protocol MyPageUseCase {
+    func libraryCount() async throws -> Int
     func photoCount() async throws -> Int
     func lastAnalyzeDate() async throws -> String
     func photoUnanalysisCount() async throws -> Int
@@ -27,6 +28,10 @@ public final class DefaultMyPageUseCase: MyPageUseCase {
         self.photoLibraryRepository = photoLibraryRepository
         self.photoDataRepository = photoDataRepository
         self.userDefaultRepository = userDefaultRepository
+    }
+    
+    public func libraryCount() async throws -> Int {
+        try await photoLibraryRepository.fetchPhotos(page: 0).photos.count
     }
     
     public func photoCount() async throws -> Int {

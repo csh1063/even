@@ -30,7 +30,8 @@ public final class TabbarDIContainer {
         let autoFolderUseCase = DefaultAutoFolderUseCase(
             photoDataRepository: appDiContainer.photoDataRepository,
             folderDataRepository: appDiContainer.folderDataRepository,
-            photoCategoryRepository: appDiContainer.photoCategoryRepository
+            photoCategoryRepository: appDiContainer.photoCategoryRepository,
+            userDefaultRepository: appDiContainer.userDefaultRepository
         )
         
         return TabbarViewModel(analysisUseCase: analysisUseCase,

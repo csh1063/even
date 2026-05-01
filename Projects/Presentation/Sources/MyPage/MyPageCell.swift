@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import Combine
 
 enum CellPosition {
     case top, middle, bottom, single
@@ -43,6 +44,7 @@ final class MyPageCell: UITableViewCell {
         label.textColor = Theme.textSecondary
         return label
     }()
+    private let styleIconView: UIImageView = UIImageView()
     
     private let switchView: UISwitch = {
         let switchView = UISwitch()
@@ -51,18 +53,52 @@ final class MyPageCell: UITableViewCell {
         return switchView
     }()
     
+    private let topSeperator: UIView = UIView(backgroundColor: Theme.strokeSoft)
+    private let bottomSeperator: UIView = UIView(backgroundColor: Theme.strokeSoft)
+    
+    private var isPrimary: Bool = true
+    
+    private var cancellables = Set<AnyCancellable>()
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
         self.setupView()
         self.selectionStyle = .none
+//        self.sutupBinding()
+    }
+    
+    override func setHighlighted(_ highlighted: Bool, animated: Bool) {
+        print("setHighlighted")
+        if highlighted {
+            self.boxView.backgroundColor = (isPrimary ? Theme.surfaceWarm:Theme.surfaceCool)
+            self.boxCoverView.backgroundColor = (isPrimary ? Theme.surfaceWarm:Theme.surfaceCool)
+        } else {
+            self.boxView.backgroundColor = Theme.surface
+            self.boxCoverView.backgroundColor = Theme.surface
+        }
+    }
+    
+    override func setSelected(_ selected: Bool, animated: Bool) {
+        print("setSelected")
+        if selected {
+            self.boxView.backgroundColor = (isPrimary ? Theme.surfaceWarm:Theme.surfaceCool)
+            self.boxCoverView.backgroundColor = (isPrimary ? Theme.surfaceWarm:Theme.surfaceCool)
+            UIView.animate(withDuration: 0.5, delay: 0.1) {
+                self.boxView.backgroundColor = Theme.surface
+                self.boxCoverView.backgroundColor = Theme.surface
+            }
+        } else {
+            self.boxView.backgroundColor = Theme.surface
+            self.boxCoverView.backgroundColor = Theme.surface
+        }
     }
     
     required init?(coder: NSCoder) {
         fatalError("MyCell does not support NSCoding")
     }
     
-    func setupView() {
+    private func setupView() {
         
         backgroundColor = .clear
         iconView.contentMode = .scaleAspectFit
@@ -70,14 +106,25 @@ final class MyPageCell: UITableViewCell {
         coverView.layer.cornerRadius = 17
         coverView.layer.masksToBounds = true
         
+        topSeperator.isHidden = true
+        bottomSeperator.isHidden = true
+        
+        switchView.isHidden = true
+        valueLabel.isHidden = true
+        styleIconView.isHidden = true
+        styleIconView.contentMode = .scaleAspectFit
+        styleIconView.tintColor = Theme.textSecondary
+        
         contentView.addSubview(boxView)
         contentView.addSubview(boxCoverView)
         boxCoverView.addSubview(coverView)
         coverView.addSubview(iconView)
         boxCoverView.addSubview(titleLabel)
         boxCoverView.addSubview(valueLabel)
+        boxCoverView.addSubview(styleIconView)
         boxCoverView.addSubview(switchView)
-        
+        boxCoverView.addSubview(topSeperator)
+        boxCoverView.addSubview(bottomSeperator)
         boxView.snp.makeConstraints { make in
             make.leading.trailing.equalTo(contentView).inset(20)
             make.top.bottom.equalTo(contentView)
@@ -111,45 +158,72 @@ final class MyPageCell: UITableViewCell {
             make.trailing.equalTo(boxView).offset(-14)
         }
         
+        styleIconView.snp.makeConstraints { make in
+            make.centerY.equalTo(boxView)
+            make.height.width.equalTo(16)
+            make.trailing.equalTo(boxView).offset(-14)
+        }
+        
         switchView.snp.makeConstraints { make in
             make.centerY.equalTo(boxView)
 //            make.leading.equalTo(titleLabel.snp.trailing).offset(12)
             make.trailing.equalTo(boxView).offset(-14)
         }
+        
+        topSeperator.snp.makeConstraints { make in
+            make.height.equalTo(0.5)
+            make.leading.equalTo(titleLabel)
+            make.trailing.equalTo(boxView).offset(-14)
+            make.top.equalTo(boxView)
+        }
+        
+        bottomSeperator.snp.makeConstraints { make in
+            make.height.equalTo(0.5)
+            make.leading.equalTo(titleLabel)
+            make.trailing.equalTo(boxView).offset(-14)
+            make.bottom.equalTo(boxView)
+        }
     }
     
     func configure(with data: MyCellData, cellPosition: CellPosition) {
         
+        isPrimary = data.isPrimary
         boxView.applyStyle(cellPosition)
         switch cellPosition {
         case .single:
+            topSeperator.isHidden = true
+            bottomSeperator.isHidden = true
             boxCoverView.snp.updateConstraints { make in
                 make.leading.trailing.equalTo(boxView).inset(1)
                 make.top.equalTo(boxView).offset(18)
                 make.bottom.equalTo(boxView).offset(-18)
             }
         case .top:
+            topSeperator.isHidden = true
+            bottomSeperator.isHidden = false
             boxCoverView.snp.updateConstraints { make in
                 make.leading.trailing.equalTo(boxView).inset(1)
                 make.top.equalTo(boxView).offset(18)
                 make.bottom.equalTo(boxView)
             }
         case .bottom:
+            topSeperator.isHidden = false
+            bottomSeperator.isHidden = true
             boxCoverView.snp.updateConstraints { make in
                 make.leading.trailing.equalTo(boxView).inset(1)
                 make.top.equalTo(boxView)
                 make.bottom.equalTo(boxView).offset(-18)
             }
         case .middle:
+            topSeperator.isHidden = true
+            bottomSeperator.isHidden = true
             boxCoverView.snp.updateConstraints { make in
                 make.leading.trailing.equalTo(boxView).inset(1)
                 make.top.bottom.equalTo(boxView)
             }
         }
-        switchView.isHidden = true
-        valueLabel.isHidden = true
         
-        let icon = UIImage(systemName: data.type.icon)?.withRenderingMode(.alwaysTemplate)
+        let icon = (UIImage(named: data.type.icon, in: .module, with: nil) ?? UIImage(systemName: data.type.icon))?.withRenderingMode(.alwaysTemplate)
         iconView.image = icon
         titleLabel.text = data.type.text
         valueLabel.text = data.value
@@ -165,6 +239,51 @@ final class MyPageCell: UITableViewCell {
             iconView.tintColor = Theme.secondary
             switchView.isHidden = false
             valueLabel.isHidden = true
+        }
+        
+        let styleIcon = UIImage(systemName: data.type.style.icon)?.withRenderingMode(.alwaysTemplate)
+        switch data.type.style {
+        case .info:
+            switchView.isHidden = true
+            valueLabel.isHidden = false
+            styleIconView.isHidden = true
+            valueLabel.snp.updateConstraints { make in
+                make.trailing.equalTo(boxView).offset(-14)
+            }
+            titleLabel.textColor = Theme.textPrimary
+        case .open:
+            switchView.isHidden = true
+            valueLabel.isHidden = false
+            styleIconView.isHidden = false
+            styleIconView.image = styleIcon
+            valueLabel.snp.updateConstraints { make in
+                make.trailing.equalTo(boxView).offset(-36)
+            }
+            titleLabel.textColor = Theme.textPrimary
+        case .toggle:
+            switchView.isHidden = false
+            valueLabel.isHidden = true
+            styleIconView.isHidden = true
+            titleLabel.textColor = Theme.textPrimary
+        case .link:
+            switchView.isHidden = true
+            valueLabel.isHidden = false
+            styleIconView.isHidden = false
+            styleIconView.image = styleIcon
+            valueLabel.snp.updateConstraints { make in
+                make.trailing.equalTo(boxView).offset(-36)
+            }
+            titleLabel.textColor = Theme.textPrimary
+        case .button:
+            switchView.isHidden = true
+            valueLabel.isHidden = true
+            styleIconView.isHidden = true
+            
+            if data.isPrimary {
+                titleLabel.textColor = Theme.primary
+            } else {
+                titleLabel.textColor = Theme.secondary
+            }
         }
     }
 }

@@ -10,7 +10,7 @@
 import Foundation
 
 public protocol AutoFolderUseCase {
-    func execute() -> AsyncThrowingStream<ProgressFolder, Error>
+    func execute(_ isPhoto: Bool) -> AsyncThrowingStream<ProgressFolder, Error>
     func syncPhotoCount() async throws
 }
 
@@ -19,6 +19,7 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
     private let photoDataRepository: PhotoDataRepository
     private let folderDataRepository: FolderDataRepository
     private let photoCategoryRepository: PhotoCategoryRepository
+    private let userDefaultRepository: UserDefaultRepository
     
     // 폴더 생성 최소 비율
     private let threshold: Double = 0.05
@@ -26,14 +27,16 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
     public init(
         photoDataRepository: PhotoDataRepository,
         folderDataRepository: FolderDataRepository,
-        photoCategoryRepository: PhotoCategoryRepository
+        photoCategoryRepository: PhotoCategoryRepository,
+        userDefaultRepository: UserDefaultRepository
     ) {
         self.photoDataRepository = photoDataRepository
         self.folderDataRepository = folderDataRepository
         self.photoCategoryRepository = photoCategoryRepository
+        self.userDefaultRepository = userDefaultRepository
     }
     
-    public func execute() -> AsyncThrowingStream<ProgressFolder, Error> {
+    public func execute(_ isPhoto: Bool) -> AsyncThrowingStream<ProgressFolder, Error> {
         AsyncThrowingStream { continuation in
             Task {
                 do {
@@ -165,6 +168,11 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
                         continuation.yield(ProgressFolder(step: .classifying, ratio: ratio))
                     }
                     
+                    if isPhoto {
+                        try await userDefaultRepository.saveAnalyzedDate()
+                    } else {
+                        try await userDefaultRepository.saveLocationAnalyzedDate()
+                    }
                     continuation.yield(ProgressFolder(step: .completed, ratio: 1.0))
                     continuation.finish()
                 } catch {

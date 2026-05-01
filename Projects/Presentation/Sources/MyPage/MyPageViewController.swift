@@ -20,6 +20,7 @@ final class MyPageViewController: BaseViewController {
         tableView.separatorStyle = .none
         tableView.contentInset = UIEdgeInsets(top: 12, left: 0, bottom: 100, right: 0)
         tableView.alwaysBounceVertical = true
+        tableView.showsVerticalScrollIndicator = false
         
         tableView.register(MyCell.self, forCellReuseIdentifier: MyCell.cellName)
         tableView.register(MyPageCell.self, forCellReuseIdentifier: MyPageCell.cellName)
@@ -100,41 +101,41 @@ extension MyPageViewController {
                     cell.configure(with: itemIdentifier.type)
                     return cell
                 }
-                return UITableViewCell()
             case .locationAnalysis, .locationAutoFolder:
-                let defaultCell = UITableViewCell()
-                defaultCell.backgroundColor = Theme.accent
-                print("indexPath row", indexPath.row, ", item", indexPath.item)
-                return defaultCell
+                break
             default:
                 if let cell = tableView.dequeueReusableCell(withIdentifier: MyPageCell.cellName, for: indexPath) as? MyPageCell {
-                    
-                    let sectionId = self.dataSource.snapshot().sectionIdentifiers[indexPath.section]
-                    let items = self.dataSource.snapshot().itemIdentifiers(inSection: sectionId)
-                    let isFirst = items.first == itemIdentifier
-                    let isLast = items.last == itemIdentifier
-                    
-                    let cellPosition: CellPosition
-                    if items.count == 1 {
-                        cellPosition = .single
-                    } else if isFirst {
-                        cellPosition = .top
-                    } else if isLast {
-                        cellPosition = .bottom
-                    } else {
-                        cellPosition = .middle
-                    }
-                    
+                    let cellPosition = self.calCellPosition(itemIdentifier: itemIdentifier, indexPath: indexPath)
                     cell.configure(with: itemIdentifier, cellPosition: cellPosition)
                     return cell
                 }
-                
-                let defaultCell = UITableViewCell()
-                defaultCell.backgroundColor = .blue
-                print("indexPath row", indexPath.row, ", item", indexPath.item)
-                return defaultCell
             }
+            
+            let defaultCell = UITableViewCell()
+            defaultCell.backgroundColor = .blue
+            print("indexPath row", indexPath.row, ", item", indexPath.item)
+            return defaultCell
         })
+    }
+    
+    private func calCellPosition(itemIdentifier: MyCellData, indexPath: IndexPath) -> CellPosition {
+        
+        let sectionId = self.dataSource.snapshot().sectionIdentifiers[indexPath.section]
+        let items = self.dataSource.snapshot().itemIdentifiers(inSection: sectionId)
+        let isFirst = items.first == itemIdentifier
+        let isLast = items.last == itemIdentifier
+        
+        let cellPosition: CellPosition
+        if items.count == 1 {
+            cellPosition = .single
+        } else if isFirst {
+            cellPosition = .top
+        } else if isLast {
+            cellPosition = .bottom
+        } else {
+            cellPosition = .middle
+        }
+        return cellPosition
     }
     
     private func applySnapshot(with folders: [MyCellHeader: [MyCellData]]) {
@@ -148,7 +149,7 @@ extension MyPageViewController {
             snapshot.appendItems(folders[section] ?? [], toSection: section)
         }
         
-        dataSource.apply(snapshot, animatingDifferences: true)
+        dataSource.apply(snapshot, animatingDifferences: false)
     }
 }
 
@@ -156,6 +157,7 @@ extension MyPageViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 //        self.viewModel.send(.selectItem(cellTypes[indexPath.row]))
+        print("didSelectRowAt")
     }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {

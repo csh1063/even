@@ -8,6 +8,7 @@
 
 public enum UserDefaultsKey {
     public static let lastAnalyzedDate = "lastAnalyzedDate"
+    public static let lastLocationAnalyzedDate = "lastLocationAnalyzedDate"
     public static let displayMode = "displayMode"
     public static let autoNewAnalysis = "autoNewAnalysis"
 }
