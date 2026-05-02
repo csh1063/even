@@ -45,7 +45,7 @@ public final class PhotoTestViewModel: BaseViewModel {
     private func bind() {
         self.input.sink { [weak self] input in
             guard let self else { return }
-            Task { await self.handle(input) }
+            Task { @MainActor in await self.handle(input) }
         }
         .store(in: &cancellables)
     }

@@ -3,11 +3,12 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 55;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		0FFF444A8B420D7E14FE74F6 /* PhotoLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56003B638FE18EC472358133 /* PhotoLocation.swift */; };
+		196CB1912FA61D3D00824005 /* AnalyzedType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 196CB1902FA61D3D00824005 /* AnalyzedType.swift */; };
 		1D32E7B4A891C68E824A1F11 /* PhotoDataRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A738BCE2F1F1AEF9C6F0BB0 /* PhotoDataRepository.swift */; };
 		209A23984E931C57FD20AE16 /* PhotoRepositoryError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30EAF667B0530265E87C006C /* PhotoRepositoryError.swift */; };
 		21027B31EC06337CCD82FBBB /* ProgressFolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287561C66C690B7D25A1EB49 /* ProgressFolder.swift */; };
@@ -58,6 +59,7 @@
 /* Begin PBXFileReference section */
 		070EF8A7FC77D8F70307E3AC /* GeoRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeoRepository.swift; sourceTree = "<group>"; };
 		135C338F8688EFFC198158A2 /* FolderDataRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderDataRepository.swift; sourceTree = "<group>"; };
+		196CB1902FA61D3D00824005 /* AnalyzedType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyzedType.swift; sourceTree = "<group>"; };
 		1A738BCE2F1F1AEF9C6F0BB0 /* PhotoDataRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDataRepository.swift; sourceTree = "<group>"; };
 		1ABAD620DB6CE1F6BB3F5625 /* AutoFolderUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoFolderUseCase.swift; sourceTree = "<group>"; };
 		1E766E86BC730F636DD2C6E2 /* FolderRepositoryError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderRepositoryError.swift; sourceTree = "<group>"; };
@@ -144,6 +146,7 @@
 				2528E93271B989A4596EA6C3 /* ProgressAnalysis.swift */,
 				287561C66C690B7D25A1EB49 /* ProgressFolder.swift */,
 				636453CB1CFD3AD57CCCCBF7 /* ProgressState.swift */,
+				196CB1902FA61D3D00824005 /* AnalyzedType.swift */,
 			);
 			path = Entity;
 			sourceTree = "<group>";
@@ -295,6 +298,7 @@
 				0FFF444A8B420D7E14FE74F6 /* PhotoLocation.swift in Sources */,
 				209A23984E931C57FD20AE16 /* PhotoRepositoryError.swift in Sources */,
 				F3AF649C2A4F4522949B6D62 /* ProgressAnalysis.swift in Sources */,
+				196CB1912FA61D3D00824005 /* AnalyzedType.swift in Sources */,
 				21027B31EC06337CCD82FBBB /* ProgressFolder.swift in Sources */,
 				B4384FBDE51B22F8459F85C1 /* ProgressState.swift in Sources */,
 				B7150B611AE3FFC1CE934E5A /* FolderDataRepository.swift in Sources */,
@@ -345,10 +349,7 @@
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = (
-					"$(inherited)",
-					DEBUG,
-				);
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
 				SWIFT_COMPILATION_MODE = singlefile;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;

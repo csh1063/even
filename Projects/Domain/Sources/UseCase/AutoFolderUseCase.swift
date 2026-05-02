@@ -12,6 +12,7 @@ import Foundation
 public protocol AutoFolderUseCase {
     func execute(_ isPhoto: Bool) -> AsyncThrowingStream<ProgressFolder, Error>
     func syncPhotoCount() async throws
+    func deletePhotos() async throws
 }
 
 public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
@@ -90,7 +91,9 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
                                 name: folderName,
                                 displayName: folderName,
                                 isAuto: true,
-                                keywords: keywords, photoCount: 0
+                                keywords: keywords,
+                                photoCount: 0,
+                                from: "category"
                             )
                             if let savedFolder = try folderDataRepository.saveFolder(folder: folder) {
                                 folders.append(savedFolder)
@@ -106,7 +109,8 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
                                 displayName: "\(year)년",
                                 isAuto: true,
                                 keywords: [year, "\(year)년"],
-                                photoCount: 0
+                                photoCount: 0,
+                                from: "date"
                             )
                             if let savedFolder = try folderDataRepository.saveFolder(folder: folder) {
                                 folders.append(savedFolder)
@@ -122,7 +126,8 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
                                 displayName: address,
                                 isAuto: true,
                                 keywords: [address],
-                                photoCount: 0
+                                photoCount: 0,
+                                from: "location"
                             )
                             if let savedFolder = try folderDataRepository.saveFolder(folder: folder) {
                                 folders.append(savedFolder)
@@ -168,6 +173,8 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
                         continuation.yield(ProgressFolder(step: .classifying, ratio: ratio))
                     }
                     
+                    try folderDataRepository.syncFolders()
+                    
                     if isPhoto {
                         try await userDefaultRepository.saveAnalyzedDate()
                     } else {
@@ -184,5 +191,9 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
     
     public func syncPhotoCount() async throws {
         try folderDataRepository.syncPhotoCount()
+    }
+    
+    public func deletePhotos() async throws {
+        try self.folderDataRepository.deleteAll()
     }
 }

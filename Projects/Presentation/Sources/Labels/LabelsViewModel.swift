@@ -48,16 +48,15 @@ public final class LabelsViewModel: BaseViewModel {
     }
     
     private func bind() {
-        self.input.sink { input in
-                Task {
-                    await self.hander(input)
-                }
-            }
-            .store(in: &cancellables)
+        self.input.sink { [weak self] input in
+            guard let self else { return }
+            Task { @MainActor in await self.handle(input) }
+        }
+        .store(in: &cancellables)
 
     }
     
-    private func hander(_ input: Input) async {
+    private func handle(_ input: Input) async {
         switch input {
         case .appear:
             await self.loadLabels()

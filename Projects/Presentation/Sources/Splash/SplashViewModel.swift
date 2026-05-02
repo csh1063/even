@@ -47,14 +47,13 @@ public final class SplashViewModel: BaseViewModel {
     
     private func bind() {
         input.sink { [weak self] input in
-            Task {
-                await self?.handler(input)
-            }
+            guard let self else { return }
+            Task { @MainActor in await self.handle(input) }
         }
         .store(in: &cancellables)
     }
     
-    private func handler(_ input: Input) async {
+    private func handle(_ input: Input) async {
         switch input {
         case .appear:
             await self.checkDeletedPhoto()

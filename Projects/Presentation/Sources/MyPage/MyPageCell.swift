@@ -57,6 +57,7 @@ final class MyPageCell: UITableViewCell {
     private let bottomSeperator: UIView = UIView(backgroundColor: Theme.strokeSoft)
     
     private var isPrimary: Bool = true
+    private var hasStyle: Bool = false
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -69,28 +70,32 @@ final class MyPageCell: UITableViewCell {
     }
     
     override func setHighlighted(_ highlighted: Bool, animated: Bool) {
-        print("setHighlighted")
-        if highlighted {
-            self.boxView.backgroundColor = (isPrimary ? Theme.surfaceWarm:Theme.surfaceCool)
-            self.boxCoverView.backgroundColor = (isPrimary ? Theme.surfaceWarm:Theme.surfaceCool)
-        } else {
-            self.boxView.backgroundColor = Theme.surface
-            self.boxCoverView.backgroundColor = Theme.surface
+        if hasStyle {
+            print("setHighlighted")
+            if highlighted {
+                self.boxView.backgroundColor = (isPrimary ? Theme.surfaceWarm:Theme.surfaceCool)
+                self.boxCoverView.backgroundColor = (isPrimary ? Theme.surfaceWarm:Theme.surfaceCool)
+            } else {
+                self.boxView.backgroundColor = Theme.surface
+                self.boxCoverView.backgroundColor = Theme.surface
+            }
         }
     }
     
     override func setSelected(_ selected: Bool, animated: Bool) {
-        print("setSelected")
-        if selected {
-            self.boxView.backgroundColor = (isPrimary ? Theme.surfaceWarm:Theme.surfaceCool)
-            self.boxCoverView.backgroundColor = (isPrimary ? Theme.surfaceWarm:Theme.surfaceCool)
-            UIView.animate(withDuration: 0.5, delay: 0.1) {
+        if hasStyle {
+            print("setSelected")
+            if selected {
+                self.boxView.backgroundColor = (isPrimary ? Theme.surfaceWarm:Theme.surfaceCool)
+                self.boxCoverView.backgroundColor = (isPrimary ? Theme.surfaceWarm:Theme.surfaceCool)
+                UIView.animate(withDuration: 0.5, delay: 0.1) {
+                    self.boxView.backgroundColor = Theme.surface
+                    self.boxCoverView.backgroundColor = Theme.surface
+                }
+            } else {
                 self.boxView.backgroundColor = Theme.surface
                 self.boxCoverView.backgroundColor = Theme.surface
             }
-        } else {
-            self.boxView.backgroundColor = Theme.surface
-            self.boxCoverView.backgroundColor = Theme.surface
         }
     }
     
@@ -244,6 +249,7 @@ final class MyPageCell: UITableViewCell {
         let styleIcon = UIImage(systemName: data.type.style.icon)?.withRenderingMode(.alwaysTemplate)
         switch data.type.style {
         case .info:
+            hasStyle = false
             switchView.isHidden = true
             valueLabel.isHidden = false
             styleIconView.isHidden = true
@@ -252,6 +258,7 @@ final class MyPageCell: UITableViewCell {
             }
             titleLabel.textColor = Theme.textPrimary
         case .open:
+            hasStyle = true
             switchView.isHidden = true
             valueLabel.isHidden = false
             styleIconView.isHidden = false
@@ -261,11 +268,13 @@ final class MyPageCell: UITableViewCell {
             }
             titleLabel.textColor = Theme.textPrimary
         case .toggle:
+            hasStyle = false
             switchView.isHidden = false
             valueLabel.isHidden = true
             styleIconView.isHidden = true
             titleLabel.textColor = Theme.textPrimary
         case .link:
+            hasStyle = true
             switchView.isHidden = true
             valueLabel.isHidden = false
             styleIconView.isHidden = false
@@ -275,6 +284,7 @@ final class MyPageCell: UITableViewCell {
             }
             titleLabel.textColor = Theme.textPrimary
         case .button:
+            hasStyle = true
             switchView.isHidden = true
             valueLabel.isHidden = true
             styleIconView.isHidden = true

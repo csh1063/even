@@ -26,6 +26,7 @@ public final class TabbarViewModel: BaseViewModel {
     
     enum Input {
         case analysis
+        case reanalysis
         case clear
     }
     
@@ -78,7 +79,7 @@ public final class TabbarViewModel: BaseViewModel {
     private func bind() {
         self.input.sink { [weak self] input in
             guard let self else { return }
-            Task { await self.handle(input) }
+            Task { @MainActor in await self.handle(input) }
         }
         .store(in: &cancellables)
     }
@@ -102,6 +103,30 @@ public final class TabbarViewModel: BaseViewModel {
                                 locationFolderProgress: self.$locationFolderProgressRatio.eraseToAnyPublisher()
                             )))
                             self.isLoading = true
+                            await self.analysis()
+                            self.isLoading = false
+                        }
+                    }
+                ]
+            )
+        case .reanalysis:
+            showAlert(
+                title: "리셋 후 재분석하기",
+                message: "저장된 사진 및 앨범을\n삭제 후 다시 분석합니다.\n다시 분석할까요?",
+                buttons: [
+                    AlertButtonConfig(title: "취소", style: .cancel, action: nil),
+                    AlertButtonConfig(title: "재분석하기", style: .default) { [weak self] in
+                        Task {
+                            guard let self else {return}
+                            self.isLoading = true
+                            await self.clear()
+                            
+                            self.onAction?(.progressSheet(AnalyzeProgress(
+                                photoProgress: self.$progressRatio.eraseToAnyPublisher(),
+                                folderProgress: self.$autoFolderProgressRatio.eraseToAnyPublisher(),
+                                locationProgress: self.$locationProgressRatio.eraseToAnyPublisher(),
+                                locationFolderProgress: self.$locationFolderProgressRatio.eraseToAnyPublisher()
+                            )))
                             await self.analysis()
                             self.isLoading = false
                         }
@@ -156,8 +181,7 @@ public final class TabbarViewModel: BaseViewModel {
     
     private func clear() async {
         do {
-            try await self.analysisUseCase.deletePhotos()
-//            _ = await self.loadFodlers()
+            try await self.autoFolderUseCase.deletePhotos()
         } catch {
             print("error", error.localizedDescription)
         }

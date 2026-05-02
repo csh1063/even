@@ -27,8 +27,8 @@ public final class MyPageCoordinator: BaseCoordinator {
         let viewModel = diContainer.makeMyPageViewModel(tabbarViewModel: tabbarViewModel)
         viewModel.onAction = { [weak self] action in
             switch action {
-            case .move(let type):
-                switch type {
+            case .move(let data):
+                switch data.type {
                 case .labels:
                     self?.moveLabels()
                 case .test:

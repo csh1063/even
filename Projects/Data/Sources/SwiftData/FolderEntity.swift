@@ -17,8 +17,8 @@ public final class FolderEntity {
     public var createdAt: Date
     public var isAuto: Bool              // 자동 생성 폴더 여부
     public var coverPhotoIdentifier: String?
-    
     public var photoCount: Int = 0
+    public var from: String
     
     @Relationship(deleteRule: .nullify)
     public var photos: [PhotoEntity] = []
@@ -32,7 +32,8 @@ public final class FolderEntity {
         displayName: String,
         createdAt: Date = Date(),
         isAuto: Bool = false,
-        coverPhotoIdentifier: String? = nil
+        coverPhotoIdentifier: String? = nil,
+        from: String
     ) {
         self.id = id
         self.name = name
@@ -40,5 +41,6 @@ public final class FolderEntity {
         self.createdAt = createdAt
         self.isAuto = isAuto
         self.coverPhotoIdentifier = coverPhotoIdentifier
+        self.from = from
     }
 }

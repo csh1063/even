@@ -156,8 +156,9 @@ extension MyPageViewController {
 extension MyPageViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-//        self.viewModel.send(.selectItem(cellTypes[indexPath.row]))
-        print("didSelectRowAt")
+        guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
+        self.viewModel.send(.selectItem(item))
+//        print("didSelectRowAt")
     }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {

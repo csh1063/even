@@ -18,6 +18,7 @@ public struct Folder {
     public var keywords: [String]
     public var photos: [Photo]
     public var photoCount: Int
+    public var from: String
     
     public init(
         id: UUID = UUID(),
@@ -28,7 +29,8 @@ public struct Folder {
         coverPhotoIdentifier: String? = nil,
         keywords: [String] = [],
         photos: [Photo] = [],
-        photoCount: Int
+        photoCount: Int,
+        from: String
     ) {
         self.id = id
         self.name = name
@@ -39,5 +41,6 @@ public struct Folder {
         self.keywords = keywords
         self.photos = photos
         self.photoCount = photoCount
+        self.from = from
     }
 }

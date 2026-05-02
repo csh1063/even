@@ -51,7 +51,7 @@ public final class GeocoderService {
         }
     }
     
-    func fetchAddress(latitude: Double, longitude: Double, id: String, locale: Locale = .current) async throws -> PhotoLocation? {
+    func fetchAddress(latitude: Double, longitude: Double, locale: Locale = .current) async throws -> PhotoLocation? {
         
         let geocoder = CLGeocoder()
         do {

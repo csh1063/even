@@ -35,11 +35,11 @@ public final class DefaultFolderUseCase: FolderUseCase {
     public func createDummy() async throws {
         print("usecase create dummy!")
         let folders = [
-            Folder(name: "dummy1", displayName: "dummy1", isAuto: true, photoCount: 0),
-            Folder(name: "dummy2", displayName: "dummy2", isAuto: true, photoCount: 0),
-            Folder(name: "dummy3", displayName: "dummy3", isAuto: true, photoCount: 0),
-            Folder(name: "dummy4", displayName: "dummy4", isAuto: true, photoCount: 0),
-            Folder(name: "dummy5", displayName: "dummy5", isAuto: true, photoCount: 0)
+            Folder(name: "dummy1", displayName: "dummy1", isAuto: true, photoCount: 0, from: "dummy"),
+            Folder(name: "dummy2", displayName: "dummy2", isAuto: true, photoCount: 0, from: "dummy"),
+            Folder(name: "dummy3", displayName: "dummy3", isAuto: true, photoCount: 0, from: "dummy"),
+            Folder(name: "dummy4", displayName: "dummy4", isAuto: true, photoCount: 0, from: "dummy"),
+            Folder(name: "dummy5", displayName: "dummy5", isAuto: true, photoCount: 0, from: "dummy")
         ]
     
         for folder in folders {

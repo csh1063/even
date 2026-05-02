@@ -21,7 +21,6 @@ public protocol PhotoDataRepository {
     func fetchSyncPhotoId(byFolder localIdentifier: UUID) throws -> String?
     func fetchSyncPhotoCount(byFolder localIdentifier: UUID) throws -> Int
     func delete(identifier: String) throws
-    func deleteAll() throws
 }
 
 extension PhotoDataRepository {

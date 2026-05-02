@@ -56,7 +56,7 @@ final class AlbumAnalysisSheet: UIViewController {
         return label
     }()
 
-    private let photoRow = ProgressRow(icon: "photo.badge.plus", title: "새 사진 정리 중")
+    private let photoRow = ProgressRow(icon: "photo.badge.plus", title: "사진 분석 중")
     private let albumRow = ProgressRow(icon: "square.stack.3d.up.fill", title: "앨범 생성 중")
 
     private let locationNoteView: UIView = {

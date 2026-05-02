@@ -9,11 +9,11 @@
 import Foundation
 
 public protocol MyPageUseCase {
-    func libraryCount() async throws -> Int
     func photoCount() async throws -> Int
     func lastAnalyzeDate() async throws -> String
     func photoUnanalysisCount() async throws -> Int
     func getDisplayMode() async throws -> String
+    func nextDisplayMode() async throws -> String
 }
 
 public final class DefaultMyPageUseCase: MyPageUseCase {
@@ -28,10 +28,6 @@ public final class DefaultMyPageUseCase: MyPageUseCase {
         self.photoLibraryRepository = photoLibraryRepository
         self.photoDataRepository = photoDataRepository
         self.userDefaultRepository = userDefaultRepository
-    }
-    
-    public func libraryCount() async throws -> Int {
-        try await photoLibraryRepository.fetchPhotos(page: 0).photos.count
     }
     
     public func photoCount() async throws -> Int {
@@ -50,5 +46,21 @@ public final class DefaultMyPageUseCase: MyPageUseCase {
     
     public func getDisplayMode() async throws -> String {
         try await userDefaultRepository.fetchDisplayMode()
+    }
+    
+    public func nextDisplayMode() async throws -> String {
+        let now = try await userDefaultRepository.fetchDisplayMode()
+        
+        switch now {
+        case "light":
+            try await userDefaultRepository.saveDisplayMode("dark")
+            return "dark"
+        case "dark":
+            try await userDefaultRepository.saveDisplayMode("")
+            return ""
+        default:
+            try await userDefaultRepository.saveDisplayMode("light")
+            return "light"
+        }
     }
 }

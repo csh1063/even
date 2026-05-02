@@ -33,6 +33,7 @@ enum MyPageCellType {
     case analyzedDate
     case analysis
     case reAnalysis
+    case reset
     
     // background
     case locationAnalysis
@@ -62,6 +63,7 @@ enum MyPageCellType {
         case .analyzedDate: return "clock.arrow.circlepath"
         case .analysis: return "sparkles"
         case .reAnalysis: return "arrow.clockwise"
+        case .reset: return "eraser"
         case .locationAnalysis: return "location.fill.viewfinder"
         case .locationAutoFolder: return "map.fill"
         case .autoAnalysis: return "sparkles"
@@ -84,6 +86,7 @@ enum MyPageCellType {
         case .analyzedDate: return "최근 분석"
         case .analysis: return "이어서 분석하기"
         case .reAnalysis: return "리셋 후 재분석하기"
+        case .reset: return "리셋"
         case .locationAnalysis: return "사진 좌표를 주소로 변환"
         case .locationAutoFolder: return "장소 기반 앨범 생성"
         case .autoAnalysis: return "새 사진 자동 분석"
@@ -98,20 +101,30 @@ enum MyPageCellType {
         }
     }
     
+    var subText: String {
+        switch self {
+        case .locationAnalysis: return ""
+        case .locationAutoFolder: return ""
+        default: return ""
+        }
+    }
+    
     var style: MyPageCellStyle {
         switch self {
         case .allLibraryPhoto, .allPhoto, .unanalysisPhoto, .analyzedDate:
             return .info
-        case .analysis, .reAnalysis:
+        case .analysis, .reAnalysis, .reset:
             return .button
         case .locationAnalysis, .locationAutoFolder:
             return .info
         case .autoAnalysis:
             return .toggle
-        case .terms, .privacy, .photoPermission, .displayMode, .feedback, .version:
+        case .terms, .privacy, .displayMode, .feedback:
             return .open
+        case .version, .photoPermission:
+            return .link
         case .labels, .test:
-            return .info
+            return .open
         }
     }
 }

@@ -38,6 +38,7 @@ open class CustomTabBarController: UIViewController {
     private var tabBarPaddingLeading: NSLayoutConstraint!
     private var tabBarPaddingTrailing: NSLayoutConstraint!
     
+    private var tabBarCoverView: UIView = UIView()
     private var tabBarShadowView: UIView = UIView()
     
     private var tabBarStackView: UIStackView = UIStackView()
@@ -76,6 +77,7 @@ open class CustomTabBarController: UIViewController {
     private var tabbarBackgroundColor: UIColor = .systemBackground {
         didSet {
             self.tabBarView.backgroundColor = tabbarBackgroundColor
+            self.tabBarCoverView.backgroundColor = tabbarBackgroundColor.withAlphaComponent(1.0)
             self.tabBarShadowView.backgroundColor = tabbarBackgroundColor
         }
     }
@@ -135,6 +137,9 @@ open class CustomTabBarController: UIViewController {
     
     private func initView() {
         
+        self.tabBarCoverView.isHidden = true
+        self.tabBarCoverView.backgroundColor = self.tabbarBackgroundColor.withAlphaComponent(1.0)
+        self.tabBarCoverView.translatesAutoresizingMaskIntoConstraints = false
         self.tabBarView.backgroundColor = self.tabbarBackgroundColor
         self.tabBarView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -148,6 +153,7 @@ open class CustomTabBarController: UIViewController {
         self.tabBarStackView.translatesAutoresizingMaskIntoConstraints = false
         
         self.view.addSubview(tabBarShadowView)
+        self.view.addSubview(tabBarCoverView)
         self.view.addSubview(tabBarView)
         self.tabBarView.addSubview(tabBarStackView)
         
@@ -173,6 +179,10 @@ open class CustomTabBarController: UIViewController {
             self.tabBarStackView.bottomAnchor.constraint(equalTo: self.tabBarView.bottomAnchor),
             self.tabBarPaddingLeading,
             self.tabBarPaddingTrailing,
+            self.tabBarCoverView.topAnchor.constraint(equalTo: self.tabBarView.topAnchor),
+            self.tabBarCoverView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            self.tabBarCoverView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            self.tabBarCoverView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             self.tabBarShadowView.topAnchor.constraint(equalTo: self.tabBarView.topAnchor),
             self.tabBarShadowView.bottomAnchor.constraint(equalTo: self.tabBarView.bottomAnchor),
             self.tabBarShadowView.leadingAnchor.constraint(equalTo: self.tabBarView.leadingAnchor),
@@ -298,6 +308,12 @@ open class CustomTabBarController: UIViewController {
         self.margin = margin
         self.padding = padding
         
+        if margin.bottom == 0 {
+            self.tabBarCoverView.isHidden = false
+        } else {
+            self.tabBarCoverView.isHidden = true
+        }
+        
         if let cornerRadius = cornerRadius {
             self.cornerRadius = cornerRadius
         }
@@ -337,6 +353,7 @@ open class CustomTabBarController: UIViewController {
         UIView.animate(withDuration: 0.2) {
             self.tabBarShadowView.alpha = isShow ? 1.0:0.0
             self.tabBarView.alpha = isShow ? 1.0:0.0
+            self.tabBarCoverView.alpha = isShow ? 1.0:0.0
             self.view.layoutIfNeeded()
         }
     }

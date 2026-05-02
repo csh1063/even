@@ -9,9 +9,10 @@
 import Foundation
 import Combine
 import Domain
+import UIKit
 
 enum MyPageViewModelAction {
-    case move(MyPageCellType)
+    case move(MyCellData)
 }
 
 final class MyPageViewModel: BaseViewModel {
@@ -20,7 +21,7 @@ final class MyPageViewModel: BaseViewModel {
         case appear
         case analysis
         case clear
-        case selectItem(MyPageCellType)
+        case selectItem(MyCellData)
     }
     
     struct Output {
@@ -64,11 +65,10 @@ final class MyPageViewModel: BaseViewModel {
         self.input.send(input)
     }
     
-    func bind() {
-        self.input.sink { input in
-            Task {
-                await self.handle(input)
-            }
+    private func bind() {
+        self.input.sink { [weak self] input in
+            guard let self else { return }
+            Task { @MainActor in await self.handle(input) }
         }
         .store(in: &cancellables)
     }
@@ -81,20 +81,75 @@ final class MyPageViewModel: BaseViewModel {
             tabbarViewModel.send(.analysis)
         case .clear:
             tabbarViewModel.send(.clear)
-        case let .selectItem(type):
-            print("gogo", type)
-            self.onAction?(.move(type))
+        case let .selectItem(data):
+            print("gogo", data)
+            switch data.type {
+            case .allLibraryPhoto, .allPhoto, .unanalysisPhoto, .analyzedDate: break
+            case .analysis: tabbarViewModel.send(.analysis)
+            case .reAnalysis: tabbarViewModel.send(.reanalysis)
+            case .reset: tabbarViewModel.send(.clear)
+            case .locationAnalysis, .locationAutoFolder: break
+            case .autoAnalysis: break // toggle
+            case .photoPermission:
+                showAlert(
+                    title: "사진 접근 권한",
+                    message: "설정에서 사진 접근 권한을 변경할 수 있어요.",
+                    buttons: [
+                        AlertButtonConfig(title: "취소", style: .cancel, action: nil),
+                        AlertButtonConfig(title: "설정으로 이동", style: .default) {
+                            guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+                            UIApplication.shared.open(url)
+                        }
+                    ]
+                )
+            case .version: break
+            case .displayMode:
+                await self.testDisplayMode()
+            default:
+                self.onAction?(.move(data))
+            }
+        }
+    }
+    
+    private func testDisplayMode() async {
+        do {
+            let mode = try await myPageUseCase.nextDisplayMode()
+            
+            if let window = UIApplication.shared.connectedScenes
+                .compactMap({ $0 as? UIWindowScene })
+                .flatMap({ $0.windows })
+                .first(where: { $0.isKeyWindow }) {
+                
+                switch mode {
+                case "dark":
+                    window.overrideUserInterfaceStyle = .dark
+                case "light":
+                    window.overrideUserInterfaceStyle = .light
+                default:
+                    window.overrideUserInterfaceStyle = .unspecified
+                }
+            }
+            
+            switch mode {
+            case "light":
+                self.displayMode = "라이트"
+            case "dark":
+                self.displayMode = "다크"
+            default:
+                self.displayMode = "시스템 설정"
+            }
+            self.cells()
+        } catch  {
+            print("error", error.localizedDescription)
         }
     }
     
     private func loadAll() async {
         do {
-            async let library = myPageUseCase.libraryCount()
             async let count = myPageUseCase.photoCount()
             async let date = myPageUseCase.lastAnalyzeDate()
             async let unanalysis = myPageUseCase.photoUnanalysisCount()
             async let displayMode = myPageUseCase.getDisplayMode()
-            self.libraryCount = try await library
             self.photoCount = try await count
             self.analyzedDate = relativeDate(from: try await date)
             self.unanalysisCount = try await unanalysis
@@ -118,16 +173,17 @@ final class MyPageViewModel: BaseViewModel {
     }
     
     private func cells() {
+        
         self.cellTypes = [
             MyCellHeader(name: "내 라이브러리", order: 0): [
-                MyCellData(type: .allLibraryPhoto, value: "\(libraryCount.formatted())장"),
                 MyCellData(type: .allPhoto, value: "\(photoCount.formatted())장"),
                 MyCellData(type: .unanalysisPhoto, value: "\(unanalysisCount.formatted())장")
             ],
             MyCellHeader(name: "사진 분석", order: 10): [
                 MyCellData(type: .analyzedDate, value: analyzedDate),
-                MyCellData(type: .analysis, value: "\(unanalysisCount.formatted())장"),
-                MyCellData(type: .reAnalysis, value: "\(unanalysisCount.formatted())장")
+                MyCellData(type: .analysis),
+                MyCellData(type: .reAnalysis),
+                MyCellData(type: .reset)
             ],
             MyCellHeader(name: "백 그라운드 작업", order: 20): [
                 MyCellData(type: .locationAnalysis, value: "-", isOn: false),

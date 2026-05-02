@@ -41,7 +41,8 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
             name: folder.name,
             displayName: folder.displayName,
             isAuto: folder.isAuto,
-            coverPhotoIdentifier: folder.coverPhotoIdentifier
+            coverPhotoIdentifier: folder.coverPhotoIdentifier,
+            from: folder.from
         )
         context.insert(entity)
         
@@ -130,8 +131,7 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
         
         try context.save()
         
-        let updated = try fetchAll()
-        foldersSubject.send(updated)
+        try self.syncFolders()
     }
     
     public func delete(id: UUID) throws {
@@ -149,8 +149,7 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
         context.delete(entity)
         try context.save()
         
-        let updated = try fetchAll()
-        foldersSubject.send(updated)
+        try self.syncFolders()
     }
     
     public func addPhoto(folderId: UUID, photoIdentifier: String) throws {
@@ -248,5 +247,28 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
         }
         
         try context.save()
+    }
+    
+    public func syncFolders() throws {
+        let updated = try fetchAll()
+        foldersSubject.send(updated)
+    }
+    
+    public func deleteAll() throws {
+        let context = ModelContext(container)
+        
+        print("photo-folder 연결 제거")
+        let folders = try context.fetch(FetchDescriptor<FolderEntity>())
+        folders.forEach { $0.photos.removeAll() }
+        try context.save()
+        
+        folders.forEach { context.delete($0) }
+        try context.save()
+        
+        print("photo 삭제")
+        try context.delete(model: PhotoEntity.self)
+        try context.save()
+        
+        try self.syncFolders()
     }
 }

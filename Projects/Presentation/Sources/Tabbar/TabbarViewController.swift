@@ -29,25 +29,25 @@ final class TabbarViewController: CustomTabBarController {
         
         self.setItemColors(
             normal: Theme.textSecondary,
-            selected: .white)
+//            selected: .white)
+            selected: Theme.primary)
         
         self.setLayoutMargin(height: 68,
-                             margin: .init(leading: 20, trailing: 20, bottom: 10),
-                             padding: .init(leading: 12, trailing: 12),
-                             cornerRadius: 28)
+                             margin: .init(leading: 0, trailing: 0, bottom: 0),
+                             padding: .init(leading: 12, trailing: 12))
 //        self.setLayoutMargin(height: 56, bottom: 4,
 //                             leading: 80, trailing: 80, cornerRadius: 28)
         
-        self.setShadow(color: .black, alpha: 0.1, x: 0, y: 4, blur: 16)
+//        self.setShadow(color: .black, alpha: 0.1, x: 0, y: 4, blur: 16)
         
-        self.setSelectedBox(radius: 26, color: Theme.primary)
+//        self.setSelectedBox(radius: 26, color: Theme.primary)
         
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        self.selectedIndex = 2
+        self.selectedIndex = 1
     }
     
     func showTabbar() {

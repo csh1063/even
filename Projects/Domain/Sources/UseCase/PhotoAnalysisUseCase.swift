@@ -11,7 +11,6 @@ import Foundation
 public protocol PhotoAnalysisUseCase {
     func analysis() -> AsyncThrowingStream<ProgressAnalysis, Error>
     func locationAnalysis() -> AsyncThrowingStream<ProgressAnalysis, Error>
-    func deletePhotos() async throws
 }
 
 public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
@@ -88,7 +87,7 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                                             isoCountryCode: address.isoCountryCode,
                                             address: address),
                                         labels: [],
-                                        state: .progress(index/Double(total))
+                                        state: .progress(index/Double(total) / 2.0)
                                     )
                                 )
                                 index += 1
@@ -99,25 +98,61 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                         }
                         
                         // 외국 주소
-                        for etcPhoto in etcPhotos {
-                            if let address = try await self.analysisRepository.geocoderAnalyze(etcPhoto) {
-                                
+                        print("etcPhotos before", etcPhotos.count)
+                        let unique = Dictionary(grouping: etcPhotos) {
+                            if let lat = $0.latitude, let lng = $0.longitude {
+                                return "\((lat * 10000).rounded() / 10000),\((lng * 10000).rounded() / 10000)"
+                            }
+                            return ""
+                        }
+                        print("etcPhotos after", unique.count)
+                        
+                        for (_, photos) in unique {
+                            
+                            let avgLat = photos.compactMap { $0.latitude }.reduce(0, +) / Double(photos.count)
+                            let avgLng = photos.compactMap { $0.longitude }.reduce(0, +) / Double(photos.count)
+
+                            guard let address = try await self.analysisRepository.geocoderAnalyze(latitude: avgLat, longitude: avgLng) else {
+                                continue
+                            }
+                            
+                            // 3. 같은 그룹 사진들은 결과 재사용
+                            for photo in photos {
+                                index += 1
                                 continuation.yield(
                                     ProgressAnalysis(
                                         photo: Photo(
-                                            localIdentifier: etcPhoto.localIdentifier,
-                                            createdAt: etcPhoto.createdAt,
-                                            latitude: etcPhoto.latitude,
-                                            longitude: etcPhoto.longitude,
-                                            isoCountryCode: address.isoCountryCode,
+                                            localIdentifier: photo.localIdentifier,
+                                            createdAt: photo.createdAt,
+                                            latitude: photo.latitude,
+                                            longitude: photo.longitude,
+                                            isoCountryCode: address.isoCountryCode == "" ? "None":address.isoCountryCode,
                                             address: address),
                                         labels: [],
-                                        state: .progress(index/Double(total))
+                                        state: .progress(index / Double(total))
                                     )
                                 )
-                                index += 1
                             }
                         }
+//                        for etcPhoto in etcPhotos {
+//                            if let address = try await self.analysisRepository.geocoderAnalyze(etcPhoto) {
+//                                
+//                                continuation.yield(
+//                                    ProgressAnalysis(
+//                                        photo: Photo(
+//                                            localIdentifier: etcPhoto.localIdentifier,
+//                                            createdAt: etcPhoto.createdAt,
+//                                            latitude: etcPhoto.latitude,
+//                                            longitude: etcPhoto.longitude,
+//                                            isoCountryCode: address.isoCountryCode,
+//                                            address: address),
+//                                        labels: [],
+//                                        state: .progress(index/Double(total))
+//                                    )
+//                                )
+//                                index += 1
+//                            }
+//                        }
                         continuation.finish()
                     } catch {
                         continuation.finish(throwing: error)
@@ -125,10 +160,6 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                 }
             }
         }
-    }
-    
-    public func deletePhotos() async throws {
-        try self.dataRepository.deleteAll()
     }
     
     // MARK: - Private

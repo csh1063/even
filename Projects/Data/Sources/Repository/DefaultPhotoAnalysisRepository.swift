@@ -97,15 +97,10 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
         }
     }
     
-    public func geocoderAnalyze(_ photo: Photo) async throws -> PhotoLocation? {
-        
-        guard let latitude = photo.latitude, let longitude = photo.longitude else {
-            return nil
-        }
+    public func geocoderAnalyze(latitude: Double, longitude: Double) async throws -> PhotoLocation? {
             
         let address = try await self.geocoderService.fetchAddress(
             latitude: latitude, longitude: longitude,
-            id: photo.localIdentifier,
             locale: Locale(identifier: "ko"))
         
         try await Task.sleep(nanoseconds: 1_500_000_000)

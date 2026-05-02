@@ -84,7 +84,8 @@ public class DefaultPhotoCheckUseCase: PhotoCheckUseCase {
                                                name: folder.name,
                                                displayName: folder.displayName,
                                                coverPhotoIdentifier: coverPhotoIdentifier,
-                                               photoCount: photoCount)
+                                               photoCount: photoCount,
+                                               from: folder.from)
                         
                         try folderDataRepository.updateFolder(folder: newFolder)
                         

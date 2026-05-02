@@ -20,7 +20,8 @@ extension FolderEntity {
             coverPhotoIdentifier: coverPhotoIdentifier,
             keywords: [],
             photos: [],
-            photoCount: photoCount
+            photoCount: photoCount,
+            from: from
         )
     }
     
@@ -34,7 +35,8 @@ extension FolderEntity {
             coverPhotoIdentifier: coverPhotoIdentifier,
             keywords: keywords.map { $0.keyword },
             photos: [],
-            photoCount: photoCount
+            photoCount: photoCount,
+            from: from
         )
     }
     
@@ -48,7 +50,8 @@ extension FolderEntity {
             coverPhotoIdentifier: coverPhotoIdentifier,
             keywords: [],
             photos: photos.sorted { $0.createdAt > $1.createdAt} .prefix(4).map {$0.toDomain()},
-            photoCount: photoCount
+            photoCount: photoCount,
+            from: from
         )
     }
     
@@ -62,7 +65,8 @@ extension FolderEntity {
             coverPhotoIdentifier: coverPhotoIdentifier,
             keywords: keywords.map { $0.keyword },
             photos: photos.sorted { $0.createdAt > $1.createdAt} .prefix(4).map {$0.toDomain()},
-            photoCount: photoCount
+            photoCount: photoCount,
+            from: from
         )
     }
 }

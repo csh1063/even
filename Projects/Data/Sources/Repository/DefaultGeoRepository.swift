@@ -19,8 +19,10 @@ public final class DefaultGeoRepository: GeoRepository {
     
     public func locationToaddress(_ photos: [Photo]) async throws -> [String: PhotoLocation] {
         var result: [String: PhotoLocation] = [:]
-        for address in try await self.service.locationToAddress(photos) where address.isKorea {
-            result[address.id] = address.toKRDomain()
+        if photos.count != 0 {
+            for address in try await self.service.locationToAddress(photos) where address.isKorea {
+                result[address.id] = address.toKRDomain()
+            }
         }
         return result
     }

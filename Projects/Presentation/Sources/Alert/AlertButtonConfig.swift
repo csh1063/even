@@ -21,9 +21,9 @@ public struct AlertButtonConfig {
 
         var titleColor: UIColor {
             switch self {
-            case .default:     return Theme.positive
+            case .default:     return Theme.primary
             case .cancel:      return Theme.textPrimary
-            case .destructive: return Theme.negative
+            case .destructive: return .systemRed
             }
         }
 

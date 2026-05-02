@@ -218,20 +218,4 @@ public final class DefaultPhotoDataRepository: PhotoDataRepository {
         
         try context.save()
     }
-    
-    public func deleteAll() throws {
-        let context = ModelContext(container)
-        
-        print("photo-folder 연결 제거")
-        let folders = try context.fetch(FetchDescriptor<FolderEntity>())
-        folders.forEach { $0.photos.removeAll() }
-        try context.save()
-        
-        folders.forEach { context.delete($0) }
-        try context.save()
-        
-        print("photo 삭제")
-        try context.delete(model: PhotoEntity.self)
-        try context.save()
-    }
 }
