@@ -119,7 +119,7 @@ public final class PhotoLibraryViewModel: BaseViewModel {
         case let .nextPage(page):
             await self.loadPhoto(page: page)
         case .selectCell(let data):
-
+            break
 //            self.onAction?()
         }
     }
