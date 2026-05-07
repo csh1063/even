@@ -102,16 +102,16 @@ public final class TabbarViewModel: BaseViewModel {
                                 locationProgress: self.$locationProgressRatio.eraseToAnyPublisher(),
                                 locationFolderProgress: self.$locationFolderProgressRatio.eraseToAnyPublisher()
                             )))
-                            self.isLoading = true
+//                            self.isLoading = true
                             await self.analysis()
-                            self.isLoading = false
+//                            self.isLoading = false
                         }
                     }
                 ]
             )
         case .reanalysis:
             showAlert(
-                title: "리셋 후 재분석하기",
+                title: "처음부터 분석하기",
                 message: "저장된 사진 및 앨범을\n삭제 후 다시 분석합니다.\n다시 분석할까요?",
                 buttons: [
                     AlertButtonConfig(title: "취소", style: .cancel, action: nil),
@@ -120,6 +120,7 @@ public final class TabbarViewModel: BaseViewModel {
                             guard let self else {return}
                             self.isLoading = true
                             await self.clear()
+                            self.isLoading = false
                             
                             self.onAction?(.progressSheet(AnalyzeProgress(
                                 photoProgress: self.$progressRatio.eraseToAnyPublisher(),
@@ -128,7 +129,6 @@ public final class TabbarViewModel: BaseViewModel {
                                 locationFolderProgress: self.$locationFolderProgressRatio.eraseToAnyPublisher()
                             )))
                             await self.analysis()
-                            self.isLoading = false
                         }
                     }
                 ]

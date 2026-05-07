@@ -65,14 +65,14 @@ final class AlbumEmtpyView: UIView {
     }()
     private var locationTitleLabel: UILabel = {
         let label = UILabel()
-        label.text = "위치 기반 정리는 백그라운드에서 진행돼요"
+        label.text = "좌표 분석은 백그라운드에서 진행돼요"
         label.font = .systemFont(ofSize: 15, weight: .semibold)
         label.textColor = Theme.textPrimary
         return label
     }()
     private var locationMessageLabel: UILabel = {
         let label = UILabel()
-        label.text = "주소 변환과 장소 기준 앨범 생성은 마이페이지에서 확인할 수 있어요"
+        label.text = "사진에 저장된 좌표를 주소로 변환하고 관련 폴더를 생성해요"
         label.font = .systemFont(ofSize: 13, weight: .regular)
         label.textColor = Theme.textSecondary
         label.numberOfLines = 2

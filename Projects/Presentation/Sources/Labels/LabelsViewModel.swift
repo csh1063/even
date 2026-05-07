@@ -23,12 +23,14 @@ public final class LabelsViewModel: BaseViewModel {
     @Published private var photoLabels: [String] = []
     
     private let input = PassthroughSubject<Input, Never>()
+    private let isLabel: Bool
     private let useCase: PhotoLabelUseCase
     private var cancellables = Set<AnyCancellable>()
     
     var pop: (() -> Void)?
     
-    public init(useCase: PhotoLabelUseCase, pop: (() -> Void)?) {
+    public init(isLabel: Bool, useCase: PhotoLabelUseCase, pop: (() -> Void)?) {
+        self.isLabel = isLabel
         self.useCase = useCase
         self.pop = pop
         
@@ -59,7 +61,11 @@ public final class LabelsViewModel: BaseViewModel {
     private func handle(_ input: Input) async {
         switch input {
         case .appear:
-            await self.loadLabels()
+            if isLabel {
+                await self.loadLabels()
+            } else {
+                await self.loadAddressCount()
+            }
         }
     }
     
@@ -67,9 +73,35 @@ public final class LabelsViewModel: BaseViewModel {
         
         do {
             print("start loadLabels")
-            self.photoLabels = try await self.useCase.fetchUniqueNames()
+            self.isLoading = true
+//            self.photoLabels = try await self.useCase.fetchUniqueNames()
+            let tuple = try await self.useCase.fetchLabelCounts()
+            
+            self.photoLabels = tuple.map { "\($0.name): \($0.count)" }
+            
             print("end loadLabels")
             print(photoLabels)
+            
+            self.isLoading = false
+        } catch {
+            print("error:", error.localizedDescription)
+        }
+    }
+    
+    private func loadAddressCount() async {
+        
+        do {
+            print("start loadLabels")
+            self.isLoading = true
+
+            let tuple = try await self.useCase.fetchAddressCounts()
+            
+            self.photoLabels = tuple.map { "\($0.name): \($0.count)" }
+            
+            print("end loadLabels")
+            print(photoLabels)
+            
+            self.isLoading = false
         } catch {
             print("error:", error.localizedDescription)
         }

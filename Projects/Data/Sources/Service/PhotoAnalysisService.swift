@@ -12,6 +12,15 @@ import CoreGraphics
 
 public final class PhotoAnalysisService {
     
+    private var removeKeywords: [String] = {
+        let bundle = Bundle(for: PhotoCategoryService.self)
+        guard let url = bundle.url(forResource: "RemoveKeywords", withExtension: "json"),
+              let data = try? Data(contentsOf: url),
+              let array = try? JSONDecoder().decode([String].self, from: data)
+        else { return [] }
+        return array
+    }()
+    
     private let classifyQueue = DispatchQueue(label: "com.app.analysis.classify")
     private let faceQueue = DispatchQueue(label: "com.app.analysis.face")
     private let textQueue = DispatchQueue(label: "com.app.analysis.text")
@@ -36,6 +45,7 @@ public final class PhotoAnalysisService {
     // MARK: - Private
     /// Vision 이미지 분류기 (Apple 기본 - 더 다양한 카테고리)
     private func classifyImage(_ image: CGImage) async throws -> [PhotoLabel] {
+        let removeKeywords = self.removeKeywords
         return try await withCheckedThrowingContinuation { continuation in
             classifyQueue.async {
                 let request = VNClassifyImageRequest()
@@ -47,8 +57,13 @@ public final class PhotoAnalysisService {
                         continuation.resume(returning: [])
                         return
                     }
+                    print("removeKeywords", removeKeywords)
                     let labels = results
                         .filter { $0.confidence >= 0.3 }
+                        .filter {
+                            
+                            return !removeKeywords.contains($0.identifier)
+                        }
                         .map { PhotoLabel(name: $0.identifier, confidence: Float($0.confidence)) }
                     continuation.resume(returning: labels)
                     
@@ -78,7 +93,8 @@ public final class PhotoAnalysisService {
                         return
                     }
                     
-                    let label = results.count > 1 ? "people_group" : "people"
+                    let label = "people"
+//                    let label = results.count > 1 ? "people_group" : "people"
                     continuation.resume(returning: [
                         PhotoLabel(name: label, confidence: 1.0),
                         PhotoLabel(name: "portrait", confidence: 1.0)

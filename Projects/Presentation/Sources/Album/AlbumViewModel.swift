@@ -56,6 +56,9 @@ public final class AlbumViewModel: BaseViewModel {
         
         folderUseCase.foldersPublisher
             .receive(on: DispatchQueue.main)
+            .handleEvents(receiveOutput: { folders in
+                print("📂 foldersPublisher received: \(folders.count)")
+            })
             .assign(to: &$folders)
     }
     
@@ -83,7 +86,7 @@ public final class AlbumViewModel: BaseViewModel {
         switch input {
         case .appear:
             self.isLoading = true
-            _ = await self.loadFodlers()
+            await self.loadFodlers()
             self.isLoading = false
         case .analysis:
             print("analysis 1")

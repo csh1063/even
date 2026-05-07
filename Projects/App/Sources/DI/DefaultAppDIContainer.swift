@@ -49,6 +49,10 @@ final class DefaultAppDIContainer: AppDIContainer {
         repositoryFactory.userDefaultRepository
     }
     
+//    var travelRepository: TravelDetectionRepository {
+//        repositoryFactory.travelRepository
+//    }
+    
     private let providerFactory: ProviderFactory
     private lazy var executor: DefaultNetworkExecutor = {
         DefaultNetworkExecutor(providerFactory: providerFactory)
@@ -74,7 +78,6 @@ final class DefaultAppDIContainer: AppDIContainer {
         self.providerFactory = ProviderFactory()
     }
     
-    // MARK: Splash
     func makePhotoCheckUseCase() -> PhotoCheckUseCase {
         DefaultPhotoCheckUseCase(photoLibraryRepository: photoLibraryRepository,
                                  photoDataRepository: photoDataRepository,
@@ -86,7 +89,6 @@ final class DefaultAppDIContainer: AppDIContainer {
         SplashViewModel(useCase: makePhotoCheckUseCase())
     }
     
-    // MARK: Main
     func makeMainUseCase() {
         
     }

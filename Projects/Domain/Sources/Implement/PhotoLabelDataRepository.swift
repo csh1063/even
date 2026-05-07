@@ -11,4 +11,5 @@ import Foundation
 public protocol PhotoLabelDataRepository {
     func fetchAll() throws -> [PhotoLabel]
     func fetchUniqueNames() throws -> [String]
+    func fetchLabelCounts() throws -> [(name: String, count: Int)]
 }

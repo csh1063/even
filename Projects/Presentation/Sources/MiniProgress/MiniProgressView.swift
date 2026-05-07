@@ -20,6 +20,8 @@ final class MiniProgressView: UIView {
     private let folderTrackLayer = CAShapeLayer()
     private let folderProgressLayer = CAShapeLayer()
     private let dividerLayer = CAShapeLayer()
+    private let locationGlowLayer = CALayer()
+    private let folderGlowLayer = CALayer()
     
     private let locationIconView: UIImageView = {
         let imageView = UIImageView(image: UIImage(systemName: "location.fill"))
@@ -46,6 +48,7 @@ final class MiniProgressView: UIView {
         layer.shadowRadius = 12
         layer.shadowOffset = CGSize(width: 0, height: 4)
         setupLayers()
+        setupGlowDots()
         setupIcons()
     }
     
@@ -91,6 +94,20 @@ final class MiniProgressView: UIView {
         dividerLayer.lineWidth = 0.5
     }
     
+    private func setupGlowDots() {
+        [locationGlowLayer, folderGlowLayer].forEach {
+            $0.bounds = CGRect(x: 0, y: 0, width: 6, height: 6)
+            $0.cornerRadius = 3
+            $0.backgroundColor = UIColor.white.cgColor
+            $0.shadowColor = Theme.primary.cgColor
+            $0.shadowRadius = 4
+            $0.shadowOpacity = 0
+            $0.shadowOffset = .zero
+            $0.isHidden = true
+            layer.addSublayer($0)
+        }
+    }
+    
     private func setupIcons() {
         addSubview(locationIconView)
         addSubview(folderIconView)
@@ -114,6 +131,8 @@ final class MiniProgressView: UIView {
         super.layoutSubviews()
         updateBorder()
         updatePaths()
+        updateGlowDot(glowLayer: locationGlowLayer, progress: locationProgressLayer.strokeEnd, startAngle: .pi)
+        updateGlowDot(glowLayer: folderGlowLayer, progress: folderProgressLayer.strokeEnd, startAngle: 0)
     }
     
     private func updateBorder() {
@@ -125,7 +144,6 @@ final class MiniProgressView: UIView {
         let center = CGPoint(x: bounds.midX, y: bounds.midY)
         let radius: CGFloat = 26
         
-        // 위 반원 (위치) - 왼쪽에서 오른쪽으로
         let topPath = UIBezierPath(
             arcCenter: center,
             radius: radius,
@@ -136,7 +154,6 @@ final class MiniProgressView: UIView {
         locationTrackLayer.path = topPath.cgPath
         locationProgressLayer.path = topPath.cgPath
         
-        // 아래 반원 (폴더) - 오른쪽에서 왼쪽으로
         let bottomPath = UIBezierPath(
             arcCenter: center,
             radius: radius,
@@ -147,11 +164,58 @@ final class MiniProgressView: UIView {
         folderTrackLayer.path = bottomPath.cgPath
         folderProgressLayer.path = bottomPath.cgPath
         
-        // 구분선
         let dividerPath = UIBezierPath()
         dividerPath.move(to: CGPoint(x: center.x - 22, y: center.y))
         dividerPath.addLine(to: CGPoint(x: center.x + 22, y: center.y))
         dividerLayer.path = dividerPath.cgPath
+    }
+    
+    // MARK: - Glow Dot
+    
+    private func arcPoint(center: CGPoint, radius: CGFloat, angle: CGFloat) -> CGPoint {
+        CGPoint(
+            x: center.x + radius * cos(angle),
+            y: center.y + radius * sin(angle)
+        )
+    }
+    
+    private func updateGlowDot(glowLayer: CALayer, progress: CGFloat, startAngle: CGFloat) {
+        guard progress > 0 else {
+            glowLayer.isHidden = true
+            return
+        }
+        glowLayer.isHidden = false
+        let center = CGPoint(x: bounds.midX, y: bounds.midY)
+        let angle = startAngle + .pi * progress
+        let point = arcPoint(center: center, radius: 26, angle: angle)
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        glowLayer.position = point
+        CATransaction.commit()
+    }
+    
+    private func startPulseAnimation(on glowLayer: CALayer) {
+        guard glowLayer.animation(forKey: "pulse") == nil else { return }
+        
+        let shadowAnim = CAKeyframeAnimation(keyPath: "shadowOpacity")
+        shadowAnim.values = [0.4, 0.9, 0.4]
+        shadowAnim.keyTimes = [0, 0.5, 1]
+        
+        let shadowRadiusAnim = CAKeyframeAnimation(keyPath: "shadowRadius")
+        shadowRadiusAnim.values = [2, 8, 2]
+        shadowRadiusAnim.keyTimes = [0, 0.5, 1]
+        
+        let scaleAnim = CAKeyframeAnimation(keyPath: "transform.scale")
+        scaleAnim.values = [0.8, 1.2, 0.8]
+        scaleAnim.keyTimes = [0, 0.5, 1]
+        
+        let group = CAAnimationGroup()
+        group.animations = [shadowAnim, shadowRadiusAnim, scaleAnim]
+        group.duration = 1.2
+        group.repeatCount = .infinity
+        group.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        
+        glowLayer.add(group, forKey: "pulse")
     }
     
     // MARK: - Bind
@@ -163,14 +227,25 @@ final class MiniProgressView: UIView {
         locationProgress
             .receive(on: DispatchQueue.main)
             .sink { [weak self] progress in
-                self?.locationProgressLayer.strokeEnd = CGFloat(progress)
+                guard let self else { return }
+                self.locationProgressLayer.strokeEnd = CGFloat(progress)
+                self.updateGlowDot(glowLayer: self.locationGlowLayer, progress: CGFloat(progress), startAngle: .pi)
+                if progress > 0 { self.startPulseAnimation(on: self.locationGlowLayer) }
             }
             .store(in: &cancellables)
         
         folderProgress
             .receive(on: DispatchQueue.main)
             .sink { [weak self] progress in
-                self?.folderProgressLayer.strokeEnd = CGFloat(progress)
+                guard let self else { return }
+                self.folderProgressLayer.strokeEnd = CGFloat(progress)
+                self.updateGlowDot(glowLayer: self.folderGlowLayer, progress: CGFloat(progress), startAngle: 0)
+                if progress > 0 {
+                    self.startPulseAnimation(on: self.folderGlowLayer)
+                    locationGlowLayer.removeAnimation(forKey: "pulse")
+                    locationGlowLayer.isHidden = true
+                }
+
                 if progress >= 1.0 {
                     AnalysisProgressManager.shared.hide()
                 }

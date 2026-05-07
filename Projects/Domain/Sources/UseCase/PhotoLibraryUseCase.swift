@@ -11,7 +11,6 @@ import Foundation
 public protocol PhotoLibraryUseCase {
     func fetchData(page: Int) async throws -> PhotoList
     func checkPermission() async throws -> PhotoPermission
-//    func loadImage<T>(id: String, type: LoadPhotoOptionType) async throws -> ImageData<T>
 }
 
 public class DefaultPhotoLibraryUseCase: PhotoLibraryUseCase {
@@ -45,14 +44,9 @@ public class DefaultPhotoLibraryUseCase: PhotoLibraryUseCase {
             photos: updatedPhotos,
             hasNext: photoList.hasNext
         )
-        
     }
     
     public func checkPermission() async throws -> PhotoPermission {
         try await self.repository.checkPermission()
     }
-    
-//    public func loadImage<T>(id: String, type: LoadPhotoOptionType) async throws -> ImageData<T> {
-//        return try await self.repository.loadImage(id: id, type: type)
-//    }
 }

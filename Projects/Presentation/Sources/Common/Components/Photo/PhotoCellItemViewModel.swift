@@ -26,6 +26,7 @@ struct PhotoCellItemViewModel: Hashable {
         self.formattedDate = ""
         self.imageLoader = imageLoader
         self.isUnanalysis = isUnanalysis
+        Theme
     }
 //    init(photo: PhotoInAlbum, imageLoader: any ImageLoadable) {
 //        self.localIdentifier = photo.localIdentifier

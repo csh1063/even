@@ -149,12 +149,20 @@ final class MyPageViewModel: BaseViewModel {
             async let count = myPageUseCase.photoCount()
             async let date = myPageUseCase.lastAnalyzeDate()
             async let unanalysis = myPageUseCase.photoUnanalysisCount()
+            async let permission = myPageUseCase.checkPermission()
             async let displayMode = myPageUseCase.getDisplayMode()
             self.photoCount = try await count
             self.analyzedDate = relativeDate(from: try await date)
             self.unanalysisCount = try await unanalysis
             
-            self.photoPermission = "허용"
+            switch try await permission {
+            case .fullAccess:
+                self.photoPermission = "전체 허용"
+            case .limitedAccess:
+                self.photoPermission = "일부 허용"
+            default:
+                self.photoPermission = "거부"
+            }
             
             switch try await displayMode {
             case "light":
@@ -185,12 +193,13 @@ final class MyPageViewModel: BaseViewModel {
                 MyCellData(type: .reAnalysis),
                 MyCellData(type: .reset)
             ],
-            MyCellHeader(name: "백 그라운드 작업", order: 20): [
-                MyCellData(type: .locationAnalysis, value: "-", isOn: false),
-                MyCellData(type: .locationAutoFolder, value: "-", isOn: false)
-            ],
+//            MyCellHeader(name: "백 그라운드 작업", order: 20): [
+//                MyCellData(type: .locationAnalysis, value: "-", isOn: false),
+//                MyCellData(type: .locationAutoFolder, value: "-", isOn: false)
+//            ],
             MyCellHeader(name: "정리 옵션", order: 30): [
-                MyCellData(type: .autoAnalysis, isOn: true, isPrimary: false),
+                MyCellData(type: .autoAnalysis, isOn: false, isPrimary: false),
+                MyCellData(type: .continueLocation, isOn: false, isPrimary: false),
             ],
             MyCellHeader(name: "접근 및 권한", order: 40): [
                 MyCellData(type: .terms),
@@ -204,7 +213,8 @@ final class MyPageViewModel: BaseViewModel {
             ],
             MyCellHeader(name: "실험실", order: 60): [
                 MyCellData(type: .labels),
-                MyCellData(type: .test)
+                MyCellData(type: .test),
+                MyCellData(type: .addressCount)
             ]
         ]
     }

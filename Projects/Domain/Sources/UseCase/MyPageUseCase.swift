@@ -12,6 +12,7 @@ public protocol MyPageUseCase {
     func photoCount() async throws -> Int
     func lastAnalyzeDate() async throws -> String
     func photoUnanalysisCount() async throws -> Int
+    func checkPermission() async throws -> PhotoPermission
     func getDisplayMode() async throws -> String
     func nextDisplayMode() async throws -> String
 }
@@ -42,6 +43,10 @@ public final class DefaultMyPageUseCase: MyPageUseCase {
         let photoIds = try await self.photoLibraryRepository.fetchPhotoIds()
         let analyzedIds = Set(try photoDataRepository.fetchAnalyzed())
         return photoIds.filter { !analyzedIds.contains($0) }.count
+    }
+    
+    public func checkPermission() async throws -> PhotoPermission {
+        try await photoLibraryRepository.checkPermission()
     }
     
     public func getDisplayMode() async throws -> String {

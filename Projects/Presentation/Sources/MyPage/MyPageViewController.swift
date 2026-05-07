@@ -96,11 +96,11 @@ extension MyPageViewController {
     private func configureDataSource() {
         dataSource = UITableViewDiffableDataSource<MyCellHeader, MyCellData>(tableView: tableView, cellProvider: { tableView, indexPath, itemIdentifier in
             switch itemIdentifier.type {
-            case .labels, .test:
-                if let cell = tableView.dequeueReusableCell(withIdentifier: MyCell.cellName, for: indexPath) as? MyCell {
-                    cell.configure(with: itemIdentifier.type)
-                    return cell
-                }
+//            case .labels, .test:
+//                if let cell = tableView.dequeueReusableCell(withIdentifier: MyCell.cellName, for: indexPath) as? MyCell {
+//                    cell.configure(with: itemIdentifier.type)
+//                    return cell
+//                }
             case .locationAnalysis, .locationAutoFolder:
                 break
             default:

@@ -13,7 +13,7 @@ public protocol FolderDataRepository {
     
     var foldersPublisher: AnyPublisher<[Folder], Never> {get}
     
-    func saveFolder(folder: Folder) throws -> Folder?
+    func saveFolder(folder: Folder, returnExist: Bool) throws -> Folder?
     func fetchAll() throws -> [Folder]
     func fetchAutoAll() throws -> [Folder]
     func fetchPhotos(by folderId: UUID) throws -> [Photo]
@@ -27,4 +27,10 @@ public protocol FolderDataRepository {
     func syncPhotoCount() throws
     func syncFolders() throws
     func deleteAll() throws
+}
+
+extension FolderDataRepository {
+    func saveFolder(folder: Folder, returnExist: Bool = false) throws -> Folder? {
+        try self.saveFolder(folder: folder, returnExist: returnExist)
+    }
 }

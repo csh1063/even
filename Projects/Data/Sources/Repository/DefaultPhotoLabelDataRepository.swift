@@ -39,4 +39,15 @@ final public class DefaultPhotoLabelDataRepository: PhotoLabelDataRepository {
             .filter { seen.insert($0.name).inserted }
             .map { $0.toDomain().name }
     }
+    
+    public func fetchLabelCounts() throws -> [(name: String, count: Int)] {
+        let context = ModelContext(self.container)
+        let descriptor = FetchDescriptor<PhotoLabelEntity>()
+        let all = try context.fetch(descriptor)
+        
+        let grouped = Dictionary(grouping: all, by: \.name)
+        return grouped
+            .map { (name: $0.key, count: $0.value.count) }
+            .sorted { $0.count > $1.count }
+    }
 }

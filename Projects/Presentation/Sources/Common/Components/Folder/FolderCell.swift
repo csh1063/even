@@ -29,14 +29,14 @@ final class FolderCell: UICollectionViewCell {
     private let contentsView: UIView = UIView()
     private let nameLabel: UILabel = UILabel()
     private let countLabel: UILabel = UILabel()
-    private let descLabel: UILabel = UILabel()
+//    private let descLabel: UILabel = UILabel()
     
     private var task: Task<Void, Never>?
     private var assetIdentifier: String?
 
     override func prepareForReuse() {
         super.prepareForReuse()
-        self.task?.cancel() // 로딩 중인 작업 즉시 중단
+        self.task?.cancel()
         self.mainImageView.image = nil
     }
     
@@ -89,8 +89,8 @@ final class FolderCell: UICollectionViewCell {
         self.countLabel.textColor = Theme.textPrimary
         self.countLabel.font = .systemFont(ofSize: 14, weight: .semibold)
         
-        self.descLabel.textColor = Theme.textSecondary
-        self.descLabel.font = .systemFont(ofSize: 13, weight: .regular)
+//        self.descLabel.textColor = Theme.textSecondary
+//        self.descLabel.font = .systemFont(ofSize: 13, weight: .regular)
         
         self.contentView.addSubview(radiusView)
         
@@ -100,7 +100,7 @@ final class FolderCell: UICollectionViewCell {
         self.radiusView.addSubview(contentsView)
         self.contentsView.addSubview(nameLabel)
         self.contentsView.addSubview(countLabel)
-        self.contentsView.addSubview(descLabel)
+//        self.contentsView.addSubview(descLabel)
         
         self.radiusView.snp.makeConstraints { make in
             make.edges.equalTo(self.contentView)
@@ -117,7 +117,6 @@ final class FolderCell: UICollectionViewCell {
         self.mainImageView.snp.makeConstraints { make in
             make.top.leading.trailing.equalTo(self.radiusView).inset(12)
             make.height.equalTo(self.mainImageView.snp.width).multipliedBy(4.0/5.0)
-//            make.height.equalTo(136)
         }
         
         self.contentsView.snp.makeConstraints { make in
@@ -133,13 +132,14 @@ final class FolderCell: UICollectionViewCell {
         self.countLabel.snp.makeConstraints { make in
             make.leading.trailing.equalTo(contentsView).inset(12)
             make.top.equalTo(self.nameLabel.snp.bottom).offset(6)
-        }
-        
-        self.descLabel.snp.makeConstraints { make in
-            make.leading.trailing.equalTo(self.nameLabel)
-            make.top.equalTo(self.countLabel.snp.bottom).offset(6)
             make.bottom.equalTo(self.contentsView).inset(12)
         }
+        
+//        self.descLabel.snp.makeConstraints { make in
+//            make.leading.trailing.equalTo(self.nameLabel)
+//            make.top.equalTo(self.countLabel.snp.bottom).offset(6)
+//            make.bottom.equalTo(self.contentsView).inset(12)
+//        }
     }
     
     func configure(with viewModel: FolderCellItemViewModel, index: Int) {
@@ -155,7 +155,14 @@ final class FolderCell: UICollectionViewCell {
         
         self.nameLabel.text = viewModel.folder.displayName
         self.countLabel.text = "\(viewModel.folder.photoCount.formatted())장"
-        self.descLabel.text = "설명설명"
+//        self.descLabel.text = "설명설명"
+        
+//        switch viewModel.folder.from {
+//        case "category": self.descLabel.text = "[자동] \(viewModel.folder.displayName) 사진 모음"
+//        case "location": self.descLabel.text = "[자동] \(viewModel.folder.displayName) 사진 모음"
+//        case "date": self.descLabel.text = "[자동] \(viewModel.folder.displayName) 사진 모음"
+//        default: self.descLabel.text = ""
+//        }
         
         task = Task {
             let size = self.frame.size
@@ -166,15 +173,7 @@ final class FolderCell: UICollectionViewCell {
             
             if !Task.isCancelled && self.assetIdentifier == viewModel.localIdentifier {
                 self.mainImageView.image = image
-                
-//                self.gradientView.colors = [
-//                    Theme.accent,
-//                    Theme.primary,
-//                    Theme.secondary
-//                ].map {$0.withAlphaComponent(0.5)}
-                
             }
-//            self.gradientView.isHidden = true
             self.imageIconView.isHidden = true
         }
     }

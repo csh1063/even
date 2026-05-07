@@ -58,4 +58,8 @@ public final class RepositoryFactory {
     public lazy var userDefaultRepository: UserDefaultRepository = {
         DefaultUserDefaultRepository(service: serviceFactory.userDefaultsService)
     }()
+    
+//    public lazy var travelRepository: TravelDetectionRepository = {
+//        DefaultTravelDetectionRepository()
+//    }()
 }

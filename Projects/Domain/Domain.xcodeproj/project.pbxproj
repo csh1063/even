@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		0FFF444A8B420D7E14FE74F6 /* PhotoLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56003B638FE18EC472358133 /* PhotoLocation.swift */; };
 		196CB1912FA61D3D00824005 /* AnalyzedType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 196CB1902FA61D3D00824005 /* AnalyzedType.swift */; };
+		196CB1952FAB12D000824005 /* TravelCluster.swift in Sources */ = {isa = PBXBuildFile; fileRef = 196CB1942FAB12D000824005 /* TravelCluster.swift */; };
+		196CB1992FAB174C00824005 /* PhotoLocationSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 196CB1982FAB174C00824005 /* PhotoLocationSnapshot.swift */; };
+		196CB19B2FAB178700824005 /* TravelDetectionRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 196CB19A2FAB178700824005 /* TravelDetectionRepository.swift */; };
 		1D32E7B4A891C68E824A1F11 /* PhotoDataRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A738BCE2F1F1AEF9C6F0BB0 /* PhotoDataRepository.swift */; };
 		209A23984E931C57FD20AE16 /* PhotoRepositoryError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30EAF667B0530265E87C006C /* PhotoRepositoryError.swift */; };
 		21027B31EC06337CCD82FBBB /* ProgressFolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287561C66C690B7D25A1EB49 /* ProgressFolder.swift */; };
@@ -60,6 +63,9 @@
 		070EF8A7FC77D8F70307E3AC /* GeoRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeoRepository.swift; sourceTree = "<group>"; };
 		135C338F8688EFFC198158A2 /* FolderDataRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderDataRepository.swift; sourceTree = "<group>"; };
 		196CB1902FA61D3D00824005 /* AnalyzedType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyzedType.swift; sourceTree = "<group>"; };
+		196CB1942FAB12D000824005 /* TravelCluster.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TravelCluster.swift; sourceTree = "<group>"; };
+		196CB1982FAB174C00824005 /* PhotoLocationSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLocationSnapshot.swift; sourceTree = "<group>"; };
+		196CB19A2FAB178700824005 /* TravelDetectionRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TravelDetectionRepository.swift; sourceTree = "<group>"; };
 		1A738BCE2F1F1AEF9C6F0BB0 /* PhotoDataRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDataRepository.swift; sourceTree = "<group>"; };
 		1ABAD620DB6CE1F6BB3F5625 /* AutoFolderUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoFolderUseCase.swift; sourceTree = "<group>"; };
 		1E766E86BC730F636DD2C6E2 /* FolderRepositoryError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderRepositoryError.swift; sourceTree = "<group>"; };
@@ -117,6 +123,7 @@
 		04A08A9FA52DB67E22049769 /* Implement */ = {
 			isa = PBXGroup;
 			children = (
+				196CB19A2FAB178700824005 /* TravelDetectionRepository.swift */,
 				135C338F8688EFFC198158A2 /* FolderDataRepository.swift */,
 				070EF8A7FC77D8F70307E3AC /* GeoRepository.swift */,
 				E254DA4A96027924005958BD /* PhotoAnalysisRepository.swift */,
@@ -132,6 +139,8 @@
 		11B3611D1728B87E7C917C63 /* Entity */ = {
 			isa = PBXGroup;
 			children = (
+				196CB1982FAB174C00824005 /* PhotoLocationSnapshot.swift */,
+				196CB1942FAB12D000824005 /* TravelCluster.swift */,
 				E30516D5195AD3B5FC34507A /* Album.swift */,
 				885A73FB2BF5308F8D9201F7 /* Folder.swift */,
 				A2CA88437A044A7AD9115E0F /* FolderKeyword.swift */,
@@ -299,6 +308,8 @@
 				209A23984E931C57FD20AE16 /* PhotoRepositoryError.swift in Sources */,
 				F3AF649C2A4F4522949B6D62 /* ProgressAnalysis.swift in Sources */,
 				196CB1912FA61D3D00824005 /* AnalyzedType.swift in Sources */,
+				196CB19B2FAB178700824005 /* TravelDetectionRepository.swift in Sources */,
+				196CB1952FAB12D000824005 /* TravelCluster.swift in Sources */,
 				21027B31EC06337CCD82FBBB /* ProgressFolder.swift in Sources */,
 				B4384FBDE51B22F8459F85C1 /* ProgressState.swift in Sources */,
 				B7150B611AE3FFC1CE934E5A /* FolderDataRepository.swift in Sources */,
@@ -317,6 +328,7 @@
 				F34EBE9576F8CB9E40296EE2 /* PhotoCheckUseCase.swift in Sources */,
 				28F9FEDC1737DF3A5293471B /* PhotoImageUseCase.swift in Sources */,
 				89B116F69496103FA351FB6A /* PhotoLabelUseCase.swift in Sources */,
+				196CB1992FAB174C00824005 /* PhotoLocationSnapshot.swift in Sources */,
 				D0361B33286CE7C84AB9B6D2 /* PhotoLibraryUseCase.swift in Sources */,
 				2280FD05E21D9A70B093846B /* PhotoTestUseCase.swift in Sources */,
 			);

@@ -14,7 +14,7 @@ class BoxView: UIView {
     
     func applyStyle(_ position: CellPosition) {
         self.position = position
-//        self.layer.sublayers?.removeAll()
+        self.layer.sublayers?.removeAll()
         
         let path: UIBezierPath
         let radius: CGFloat = 12

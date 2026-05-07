@@ -12,7 +12,17 @@ import Combine
 @MainActor
 open class BaseViewModel {
     
-    @Published var isLoading: Bool = false
+    private let loadingView = LoadingManager.shared
+    
+    @Published var isLoading: Bool = false {
+        didSet {
+            if isLoading {
+                loadingView.show()
+            } else {
+                loadingView.hide()
+            }
+        }
+    }
     
     let alertPublisher = PassthroughSubject<AlertItem, Never>()
 

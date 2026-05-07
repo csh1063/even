@@ -41,6 +41,7 @@ enum MyPageCellType {
     
     // switch
     case autoAnalysis
+    case continueLocation
     
     // privacy
     case terms
@@ -54,6 +55,7 @@ enum MyPageCellType {
     
     case labels
     case test
+    case addressCount
     
     var icon: String {
         switch self {
@@ -67,14 +69,16 @@ enum MyPageCellType {
         case .locationAnalysis: return "location.fill.viewfinder"
         case .locationAutoFolder: return "map.fill"
         case .autoAnalysis: return "sparkles"
+        case .continueLocation: return "location.fill.viewfinder"
         case .terms: return "doc.text"
         case .privacy: return "person.2"
         case .photoPermission: return "photo.badge.checkmark"
         case .displayMode: return "moon.fill"
         case .feedback: return "questionmark.circle"
         case .version: return "info.circle"
-        case .labels: return ""
-        case .test: return ""
+        case .labels: return "testtube.2"
+        case .test: return "testtube.2"
+        case .addressCount: return "testtube.2"
         }
     }
     
@@ -85,11 +89,12 @@ enum MyPageCellType {
         case .unanalysisPhoto: return "미분석 사진 수"
         case .analyzedDate: return "최근 분석"
         case .analysis: return "이어서 분석하기"
-        case .reAnalysis: return "리셋 후 재분석하기"
+        case .reAnalysis: return "처음부터 재분석하기"
         case .reset: return "리셋"
         case .locationAnalysis: return "사진 좌표를 주소로 변환"
         case .locationAutoFolder: return "장소 기반 앨범 생성"
         case .autoAnalysis: return "새 사진 자동 분석"
+        case .continueLocation: return "사진 좌표 이어서 분석"
         case .terms: return "이용 약관"
         case .privacy: return "개인 정보 처리 방침"
         case .photoPermission: return "사진 접근 범위"
@@ -98,6 +103,7 @@ enum MyPageCellType {
         case .version: return "앱 버전"
         case .labels: return "사진 라벨 목록"
         case .test: return "연구소"
+        case .addressCount: return "주소별 사진 수"
         }
     }
     
@@ -117,13 +123,13 @@ enum MyPageCellType {
             return .button
         case .locationAnalysis, .locationAutoFolder:
             return .info
-        case .autoAnalysis:
+        case .autoAnalysis, .continueLocation:
             return .toggle
         case .terms, .privacy, .displayMode, .feedback:
             return .open
         case .version, .photoPermission:
             return .link
-        case .labels, .test:
+        case .labels, .test, .addressCount:
             return .open
         }
     }

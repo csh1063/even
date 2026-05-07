@@ -11,6 +11,10 @@ import Combine
 import Domain
 import UIKit
 
+protocol PhotoLibraryViewModelAction {
+    func move(_ photo: Photo)
+}
+
 @MainActor
 public final class PhotoLibraryViewModel: BaseViewModel {
     
@@ -18,6 +22,7 @@ public final class PhotoLibraryViewModel: BaseViewModel {
         case appear
         case refresh
         case nextPage(Int)
+        case selectCell(PhotoCellItemViewModel)
     }
     
     public struct Output {
@@ -35,10 +40,14 @@ public final class PhotoLibraryViewModel: BaseViewModel {
     @Published private var errorMessage: String?
     @Published private var photoPermission: PhotoPermission = .notDetermined
     
+    private var photoList: [Photo] = []
+    
     private let input = PassthroughSubject<Input, Never>()
     private let useCase: PhotoLibraryUseCase
     private let imageUseCase: PhotoImageUseCase
     private var cancellables = Set<AnyCancellable>()
+    
+    var onAction: ((PhotoLibraryViewModelAction) -> Void)?
     
     public init(useCase: PhotoLibraryUseCase,
                 imageUseCase: PhotoImageUseCase) {
@@ -109,6 +118,9 @@ public final class PhotoLibraryViewModel: BaseViewModel {
             await self.loadPhoto(page: 0)
         case let .nextPage(page):
             await self.loadPhoto(page: page)
+        case .selectCell(let data):
+
+//            self.onAction?()
         }
     }
     
@@ -147,29 +159,6 @@ public final class PhotoLibraryViewModel: BaseViewModel {
             
         }
     }
-    
-//    private func changeForm() {
-//        self.photoMonth = $photos
-//            .map { [weak self] photos -> [String: [PhotoCellItemViewModel]] in
-//                guard let self else { return [:] }
-//                
-//                let formatter = DateFormatter()
-//                formatter.dateFormat = "yyyy년 MM월"
-//                formatter.locale = Locale(identifier: "ko_KR")
-//                
-//                return Dictionary(grouping: photos) { photo in
-//                    photo.createdDate.map { formatter.string(from: $0) } ?? "날짜 없음"
-//                }
-//                .mapValues { photos in
-//                    photos.map {
-//                        PhotoCellItemViewModel(
-//                            localIdentifier: $0.localIdentifier,
-//                            imageLoader: self
-//                        )
-//                    }
-//                }
-//            }
-//    }
 }
 
 extension PhotoLibraryViewModel: ImageLoadable { }

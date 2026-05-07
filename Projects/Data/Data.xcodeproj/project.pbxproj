@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 55;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -11,6 +11,8 @@
 		025400DBA1FBCED05EECA3ED /* PhotoModelMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D23287CAC9A15F1CD81389D /* PhotoModelMapper.swift */; };
 		113EC0295E5F35367F42DFB8 /* ProviderFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF420FD928A623DCD3CA5C99 /* ProviderFactory.swift */; };
 		1234B2C43CA8425C20D991BF /* UserDefaultsKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136F5B333BEF3ED61F96C299 /* UserDefaultsKey.swift */; };
+		196CB1932FA8985600824005 /* RemoveKeywords.json in Resources */ = {isa = PBXBuildFile; fileRef = 196CB1922FA8985600824005 /* RemoveKeywords.json */; };
+		196CB1972FAB130200824005 /* TravelDetectionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 196CB1962FAB130200824005 /* TravelDetectionService.swift */; };
 		1989135D2D6A2C2BA17A6B60 /* PhotoAssetEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1818CB29A1914B6416E20D3E /* PhotoAssetEntity.swift */; };
 		1A9938F2B9F9AD2825A0FC20 /* DefaultPhotoLabelDataRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76713B0DD0063DA264DCB484 /* DefaultPhotoLabelDataRepository.swift */; };
 		2169AA2311BA60ACAA3F77E2 /* FolderEntityMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13D68148ECEC00D5F0D873BA /* FolderEntityMapper.swift */; };
@@ -75,6 +77,8 @@
 		13D68148ECEC00D5F0D873BA /* FolderEntityMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderEntityMapper.swift; sourceTree = "<group>"; };
 		15E0F3D1A2F015968E4FBB6A /* SwiftDataStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDataStack.swift; sourceTree = "<group>"; };
 		1818CB29A1914B6416E20D3E /* PhotoAssetEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoAssetEntity.swift; sourceTree = "<group>"; };
+		196CB1922FA8985600824005 /* RemoveKeywords.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = RemoveKeywords.json; sourceTree = "<group>"; };
+		196CB1962FAB130200824005 /* TravelDetectionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TravelDetectionService.swift; sourceTree = "<group>"; };
 		1D6BD6C0BFFB08B0574D32AF /* PhotoCategoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCategoryService.swift; sourceTree = "<group>"; };
 		1E0A1E65D202F027E3B90C53 /* PhotoLabelEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLabelEntity.swift; sourceTree = "<group>"; };
 		2FEE537A6453D74F3910F7C2 /* DefaultFolderDataRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultFolderDataRepository.swift; sourceTree = "<group>"; };
@@ -154,6 +158,7 @@
 			isa = PBXGroup;
 			children = (
 				6D8A1A11088B68A6F132362E /* PhotoCategories.json */,
+				196CB1922FA8985600824005 /* RemoveKeywords.json */,
 				7C6F4F8847EEDF2F518DCDFA /* ReplaceWord.json */,
 			);
 			path = Resources;
@@ -240,6 +245,7 @@
 		B119E31677D59F7802A67D11 /* Service */ = {
 			isa = PBXGroup;
 			children = (
+				196CB1962FAB130200824005 /* TravelDetectionService.swift */,
 				C8B077C6F08E7379B701117E /* GeoAddressService.swift */,
 				34FC610C922DCAAD54F6B871 /* GeocoderService.swift */,
 				5070A6753C1BF6C98B7913FC /* PermissionService.swift */,
@@ -351,6 +357,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				196CB1932FA8985600824005 /* RemoveKeywords.json in Resources */,
 				6F110D428C48DDE7B9472154 /* PhotoCategories.json in Resources */,
 				6F33010F296BA936918BD397 /* ReplaceWord.json in Resources */,
 			);
@@ -392,6 +399,7 @@
 				633482339839676C7B3E5261 /* GeoAddressService.swift in Sources */,
 				22AD151C6F8F526A63C49DF8 /* GeocoderService.swift in Sources */,
 				B5A3754A0C97B4B4F6603D4F /* PermissionService.swift in Sources */,
+				196CB1972FAB130200824005 /* TravelDetectionService.swift in Sources */,
 				AD69ED776BF945A29DC4CBC1 /* PhotoAnalysisService.swift in Sources */,
 				96A50F032D49210391F99B80 /* PhotoCategoryService.swift in Sources */,
 				C5E3901016A28982EE6D8EC0 /* PhotoLibararyService.swift in Sources */,
@@ -433,10 +441,7 @@
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = (
-					"$(inherited)",
-					DEBUG,
-				);
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
 				SWIFT_COMPILATION_MODE = singlefile;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;

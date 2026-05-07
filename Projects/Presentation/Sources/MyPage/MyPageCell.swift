@@ -71,7 +71,6 @@ final class MyPageCell: UITableViewCell {
     
     override func setHighlighted(_ highlighted: Bool, animated: Bool) {
         if hasStyle {
-            print("setHighlighted")
             if highlighted {
                 self.boxView.backgroundColor = (isPrimary ? Theme.surfaceWarm:Theme.surfaceCool)
                 self.boxCoverView.backgroundColor = (isPrimary ? Theme.surfaceWarm:Theme.surfaceCool)
@@ -84,7 +83,6 @@ final class MyPageCell: UITableViewCell {
     
     override func setSelected(_ selected: Bool, animated: Bool) {
         if hasStyle {
-            print("setSelected")
             if selected {
                 self.boxView.backgroundColor = (isPrimary ? Theme.surfaceWarm:Theme.surfaceCool)
                 self.boxCoverView.backgroundColor = (isPrimary ? Theme.surfaceWarm:Theme.surfaceCool)
@@ -220,8 +218,8 @@ final class MyPageCell: UITableViewCell {
                 make.bottom.equalTo(boxView).offset(-18)
             }
         case .middle:
-            topSeperator.isHidden = true
-            bottomSeperator.isHidden = true
+            topSeperator.isHidden = false
+            bottomSeperator.isHidden = false
             boxCoverView.snp.updateConstraints { make in
                 make.leading.trailing.equalTo(boxView).inset(1)
                 make.top.bottom.equalTo(boxView)

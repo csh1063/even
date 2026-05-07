@@ -48,7 +48,7 @@ final class AlbumAnalysisSheet: UIViewController {
 
     private let subtitleLabel: UILabel = {
         let label = UILabel()
-        label.text = "새 사진을 정리하고 관련 사진끼리 앨범을 만들고 있어요"
+        label.text = "사진을 분석하고 관련 사진끼리 앨범을 만들고 있어요"
         label.font = .systemFont(ofSize: 14, weight: .regular)
         label.textColor = Theme.textSecondary
         label.textAlignment = .center
@@ -75,7 +75,7 @@ final class AlbumAnalysisSheet: UIViewController {
 
     private let locationLabel: UILabel = {
         let label = UILabel()
-        label.text = "이후 위치 기반 정리는 백그라운드에서 계속 진행돼요"
+        label.text = "이후 사진의 좌표 분석은 백그라운드에서 계속 진행돼요"
         label.font = .systemFont(ofSize: 13, weight: .medium)
         label.textColor = Theme.textSecondary
         label.numberOfLines = 0

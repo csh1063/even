@@ -29,8 +29,10 @@ public final class MyPageDIContainer {
         return MyPageViewModel(tabbarViewModel: tabbarViewModel, myPageUseCase: useCase)
     }
 
-    func makeLabelsDIContainer() -> LabelsDIContainer {
+    func makeLabelsDIContainer(isLabel: Bool) -> LabelsDIContainer {
         LabelsDIContainer(
+            isLabel: isLabel,
+            photoDataRepository: appDIContainer.photoDataRepository,
             photoLabelDataRepository: appDIContainer.photoLabelDataRepository
         )
     }

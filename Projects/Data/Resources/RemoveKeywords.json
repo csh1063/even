@@ -1,0 +1,30 @@
+{
+    [
+        "structure", "material", "land", "liquid", "textile", "conveyance",
+        "portal", "raw_glass", "wood_processed", "wood_natural", "foliage",
+        "shrub", "branch", "vegetation", "daytime", "haze", "celestial_body",
+        "rim", "cord", "grain", "blocks", "diorama", "dial", "keypad",
+        "apron", "bib", "leash", "cableway", "escalator", "chalkboard",
+        "crosswalk", "road_other", "waterways", "dirt_road", "track_rail",
+        "railroad", "sidewalk", "parking_lot", "path", "shore", "barn",
+        "polka_dots", "domicile", "steamer_cookware", "cutting_board",
+        "pot_cooking", "cookware", "housewares", "appliance", "spotlight",
+        "speakers_music", "car_seat", "swivel_chair", "chair_other", "seat",
+        "frame", "billboards", "sign", "street_sign", "license_plate", "banner",
+        "printed_page", "handwriting", "document", "receipt", "ticket",
+        "cardboard_box", "carton", "paper_bag", "trash_can", "basket_container",
+        "tripod", "tool", "timepiece", "thermostat", "dartboard", "whiteboard",
+        "media", "cassette", "office_supplies", "computer_keyboard", "computer_monitor",
+        "mammal", "feline", "canine", "ungulates", "marsupial", "rodent",
+        "adult", "teen", "baby", "people_group", "crowd",
+        "vehicle", "aircraft", "watercraft",
+        "frozen", "frozen_dessert",
+        "decoration", "decorative_plant", "consumer_electronics",
+        "container", "drinking_glass", "optical_equipment",
+        "interior_room", "light", "window", "door",
+        "roof", "brick", "arch", "balcony", "patio",
+        "hill", "rocks", "island", "cliff", "sand",
+        "adult_cat", "train_real", "shellfish_prepared",
+        "flower_arrangement", "water_body", "blue_sky"
+    ]
+}

@@ -66,6 +66,14 @@ public final class AlbumDetailViewModel: BaseViewModel {
         
         super.init()
         
+        var items = [Photo]()
+        
+        for i in 0..<20 {
+            items.append(Photo(localIdentifier: "\(i)"))
+        }
+        
+        self.photos = items
+        
         self.bind()
     }
     
@@ -136,7 +144,7 @@ public final class AlbumDetailViewModel: BaseViewModel {
     
     private func changeName(name: String) async {
         do {
-            self.isLoading = false
+            self.isLoading = true
             try await self.detailUseCase.editFolderName(new: name, id: folder.id)
             
             self.folderName = name
@@ -149,8 +157,10 @@ public final class AlbumDetailViewModel: BaseViewModel {
     
     private func deleteFolder() {
         print("삭제")
+        self.isLoading = true
         Task {
             try await detailUseCase.deleteFolder(folder.id)
+            self.isLoading = false
             self.onAction?(.pop)
         }
     }

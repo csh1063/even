@@ -107,6 +107,9 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                         }
                         print("etcPhotos after", unique.count)
                         
+                        var totalSec = Double(unique.count) * 1.5
+                        print("totalSec", totalSec)
+                        
                         for (_, photos) in unique {
                             
                             let avgLat = photos.compactMap { $0.latitude }.reduce(0, +) / Double(photos.count)
@@ -133,26 +136,10 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                                     )
                                 )
                             }
+                            totalSec -= 1.5
+                            
+                            self.timeLog(sec: totalSec)
                         }
-//                        for etcPhoto in etcPhotos {
-//                            if let address = try await self.analysisRepository.geocoderAnalyze(etcPhoto) {
-//                                
-//                                continuation.yield(
-//                                    ProgressAnalysis(
-//                                        photo: Photo(
-//                                            localIdentifier: etcPhoto.localIdentifier,
-//                                            createdAt: etcPhoto.createdAt,
-//                                            latitude: etcPhoto.latitude,
-//                                            longitude: etcPhoto.longitude,
-//                                            isoCountryCode: address.isoCountryCode,
-//                                            address: address),
-//                                        labels: [],
-//                                        state: .progress(index/Double(total))
-//                                    )
-//                                )
-//                                index += 1
-//                            }
-//                        }
                         continuation.finish()
                     } catch {
                         continuation.finish(throwing: error)
@@ -193,5 +180,22 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
         // 한국 바운딩 박스로 1차 필터 — 폴리곤 순회보다 훨씬 빠름
         return (32.0...39.5).contains(latitude) &&
                (123.5...132.5).contains(longitude)
+    }
+    
+    private func timeLog(sec: Double) {
+        
+        let hour = Int(sec / 3600)
+        let min = Int(sec.truncatingRemainder(dividingBy: 3600) / 60)
+        let sec = Int(sec.truncatingRemainder(dividingBy: 60))
+        
+        if hour != 0 {
+            print(hour, "시간")
+        }
+        if min != 0 {
+            print(min, "분")
+        }
+        if sec != 0 {
+            print(sec, "초")
+        }
     }
 }

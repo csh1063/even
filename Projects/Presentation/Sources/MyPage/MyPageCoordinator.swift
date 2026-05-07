@@ -30,7 +30,9 @@ public final class MyPageCoordinator: BaseCoordinator {
             case .move(let data):
                 switch data.type {
                 case .labels:
-                    self?.moveLabels()
+                    self?.moveLabels(isLabel: true)
+                case .addressCount:
+                    self?.moveLabels(isLabel: false)
                 case .test:
                     self?.moveTest()
                 default: break
@@ -52,9 +54,9 @@ public final class MyPageCoordinator: BaseCoordinator {
         return navigationController
     }
     
-    func moveLabels() {
+    func moveLabels(isLabel: Bool) {
         print("move!")
-        let detailDI = diContainer.makeLabelsDIContainer()
+        let detailDI = diContainer.makeLabelsDIContainer(isLabel: isLabel)
         
         let detailCoordinator = LabelsCoordinator(
             diContainer: detailDI,

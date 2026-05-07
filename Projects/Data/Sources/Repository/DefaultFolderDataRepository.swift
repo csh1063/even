@@ -24,7 +24,7 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
         self.container = container
     }
     
-    public func saveFolder(folder: Folder) throws -> Folder? {
+    public func saveFolder(folder: Folder, returnExist: Bool = false) throws -> Folder? {
         
         let context = ModelContext(container)
         
@@ -34,7 +34,7 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
         )
         
         let existing = try context.fetch(fetchDescriptor)
-        guard existing.isEmpty else { return nil }
+        guard existing.isEmpty else { return returnExist ? existing.first?.toDomain():nil }
         
         let entity = FolderEntity(
             id: folder.id,
@@ -64,8 +64,11 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
         let context = ModelContext(container)
         
         let fetchDescriptor = FetchDescriptor<FolderEntity>(
-            sortBy: [SortDescriptor(\.photoCount, order: .reverse),
-                     SortDescriptor(\.displayName, order: .forward)]
+            sortBy: [
+//                SortDescriptor(\.from, order: .forward),
+                SortDescriptor(\.photoCount, order: .reverse),
+                SortDescriptor(\.displayName, order: .forward)
+            ]
         )
         return try context.fetch(fetchDescriptor).map {$0.toDomain()}
     }

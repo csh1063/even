@@ -21,6 +21,16 @@ public struct Photo {
     public var address: PhotoLocation?
     public var addressEn: PhotoLocation?
     
+    public var country: String? {
+        return address?.country
+    }
+    public var locality: String? {
+        return address?.locality
+    }
+    public var administrativeArea: String? {
+        return address?.administrativeArea
+    }
+    
     // date
     public var year: String?
     public var month: String?
