@@ -37,14 +37,19 @@ public struct PhotoList {
 }
 
 public struct PhotoInAlbum: Hashable {
-    
+
     public let localIdentifier: String
     public let createdDate: Date?
+    public var photo: Photo? = nil
     public var isUnanalysis: Bool = false
     
     public init(id: String, createdDate: Date? = nil) {
         self.localIdentifier = id
         self.createdDate = createdDate
+    }
+    
+    public static func == (lhs: PhotoInAlbum, rhs: PhotoInAlbum) -> Bool {
+        lhs.localIdentifier == rhs.localIdentifier
     }
 }
 

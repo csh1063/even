@@ -39,4 +39,15 @@ public final class AlbumDetailDIContainer {
                                     imageUseCase: imageUseCase,
                                     detailUseCase: folderDetailUseCase)
     }
+    
+    func makeImageViewerViewModel(photoDetails: [PhotoDetail], index: Int) -> ImageViewerViewModel {
+        
+        let imageUseCase = DefaultPhotoImageUseCase(
+            repository: photoLibraryRepository
+        )
+        
+        return ImageViewerViewModel(photoDetails: photoDetails,
+                                    initialIndex: index,
+                                    imageUseCase: imageUseCase)
+    }
 }

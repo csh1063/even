@@ -10,6 +10,7 @@ import Foundation
 
 public protocol PhotoLibraryUseCase {
     func fetchData(page: Int) async throws -> PhotoList
+    func fetchPhoto(page: Int) async throws -> PhotoList
     func checkPermission() async throws -> PhotoPermission
 }
 
@@ -43,6 +44,29 @@ public class DefaultPhotoLibraryUseCase: PhotoLibraryUseCase {
             title: photoList.title,
             photos: updatedPhotos,
             hasNext: photoList.hasNext
+        )
+    }
+    
+    public func fetchPhoto(page: Int) async throws -> PhotoList {
+        
+        let library = try await self.repository.fetchPhotos(page: page)
+        
+        let photos = try dataRepository.fetchPhotos()
+        
+        let photoMap = Dictionary(uniqueKeysWithValues: photos.map { ($0.localIdentifier, $0) })
+        
+        let updatedPhotos = library.photos.map { libraryPhoto -> PhotoInAlbum in
+            var updatedPhoto = libraryPhoto
+            if let photo = photoMap[libraryPhoto.localIdentifier] {
+                updatedPhoto.photo = photo
+            }
+            return updatedPhoto
+        }
+        
+        return PhotoList(
+            title: library.title,
+            photos: updatedPhotos,
+            hasNext: library.hasNext
         )
     }
     

@@ -11,8 +11,8 @@ import Combine
 import Domain
 import UIKit
 
-protocol PhotoLibraryViewModelAction {
-    func move(_ photo: Photo)
+enum PhotoLibraryViewModelAction {
+    case selectPhoto(_ photoDetails: [PhotoDetail], index: Int)
 }
 
 @MainActor
@@ -22,7 +22,7 @@ public final class PhotoLibraryViewModel: BaseViewModel {
         case appear
         case refresh
         case nextPage(Int)
-        case selectCell(PhotoCellItemViewModel)
+        case selectItem(id: String)
     }
     
     public struct Output {
@@ -40,7 +40,8 @@ public final class PhotoLibraryViewModel: BaseViewModel {
     @Published private var errorMessage: String?
     @Published private var photoPermission: PhotoPermission = .notDetermined
     
-    private var photoList: [Photo] = []
+    private var photoDetails: [PhotoDetail] = []
+    private var isRefresh: Bool = false
     
     private let input = PassthroughSubject<Input, Never>()
     private let useCase: PhotoLibraryUseCase
@@ -114,24 +115,38 @@ public final class PhotoLibraryViewModel: BaseViewModel {
     private func handle(_ input: Input) async {
         
         switch input {
-        case .appear, .refresh:
+        case .appear:
+            await self.loadPhoto(page: 0)
+        case .refresh:
+            self.isRefresh = true
             await self.loadPhoto(page: 0)
         case let .nextPage(page):
             await self.loadPhoto(page: page)
-        case .selectCell(let data):
-            break
-//            self.onAction?()
+        case .selectItem(let id):
+            if let index = self.photoDetails.firstIndex(where: {$0.id == id}) {
+                self.onAction?(.selectPhoto(self.photoDetails, index: index))
+            }
         }
     }
     
     private func loadPhoto(page: Int) async {
         print("loadPhoto", page)
+        defer {
+            if isRefresh {
+                self.isLoading = false
+            }
+            
+            self.isRefresh = false
+        }
         do {
-            self.isLoading = false
-            let photoList = try await self.useCase.fetchData(page: page)
+            if isRefresh {
+                self.isLoading = true
+            }
+            let photoList = try await self.useCase.fetchPhoto(page: page)
             print("photos count: ", photoList.photos.count)
             
-//            self.photos = photoList.photos
+            self.photoDetails = photoList.photos.map {PhotoDetail(id: $0.localIdentifier, photo: $0.photo)}
+//            self.photoMap = Dictionary(uniqueKeysWithValues: photoList.photos.compactMap{$0.photo}.map { ($0.localIdentifier, $0) })
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy년 MM월"
             formatter.locale = Locale(identifier: "ko_KR")
@@ -146,15 +161,13 @@ public final class PhotoLibraryViewModel: BaseViewModel {
                         PhotoCellItemViewModel(
                             localIdentifier: $0.localIdentifier,
                             imageLoader: self,
-                            isUnanalysis: $0.isUnanalysis
+                            isUnanalysis: $0.photo == nil
                         )
                     }
                 )
             })
             
             self.hasNext = photoList.hasNext
-            
-            self.isLoading = true
         } catch {
             
         }

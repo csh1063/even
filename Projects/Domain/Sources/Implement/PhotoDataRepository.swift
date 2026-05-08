@@ -11,7 +11,7 @@ import Foundation
 public protocol PhotoDataRepository {
     func savePhoto(photo: Photo) throws
     func saveAndUpdateLabels(photo: Photo, labels: [PhotoLabel]) async throws
-    func fetchPhotos() throws -> [Photo]
+    func fetchPhotos(page: Int, pageSize: Int) throws -> [Photo]
     func fetchAll(page: Int, pageSize: Int) throws -> [Photo]
     func fetchPhotoCount() throws -> Int
     func fetchIds(page: Int, pageSize: Int) throws -> [String]
@@ -26,5 +26,9 @@ public protocol PhotoDataRepository {
 extension PhotoDataRepository {
     func fetchAll(page: Int = -1, pageSize: Int = 50) throws -> [Photo] {
         return try fetchAll(page: page, pageSize: pageSize)
+    }
+    
+    func fetchPhotos(page: Int = -1, pageSize: Int = 300) throws -> [Photo] {
+        return try fetchPhotos(page: page, pageSize: pageSize)
     }
 }

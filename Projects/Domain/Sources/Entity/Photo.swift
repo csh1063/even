@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct Photo {
+public struct Photo: Hashable {
     public let id: UUID
     public let localIdentifier: String
     public let createdAt: Date
@@ -63,6 +63,10 @@ public struct Photo {
         self.year = year
         self.month = month
         self.labels = labels
+    }
+    
+    public static func == (lhs: Photo, rhs: Photo) -> Bool {
+        lhs.localIdentifier == rhs.localIdentifier
     }
 }
 

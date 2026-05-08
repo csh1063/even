@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 import Combine
+import Domain
 
 @MainActor
 final class PhotoLibraryCoordinator: BaseCoordinator {
@@ -24,28 +25,38 @@ final class PhotoLibraryCoordinator: BaseCoordinator {
 
     override func start() {
         let viewModel = diContainer.makePhotoLibraryViewModel()
+        viewModel.onAction = { [weak self] action in
+            print("onAction")
+            switch action {
+            case .selectPhoto(let photoDetails, let index):
+                print("move", index)
+                self?.showDetail(photoDetails, index: index)
+            }
+        }
         let vc = PhotoLibraryViewController(viewModel: viewModel)
 
-//        vc.onSelectItem = { [weak self] id in
-//            self?.showDetail(id: id)
-//        }
-
         navigationController.viewControllers = [vc]
+        self.viewController = vc
     }
 
     func startAndReturn() -> UINavigationController {
-        start()
+        start(coordinator: self)
 //        navigationController.tabBarItem =
 //            UITabBarItem(title: "Tab1", image: nil, selectedImage: nil)
         return navigationController
     }
 
-//    private func showDetail(id: String) {
-//        let detailDI = diContainer.makeDetailDIContainer(itemID: id)
-//        let coordinator = Tab1DetailCoordinator(
-//            navigationController: navigationController,
-//            diContainer: detailDI
-//        )
-//        coordinator.start()
-//    }
+    func showDetail(_ photoDetails: [PhotoDetail], index: Int) {
+        print("showDetail")
+        let vm = diContainer.makeImageViewerViewModel(photoDetails: photoDetails, index: index)
+        vm.onAction = { [weak self] action in
+            switch action {
+            case .pageChanged(let id):
+                (self?.viewController as? PhotoLibraryViewController)?.scrollToItem(id: id)
+            }
+        }
+        let vc = ImageViewerViewController(viewModel: vm)
+        
+        navigationController.present(vc, animated: true)
+    }
 }

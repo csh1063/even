@@ -13,15 +13,12 @@ import Domain
 
 final class ImageViewerViewController: UIViewController {
 
-    // MARK: - Properties
-
     private let viewModel: ImageViewerViewModel
     private var showOverlay = true
     private var cancellables = Set<AnyCancellable>()
     private let pageChangedSubject = PassthroughSubject<Int, Never>()
     private var currentIndex: Int
-
-    // MARK: - UI
+    private var beganY: CGFloat = 0
 
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -45,28 +42,6 @@ final class ImageViewerViewController: UIViewController {
         button.tintColor = .white
         button.layer.cornerRadius = 20
         button.clipsToBounds = true
-        let blur = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterial))
-        blur.frame = CGRect(x: 0, y: 0, width: 40, height: 40)
-        blur.isUserInteractionEnabled = false
-        blur.layer.cornerRadius = 20
-        blur.clipsToBounds = true
-        button.insertSubview(blur, at: 0)
-        return button
-    }()
-
-    private let moreButton: UIButton = {
-        let button = UIButton(type: .system)
-        let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .bold)
-        button.setImage(UIImage(systemName: "ellipsis", withConfiguration: config), for: .normal)
-        button.tintColor = .white
-        button.layer.cornerRadius = 20
-        button.clipsToBounds = true
-        let blur = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterial))
-        blur.frame = CGRect(x: 0, y: 0, width: 40, height: 40)
-        blur.isUserInteractionEnabled = false
-        blur.layer.cornerRadius = 20
-        blur.clipsToBounds = true
-        button.insertSubview(blur, at: 0)
         return button
     }()
 
@@ -97,26 +72,26 @@ final class ImageViewerViewController: UIViewController {
 
     init(viewModel: ImageViewerViewModel) {
         self.viewModel = viewModel
-        self.currentIndex = viewModel.initialIndex
+        self.currentIndex = viewModel.currentIndex
         super.init(nibName: nil, bundle: nil)
         modalPresentationStyle = .fullScreen
     }
 
     required init?(coder: NSCoder) { fatalError() }
 
-    // MARK: - Lifecycle
-
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .black
+        view.backgroundColor = Theme.viewerBackground
         setupCollectionView()
         setupOverlay()
         setupGesture()
         bind()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         scrollToInitialIndex()
     }
-
-    // MARK: - Setup
 
     private func setupCollectionView() {
         view.addSubview(collectionView)
@@ -136,17 +111,22 @@ final class ImageViewerViewController: UIViewController {
         topGradient.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 100)
         topBarView.layer.insertSublayer(topGradient, at: 0)
 
+        let buttonCoverView = UIVisualEffectView(
+            effect: UIBlurEffect(style: .systemUltraThinMaterialDark)
+        )
+        buttonCoverView.frame = CGRect(x: 0, y: 0, width: 40, height: 40)
+        buttonCoverView.isUserInteractionEnabled = false
+        buttonCoverView.layer.cornerRadius = 20
+        buttonCoverView.clipsToBounds = true
+        topBarView.addSubview(buttonCoverView)
         topBarView.addSubview(dismissButton)
-        topBarView.addSubview(moreButton)
 
+        buttonCoverView.snp.makeConstraints { make in
+            make.edges.equalTo(dismissButton)
+        }
+        
         dismissButton.snp.makeConstraints { make in
             make.leading.equalToSuperview().inset(16)
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(8)
-            make.width.height.equalTo(40)
-        }
-
-        moreButton.snp.makeConstraints { make in
-            make.trailing.equalToSuperview().inset(16)
             make.top.equalTo(view.safeAreaLayoutGuide).offset(8)
             make.width.height.equalTo(40)
         }
@@ -165,11 +145,29 @@ final class ImageViewerViewController: UIViewController {
         let tap = UITapGestureRecognizer(target: self, action: #selector(backgroundTapped))
         tap.cancelsTouchesInView = false
         collectionView.addGestureRecognizer(tap)
+        
+        let pan = UIPanGestureRecognizer(target: self, action: #selector(backgroundPan))
+        pan.cancelsTouchesInView = false
+        pan.delegate = self
+        collectionView.addGestureRecognizer(pan)
+    }
+    @objc func backgroundPan(gesture: UIPanGestureRecognizer) {
+        
+        switch gesture.state {
+        case .began:
+            beganY = gesture.location(in: view).y
+        case .ended:
+            let after = gesture.location(in: view).y
+            if after > beganY + 200 || gesture.velocity(in: view).y > 1000 {
+                dismiss(animated: true)
+            }
+        default: break
+        }
     }
 
     private func scrollToInitialIndex() {
         DispatchQueue.main.async {
-            let indexPath = IndexPath(item: self.viewModel.initialIndex, section: 0)
+            let indexPath = IndexPath(item: self.currentIndex, section: 0)
             self.collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: false)
         }
     }
@@ -177,14 +175,14 @@ final class ImageViewerViewController: UIViewController {
     // MARK: - Bind
 
     private func bind() {
-        let output = viewModel.transform(input: ImageViewerViewModel.Input(
-            pageChanged: pageChangedSubject.eraseToAnyPublisher()
-        ))
+        let output = viewModel.transform()
 
         output.currentPhoto
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] photo in
-                self?.updateInfo(with: photo)
+            .sink { [weak self] photoDetail in
+                if let photo = photoDetail.photo {
+                    self?.updateInfo(with: photo)
+                }
             }
             .store(in: &cancellables)
     }
@@ -211,7 +209,7 @@ final class ImageViewerViewController: UIViewController {
     // MARK: - Bottom Info View
 
     private func makeBottomInfoView() -> UIVisualEffectView {
-        let container = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterial))
+        let container = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterialDark))
         container.layer.cornerRadius = 22
         container.layer.borderWidth = 1
         container.layer.borderColor = UIColor.white.withAlphaComponent(0.12).cgColor
@@ -272,7 +270,7 @@ final class ImageViewerViewController: UIViewController {
 extension ImageViewerViewController: UICollectionViewDataSource {
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        viewModel.photos.count
+        viewModel.photoDetails.count
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -300,21 +298,15 @@ extension ImageViewerViewController: UICollectionViewDelegateFlowLayout {
         guard page != currentIndex else { return }
         currentIndex = page
         pageChangedSubject.send(page)
+        viewModel.send(.pageChanged(page))
     }
 }
 
-// MARK: - UIColor hex
-
-private extension UIColor {
-    convenience init(hex: String) {
-        let hex = hex.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: "#", with: "")
-        var rgb: UInt64 = 0
-        Scanner(string: hex).scanHexInt64(&rgb)
-        self.init(
-            red: CGFloat((rgb >> 16) & 0xFF) / 255,
-            green: CGFloat((rgb >> 8) & 0xFF) / 255,
-            blue: CGFloat(rgb & 0xFF) / 255,
-            alpha: 1
-        )
+extension ImageViewerViewController: UIGestureRecognizerDelegate {
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        guard let pan = gestureRecognizer as? UIPanGestureRecognizer else { return true }
+        let velocity = pan.velocity(in: view)
+        // 수직 속도가 수평보다 클 때만 인식
+        return abs(velocity.y) > abs(velocity.x)
     }
 }

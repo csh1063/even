@@ -36,6 +36,8 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
                 self?.showAlbumOptions(album: folder)
             case .pop:
                 self?.pop()
+            case .selectPhoto(let photoDetails, let index):
+                self?.showDetail(photoDetails, index: index)
             }
         }
         
@@ -82,6 +84,20 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
         }
 
         navigationController.present(sheet, animated: true)
+    }
+    
+    func showDetail(_ photoDetails: [PhotoDetail], index: Int) {
+        print("showDetail")
+        let vm = diContainer.makeImageViewerViewModel(photoDetails: photoDetails, index: index)
+        vm.onAction = { [weak self] action in
+            switch action {
+            case .pageChanged(let id):
+                (self?.viewController as? AlbumDetailViewController)?.scrollToItem(id: id)
+            }
+        }
+        let vc = ImageViewerViewController(viewModel: vm)
+        
+        navigationController.present(vc, animated: true)
     }
     
 }

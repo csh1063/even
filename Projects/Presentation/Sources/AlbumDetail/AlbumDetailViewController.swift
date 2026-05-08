@@ -59,12 +59,12 @@ final class AlbumDetailViewController: BaseViewController {
         
         self.setupView()
         self.setupBindings()
+        
+        self.viewModel.send(.appear)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-        self.viewModel.send(.appear)
     }
     
     private func setupView() {
@@ -73,6 +73,7 @@ final class AlbumDetailViewController: BaseViewController {
                              RightButton(type: .more)])
         
         configureDataSource()
+        collectionView.delegate = self
         
         view.addSubview(naviView)
         view.addSubview(collectionView)
@@ -130,6 +131,19 @@ final class AlbumDetailViewController: BaseViewController {
             }
             .store(in: &cancellables)
     }
+    
+    func scrollToItem(id: String) {
+        print("scrollToItem", id)
+        let snapshot = dataSource.snapshot()
+        for (sectionIndex, section) in snapshot.sectionIdentifiers.enumerated() {
+            let items = snapshot.itemIdentifiers(inSection: section)
+            if let itemIndex = items.firstIndex(where: { $0.localIdentifier == id }) {
+                let indexPath = IndexPath(item: itemIndex, section: sectionIndex)
+                collectionView.scrollToItem(at: indexPath, at: .centeredVertically, animated: false)
+                return
+            }
+        }
+    }
 }
 
 extension AlbumDetailViewController {
@@ -149,5 +163,13 @@ extension AlbumDetailViewController {
         snapshot.appendSections([0])
         snapshot.appendItems(photos)
         dataSource.apply(snapshot, animatingDifferences: true)
+    }
+}
+
+extension AlbumDetailViewController: UICollectionViewDelegate {
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard let cellViewModel = dataSource.itemIdentifier(for: indexPath) else { return }
+        viewModel.send(.selectItem(id: cellViewModel.localIdentifier))
     }
 }

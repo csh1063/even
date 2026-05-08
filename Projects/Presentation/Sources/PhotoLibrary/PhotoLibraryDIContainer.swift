@@ -39,8 +39,14 @@ public final class PhotoLibraryDIContainer {
         return PhotoLibraryViewModel(useCase: useCase, imageUseCase: imageUseCase)
     }
 
-//    func makeHomeDetailViewModel(
-//        id: String
-//    ) -> HomeDetailViewModel {
-//    }
+    func makeImageViewerViewModel(photoDetails: [PhotoDetail], index: Int) -> ImageViewerViewModel {
+        
+        let imageUseCase = DefaultPhotoImageUseCase(
+            repository: photoLibraryRepository
+        )
+        
+        return ImageViewerViewModel(photoDetails: photoDetails,
+                                    initialIndex: index,
+                                    imageUseCase: imageUseCase)
+    }
 }

@@ -6,7 +6,7 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
-public struct PhotoLocation: Codable, Equatable {
+public struct PhotoLocation: Codable, Equatable, Hashable {
 //    public var country: String?               // 대한민국
 //    public var administrativeArea: String?    // 서울특별시
 //    public var locality: String?              // 서울특별시

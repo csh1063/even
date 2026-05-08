@@ -42,12 +42,12 @@ final class TabbarViewController: CustomTabBarController {
         
 //        self.setSelectedBox(radius: 26, color: Theme.primary)
         
+        self.selectedIndex = 1
+        
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
-        self.selectedIndex = 1
     }
     
     func showTabbar() {

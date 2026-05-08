@@ -98,11 +98,17 @@ public final class DefaultPhotoDataRepository: PhotoDataRepository {
         }.value
     }
     
-    public func fetchPhotos() throws -> [Photo] {
+    public func fetchPhotos(page: Int = -1, pageSize: Int = 300) throws -> [Photo] {
         let context = ModelContext(container)
-        let fetchDescriptor = FetchDescriptor<PhotoEntity>(
+        var fetchDescriptor = FetchDescriptor<PhotoEntity>(
             sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
         )
+        
+        if page >= 0 {
+            fetchDescriptor.fetchLimit = pageSize
+            fetchDescriptor.fetchOffset = page * pageSize
+        }
+        
         return try context.fetch(fetchDescriptor).map { $0.toDomain() }
     }
     

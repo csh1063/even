@@ -256,7 +256,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		196CB1A02FABB73C00824005 /* PhotoDetail */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = PhotoDetail; sourceTree = "<group>"; };
+		196CB1A02FABB73C00824005 /* ImageViewer */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = ImageViewer; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -448,7 +448,7 @@
 		ACFC6E8F6D299B22A1D9900B /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				196CB1A02FABB73C00824005 /* PhotoDetail */,
+				196CB1A02FABB73C00824005 /* ImageViewer */,
 				B9397ABB0AF9E6EB341D382E /* Album */,
 				1218EF0C221C717746E3CBE1 /* AlbumAnalysisSheet */,
 				B6F0CB9BC97FA29087115603 /* AlbumDetail */,
@@ -684,7 +684,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				196CB1A02FABB73C00824005 /* PhotoDetail */,
+				196CB1A02FABB73C00824005 /* ImageViewer */,
 			);
 			name = Presentation;
 			packageProductDependencies = (

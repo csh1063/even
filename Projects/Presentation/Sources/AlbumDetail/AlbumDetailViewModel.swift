@@ -14,6 +14,7 @@ import UIKit
 enum AlbumDetailViewModelAction {
     case options(folder: Folder)
     case pop
+    case selectPhoto(_ photoDetails: [PhotoDetail], index: Int)
 }
 
 @MainActor
@@ -30,6 +31,7 @@ public final class AlbumDetailViewModel: BaseViewModel {
         case refresh
         case more
         case dismiss
+        case selectItem(id: String)
     }
     
     public struct Output {
@@ -50,6 +52,7 @@ public final class AlbumDetailViewModel: BaseViewModel {
     var onAction: ((AlbumDetailViewModelAction) -> Void)?
     
     private let input = PassthroughSubject<Input, Never>()
+    private var photoDetails: [PhotoDetail] = []
     
     private let imageUseCase: PhotoImageUseCase
     private let detailUseCase: FolderDetailUseCase
@@ -126,6 +129,10 @@ public final class AlbumDetailViewModel: BaseViewModel {
             self.onAction?(.options(folder: self.folder))
         case .dismiss:
             self.onAction?(.pop)
+        case .selectItem(let id):
+            if let index = self.photoDetails.firstIndex(where: {$0.id == id}) {
+                self.onAction?(.selectPhoto(self.photoDetails, index: index))
+            }
         }
     }
     
@@ -136,6 +143,8 @@ public final class AlbumDetailViewModel: BaseViewModel {
             let photos = try await self.detailUseCase.fetchPhotos(by: folder.id)
             print("photos count: ", photos.count)
             self.photos = photos
+            
+            self.photoDetails = photos.map {PhotoDetail(id: $0.localIdentifier, photo: $0)}
             self.isLoading = false
         } catch {
             

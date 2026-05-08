@@ -17,7 +17,8 @@ final class PhotoLibraryViewController: BaseViewController {
     
     private var collectionView: UICollectionView!
     private var dataSource: UICollectionViewDiffableDataSource<PhotoHeader, PhotoCellItemViewModel>!
-    
+    private let refreshControl = UIRefreshControl()
+
     private var columnCount: Int = 3
     private var pinchBeginScale: CGFloat = 1.0
     
@@ -65,6 +66,10 @@ final class PhotoLibraryViewController: BaseViewController {
         collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: createDynamicLayout(columns: columnCount))
         collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         collectionView.backgroundColor = Theme.background
+        collectionView.delegate = self
+
+        collectionView.refreshControl = refreshControl
+        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
         
         naviView.setTitle("전체 사진첩",
                           color: Theme.textPrimary,
@@ -88,6 +93,11 @@ final class PhotoLibraryViewController: BaseViewController {
             make.top.equalTo(self.naviView.snp.bottom)
             make.leading.trailing.bottom.equalTo(self.view)
         }
+    }
+    
+    @objc private func handleRefresh() {
+        viewModel.send(.refresh)
+        refreshControl.endRefreshing()
     }
     
     private func setupBindings() {
@@ -230,6 +240,19 @@ final class PhotoLibraryViewController: BaseViewController {
             return section
         }
     }
+    
+    func scrollToItem(id: String) {
+        print("scrollToItem", id)
+        let snapshot = dataSource.snapshot()
+        for (sectionIndex, section) in snapshot.sectionIdentifiers.enumerated() {
+            let items = snapshot.itemIdentifiers(inSection: section)
+            if let itemIndex = items.firstIndex(where: { $0.localIdentifier == id }) {
+                let indexPath = IndexPath(item: itemIndex, section: sectionIndex)
+                collectionView.scrollToItem(at: indexPath, at: .centeredVertically, animated: false)
+                return
+            }
+        }
+    }
 }
 
 extension PhotoLibraryViewController {
@@ -267,5 +290,13 @@ extension PhotoLibraryViewController {
         }
 
         dataSource.apply(snapshot, animatingDifferences: true)
+    }
+}
+
+extension PhotoLibraryViewController: UICollectionViewDelegate {
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard let cellViewModel = dataSource.itemIdentifier(for: indexPath) else { return }
+        viewModel.send(.selectItem(id: cellViewModel.localIdentifier))
     }
 }
