@@ -145,7 +145,9 @@ public final class PhotoLibraryViewModel: BaseViewModel {
             let photoList = try await self.useCase.fetchPhoto(page: page)
             print("photos count: ", photoList.photos.count)
             
-            self.photoDetails = photoList.photos.map {PhotoDetail(id: $0.localIdentifier, photo: $0.photo)}
+            self.photoDetails = photoList.photos.map {
+                PhotoDetail(id: $0.localIdentifier, createdDate: $0.createdDate, photo: $0.photo)
+            }
 //            self.photoMap = Dictionary(uniqueKeysWithValues: photoList.photos.compactMap{$0.photo}.map { ($0.localIdentifier, $0) })
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy년 MM월"

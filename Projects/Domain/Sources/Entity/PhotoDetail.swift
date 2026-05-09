@@ -10,10 +10,12 @@ import Foundation
 
 public struct PhotoDetail {
     public let id: String
+    public let createdDate: Date?
     public let photo: Photo?
     
-    public init(id: String, photo: Photo? = nil) {
+    public init(id: String, createdDate: Date?, photo: Photo? = nil) {
         self.id = id
+        self.createdDate = createdDate
         self.photo = photo
     }
 }

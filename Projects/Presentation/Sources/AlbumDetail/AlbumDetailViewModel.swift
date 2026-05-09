@@ -144,7 +144,9 @@ public final class AlbumDetailViewModel: BaseViewModel {
             print("photos count: ", photos.count)
             self.photos = photos
             
-            self.photoDetails = photos.map {PhotoDetail(id: $0.localIdentifier, photo: $0)}
+            self.photoDetails = photos.map {
+                PhotoDetail(id: $0.localIdentifier, createdDate: $0.createdAt, photo: $0)
+            }
             self.isLoading = false
         } catch {
             

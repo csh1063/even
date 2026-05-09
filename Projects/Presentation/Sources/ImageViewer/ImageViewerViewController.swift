@@ -54,9 +54,11 @@ final class ImageViewerViewController: UIViewController {
         label.textColor = .white
         return label
     }()
+    
+    private let albumBadge = UIView()
     private let albumBadgeLabel: UILabel = {
         let label = UILabel()
-        label.text = "연결된 앨범 2개"
+//        label.text = "연결된 앨범 2개"
         label.font = .systemFont(ofSize: 13, weight: .semibold)
         label.textColor = Theme.primary
         return label
@@ -180,28 +182,42 @@ final class ImageViewerViewController: UIViewController {
         output.currentPhoto
             .receive(on: DispatchQueue.main)
             .sink { [weak self] photoDetail in
-                if let photo = photoDetail.photo {
-                    self?.updateInfo(with: photo)
-                }
+                self?.updateInfo(with: photoDetail)
             }
             .store(in: &cancellables)
     }
 
-    private func updateInfo(with photo: Photo) {
+    private func updateInfo(with photoDetail: PhotoDetail) {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy년 M월 d일"
         formatter.locale = Locale(identifier: "ko_KR")
-        dateLabel.text = formatter.string(from: photo.createdAt)
-
-        if let locality = photo.locality ?? photo.administrativeArea {
-            locationIcon.image = UIImage(systemName: "location.fill")
-            locationIcon.tintColor = Theme.secondary
-            locationLabel.text = locality
-            locationLabel.textColor = .white.withAlphaComponent(0.92)
+        if let date = photoDetail.createdDate {
+            dateLabel.text = formatter.string(from: date)
         } else {
+            dateLabel.text = "날짜 정보 없음"
+        }
+        
+        if let photo = photoDetail.photo {
+            albumBadgeLabel.text = "연결된 앨범 2개"
+            
+            let components = [photo.country, photo.administrativeArea, photo.locality].compactMap { $0 }
+            
+            if components.isEmpty {
+                locationIcon.image = UIImage(systemName: "location.slash")
+                locationIcon.tintColor = .white.withAlphaComponent(0.72)
+                locationLabel.text = "위치 정보 없음"
+                locationLabel.textColor = .white.withAlphaComponent(0.82)
+            } else {
+                locationIcon.image = UIImage(systemName: "location.fill")
+                locationIcon.tintColor = Theme.secondary
+                locationLabel.text = components.joined(separator: " ")
+                locationLabel.textColor = .white.withAlphaComponent(0.92)
+            }
+        } else {
+            albumBadgeLabel.text = "미분석"
             locationIcon.image = UIImage(systemName: "location.slash")
             locationIcon.tintColor = .white.withAlphaComponent(0.72)
-            locationLabel.text = "위치 정보 없음"
+            locationLabel.text = "분석되지 않은 사진이에요"
             locationLabel.textColor = .white.withAlphaComponent(0.82)
         }
     }
@@ -215,7 +231,6 @@ final class ImageViewerViewController: UIViewController {
         container.layer.borderColor = UIColor.white.withAlphaComponent(0.12).cgColor
         container.clipsToBounds = true
 
-        let albumBadge = UIView()
         albumBadge.backgroundColor = UIColor.white.withAlphaComponent(0.14)
         albumBadge.layer.cornerRadius = 13
         albumBadge.addSubview(albumBadgeLabel)
