@@ -15,15 +15,18 @@ public final class SplashViewModel: BaseViewModel {
     
     enum Input {
         case appear
+        case endAnim
     }
     
     struct Output {
         let finished: AnyPublisher<Bool, Never>
     }
     
-    
     private let input = PassthroughSubject<Input, Never>()
+    
     @Published private var finished: Bool = false
+    private let appearSubject = PassthroughSubject<Void, Never>()
+    private let animDoneSubject = PassthroughSubject<Void, Never>()
     
     private let useCase: PhotoCheckUseCase
     
@@ -51,12 +54,25 @@ public final class SplashViewModel: BaseViewModel {
             Task { @MainActor in await self.handle(input) }
         }
         .store(in: &cancellables)
+        
+        appearSubject.zip(animDoneSubject)
+            .first()
+            .sink { [weak self] _ in
+                Task {
+//                if endAppear && endAnim {
+                    await self?.start()
+//                }
+                }
+            }
+            .store(in: &cancellables)
     }
     
     private func handle(_ input: Input) async {
         switch input {
         case .appear:
             await self.checkDeletedPhoto()
+        case .endAnim:
+            self.animDoneSubject.send()
         }
     }
     
@@ -89,7 +105,8 @@ public final class SplashViewModel: BaseViewModel {
                     print("syncData progress:", ratio)
                 case .completed:
                     print("syncData completed")
-                    await self.start()
+//                    await self.start()
+                    appearSubject.send()
                 case .unavailable(let reason):
                     print("syncData reason:", reason)
                 }
@@ -101,18 +118,7 @@ public final class SplashViewModel: BaseViewModel {
 
     private func start() async {
         print("start")
-//        Task { [weak self] in
-            try? await Task.sleep(nanoseconds: 3_000_000_000) // 3초 (1초 = 1_000_000_000 ns)
-//            showAlert(
-//                title: "진행?",
-//                message: "진행 고고?",
-//                buttons: [
-//                    AlertButtonConfig(title: "껃영", style: .destructive, action: nil),
-//                    AlertButtonConfig(title: "고고", style: .default) { [weak self] in
-                        self.finished = true
-//                    }
-//                ]
-//            )
-//        }
+        try? await Task.sleep(nanoseconds: 3_000_000_000) // 3초 (1초 = 1_000_000_000 ns)
+        self.finished = true
     }
 }

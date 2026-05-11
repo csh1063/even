@@ -70,8 +70,6 @@ final class ImageViewerViewController: UIViewController {
         return label
     }()
 
-    // MARK: - Init
-
     init(viewModel: ImageViewerViewModel) {
         self.viewModel = viewModel
         self.currentIndex = viewModel.currentIndex
@@ -84,9 +82,7 @@ final class ImageViewerViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = Theme.viewerBackground
-        setupCollectionView()
-        setupOverlay()
-        setupGesture()
+        setupViews()
         bind()
     }
     
@@ -94,13 +90,14 @@ final class ImageViewerViewController: UIViewController {
         super.viewWillAppear(animated)
         scrollToInitialIndex()
     }
-
-    private func setupCollectionView() {
+    
+    private func setupViews() {
+        
         view.addSubview(collectionView)
-        collectionView.snp.makeConstraints { $0.edges.equalToSuperview() }
-    }
-
-    private func setupOverlay() {
+        collectionView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        
         // 상단
         view.addSubview(topBarView)
         topBarView.snp.makeConstraints { make in
@@ -137,33 +134,8 @@ final class ImageViewerViewController: UIViewController {
         view.addSubview(bottomInfoView)
         bottomInfoView.snp.makeConstraints { make in
             make.leading.trailing.equalToSuperview().inset(16)
-            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-24)
-        }
-
-        dismissButton.addTarget(self, action: #selector(dismissTapped), for: .touchUpInside)
-    }
-
-    private func setupGesture() {
-        let tap = UITapGestureRecognizer(target: self, action: #selector(backgroundTapped))
-        tap.cancelsTouchesInView = false
-        collectionView.addGestureRecognizer(tap)
-        
-        let pan = UIPanGestureRecognizer(target: self, action: #selector(backgroundPan))
-        pan.cancelsTouchesInView = false
-        pan.delegate = self
-        collectionView.addGestureRecognizer(pan)
-    }
-    @objc func backgroundPan(gesture: UIPanGestureRecognizer) {
-        
-        switch gesture.state {
-        case .began:
-            beganY = gesture.location(in: view).y
-        case .ended:
-            let after = gesture.location(in: view).y
-            if after > beganY + 200 || gesture.velocity(in: view).y > 1000 {
-                dismiss(animated: true)
-            }
-        default: break
+            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-8)
+            make.height.equalTo(96)
         }
     }
 
@@ -174,8 +146,6 @@ final class ImageViewerViewController: UIViewController {
         }
     }
 
-    // MARK: - Bind
-
     private func bind() {
         let output = viewModel.transform()
 
@@ -183,6 +153,56 @@ final class ImageViewerViewController: UIViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] photoDetail in
                 self?.updateInfo(with: photoDetail)
+            }
+            .store(in: &cancellables)
+        
+        dismissButton.publisher(for: .touchUpInside)
+            .sink(receiveValue: { _ in
+                self.dismiss(animated: true)
+            })
+            .store(in: &cancellables)
+        
+        let tap = UITapGestureRecognizer()
+        tap.cancelsTouchesInView = false
+        collectionView.addGestureRecognizer(tap)
+        tap.eventPublisher
+            .sink { gesture in
+                self.showOverlay.toggle()
+                UIView.animate(withDuration: 0.2) {
+                    let alpha: CGFloat = self.showOverlay ? 1 : 0
+                    let ty: CGFloat = self.showOverlay ? 0 : 20
+                    self.topBarView.alpha = alpha
+                    self.bottomInfoView.alpha = alpha
+                    self.bottomInfoView.transform = CGAffineTransform(translationX: 0, y: self.showOverlay ? 0 : ty)
+                }
+            }
+            .store(in: &cancellables)
+        
+        let pan = UIPanGestureRecognizer()
+        pan.cancelsTouchesInView = false
+        pan.delegate = self
+        collectionView.addGestureRecognizer(pan)
+        pan.eventPublisher
+            .sink { gesture in
+                
+                switch gesture.state {
+                case .began:
+                    self.beganY = gesture.location(in: self.view).y
+                case .ended:
+                    let after = gesture.location(in: self.view).y
+                    if after > self.beganY + 200 || gesture.velocity(in: self.view).y > 1000 {
+                        self.dismiss(animated: true)
+                    }
+                default: break
+                }
+            }
+            .store(in: &cancellables)
+        
+        let tapBottom = UITapGestureRecognizer()
+        bottomInfoView.addGestureRecognizer(tapBottom)
+        tapBottom.eventPublisher
+            .sink { gesture in
+                print("!!")
             }
             .store(in: &cancellables)
     }
@@ -198,7 +218,8 @@ final class ImageViewerViewController: UIViewController {
         }
         
         if let photo = photoDetail.photo {
-            albumBadgeLabel.text = "연결된 앨범 2개"
+            albumBadge.isHidden = true
+//            albumBadgeLabel.text = "연결된 앨범 2개"
             
             let components = [photo.country, photo.administrativeArea, photo.locality].compactMap { $0 }
             
@@ -214,6 +235,7 @@ final class ImageViewerViewController: UIViewController {
                 locationLabel.textColor = .white.withAlphaComponent(0.92)
             }
         } else {
+            albumBadge.isHidden = false
             albumBadgeLabel.text = "미분석"
             locationIcon.image = UIImage(systemName: "location.slash")
             locationIcon.tintColor = .white.withAlphaComponent(0.72)
@@ -222,9 +244,8 @@ final class ImageViewerViewController: UIViewController {
         }
     }
 
-    // MARK: - Bottom Info View
-
     private func makeBottomInfoView() -> UIVisualEffectView {
+        
         let container = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterialDark))
         container.layer.cornerRadius = 22
         container.layer.borderWidth = 1
@@ -257,31 +278,15 @@ final class ImageViewerViewController: UIViewController {
         stack.spacing = 14
 
         container.contentView.addSubview(stack)
-        stack.snp.makeConstraints { $0.edges.equalToSuperview().inset(18) }
+        stack.snp.makeConstraints { make in
+            make.edges.equalToSuperview().inset(18)
+        }
 
         return container
-    }
-
-    // MARK: - Actions
-
-    @objc private func dismissTapped() {
-        dismiss(animated: true)
-    }
-
-    @objc private func backgroundTapped() {
-        showOverlay.toggle()
-        UIView.animate(withDuration: 0.2) {
-            let alpha: CGFloat = self.showOverlay ? 1 : 0
-            let ty: CGFloat = self.showOverlay ? 0 : 20
-            self.topBarView.alpha = alpha
-            self.bottomInfoView.alpha = alpha
-            self.bottomInfoView.transform = CGAffineTransform(translationX: 0, y: self.showOverlay ? 0 : ty)
-        }
     }
 }
 
 // MARK: - UICollectionViewDataSource
-
 extension ImageViewerViewController: UICollectionViewDataSource {
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -301,7 +306,6 @@ extension ImageViewerViewController: UICollectionViewDataSource {
 }
 
 // MARK: - UICollectionViewDelegateFlowLayout
-
 extension ImageViewerViewController: UICollectionViewDelegateFlowLayout {
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -321,7 +325,6 @@ extension ImageViewerViewController: UIGestureRecognizerDelegate {
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         guard let pan = gestureRecognizer as? UIPanGestureRecognizer else { return true }
         let velocity = pan.velocity(in: view)
-        // 수직 속도가 수평보다 클 때만 인식
         return abs(velocity.y) > abs(velocity.x)
     }
 }

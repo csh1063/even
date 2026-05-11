@@ -21,9 +21,13 @@ public final class DefaultPhotoLibraryRepository: PhotoLibraryRepository {
         self.libraryService = libraryService
         self.permissionService = permissionService
     }
+    
+    public func fetchPhotoCount() async throws -> Int {
+        return try await self.libraryService.getPhotoCount()
+    }
 
-    public func fetchPhotos(page: Int) async throws -> PhotoList {
-        return try await self.libraryService.getPhotoList(page: page).toDomain()
+    public func fetchPhotos(page: Int, pageCount: Int) async throws -> PhotoList {
+        return try await self.libraryService.getPhotoList(page: page, pageCount: pageCount).toDomain()
     }
     
     public func fetchPhotoIds() async throws -> [String] {

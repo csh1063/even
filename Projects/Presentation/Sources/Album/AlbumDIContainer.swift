@@ -37,7 +37,8 @@ public final class AlbumDIContainer {
         AlbumDetailDIContainer(
             folder: folder,
             photoLibraryRepository: appDIContainer.photoLibraryRepository,
-            folderDataRepository: appDIContainer.folderDataRepository
+            folderDataRepository: appDIContainer.folderDataRepository,
+            labelRepository: appDIContainer.photoLabelDataRepository
         )
     }
 }

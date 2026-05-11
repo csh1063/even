@@ -13,6 +13,7 @@
 		196CB1992FAB174C00824005 /* PhotoLocationSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 196CB1982FAB174C00824005 /* PhotoLocationSnapshot.swift */; };
 		196CB19B2FAB178700824005 /* TravelDetectionRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 196CB19A2FAB178700824005 /* TravelDetectionRepository.swift */; };
 		196CB1AA2FAD055A00824005 /* PhotoDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 196CB1A92FAD055A00824005 /* PhotoDetail.swift */; };
+		196CB1AC2FB0472600824005 /* ImageViewerUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 196CB1AB2FB0472500824005 /* ImageViewerUseCase.swift */; };
 		1D32E7B4A891C68E824A1F11 /* PhotoDataRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A738BCE2F1F1AEF9C6F0BB0 /* PhotoDataRepository.swift */; };
 		209A23984E931C57FD20AE16 /* PhotoRepositoryError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30EAF667B0530265E87C006C /* PhotoRepositoryError.swift */; };
 		21027B31EC06337CCD82FBBB /* ProgressFolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287561C66C690B7D25A1EB49 /* ProgressFolder.swift */; };
@@ -68,6 +69,7 @@
 		196CB1982FAB174C00824005 /* PhotoLocationSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLocationSnapshot.swift; sourceTree = "<group>"; };
 		196CB19A2FAB178700824005 /* TravelDetectionRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TravelDetectionRepository.swift; sourceTree = "<group>"; };
 		196CB1A92FAD055A00824005 /* PhotoDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDetail.swift; sourceTree = "<group>"; };
+		196CB1AB2FB0472500824005 /* ImageViewerUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageViewerUseCase.swift; sourceTree = "<group>"; };
 		1A738BCE2F1F1AEF9C6F0BB0 /* PhotoDataRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDataRepository.swift; sourceTree = "<group>"; };
 		1ABAD620DB6CE1F6BB3F5625 /* AutoFolderUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoFolderUseCase.swift; sourceTree = "<group>"; };
 		1E766E86BC730F636DD2C6E2 /* FolderRepositoryError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderRepositoryError.swift; sourceTree = "<group>"; };
@@ -185,6 +187,7 @@
 		2BE278B80FDD95404961E580 /* UseCase */ = {
 			isa = PBXGroup;
 			children = (
+				196CB1AB2FB0472500824005 /* ImageViewerUseCase.swift */,
 				1ABAD620DB6CE1F6BB3F5625 /* AutoFolderUseCase.swift */,
 				B4B1B8780032F13D9ADCBA5A /* FolderDetailUseCase.swift */,
 				9CD523D448654F28B80C431E /* FolderUseCase.swift */,
@@ -304,6 +307,7 @@
 				FF215CC76366F64494FC69ED /* FolderRepositoryError.swift in Sources */,
 				5E09CC05A4D61725322FFE4F /* ImageData.swift in Sources */,
 				47045A3FD36A03417C0229F7 /* NetworkError.swift in Sources */,
+				196CB1AC2FB0472600824005 /* ImageViewerUseCase.swift in Sources */,
 				53303865F07D78019523C147 /* Photo.swift in Sources */,
 				9CD9A4F5C4DBD55EFEE9D8C3 /* PhotoInAlbum.swift in Sources */,
 				F70840E8E99043FF20FCA8FA /* PhotoLabel.swift in Sources */,

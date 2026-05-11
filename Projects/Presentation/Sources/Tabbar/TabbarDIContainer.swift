@@ -42,7 +42,8 @@ public final class TabbarDIContainer {
     func makePhotoLibraryDIContainer() -> PhotoLibraryDIContainer {
         PhotoLibraryDIContainer(
             photoLibraryRepository: appDiContainer.photoLibraryRepository,
-            photoDataRepository: appDiContainer.photoDataRepository
+            photoDataRepository: appDiContainer.photoDataRepository,
+            labelDataRepository: appDiContainer.photoLabelDataRepository
         )
     }
     

@@ -28,11 +28,13 @@ public struct PhotoList {
     public let title: String
     public let photos: [PhotoInAlbum]
     public let hasNext: Bool
+    public let totalCount: Int
     
-    public init(title: String, photos: [PhotoInAlbum], hasNext: Bool) {
+    public init(title: String, photos: [PhotoInAlbum], hasNext: Bool, totalCount: Int) {
         self.title = title
         self.photos = photos
         self.hasNext = hasNext
+        self.totalCount = totalCount
     }
 }
 

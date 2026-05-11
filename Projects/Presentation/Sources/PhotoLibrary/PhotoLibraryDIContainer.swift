@@ -11,20 +11,17 @@ import Domain
 
 @MainActor
 public final class PhotoLibraryDIContainer {
-
-//    let appDIContainer: AppDIContainer
-//
-//    init(appDIContainer: AppDIContainer) {
-//        self.appDIContainer = appDIContainer
-//    }
     
     private let photoLibraryRepository: PhotoLibraryRepository
     private let photoDataRepository: PhotoDataRepository
+    private let labelDataRepository: PhotoLabelDataRepository
     
     public init(photoLibraryRepository: PhotoLibraryRepository,
-                photoDataRepository: PhotoDataRepository) {
+                photoDataRepository: PhotoDataRepository,
+                labelDataRepository: PhotoLabelDataRepository) {
         self.photoLibraryRepository = photoLibraryRepository
         self.photoDataRepository = photoDataRepository
+        self.labelDataRepository = labelDataRepository
     }
 
     func makePhotoLibraryViewModel() -> PhotoLibraryViewModel {
@@ -41,8 +38,9 @@ public final class PhotoLibraryDIContainer {
 
     func makeImageViewerViewModel(photoDetails: [PhotoDetail], index: Int) -> ImageViewerViewModel {
         
-        let imageUseCase = DefaultPhotoImageUseCase(
-            repository: photoLibraryRepository
+        let imageUseCase = DefaultImageViewerUseCase(
+            repository: photoLibraryRepository,
+            labelRepository: labelDataRepository
         )
         
         return ImageViewerViewModel(photoDetails: photoDetails,

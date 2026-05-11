@@ -23,4 +23,5 @@ public struct PhotoAssetListEntity {
     let title: String
     let photos: [PhotoAssetEntity]
     let hasNext: Bool
+    let totalCount: Int
 }

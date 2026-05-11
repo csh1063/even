@@ -9,8 +9,7 @@
 import Foundation
 
 public protocol PhotoLibraryUseCase {
-    func fetchData(page: Int) async throws -> PhotoList
-    func fetchPhoto(page: Int) async throws -> PhotoList
+    func fetchPhoto() async throws -> PhotoList
     func checkPermission() async throws -> PhotoPermission
 }
 
@@ -24,32 +23,9 @@ public class DefaultPhotoLibraryUseCase: PhotoLibraryUseCase {
         self.dataRepository = dataRepository
     }
     
-    public func fetchData(page: Int) async throws -> PhotoList {
+    public func fetchPhoto() async throws -> PhotoList {
         
-        let photoList = try await self.repository.fetchPhotos(page: page)
-        let analyzedIds = Set(try dataRepository.fetchAnalyzed())
-        let updatedPhotos = photoList.photos.map { photo -> PhotoInAlbum in
-            var updatedPhoto = photo
-            
-            if !analyzedIds.contains(photo.localIdentifier) {
-                updatedPhoto.isUnanalysis = true
-            } else {
-                updatedPhoto.isUnanalysis = false
-            }
-            
-            return updatedPhoto
-        }
-        
-        return PhotoList(
-            title: photoList.title,
-            photos: updatedPhotos,
-            hasNext: photoList.hasNext
-        )
-    }
-    
-    public func fetchPhoto(page: Int) async throws -> PhotoList {
-        
-        let library = try await self.repository.fetchPhotos(page: page)
+        let library = try await self.repository.fetchPhotos()
         
         let photos = try dataRepository.fetchPhotos()
         
@@ -66,7 +42,8 @@ public class DefaultPhotoLibraryUseCase: PhotoLibraryUseCase {
         return PhotoList(
             title: library.title,
             photos: updatedPhotos,
-            hasNext: library.hasNext
+            hasNext: library.hasNext,
+            totalCount: library.totalCount
         )
     }
     

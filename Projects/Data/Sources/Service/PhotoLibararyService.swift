@@ -72,12 +72,7 @@ public final class PhotoLibraryService {
         }.value
     }
 
-    public func getPhotoList(from collection: PHAssetCollection? = nil, page: Int, reload: Bool = false) async throws -> PhotoAssetListEntity {
-        
-        let realPage = max(1, page)
-        let countPerPage = 300
-        let start = (realPage - 1) * countPerPage
-//        let end = start + countPerPage
+    public func getPhotoList(from collection: PHAssetCollection? = nil, page: Int = -1, pageCount: Int = 300, reload: Bool = false) async throws -> PhotoAssetListEntity {
         
         let result: PHFetchResult<PHAsset>
         
@@ -97,9 +92,19 @@ public final class PhotoLibraryService {
         }
         
         let totalCount = result.count
-        let rangeStart = min(start, totalCount)
-//        let rangeEnd = min(end, totalCount)
-        let rangeEnd = totalCount
+        let rangeStart: Int
+        let rangeEnd: Int
+        
+        if page < 0 {
+            rangeStart = 0
+            rangeEnd = totalCount
+        } else {
+            let realPage = max(1, page)
+            let start = (realPage - 1) * pageCount
+            let end = start + pageCount
+            rangeStart = min(start, totalCount)
+            rangeEnd = min(end, totalCount)
+        }
         
         let photos = (rangeStart..<rangeEnd).map { index -> PhotoAssetEntity in
             let asset = result.object(at: index)
@@ -126,8 +131,31 @@ public final class PhotoLibraryService {
         return PhotoAssetListEntity(
             title: collection?.localizedTitle ?? "",
             photos: sortedPhotos,
-            hasNext: false//rangeEnd < totalCount
+            hasNext: rangeEnd < totalCount,
+            totalCount: totalCount
         )
+    }
+    
+    public func getPhotoCount(from collection: PHAssetCollection? = nil) async throws -> Int {
+        
+        let result: PHFetchResult<PHAsset>
+        
+        if let collection {
+            if let savedResult = self.pHResultMap[collection] {
+                result = savedResult
+            } else {
+                result = PHAsset.fetchAssets(in: collection, options: .defaultOptions)
+                self.pHResultMap[collection] = result
+            }
+        } else {
+            if let savedAll = self.allPhotos {
+                result = savedAll
+            } else {
+                result = PHAsset.fetchAssets(with: .image, options: .defaultOptions)
+            }
+        }
+        
+        return result.count
     }
     
     public func getPhotoIds() async throws -> [String] {

@@ -12,6 +12,7 @@ public struct PhotoDetail {
     public let id: String
     public let createdDate: Date?
     public let photo: Photo?
+    public var labels: [PhotoLabel] = []
     
     public init(id: String, createdDate: Date?, photo: Photo? = nil) {
         self.id = id

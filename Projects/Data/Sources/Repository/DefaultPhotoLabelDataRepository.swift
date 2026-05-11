@@ -29,6 +29,19 @@ final public class DefaultPhotoLabelDataRepository: PhotoLabelDataRepository {
         return try context.fetch(fetchDescriptor).map {$0.toDomain()}
     }
     
+    public func fetchLabelsByPhoto(localIdentifier: String) throws -> [PhotoLabel] {
+        
+        let context = ModelContext(container)
+        let fetchDescriptor = FetchDescriptor<PhotoEntity>(
+            predicate: #Predicate { $0.localIdentifier == localIdentifier }
+        )
+        guard let entity = try? context.fetch(fetchDescriptor).first else {
+            return []
+        }
+        
+        return entity.labels.map { $0.toDomain() }
+    }
+    
     public func fetchUniqueNames() throws -> [String] {
         let context = ModelContext(self.container)
         let descriptor = FetchDescriptor<PhotoLabelEntity>(

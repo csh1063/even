@@ -40,12 +40,12 @@ final class ImageViewerViewModel: BaseViewModel {
     var onAction: ((ImageViewerViewModelAction) -> Void)?
     
     private var imageCache: [String: UIImage] = [:]
-    private let imageUseCase: PhotoImageUseCase
+    private let imageUseCase: ImageViewerUseCase
     
     private var cancellables = Set<AnyCancellable>()
 
     init(photoDetails: [PhotoDetail], initialIndex: Int,
-         imageUseCase: PhotoImageUseCase) {
+         imageUseCase: ImageViewerUseCase) {
         self.photoDetails = photoDetails
         self.imageUseCase = imageUseCase
         self.currentIndex = initialIndex
@@ -70,6 +70,7 @@ final class ImageViewerViewModel: BaseViewModel {
             self.currentIndex = index
             let detail = photoDetails[index]
             self.currentPhoto = detail
+            await self.loadLabels(by: detail.id)
             self.onAction?(.pageChanged(detail.id))
         }
     }
@@ -105,6 +106,15 @@ final class ImageViewerViewModel: BaseViewModel {
         } catch {
             print("이미지 로딩 실패: \(error.localizedDescription)")
             return nil
+        }
+    }
+    
+    private func loadLabels(by id: String) async {
+        do {
+            let labels = try await imageUseCase.getLabels(by: id)
+            self.currentPhoto.labels = labels
+        } catch {
+            print("error", error.localizedDescription)
         }
     }
 }

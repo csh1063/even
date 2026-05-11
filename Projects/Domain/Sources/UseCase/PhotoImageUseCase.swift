@@ -6,8 +6,6 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
-import Foundation
-
 public protocol PhotoImageUseCase {
     func loadImage<T>(id: String, type: LoadPhotoOptionType) async throws -> ImageData<T>
 }

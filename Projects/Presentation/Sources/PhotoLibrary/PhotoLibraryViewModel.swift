@@ -21,7 +21,6 @@ public final class PhotoLibraryViewModel: BaseViewModel {
     enum Input {
         case appear
         case refresh
-        case nextPage(Int)
         case selectItem(id: String)
     }
     
@@ -116,12 +115,10 @@ public final class PhotoLibraryViewModel: BaseViewModel {
         
         switch input {
         case .appear:
-            await self.loadPhoto(page: 0)
+            await self.loadPhoto()
         case .refresh:
             self.isRefresh = true
-            await self.loadPhoto(page: 0)
-        case let .nextPage(page):
-            await self.loadPhoto(page: page)
+            await self.loadPhoto()
         case .selectItem(let id):
             if let index = self.photoDetails.firstIndex(where: {$0.id == id}) {
                 self.onAction?(.selectPhoto(self.photoDetails, index: index))
@@ -129,8 +126,8 @@ public final class PhotoLibraryViewModel: BaseViewModel {
         }
     }
     
-    private func loadPhoto(page: Int) async {
-        print("loadPhoto", page)
+    private func loadPhoto() async {
+        print("loadPhoto")
         defer {
             if isRefresh {
                 self.isLoading = false
@@ -142,7 +139,7 @@ public final class PhotoLibraryViewModel: BaseViewModel {
             if isRefresh {
                 self.isLoading = true
             }
-            let photoList = try await self.useCase.fetchPhoto(page: page)
+            let photoList = try await self.useCase.fetchPhoto()
             print("photos count: ", photoList.photos.count)
             
             self.photoDetails = photoList.photos.map {
@@ -155,7 +152,7 @@ public final class PhotoLibraryViewModel: BaseViewModel {
             let grouped = Dictionary(grouping: photoList.photos) { photo in
                 photo.createdDate.map { formatter.string(from: $0) } ?? "날짜 없음"
             }
-            self.totalCount = photoList.photos.count
+            self.totalCount = photoList.totalCount
             self.photos = Dictionary(uniqueKeysWithValues: grouped.map { key, values in
                 (
                     PhotoHeader(title: key, count: values.count),

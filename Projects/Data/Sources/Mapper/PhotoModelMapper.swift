@@ -32,6 +32,7 @@ extension PhotoAssetListEntity {
         return PhotoList(
             title: self.title,
             photos: self.photos.map {$0.toDomain()},
-            hasNext: self.hasNext)
+            hasNext: self.hasNext,
+            totalCount: self.totalCount)
     }
 }

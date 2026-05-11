@@ -43,7 +43,7 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
         return AsyncThrowingStream { continuation in
             Task {
                 do {
-                    let allAssets = try await libraryService.getPhotoList(page: 0).photos
+                    let allAssets = try await libraryService.getPhotoList().photos
                     let photos = allAssets.filter { !excludingIds.contains($0.asset.localIdentifier) }
                     
                     let total = photos.count
