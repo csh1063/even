@@ -13,7 +13,7 @@ import PackageDescription
                        "Moya": .framework,
                        "CombineMoya": .framework,
                        "SnapKit": .framework,
-                       "Kingfisher": .framework,
+//                       "Kingfisher": .framework,
 //                       "Lottie": .framework
         ]
         ,

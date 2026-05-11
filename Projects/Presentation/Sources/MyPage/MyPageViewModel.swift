@@ -204,6 +204,7 @@ final class MyPageViewModel: BaseViewModel {
             MyCellHeader(name: "접근 및 권한", order: 40): [
                 MyCellData(type: .terms),
                 MyCellData(type: .privacy),
+                MyCellData(type: .openSource),
                 MyCellData(type: .photoPermission, value: self.photoPermission)
             ],
             MyCellHeader(name: "앱 설정", order: 50): [

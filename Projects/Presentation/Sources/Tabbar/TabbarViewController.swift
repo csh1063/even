@@ -46,8 +46,17 @@ final class TabbarViewController: CustomTabBarController {
         
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+    }
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        
+//        let vc = ConsentViewController()
+//        vc.modalPresentationStyle = .fullScreen
+//        self.present(vc, animated: true)
     }
     
     func showTabbar() {

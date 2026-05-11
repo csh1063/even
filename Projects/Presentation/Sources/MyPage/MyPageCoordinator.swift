@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import SafariServices
 
 @MainActor
 public final class MyPageCoordinator: BaseCoordinator {
@@ -33,6 +34,23 @@ public final class MyPageCoordinator: BaseCoordinator {
                     self?.moveLabels(isLabel: true)
                 case .addressCount:
                     self?.moveLabels(isLabel: false)
+                case .privacy:
+                    let vc = WebDocuViewController(type: .privacy)
+                    self?.navigationController.pushViewController(vc, animated: true)
+                case .terms:
+                    let vc = WebDocuViewController(type: .terms)
+                    self?.navigationController.pushViewController(vc, animated: true)
+//                    let urlString = data.type == .terms
+//                        ? "https://csh1063.github.io/moa-web/terms-of-service.html"
+//                        : "https://csh1063.github.io/moa-web/privacy-policy.html"
+//                    guard let url = URL(string: urlString) else { return }
+//
+//                    let vc = SFSafariViewController(url: url)
+//                    
+//                    self?.navigationController.pushViewController(vc, animated: true)
+                case .openSource:
+                    let vc = OpenSourceViewController()
+                    self?.navigationController.pushViewController(vc, animated: true)
                 case .test:
                     self?.moveTest()
                 default: break

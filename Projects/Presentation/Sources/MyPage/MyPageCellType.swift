@@ -46,6 +46,7 @@ enum MyPageCellType {
     // privacy
     case terms
     case privacy
+    case openSource
     case photoPermission
     
     // app settings
@@ -72,6 +73,7 @@ enum MyPageCellType {
         case .continueLocation: return "location.fill.viewfinder"
         case .terms: return "doc.text"
         case .privacy: return "person.2"
+        case .openSource: return "ellipsis.curlybraces"
         case .photoPermission: return "photo.badge.checkmark"
         case .displayMode: return "moon.fill"
         case .feedback: return "questionmark.circle"
@@ -97,6 +99,7 @@ enum MyPageCellType {
         case .continueLocation: return "사진 좌표 이어서 분석"
         case .terms: return "이용 약관"
         case .privacy: return "개인 정보 처리 방침"
+        case .openSource: return "오픈소스 라이선스"
         case .photoPermission: return "사진 접근 범위"
         case .displayMode: return "다크 모드"
         case .feedback: return "문의 / 피드백"
@@ -125,7 +128,7 @@ enum MyPageCellType {
             return .info
         case .autoAnalysis, .continueLocation:
             return .toggle
-        case .terms, .privacy, .displayMode, .feedback:
+        case .terms, .privacy, .displayMode, .openSource, .feedback:
             return .open
         case .version, .photoPermission:
             return .link
