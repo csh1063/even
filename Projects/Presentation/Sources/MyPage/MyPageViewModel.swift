@@ -31,7 +31,7 @@ final class MyPageViewModel: BaseViewModel {
     @Published private var cellTypes: [MyCellHeader: [MyCellData]] = [:]
     private var libraryCount: Int = 0
     private var photoCount: Int = 0
-    private var analyzedDate: String = ""
+    private var analyzedDate: String = "-"
     private var unanalysisCount: Int = 0
     private var photoPermission: String = ""
     private var displayMode: String = ""
@@ -182,25 +182,34 @@ final class MyPageViewModel: BaseViewModel {
     
     private func cells() {
         
+        let analyzedItems = if analyzedDate == "-" {
+            [
+                MyCellData(type: .analyzedDate, value: analyzedDate),
+                MyCellData(type: .analysis)
+            ]
+        } else {
+            [
+                MyCellData(type: .analyzedDate, value: analyzedDate),
+                MyCellData(type: .analysis),
+                MyCellData(type: .reAnalysis),
+                MyCellData(type: .reset)
+            ]
+        }
+        
         self.cellTypes = [
             MyCellHeader(name: "내 라이브러리", order: 0): [
                 MyCellData(type: .allPhoto, value: "\(photoCount.formatted())장"),
                 MyCellData(type: .unanalysisPhoto, value: "\(unanalysisCount.formatted())장")
             ],
-            MyCellHeader(name: "사진 분석", order: 10): [
-                MyCellData(type: .analyzedDate, value: analyzedDate),
-                MyCellData(type: .analysis),
-                MyCellData(type: .reAnalysis),
-                MyCellData(type: .reset)
-            ],
+            MyCellHeader(name: "사진 분석", order: 10): analyzedItems,
 //            MyCellHeader(name: "백 그라운드 작업", order: 20): [
 //                MyCellData(type: .locationAnalysis, value: "-", isOn: false),
 //                MyCellData(type: .locationAutoFolder, value: "-", isOn: false)
 //            ],
-            MyCellHeader(name: "정리 옵션", order: 30): [
-                MyCellData(type: .autoAnalysis, isOn: false, isPrimary: false),
-                MyCellData(type: .continueLocation, isOn: false, isPrimary: false),
-            ],
+//            MyCellHeader(name: "정리 옵션", order: 30): [
+//                MyCellData(type: .autoAnalysis, isOn: false, isPrimary: false),
+//                MyCellData(type: .continueLocation, isOn: false, isPrimary: false),
+//            ],
             MyCellHeader(name: "접근 및 권한", order: 40): [
                 MyCellData(type: .terms),
                 MyCellData(type: .privacy),
@@ -211,12 +220,12 @@ final class MyPageViewModel: BaseViewModel {
                 MyCellData(type: .displayMode, value: displayMode),
                 MyCellData(type: .feedback),
                 MyCellData(type: .version, value: version)
-            ],
-            MyCellHeader(name: "실험실", order: 60): [
-                MyCellData(type: .labels),
-                MyCellData(type: .test),
-                MyCellData(type: .addressCount)
-            ]
+            ]//,
+//            MyCellHeader(name: "실험실", order: 60): [
+//                MyCellData(type: .labels),
+//                MyCellData(type: .test),
+//                MyCellData(type: .addressCount)
+//            ]
         ]
     }
     
@@ -224,7 +233,7 @@ final class MyPageViewModel: BaseViewModel {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         
-        guard let date = formatter.date(from: dateString) else { return dateString }
+        guard let date = formatter.date(from: dateString) else { return "-" }
         
         let calendar = Calendar.current
         let now = Date()

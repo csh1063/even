@@ -29,8 +29,10 @@ public final class TabbarViewModel: BaseViewModel {
         case reanalysis
         case clear
         case permission
-        case appear
+        case showConsent
         case afterConsent
+        case showOnboarding
+        case afterOnboarding
     }
     
     public struct Output {
@@ -38,6 +40,7 @@ public final class TabbarViewModel: BaseViewModel {
         let folderProgress: AnyPublisher<Double, Never>
         let locationProgress: AnyPublisher<Double, Never>
         let locationFolderProgress: AnyPublisher<Double, Never>
+        let onboarding: AnyPublisher<Bool?, Never>
         let consent: AnyPublisher<Bool?, Never>
         let permission: AnyPublisher<PhotoPermission, Never>
     }
@@ -47,6 +50,7 @@ public final class TabbarViewModel: BaseViewModel {
     @Published private var locationProgressRatio: Double = 0
     @Published private var locationFolderProgressRatio: Double = 0
     @Published private var isAnalyzing : Bool = false
+    @Published private var onboarding: Bool?
     @Published private var consent: Bool?
     @Published private var permission: PhotoPermission = .notDetermined
     
@@ -71,6 +75,7 @@ public final class TabbarViewModel: BaseViewModel {
         
         self.bind()
         
+//        self.resetForTest()
     }
     
     public func transform() -> Output {
@@ -79,6 +84,7 @@ public final class TabbarViewModel: BaseViewModel {
             folderProgress: $autoFolderProgressRatio.eraseToAnyPublisher(),
             locationProgress: $locationProgressRatio.eraseToAnyPublisher(),
             locationFolderProgress: $locationFolderProgressRatio.eraseToAnyPublisher(),
+            onboarding: $onboarding.eraseToAnyPublisher(),
             consent: $consent.eraseToAnyPublisher(),
             permission: $permission.eraseToAnyPublisher()
         )
@@ -97,12 +103,25 @@ public final class TabbarViewModel: BaseViewModel {
         .store(in: &cancellables)
     }
     
+    private func resetForTest() {
+        Task {
+            do {
+                print("reset")
+                try await self.permissionUseCase.resetForTest()
+            }
+        }
+    }
+    
     private func handle(_ input: Input) async {
         switch input {
-        case .appear:
+        case .showConsent:
             await checkConsent()
         case .afterConsent:
             await consentComplete()
+        case .showOnboarding:
+            await checkOnboarding()
+        case .afterOnboarding:
+            await onboardingComplete()
         case .analysis:
             print("analysis 2")
             showAlert(
@@ -283,6 +302,22 @@ public final class TabbarViewModel: BaseViewModel {
     private func consentComplete() async {
         do {
             try await permissionUseCase.completeConsent()
+        } catch {
+            print("consentComplete fail")
+        }
+    }
+    
+    private func checkOnboarding() async {
+        do {
+            self.onboarding = try await permissionUseCase.showOnboarding()
+        } catch {
+            print("checkConsent failed")
+        }
+    }
+    
+    private func onboardingComplete() async {
+        do {
+            try await permissionUseCase.completeOnboarding()
         } catch {
             print("consentComplete fail")
         }

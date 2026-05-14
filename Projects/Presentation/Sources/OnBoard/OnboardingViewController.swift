@@ -9,25 +9,27 @@
 import UIKit
 
 final class OnboardingViewController: UIViewController {
+    
+    var onClose: (() -> Void)?
 
     private let pages: [OnboardingPage] = [
         OnboardingPage(
             imageName: "onboarding_01",
             accentColor: Theme.background,
-            title: "사진 분석",
-            description: "사진 속 장소, 날짜, 내용을\n자동으로 분석해요"
+            title: "사진을 스스로 이해해요",
+            description: "사진 속 장면, 피사체, 텍스트를\n직접 분석해요"
         ),
         OnboardingPage(
             imageName: "onboarding_02",
             accentColor: Theme.background,
-            title: "자동 분류",
-            description: "분석 결과를 바탕으로\n사진을 카테고리별로 나눠요"
+            title: "날짜와 좌표로 정리해요",
+            description: "촬영 시간과 위치를 기반으로\n사진을 자동으로 분류해요"
         ),
         OnboardingPage(
             imageName: "onboarding_03",
             accentColor: Theme.background,
-            title: "앨범 정리",
-            description: "정리된 사진을 앨범으로\n한눈에 확인해요"
+            title: "나만의 앨범이 완성돼요",
+            description: "분석 결과로\n앨범이 자동으로 만들어져요"
         )
     ]
 
@@ -137,6 +139,7 @@ final class OnboardingViewController: UIViewController {
 
     @objc private func startTapped() {
         // coordinator?.showTerms()
+        onClose?()
         self.dismiss(animated: true)
     }
 
@@ -196,7 +199,7 @@ extension OnboardingViewController: UIPageViewControllerDelegate {
 
 extension OnboardingViewController: UIScrollViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        print(scrollView.bounces, scrollView.contentOffset)
+//        print(scrollView.bounces, scrollView.contentOffset)
         
         let isFirstable = currentIndex == 0
         let isLastable = currentIndex == self.pages.count - 1

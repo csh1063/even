@@ -50,7 +50,7 @@ final class OnboardingPageViewController: UIViewController {
 
         let titleLabel = UILabel()
         titleLabel.text = page.title
-        titleLabel.font = UIFont(name: "NotoSerifKR-SemiBold", size: 28) ?? .systemFont(ofSize: 28, weight: .semibold)
+        titleLabel.font = .systemFont(ofSize: 20, weight: .semibold)
         titleLabel.textColor = Theme.textPrimary//.white
         titleLabel.textAlignment = .center
 

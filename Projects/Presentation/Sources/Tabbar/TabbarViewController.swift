@@ -13,6 +13,7 @@ final class TabbarViewController: CustomTabBarController {
     
     private let viewModel: TabbarViewModel
     
+    private var showOnConsent: Bool = false
     private var showOnboarding: Bool = false
     
     private var cancellables = Set<AnyCancellable>()
@@ -66,14 +67,37 @@ final class TabbarViewController: CustomTabBarController {
 //            let vc = OnboardingViewController()
 //            vc.modalPresentationStyle = .fullScreen
 //            self.present(vc, animated: true)
+//        } else if !showOnConsent {
+//            showOnConsent = true
+//            let vc = ConsentViewController()
+//            vc.modalPresentationStyle = .fullScreen
+//            self.present(vc, animated: true)
+//            
 //        }
         
-        viewModel.send(.appear)
+        viewModel.send(.showOnboarding)
     }
     
     private func binding() {
         
         let outlet = viewModel.transform()
+        outlet.onboarding
+            .sink { [weak self] isShow in
+                if let isShow {
+                    if !isShow {
+                        let vc = OnboardingViewController()
+                        vc.modalPresentationStyle = .fullScreen
+                        vc.onClose = { [weak self] in
+                            self?.viewModel.send(.afterOnboarding)
+                        }
+                        self?.present(vc, animated: true)
+                    } else {
+                        self?.viewModel.send(.showConsent)
+                    }
+                }
+            }
+            .store(in: &cancellables)
+        
         outlet.consent
             .sink { [weak self] isShow in
                 if let isShow, !isShow {

@@ -67,7 +67,8 @@ final class ConsentViewController: UIViewController {
 
     private lazy var subtitleLabel: UILabel = {
         let label = UILabel()
-        label.text = "동의하지 않아도 일부 기능을 사용할 수 있습니다"
+        label.text = "모아 앱 사용을 위하여 필수 약관에 동의해 주세요"
+//        label.text = "동의하지 않아도 일부 기능을 사용할 수 있습니다"
         label.font = .systemFont(ofSize: 13)
         label.textColor = Theme.textSecondary
         label.textAlignment = .center

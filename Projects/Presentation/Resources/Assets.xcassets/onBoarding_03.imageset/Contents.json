@@ -1,7 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "onboarding3_centered_v2.svg",
+      "filename" : "onboarding_3_album_light.svg",
+      "idiom" : "universal"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "filename" : "onboarding_3_album_dark.svg",
       "idiom" : "universal"
     }
   ],

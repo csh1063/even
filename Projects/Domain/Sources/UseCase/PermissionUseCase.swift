@@ -12,7 +12,9 @@ public protocol PermissionUseCase {
     func checkPermission() async throws -> PhotoPermission
     func showConsent() async throws -> Bool
     func completeConsent() async throws
-    
+    func showOnboarding() async throws -> Bool
+    func completeOnboarding() async throws
+    func resetForTest() async throws
 }
 
 public final class DefaultPermissionUseCase: PermissionUseCase {
@@ -36,5 +38,18 @@ public final class DefaultPermissionUseCase: PermissionUseCase {
     
     public func completeConsent() async throws {
         try await userDefaultRepository.saveConsent(isShown: true)
+    }
+    
+    public func showOnboarding() async throws -> Bool {
+        try await userDefaultRepository.showOnboarding()
+    }
+    
+    public func completeOnboarding() async throws {
+        try await userDefaultRepository.saveOnboarding(isShown: true)
+    }
+    
+    public func resetForTest() async throws {
+        try await userDefaultRepository.saveConsent(isShown: false)
+        try await userDefaultRepository.saveOnboarding(isShown: false)
     }
 }
