@@ -49,6 +49,10 @@ final class DefaultAppDIContainer: AppDIContainer {
         repositoryFactory.userDefaultRepository
     }
     
+    var permissionRepository: PermissionRepository {
+        repositoryFactory.permissionRepository
+    }
+    
 //    var travelRepository: TravelDetectionRepository {
 //        repositoryFactory.travelRepository
 //    }
@@ -67,10 +71,8 @@ final class DefaultAppDIContainer: AppDIContainer {
     init() {
         do {
             container = try ModelContainer(
-                for: PhotoEntity.self,
-                FolderEntity.self,
-                PhotoLabelEntity.self,
-                FolderKeywordEntity.self
+                for: Schema(MoaSchemaV0.models, version: MoaSchemaV0.versionIdentifier),
+                migrationPlan: MoaSchemaMigrationPlan.self
             )
         } catch {
             fatalError("ModelContainer 생성 실패: \(error)")

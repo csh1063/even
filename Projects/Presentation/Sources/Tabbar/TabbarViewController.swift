@@ -7,10 +7,15 @@
 //
 
 import Foundation
+import Combine
 
 final class TabbarViewController: CustomTabBarController {
     
     private let viewModel: TabbarViewModel
+    
+    private var showOnboarding: Bool = false
+    
+    private var cancellables = Set<AnyCancellable>()
     
     init(viewModel: TabbarViewModel) {
         self.viewModel = viewModel
@@ -24,6 +29,8 @@ final class TabbarViewController: CustomTabBarController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        self.binding()
         
         self.setBackgroundColor(Theme.surface.withAlphaComponent(0.72))
         
@@ -54,9 +61,31 @@ final class TabbarViewController: CustomTabBarController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-//        let vc = ConsentViewController()
-//        vc.modalPresentationStyle = .fullScreen
-//        self.present(vc, animated: true)
+//        if !showOnboarding {
+//            showOnboarding = true
+//            let vc = OnboardingViewController()
+//            vc.modalPresentationStyle = .fullScreen
+//            self.present(vc, animated: true)
+//        }
+        
+        viewModel.send(.appear)
+    }
+    
+    private func binding() {
+        
+        let outlet = viewModel.transform()
+        outlet.consent
+            .sink { [weak self] isShow in
+                if let isShow, !isShow {
+                    let vc = ConsentViewController()
+                    vc.modalPresentationStyle = .fullScreen
+                    vc.onConsented = { [weak self] in
+                        self?.viewModel.send(.afterConsent)
+                    }
+                    self?.present(vc, animated: true)
+                }
+            }
+            .store(in: &cancellables)
     }
     
     func showTabbar() {

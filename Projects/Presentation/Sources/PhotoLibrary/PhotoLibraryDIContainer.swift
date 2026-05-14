@@ -24,7 +24,7 @@ public final class PhotoLibraryDIContainer {
         self.labelDataRepository = labelDataRepository
     }
 
-    func makePhotoLibraryViewModel() -> PhotoLibraryViewModel {
+    func makePhotoLibraryViewModel(tabbarViewModel: TabbarViewModel) -> PhotoLibraryViewModel {
         let useCase = DefaultPhotoLibraryUseCase(
             repository: photoLibraryRepository,
             dataRepository: photoDataRepository
@@ -33,7 +33,9 @@ public final class PhotoLibraryDIContainer {
             repository: photoLibraryRepository
         )
         
-        return PhotoLibraryViewModel(useCase: useCase, imageUseCase: imageUseCase)
+        return PhotoLibraryViewModel(tabbarViewModel: tabbarViewModel,
+                                     useCase: useCase,
+                                     imageUseCase: imageUseCase)
     }
 
     func makeImageViewerViewModel(photoDetails: [PhotoDetail], index: Int) -> ImageViewerViewModel {

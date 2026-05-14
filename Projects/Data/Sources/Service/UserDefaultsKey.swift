@@ -11,4 +11,6 @@ public enum UserDefaultsKey {
     public static let lastLocationAnalyzedDate = "lastLocationAnalyzedDate"
     public static let displayMode = "displayMode"
     public static let autoNewAnalysis = "autoNewAnalysis"
+    public static let showOnboarding = "showOnboarding"
+    public static let showConsent = "showConsent"
 }

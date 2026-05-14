@@ -17,4 +17,8 @@ public protocol UserDefaultRepository {
     func fetchDisplayMode() async throws -> String
     func saveAutoNewAnalysis(isOn: Bool) async throws
     func fetchAutoNewAnalysis() async throws -> Bool?
+    func saveOnboarding(isShown: Bool) async throws
+    func showOnboarding() async throws -> Bool
+    func saveConsent(isShown: Bool) async throws
+    func showConsent() async throws -> Bool
 }

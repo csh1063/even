@@ -63,6 +63,7 @@ final class AlbumViewController: BaseViewController {
         self.setupView()
         self.setupBindings()
         
+//        self.viewModel.send(.permission)
         self.viewModel.send(.appear)
     }
     
@@ -147,6 +148,12 @@ final class AlbumViewController: BaseViewController {
             .sink { [weak self] folders in
                 print("folders sink: ", folders.count)
                 self?.applySnapshot(with: folders)
+            }
+            .store(in: &cancellables)
+        
+        output.permission
+            .sink { permission in
+                print("!!", permission)
             }
             .store(in: &cancellables)
     }

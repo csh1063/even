@@ -40,7 +40,7 @@ final class TabbarCoordinator: BaseCoordinator {
         
         self.tabbarViewController = TabbarViewController(viewModel: viewModel)
         
-        let photoCoordinator = makePhotoLibraryCoordinator()
+        let photoCoordinator = makePhotoLibraryCoordinator(viewModel: viewModel)
         let albumCoordinator = makeAlbumCoordinator(viewModel: viewModel)
         let myPageCoordinator = makeMyPageCoordinator(viewModel: viewModel)
         [photoCoordinator, albumCoordinator, myPageCoordinator].forEach {
@@ -70,9 +70,9 @@ final class TabbarCoordinator: BaseCoordinator {
         window.makeKeyAndVisible()
     }
     
-    private func makePhotoLibraryCoordinator() -> PhotoLibraryCoordinator {
+    private func makePhotoLibraryCoordinator(viewModel: TabbarViewModel) -> PhotoLibraryCoordinator {
         let diContainer = container.makePhotoLibraryDIContainer()
-        return PhotoLibraryCoordinator(diContainer: diContainer)
+        return PhotoLibraryCoordinator(diContainer: diContainer, tabbarViewModel: viewModel)
     }
 
     private func makeAlbumCoordinator(viewModel: TabbarViewModel) -> AlbumCoordinator {

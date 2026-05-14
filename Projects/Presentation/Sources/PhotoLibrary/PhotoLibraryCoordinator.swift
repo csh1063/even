@@ -15,16 +15,19 @@ import Domain
 final class PhotoLibraryCoordinator: BaseCoordinator {
     
     private let diContainer: PhotoLibraryDIContainer
+    private let tabbarViewModel: TabbarViewModel
+    
     private let navigationController = UINavigationController()
     
-    init(diContainer: PhotoLibraryDIContainer) {
+    init(diContainer: PhotoLibraryDIContainer, tabbarViewModel: TabbarViewModel) {
         self.diContainer = diContainer
+        self.tabbarViewModel = tabbarViewModel
         
         super.init()
     }
 
     override func start() {
-        let viewModel = diContainer.makePhotoLibraryViewModel()
+        let viewModel = diContainer.makePhotoLibraryViewModel(tabbarViewModel: tabbarViewModel)
         viewModel.onAction = { [weak self] action in
             print("onAction")
             switch action {

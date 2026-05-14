@@ -284,7 +284,7 @@ final class MyPageCell: UITableViewCell {
         case .button:
             hasStyle = true
             switchView.isHidden = true
-            valueLabel.isHidden = true
+            valueLabel.isHidden = false
             styleIconView.isHidden = true
             
             if data.isPrimary {

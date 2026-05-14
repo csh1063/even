@@ -28,6 +28,9 @@ public final class TabbarViewModel: BaseViewModel {
         case analysis
         case reanalysis
         case clear
+        case permission
+        case appear
+        case afterConsent
     }
     
     public struct Output {
@@ -35,6 +38,8 @@ public final class TabbarViewModel: BaseViewModel {
         let folderProgress: AnyPublisher<Double, Never>
         let locationProgress: AnyPublisher<Double, Never>
         let locationFolderProgress: AnyPublisher<Double, Never>
+        let consent: AnyPublisher<Bool?, Never>
+        let permission: AnyPublisher<PhotoPermission, Never>
     }
     
     @Published private var progressRatio: Double = 0
@@ -42,17 +47,23 @@ public final class TabbarViewModel: BaseViewModel {
     @Published private var locationProgressRatio: Double = 0
     @Published private var locationFolderProgressRatio: Double = 0
     @Published private var isAnalyzing : Bool = false
+    @Published private var consent: Bool?
+    @Published private var permission: PhotoPermission = .notDetermined
     
     var onAction: ((TabbarViewModelAction) -> Void)?
     
     let input = PassthroughSubject<Input, Never>()
     
+    private let permissionUseCase: PermissionUseCase
     private let analysisUseCase: PhotoAnalysisUseCase
     private let autoFolderUseCase: AutoFolderUseCase
     
     private var cancellables = Set<AnyCancellable>()
     
-    init(analysisUseCase: PhotoAnalysisUseCase, autoFolderUseCase: AutoFolderUseCase) {
+    init(permissionUseCase: PermissionUseCase,
+         analysisUseCase: PhotoAnalysisUseCase,
+         autoFolderUseCase: AutoFolderUseCase) {
+        self.permissionUseCase = permissionUseCase
         self.analysisUseCase = analysisUseCase
         self.autoFolderUseCase = autoFolderUseCase
         
@@ -67,7 +78,9 @@ public final class TabbarViewModel: BaseViewModel {
             photoProgress: $progressRatio.eraseToAnyPublisher(),
             folderProgress: $autoFolderProgressRatio.eraseToAnyPublisher(),
             locationProgress: $locationProgressRatio.eraseToAnyPublisher(),
-            locationFolderProgress: $locationFolderProgressRatio.eraseToAnyPublisher()
+            locationFolderProgress: $locationFolderProgressRatio.eraseToAnyPublisher(),
+            consent: $consent.eraseToAnyPublisher(),
+            permission: $permission.eraseToAnyPublisher()
         )
     }
     
@@ -86,6 +99,10 @@ public final class TabbarViewModel: BaseViewModel {
     
     private func handle(_ input: Input) async {
         switch input {
+        case .appear:
+            await checkConsent()
+        case .afterConsent:
+            await consentComplete()
         case .analysis:
             print("analysis 2")
             showAlert(
@@ -148,6 +165,8 @@ public final class TabbarViewModel: BaseViewModel {
                     }
                 ]
             )
+        case .permission:
+            await checkPermission()
         }
     }
     
@@ -250,6 +269,30 @@ public final class TabbarViewModel: BaseViewModel {
         
         _ = await self.createdAutoFolder(isPhoto: false) {
             self.locationFolderProgressRatio = $0
+        }
+    }
+    
+    private func checkConsent() async {
+        do {
+            self.consent = try await permissionUseCase.showConsent()
+        } catch {
+            print("checkConsent failed")
+        }
+    }
+    
+    private func consentComplete() async {
+        do {
+            try await permissionUseCase.completeConsent()
+        } catch {
+            print("consentComplete fail")
+        }
+    }
+    
+    private func checkPermission() async {
+        do {
+            self.permission = try await permissionUseCase.checkPermission()
+        } catch {
+            print("checkPermission failed")
         }
     }
 }

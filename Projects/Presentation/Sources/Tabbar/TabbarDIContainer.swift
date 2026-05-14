@@ -20,6 +20,11 @@ public final class TabbarDIContainer {
     
     func makeTabbarViewModel() -> TabbarViewModel {
         
+        let permissionUseCase = DefaultPermissionUseCase(
+            permissionRepository: appDiContainer.permissionRepository,
+            userDefaultRepository: appDiContainer.userDefaultRepository
+        )
+        
         let analysisUseCase = DefaultPhotoAnalysisUseCase(
             libraryRepository: appDiContainer.photoLibraryRepository,
             analysisRepository: appDiContainer.photoAnalysisRepository,
@@ -35,7 +40,8 @@ public final class TabbarDIContainer {
 //            travelRepository: appDiContainer.travelRepository
         )
         
-        return TabbarViewModel(analysisUseCase: analysisUseCase,
+        return TabbarViewModel(permissionUseCase: permissionUseCase,
+                               analysisUseCase: analysisUseCase,
                                autoFolderUseCase: autoFolderUseCase)
     }
     

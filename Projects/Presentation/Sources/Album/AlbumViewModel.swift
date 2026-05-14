@@ -23,11 +23,13 @@ public final class AlbumViewModel: BaseViewModel {
         case analysis
         case clear
         case selectItem(Folder)
+        case permission
     }
     
     public struct Output {
         let folders: AnyPublisher<[Folder], Never>
         let isLoading: AnyPublisher<Bool, Never>
+        let permission: AnyPublisher<PhotoPermission, Never>
     }
     
     @Published private var folders: [Folder] = []
@@ -65,7 +67,8 @@ public final class AlbumViewModel: BaseViewModel {
     public func transform() -> Output {
         return Output(
             folders: $folders.eraseToAnyPublisher(),
-            isLoading: $isLoading.eraseToAnyPublisher()
+            isLoading: $isLoading.eraseToAnyPublisher(),
+            permission: tabbarViewModel.transform().permission
         )
     }
     
@@ -80,6 +83,12 @@ public final class AlbumViewModel: BaseViewModel {
             Task { @MainActor in await self.handle(input) }
         }
         .store(in: &cancellables)
+        
+//        tabbarViewModel.transform().permission
+//            .sink { permission in
+//                self.permission = permission
+//            }
+//            .store(in: &cancellables)
     }
     
     private func handle(_ input: Input) async {
@@ -96,6 +105,8 @@ public final class AlbumViewModel: BaseViewModel {
         case .selectItem(let folder):
             print("!!!")
             self.onAction?(.moveDetail(folder: folder))
+        case .permission:
+            tabbarViewModel.send(.permission)
         }
     }
     

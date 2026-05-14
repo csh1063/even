@@ -27,15 +27,7 @@ final class ConsentViewController: UIViewController {
     private var isAllAgreed: Bool {
         isTermsAgreed && isPrivacyAgreed
     }
-
-    // MARK: - Colors
-    private let warmSand = UIColor(red: 0.784, green: 0.659, blue: 0.510, alpha: 1)   // #C8A882
-    private let dustyRose = UIColor(red: 0.627, green: 0.471, blue: 0.408, alpha: 1)  // #A07868
-    private let cream = UIColor(red: 0.980, green: 0.965, blue: 0.945, alpha: 1)      // #FAF6F1
-    private let ink = UIColor(red: 0.173, green: 0.141, blue: 0.125, alpha: 1)        // #2C2420
-    private let inkLight = UIColor(red: 0.420, green: 0.357, blue: 0.329, alpha: 1)   // #6B5B54
-    private let border = UIColor(red: 0.910, green: 0.867, blue: 0.835, alpha: 1)     // #E8DDD5
-
+    
     // MARK: - UI
     private let scrollView = UIScrollView()
     private let contentView = UIView()
@@ -46,24 +38,19 @@ final class ConsentViewController: UIViewController {
         return view
     }()
 
-    private lazy var logoMark: UIView = {
-        let view = UIView()
-        view.layer.cornerRadius = 16
-        view.clipsToBounds = true
-        let gradient = CAGradientLayer()
-        gradient.colors = [warmSand.cgColor, dustyRose.cgColor]
-        gradient.startPoint = CGPoint(x: 0, y: 0)
-        gradient.endPoint = CGPoint(x: 1, y: 1)
-        gradient.frame = CGRect(x: 0, y: 0, width: 64, height: 64)
-        view.layer.addSublayer(gradient)
-        return view
+    private lazy var logo: UIImageView = {
+        let image = UIImage(named: "icon", in: .module, with: nil)
+        let imageView = UIImageView(image: image)
+        imageView.layer.cornerRadius = 16
+        imageView.clipsToBounds = true
+        return imageView
     }()
 
     private lazy var appNameLabel: UILabel = {
         let label = UILabel()
         label.text = "모아"
-        label.font = UIFont(name: "NotoSerifKR-SemiBold", size: 22) ?? .systemFont(ofSize: 22, weight: .semibold)
-        label.textColor = ink
+        label.font = .systemFont(ofSize: 22, weight: .semibold)
+        label.textColor = Theme.textPrimary
         label.textAlignment = .center
         return label
     }()
@@ -72,7 +59,7 @@ final class ConsentViewController: UIViewController {
         let label = UILabel()
         label.text = "서비스 이용을 위해\n아래 내용에 동의해 주세요"
         label.font = .systemFont(ofSize: 17, weight: .medium)
-        label.textColor = ink
+        label.textColor = Theme.textPrimary
         label.textAlignment = .center
         label.numberOfLines = 2
         return label
@@ -82,14 +69,14 @@ final class ConsentViewController: UIViewController {
         let label = UILabel()
         label.text = "동의하지 않아도 일부 기능을 사용할 수 있습니다"
         label.font = .systemFont(ofSize: 13)
-        label.textColor = inkLight
+        label.textColor = Theme.textSecondary
         label.textAlignment = .center
         return label
     }()
 
     private lazy var allAgreeView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor(red: 0.961, green: 0.929, blue: 0.898, alpha: 1)
+        view.backgroundColor = Theme.surface
         view.layer.cornerRadius = 12
         return view
     }()
@@ -100,13 +87,13 @@ final class ConsentViewController: UIViewController {
         let label = UILabel()
         label.text = "전체 동의"
         label.font = .systemFont(ofSize: 15, weight: .semibold)
-        label.textColor = ink
+        label.textColor = Theme.textPrimary
         return label
     }()
 
     private lazy var divider: UIView = {
         let view = UIView()
-        view.backgroundColor = border
+        view.backgroundColor = Theme.strokeSoft
         return view
     }()
 
@@ -128,19 +115,10 @@ final class ConsentViewController: UIViewController {
         button.setTitle("확인", for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
         button.setTitleColor(.white, for: .normal)
-        button.backgroundColor = warmSand.withAlphaComponent(0.4)
+        button.backgroundColor = Theme.primary.withAlphaComponent(0.4)
         button.layer.cornerRadius = 14
         button.isEnabled = false
         button.addTarget(self, action: #selector(confirmTapped), for: .touchUpInside)
-        return button
-    }()
-
-    private lazy var skipButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("나중에 하기", for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 14)
-        button.setTitleColor(inkLight, for: .normal)
-        button.addTarget(self, action: #selector(skipTapped), for: .touchUpInside)
         return button
     }()
 
@@ -153,7 +131,7 @@ final class ConsentViewController: UIViewController {
 
     // MARK: - Setup
     private func setupUI() {
-        view.backgroundColor = cream
+        view.backgroundColor = Theme.background
 
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
@@ -169,7 +147,7 @@ final class ConsentViewController: UIViewController {
 
         // Logo
         contentView.addSubview(logoView)
-        logoView.addSubview(logoMark)
+        logoView.addSubview(logo)
         logoView.addSubview(appNameLabel)
 
         logoView.snp.makeConstraints {
@@ -177,14 +155,14 @@ final class ConsentViewController: UIViewController {
             $0.centerX.equalToSuperview()
         }
 
-        logoMark.snp.makeConstraints {
+        logo.snp.makeConstraints {
             $0.top.equalToSuperview()
             $0.centerX.equalToSuperview()
-            $0.width.height.equalTo(64)
+            $0.width.height.equalTo(200)
         }
 
         appNameLabel.snp.makeConstraints {
-            $0.top.equalTo(logoMark.snp.bottom).offset(10)
+            $0.top.equalTo(logo.snp.bottom).offset(10)
             $0.centerX.equalToSuperview()
             $0.bottom.equalToSuperview()
         }
@@ -274,12 +252,6 @@ final class ConsentViewController: UIViewController {
             $0.top.equalTo(allAgreeView.snp.bottom).offset(32)
             $0.leading.trailing.equalToSuperview().inset(20)
             $0.height.equalTo(54)
-        }
-
-        contentView.addSubview(skipButton)
-        skipButton.snp.makeConstraints {
-            $0.top.equalTo(confirmButton.snp.bottom).offset(12)
-            $0.centerX.equalToSuperview()
             $0.bottom.equalToSuperview().inset(24)
         }
 
@@ -314,7 +286,7 @@ final class ConsentViewController: UIViewController {
         let view = UIView()
         view.layer.cornerRadius = 6
         view.layer.borderWidth = 1.5
-        view.layer.borderColor = border.cgColor
+        view.layer.borderColor = Theme.strokeSoft.cgColor
         view.backgroundColor = .white
 
         let checkmark = UIImageView(image: UIImage(systemName: "checkmark"))
@@ -336,12 +308,12 @@ final class ConsentViewController: UIViewController {
         let titleLabel = UILabel()
         titleLabel.text = title
         titleLabel.font = .systemFont(ofSize: 13)
-        titleLabel.textColor = ink
+        titleLabel.textColor = Theme.textSecondary
 
         let linkButton = UIButton(type: .system)
         linkButton.setTitle(urlText, for: .normal)
         linkButton.titleLabel?.font = .systemFont(ofSize: 12)
-        linkButton.setTitleColor(inkLight, for: .normal)
+        linkButton.setTitleColor(Theme.textSecondary, for: .normal)
 
         container.addSubview(titleLabel)
         container.addSubview(linkButton)
@@ -362,11 +334,11 @@ final class ConsentViewController: UIViewController {
     // MARK: - Checkbox State
     private func setCheckbox(_ view: UIView, checked: Bool) {
         if checked {
-            view.backgroundColor = warmSand
-            view.layer.borderColor = warmSand.cgColor
+            view.backgroundColor = Theme.primary
+            view.layer.borderColor = Theme.strokeSoft.cgColor
         } else {
-            view.backgroundColor = .white
-            view.layer.borderColor = border.cgColor
+            view.backgroundColor = Theme.surface
+            view.layer.borderColor = Theme.strokeSoft.cgColor
         }
         view.subviews.first(where: { $0.tag == 99 })?.isHidden = !checked
     }
@@ -380,8 +352,8 @@ final class ConsentViewController: UIViewController {
         confirmButton.isEnabled = enabled
         UIView.animate(withDuration: 0.2) {
             self.confirmButton.backgroundColor = enabled
-                ? self.warmSand
-                : self.warmSand.withAlphaComponent(0.4)
+            ? Theme.primary
+            : Theme.primary.withAlphaComponent(0.4)
         }
     }
 
@@ -419,12 +391,9 @@ final class ConsentViewController: UIViewController {
     }
 
     @objc private func confirmTapped() {
-        UserDefaults.standard.set(true, forKey: "hasAgreedToTerms")
+//        UserDefaults.standard.set(true, forKey: "hasAgreedToTerms")
         onConsented?()
-    }
-
-    @objc private func skipTapped() {
-        onDismissed?()
+        self.dismiss(animated: true)
     }
 }
 

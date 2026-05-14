@@ -59,6 +59,10 @@ public final class RepositoryFactory {
         DefaultUserDefaultRepository(service: serviceFactory.userDefaultsService)
     }()
     
+    public lazy var permissionRepository: PermissionRepository = {
+        DefaultPermissionRepository(service: serviceFactory.permissionService)
+    }()
+    
 //    public lazy var travelRepository: TravelDetectionRepository = {
 //        DefaultTravelDetectionRepository()
 //    }()

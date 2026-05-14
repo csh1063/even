@@ -21,6 +21,7 @@ public final class PhotoLibraryViewModel: BaseViewModel {
     enum Input {
         case appear
         case refresh
+        case permission
         case selectItem(id: String)
     }
     
@@ -37,20 +38,23 @@ public final class PhotoLibraryViewModel: BaseViewModel {
     @Published private var totalCount: Int = 0
     @Published private var hasNext: Bool = false
     @Published private var errorMessage: String?
-    @Published private var photoPermission: PhotoPermission = .notDetermined
     
     private var photoDetails: [PhotoDetail] = []
     private var isRefresh: Bool = false
     
     private let input = PassthroughSubject<Input, Never>()
+    
+    private let tabbarViewModel: TabbarViewModel
     private let useCase: PhotoLibraryUseCase
     private let imageUseCase: PhotoImageUseCase
     private var cancellables = Set<AnyCancellable>()
     
     var onAction: ((PhotoLibraryViewModelAction) -> Void)?
     
-    public init(useCase: PhotoLibraryUseCase,
+    public init(tabbarViewModel: TabbarViewModel,
+                useCase: PhotoLibraryUseCase,
                 imageUseCase: PhotoImageUseCase) {
+        self.tabbarViewModel = tabbarViewModel
         self.useCase = useCase
         self.imageUseCase = imageUseCase
         
@@ -73,18 +77,13 @@ public final class PhotoLibraryViewModel: BaseViewModel {
             totalCount: $totalCount.eraseToAnyPublisher(),
             isLoading: $isLoading.eraseToAnyPublisher(),
             errorMessage: $errorMessage.eraseToAnyPublisher(),
-            photoPermission: $photoPermission.eraseToAnyPublisher()
+            photoPermission: tabbarViewModel.transform().permission
         )
     }
     
     func send(_ input: Input) {
         print("send", input)
         self.input.send(input)
-    }
-    
-    func checkPermission() async throws -> PhotoPermission {
-        self.photoPermission = try await self.useCase.checkPermission()
-        return self.photoPermission
     }
     
     func loadImage(id: String, size: CGSize) async -> UIImage? {
@@ -119,6 +118,8 @@ public final class PhotoLibraryViewModel: BaseViewModel {
         case .refresh:
             self.isRefresh = true
             await self.loadPhoto()
+        case .permission:
+            tabbarViewModel.send(.permission)
         case .selectItem(let id):
             if let index = self.photoDetails.firstIndex(where: {$0.id == id}) {
                 self.onAction?(.selectPhoto(self.photoDetails, index: index))

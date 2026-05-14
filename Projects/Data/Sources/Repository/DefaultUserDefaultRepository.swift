@@ -54,4 +54,20 @@ public final class DefaultUserDefaultRepository: UserDefaultRepository {
     public func fetchAutoNewAnalysis() async throws -> Bool? {
         service.bool(UserDefaultsKey.autoNewAnalysis)
     }
+    
+    public func saveOnboarding(isShown: Bool) async throws {
+        service.set(isShown, forK: UserDefaultsKey.showOnboarding)
+    }
+    
+    public func showOnboarding() async throws -> Bool {
+        service.bool(UserDefaultsKey.showOnboarding) ?? false
+    }
+    
+    public func saveConsent(isShown: Bool) async throws {
+        service.set(isShown, forK: UserDefaultsKey.showConsent)
+    }
+    
+    public func showConsent() async throws -> Bool {
+        service.bool(UserDefaultsKey.showConsent) ?? false
+    }
 }

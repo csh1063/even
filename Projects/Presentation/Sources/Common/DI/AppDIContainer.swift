@@ -20,6 +20,7 @@ public protocol AppDIContainer {
     var photoCategoryRepository: PhotoCategoryRepository {get}
     var geoRepository: GeoRepository {get}
     var userDefaultRepository: UserDefaultRepository {get}
+    var permissionRepository: PermissionRepository {get}
 //    var travelRepository: TravelDetectionRepository {get}
     
     func makeSplashViewModel() -> SplashViewModel

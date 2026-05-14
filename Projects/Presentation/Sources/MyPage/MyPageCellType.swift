@@ -75,7 +75,7 @@ enum MyPageCellType {
         case .privacy: return "person.2"
         case .openSource: return "ellipsis.curlybraces"
         case .photoPermission: return "photo.badge.checkmark"
-        case .displayMode: return "moon.fill"
+        case .displayMode: return "circle.lefthalf.filled.inverse"
         case .feedback: return "questionmark.circle"
         case .version: return "info.circle"
         case .labels: return "testtube.2"
@@ -101,7 +101,7 @@ enum MyPageCellType {
         case .privacy: return "개인 정보 처리 방침"
         case .openSource: return "오픈소스 라이선스"
         case .photoPermission: return "사진 접근 범위"
-        case .displayMode: return "다크 모드"
+        case .displayMode: return "디스플레이 모드"
         case .feedback: return "문의 / 피드백"
         case .version: return "앱 버전"
         case .labels: return "사진 라벨 목록"
@@ -122,13 +122,13 @@ enum MyPageCellType {
         switch self {
         case .allLibraryPhoto, .allPhoto, .unanalysisPhoto, .analyzedDate:
             return .info
-        case .analysis, .reAnalysis, .reset:
+        case .analysis, .reAnalysis, .reset, .displayMode:
             return .button
         case .locationAnalysis, .locationAutoFolder:
             return .info
         case .autoAnalysis, .continueLocation:
             return .toggle
-        case .terms, .privacy, .displayMode, .openSource, .feedback:
+        case .terms, .privacy,/* .displayMode,*/ .openSource, .feedback:
             return .open
         case .version, .photoPermission:
             return .link

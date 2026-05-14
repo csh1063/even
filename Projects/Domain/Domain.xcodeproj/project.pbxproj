@@ -14,6 +14,8 @@
 		196CB19B2FAB178700824005 /* TravelDetectionRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 196CB19A2FAB178700824005 /* TravelDetectionRepository.swift */; };
 		196CB1AA2FAD055A00824005 /* PhotoDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 196CB1A92FAD055A00824005 /* PhotoDetail.swift */; };
 		196CB1AC2FB0472600824005 /* ImageViewerUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 196CB1AB2FB0472500824005 /* ImageViewerUseCase.swift */; };
+		196CB1CA2FB4E55300824005 /* PermissionRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 196CB1C92FB4E55300824005 /* PermissionRepository.swift */; };
+		196CB1CE2FB4E92B00824005 /* PermissionUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 196CB1CD2FB4E92B00824005 /* PermissionUseCase.swift */; };
 		1D32E7B4A891C68E824A1F11 /* PhotoDataRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A738BCE2F1F1AEF9C6F0BB0 /* PhotoDataRepository.swift */; };
 		209A23984E931C57FD20AE16 /* PhotoRepositoryError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30EAF667B0530265E87C006C /* PhotoRepositoryError.swift */; };
 		21027B31EC06337CCD82FBBB /* ProgressFolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287561C66C690B7D25A1EB49 /* ProgressFolder.swift */; };
@@ -70,6 +72,8 @@
 		196CB19A2FAB178700824005 /* TravelDetectionRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TravelDetectionRepository.swift; sourceTree = "<group>"; };
 		196CB1A92FAD055A00824005 /* PhotoDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDetail.swift; sourceTree = "<group>"; };
 		196CB1AB2FB0472500824005 /* ImageViewerUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageViewerUseCase.swift; sourceTree = "<group>"; };
+		196CB1C92FB4E55300824005 /* PermissionRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionRepository.swift; sourceTree = "<group>"; };
+		196CB1CD2FB4E92B00824005 /* PermissionUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionUseCase.swift; sourceTree = "<group>"; };
 		1A738BCE2F1F1AEF9C6F0BB0 /* PhotoDataRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDataRepository.swift; sourceTree = "<group>"; };
 		1ABAD620DB6CE1F6BB3F5625 /* AutoFolderUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoFolderUseCase.swift; sourceTree = "<group>"; };
 		1E766E86BC730F636DD2C6E2 /* FolderRepositoryError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderRepositoryError.swift; sourceTree = "<group>"; };
@@ -136,6 +140,7 @@
 				EF4338B120DAA681FD44C489 /* PhotoLabelDataRepository.swift */,
 				6A1A054299145447B23B4DFA /* PhotoLibararyRepository.swift */,
 				E51FE95C693D88FAE7A47588 /* UserDefaultRepository.swift */,
+				196CB1C92FB4E55300824005 /* PermissionRepository.swift */,
 			);
 			path = Implement;
 			sourceTree = "<group>";
@@ -198,6 +203,7 @@
 				2AA0ABF39B6AA13A0CCF1D02 /* PhotoLabelUseCase.swift */,
 				B6E622A066C4FB9C9D7D2D5B /* PhotoLibraryUseCase.swift */,
 				3C4506CAFECDB17EE138CDBC /* PhotoTestUseCase.swift */,
+				196CB1CD2FB4E92B00824005 /* PermissionUseCase.swift */,
 			);
 			path = UseCase;
 			sourceTree = "<group>";
@@ -322,11 +328,13 @@
 				B7150B611AE3FFC1CE934E5A /* FolderDataRepository.swift in Sources */,
 				E8F50B837DAE2D6DCFAA644D /* GeoRepository.swift in Sources */,
 				B5400DE2CF879DE2D0CB097B /* PhotoAnalysisRepository.swift in Sources */,
+				196CB1CA2FB4E55300824005 /* PermissionRepository.swift in Sources */,
 				6B218BF80805B485ECDEF27E /* PhotoCategoryRepository.swift in Sources */,
 				1D32E7B4A891C68E824A1F11 /* PhotoDataRepository.swift in Sources */,
 				44005A011991E8A60BFEC6D6 /* PhotoLabelDataRepository.swift in Sources */,
 				A8DA2D60CCA77601209BD409 /* PhotoLibararyRepository.swift in Sources */,
 				57E124F15A80DDE741A7AF5A /* UserDefaultRepository.swift in Sources */,
+				196CB1CE2FB4E92B00824005 /* PermissionUseCase.swift in Sources */,
 				D113D03D51F072987EDF4B66 /* AutoFolderUseCase.swift in Sources */,
 				ADB72A9D2F74BA240F492FCC /* FolderDetailUseCase.swift in Sources */,
 				629A5A6D0E1DF5196A2AEA14 /* FolderUseCase.swift in Sources */,

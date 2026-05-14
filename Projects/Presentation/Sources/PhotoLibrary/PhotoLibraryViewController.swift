@@ -39,27 +39,28 @@ final class PhotoLibraryViewController: BaseViewController {
         super.viewDidLoad()
         
         self.setupView()
-        self.setupBindings()
-        self.checkPhotoPermission()
+        self.bindings()
+//        self.checkPhotoPermission()
         self.setupPinchGesture()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
+        self.viewModel.send(.permission)
     }
     
-    private func checkPhotoPermission() {
-        
-        Task {
-            let status = try await self.viewModel.checkPermission()
-            if status.access {
-                self.viewModel.send(.appear)
-            } else {
-                // 설정앱으로 유도
-            }
-        }
-    }
+//    private func checkPhotoPermission() {
+//        
+//        Task {
+//            let status = try await self.viewModel.checkPermission()
+//            if status.access {
+//                self.viewModel.send(.appear)
+//            } else {
+//                // 설정앱으로 유도
+//            }
+//        }
+//    }
     
     private func setupView() {
         
@@ -100,7 +101,7 @@ final class PhotoLibraryViewController: BaseViewController {
         refreshControl.endRefreshing()
     }
     
-    private func setupBindings() {
+    private func bindings() {
         let output = self.viewModel.transform()
         
         output.photos
@@ -118,6 +119,16 @@ final class PhotoLibraryViewController: BaseViewController {
                 self?.naviView.setMessage("사진 \(totalCount.formatted())장이 정렬되었습니다.",
                                           color: Theme.textSecondary,
                       font: .systemFont(ofSize: 14, weight: .regular))
+            }
+            .store(in: &cancellables)
+        
+        output.photoPermission
+            .sink { [weak self] permission in
+                if permission.access {
+                    self?.viewModel.send(.appear)
+                } else {
+                    print("// 설정앱으로 유도")
+                }
             }
             .store(in: &cancellables)
     }
