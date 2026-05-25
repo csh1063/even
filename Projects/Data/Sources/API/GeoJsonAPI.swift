@@ -6,11 +6,10 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
-
 import Foundation
 import Moya
 
-public enum GeoJsonAPI: BaseAPI {
+enum GeoJsonAPI: BaseAPI {
     
     case coordiToAddress([LocationParam])
     

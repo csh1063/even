@@ -8,14 +8,19 @@
 
 import UIKit
 import SnapKit
+import Combine
 
 final class OpenSourceViewController: UIViewController {
 
     // MARK: - Properties
     private let viewModel = OpenSourceViewModel()
     private var expandedIndexes: Set<Int> = []
+    
+    private var cancellables = Set<AnyCancellable>()
 
     // MARK: - UI
+    private var naviView: NaviBarView = NaviBarView()
+    
     private lazy var tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .plain)
         tableView.delegate = self
@@ -31,17 +36,36 @@ final class OpenSourceViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        binding()
     }
 
     // MARK: - Setup
     private func setupUI() {
         title = "오픈소스 라이선스"
         view.backgroundColor = Theme.background
+        
+        naviView.setTitle("오픈소스 라이선스")
+        naviView.addButtons([LeftButton(type: .back)])
 
         view.addSubview(tableView)
-        tableView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+        view.addSubview(naviView)
+        
+        naviView.snp.makeConstraints { make in
+            make.top.leading.trailing.equalToSuperview()
         }
+        
+        tableView.snp.makeConstraints { make in
+            make.top.equalTo(naviView.snp.bottom)
+            make.leading.trailing.bottom.equalToSuperview()
+        }
+    }
+    
+    private func binding() {
+        naviView.publisher
+            .sink { type in
+                self.navigationController?.popViewController(animated: true)
+            }
+            .store(in: &cancellables)
     }
 }
 

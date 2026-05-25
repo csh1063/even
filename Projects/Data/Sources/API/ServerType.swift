@@ -30,7 +30,7 @@ struct Server {
 ////        case .stage:
 //        default: return "http://127.0.0.1:3000"
 //        }
-        return "https://mock-serverless.vercel.app/api"
+        return "https://mock-serverless.vercel.app/api/moa"
 //        return "http://127.0.0.1:3000"
     }
 }

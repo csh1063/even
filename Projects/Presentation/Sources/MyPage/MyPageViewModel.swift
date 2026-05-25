@@ -71,6 +71,15 @@ final class MyPageViewModel: BaseViewModel {
             Task { @MainActor in await self.handle(input) }
         }
         .store(in: &cancellables)
+        
+        self.tabbarViewModel.transform()
+            .isCleared
+            .sink { isCleared in
+                if isCleared {
+                    self.send(.appear)
+                }
+            }
+            .store(in: &cancellables)
     }
     
     private func handle(_ input: Input) async {
@@ -86,6 +95,8 @@ final class MyPageViewModel: BaseViewModel {
             switch data.type {
             case .allLibraryPhoto, .allPhoto, .unanalysisPhoto, .analyzedDate: break
             case .analysis: tabbarViewModel.send(.analysis)
+            case .travelFolder: tabbarViewModel.send(.autoTravelFolder)
+            case .reAutoFolder: tabbarViewModel.send(.reAutoFolder)
             case .reAnalysis: tabbarViewModel.send(.reanalysis)
             case .reset: tabbarViewModel.send(.clear)
             case .locationAnalysis, .locationAutoFolder: break
@@ -104,48 +115,43 @@ final class MyPageViewModel: BaseViewModel {
                 )
             case .version: break
             case .displayMode:
-                await self.testDisplayMode()
+                await self.nextDisplayMode()
             default:
                 self.onAction?(.move(data))
             }
         }
     }
     
-    private func testDisplayMode() async {
+    func changeDisplayMode(_ mode: String) async {
         do {
-            let mode = try await myPageUseCase.nextDisplayMode()
+            let value = DisplayMode.from(mode).rawValue
+            try await myPageUseCase.changeDisplayMode(value)
             
             if let window = UIApplication.shared.connectedScenes
                 .compactMap({ $0 as? UIWindowScene })
                 .flatMap({ $0.windows })
                 .first(where: { $0.isKeyWindow }) {
                 
-                switch mode {
-                case "dark":
-                    window.overrideUserInterfaceStyle = .dark
-                case "light":
-                    window.overrideUserInterfaceStyle = .light
-                default:
-                    window.overrideUserInterfaceStyle = .unspecified
+                UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve) {
+                    window.overrideUserInterfaceStyle = DisplayMode(value).style
                 }
             }
             
-            switch mode {
-            case "light":
-                self.displayMode = "라이트"
-            case "dark":
-                self.displayMode = "다크"
-            default:
-                self.displayMode = "시스템 설정"
-            }
+            self.displayMode = DisplayMode(value).text
             self.cells()
         } catch  {
             print("error", error.localizedDescription)
         }
     }
     
+    private func nextDisplayMode() async {
+        let nextMode = DisplayMode.from(self.displayMode).next.text
+        await self.changeDisplayMode(nextMode)
+    }
+    
     private func loadAll() async {
         do {
+            self.isLoading = true
             async let count = myPageUseCase.photoCount()
             async let date = myPageUseCase.lastAnalyzeDate()
             async let unanalysis = myPageUseCase.photoUnanalysisCount()
@@ -164,15 +170,10 @@ final class MyPageViewModel: BaseViewModel {
                 self.photoPermission = "거부"
             }
             
-            switch try await displayMode {
-            case "light":
-                self.displayMode = "라이트"
-            case "dark":
-                self.displayMode = "다크"
-            default:
-                self.displayMode = "시스템 설정"
-            }
+            self.displayMode = DisplayMode(try await displayMode).text
             self.version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
+            
+            self.isLoading = false
             
             self.cells()
         } catch {
@@ -191,7 +192,9 @@ final class MyPageViewModel: BaseViewModel {
             [
                 MyCellData(type: .analyzedDate, value: analyzedDate),
                 MyCellData(type: .analysis),
-                MyCellData(type: .reAnalysis),
+                MyCellData(type: .travelFolder),
+                MyCellData(type: .reAutoFolder),
+//                MyCellData(type: .reAnalysis),
                 MyCellData(type: .reset)
             ]
         }
@@ -220,12 +223,12 @@ final class MyPageViewModel: BaseViewModel {
                 MyCellData(type: .displayMode, value: displayMode),
                 MyCellData(type: .feedback),
                 MyCellData(type: .version, value: version)
-            ]//,
-//            MyCellHeader(name: "실험실", order: 60): [
-//                MyCellData(type: .labels),
-//                MyCellData(type: .test),
-//                MyCellData(type: .addressCount)
-//            ]
+            ]
+            , MyCellHeader(name: "실험실", order: 60): [
+                MyCellData(type: .labels),
+                MyCellData(type: .test),
+                MyCellData(type: .addressCount)
+            ]
         ]
     }
     

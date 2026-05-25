@@ -11,9 +11,9 @@ import Domain
 
 public final class DefaultGeoRepository: GeoRepository {
     
-    private let service: GeoAddressService
+    private let service: NetworkService
     
-    public init(service: GeoAddressService) {
+    public init(service: NetworkService) {
         self.service = service
     }
     

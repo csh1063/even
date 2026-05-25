@@ -65,6 +65,10 @@ playground.xcworkspace
 *.hmap
 *.ipa
 
+# .gitignore
+*.mlpackage
+*.mlmodel
+
 # Tuist
 #
 Derived/

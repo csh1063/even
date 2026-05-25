@@ -76,8 +76,8 @@ final class AlbumViewController: BaseViewController {
                             color: Theme.textPrimary,
                             font: .systemFont(ofSize: 14, weight: .regular))
         
-        naviView.addButtons([RightButton(type: .reset),
-                             RightButton(type: .analysis)])
+//        naviView.addButtons([RightButton(type: .reset),
+//                             RightButton(type: .analysis)])
         
         collectionView.delegate = self
         

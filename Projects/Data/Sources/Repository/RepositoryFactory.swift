@@ -31,7 +31,8 @@ public final class RepositoryFactory {
             analysisService: serviceFactory.photoAnalysisService,
             libraryService: serviceFactory.photoLibraryService,
             geocoderService: serviceFactory.geocoderService,
-            geoAddressService: serviceFactory.geoAddressService
+            networkService: serviceFactory.networkService,
+            faceEmbeddingService: serviceFactory.faceEmbeddingService
         )
     }()
     
@@ -52,7 +53,7 @@ public final class RepositoryFactory {
     }()
     
     public lazy var geoRepository: GeoRepository = {
-        DefaultGeoRepository(service: serviceFactory.geoAddressService)
+        DefaultGeoRepository(service: serviceFactory.networkService)
     }()
     
     public lazy var userDefaultRepository: UserDefaultRepository = {
@@ -63,7 +64,23 @@ public final class RepositoryFactory {
         DefaultPermissionRepository(service: serviceFactory.permissionService)
     }()
     
-//    public lazy var travelRepository: TravelDetectionRepository = {
-//        DefaultTravelDetectionRepository()
-//    }()
+    public lazy var settingsRepository: SettingsRepository = {
+        DefaultSettingsRepository(service: serviceFactory.networkService)
+    }()
+    
+    public lazy var faceClusterRepository: FaceClusterRepository = {
+        DefaultFaceClusterRepository(
+            container: container,
+            clusterService: serviceFactory.faceClusterService)
+    }()
+    
+    public lazy var travelRepository: TravelDetectionRepository = {
+        DefaultTravelDetectionRepository(
+            geocoderService: serviceFactory.geocoderService
+        )
+    }()
+    
+    public lazy var homeZoneRepository: HomeZoneRepository = {
+        DefaultHomeZoneRepository(container: container)
+    }()
 }

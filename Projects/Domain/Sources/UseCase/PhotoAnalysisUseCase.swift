@@ -86,7 +86,7 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                                             longitude: koreaPhoto.longitude,
                                             isoCountryCode: address.isoCountryCode,
                                             address: address),
-                                        labels: [],
+//                                        labels: [],
                                         state: .progress(index/Double(total) / 2.0)
                                     )
                                 )
@@ -107,7 +107,7 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                         }
                         print("etcPhotos after", unique.count)
                         
-                        var totalSec = Double(unique.count) * 1.5
+                        var totalSec = Double(unique.count) * 1.2
                         print("totalSec", totalSec)
                         
                         for (_, photos) in unique {
@@ -131,12 +131,12 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                                             longitude: photo.longitude,
                                             isoCountryCode: address.isoCountryCode == "" ? "None":address.isoCountryCode,
                                             address: address),
-                                        labels: [],
+//                                        labels: [],
                                         state: .progress(index / Double(total))
                                     )
                                 )
                             }
-                            totalSec -= 1.5
+                            totalSec -= 1.2
                             
                             self.timeLog(sec: totalSec)
                         }
@@ -164,7 +164,7 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                     for try await progress in analysisStream {
                         try await dataRepository.saveAndUpdateLabels(
                             photo: progress.photo,
-                            labels: progress.labels
+                            labels: progress.photo.labels
                         )
                         continuation.yield(progress)
                     }

@@ -21,7 +21,10 @@ public protocol AppDIContainer {
     var geoRepository: GeoRepository {get}
     var userDefaultRepository: UserDefaultRepository {get}
     var permissionRepository: PermissionRepository {get}
-//    var travelRepository: TravelDetectionRepository {get}
+    var settingsRepository: SettingsRepository {get}
+    var travelRepository: TravelDetectionRepository {get}
+    var homeZoneRepository: HomeZoneRepository {get}
+    var faceClusterRepository: FaceClusterRepository {get}
     
     func makeSplashViewModel() -> SplashViewModel
     func makeMainViewModel() -> MainViewModel

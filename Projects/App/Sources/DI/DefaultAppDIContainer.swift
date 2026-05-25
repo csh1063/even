@@ -53,9 +53,21 @@ final class DefaultAppDIContainer: AppDIContainer {
         repositoryFactory.permissionRepository
     }
     
-//    var travelRepository: TravelDetectionRepository {
-//        repositoryFactory.travelRepository
-//    }
+    var settingsRepository: SettingsRepository {
+        repositoryFactory.settingsRepository
+    }
+    
+    var travelRepository: TravelDetectionRepository {
+        repositoryFactory.travelRepository
+    }
+    
+    var homeZoneRepository: HomeZoneRepository {
+        repositoryFactory.homeZoneRepository
+    }
+    
+    var faceClusterRepository: FaceClusterRepository {
+        repositoryFactory.faceClusterRepository
+    }
     
     private let providerFactory: ProviderFactory
     private lazy var executor: DefaultNetworkExecutor = {

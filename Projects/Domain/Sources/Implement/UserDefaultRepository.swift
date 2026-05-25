@@ -11,6 +11,7 @@ import Foundation
 public protocol UserDefaultRepository {
     func saveAnalyzedDate() async throws
     func fetchAnalyzedDate() async throws -> String
+    func resetAnalyzedDate() async throws
     func saveLocationAnalyzedDate() async throws
     func fetchLocationAnalyzedDate() async throws -> String
     func saveDisplayMode(_ mode: String) async throws

@@ -25,8 +25,8 @@ public final class ServiceFactory {
         self.executor = executor
     }
     
-    public lazy var geoAddressService: GeoAddressService = {
-        GeoAddressService(excuteor: self.executor)
+    public lazy var networkService: NetworkService = {
+        NetworkService(excuteor: self.executor)
     }()
     
     public var photoLibraryService: PhotoLibraryService = {
@@ -51,5 +51,13 @@ public final class ServiceFactory {
     
     public var userDefaultsService: UserDefaultsService = {
         UserDefaultsService()
+    }()
+    
+    public var faceEmbeddingService: FaceEmbeddingService = {
+        FaceEmbeddingService()
+    }()
+    
+    public var faceClusterService: FaceClusterService = {
+        FaceClusterService()
     }()
 }

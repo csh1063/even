@@ -18,7 +18,8 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
     private let analysisService: PhotoAnalysisService
     private let libraryService: PhotoLibraryService  // 이미지 로드용
     private let geocoderService: GeocoderService
-    private let geoAddressService: GeoAddressService
+    private let networkService: NetworkService
+    private let faceEmbeddingService: FaceEmbeddingService
     private let batchSize: Int
     
     // MARK: - Init
@@ -27,13 +28,15 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
         analysisService: PhotoAnalysisService,
         libraryService: PhotoLibraryService,
         geocoderService: GeocoderService,
-        geoAddressService: GeoAddressService,
+        networkService: NetworkService,
+        faceEmbeddingService: FaceEmbeddingService,
         batchSize: Int = 20
     ) {
         self.analysisService = analysisService
         self.libraryService = libraryService
         self.geocoderService = geocoderService
-        self.geoAddressService = geoAddressService
+        self.networkService = networkService
+        self.faceEmbeddingService = faceEmbeddingService
         self.batchSize = batchSize
     }
     
@@ -51,38 +54,65 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                     let batches = photos.chunked(into: batchSize)
                     
                     for batch in batches {
-                        try await withThrowingTaskGroup(of: (PhotoAssetEntity, [PhotoLabel]).self) { group in
+                        try await withThrowingTaskGroup(of: (Photo, [PhotoLabel]).self) { group in
                             for photo in batch {
                                 group.addTask {
                                     let photoId = photo.asset.localIdentifier
-                                    let labels = try await self.analyzeSingle(photoId: photoId)
-                                    return (photo, labels)
+                                    let (year, month): (String?, String?) = {
+                                        guard let date = photo.asset.creationDate else { return (nil, nil) }
+                                        let components = Calendar.current.dateComponents([.year, .month], from: date)
+                                        return (components.year.map { String($0) }, components.month.map { String($0) })
+                                    }()
+                                    
+                                    let labels: [PhotoLabel]
+                                    let embedding: [FaceEmbedding]
+                                    if let image = try? await self.loadImage(photoId: photoId) {
+                                        
+                                        labels = try await self.analysisService.analyze(image: image)
+                                        
+                                        if labels.contains(where: { $0.name == "people" }) {
+                                            embedding = await self.faceEmbeddingService.extractEmbeddings(from: image)
+                                        } else {
+                                            embedding = []
+                                        }
+                                    } else {
+                                        labels = []
+                                        embedding = []
+                                    }
+//                                    
+//                                    let labels = try await self.analyzeSingle(photoId: photoId)
+//                                    
+//                                    let embedding: [FaceEmbedding]
+//                                    if labels.contains(where: { $0.name == "people" }) {
+//                                        embedding = try await self.analyzeFaceEmbedding(photoId: photoId)
+//                                    } else {
+//                                        embedding = []
+//                                    }
+                                    
+                                    print("id: ", photo.asset.localIdentifier, "/ year: ", year ?? "?", ", month:",month ?? "?")
+                                    print("labels: ", (labels).map{ $0.name }.joined(separator: ", "))
+//                                    print("location: ", photo.asset.location?.coordinate ?? "")
+                                    let newPhoto = Photo(
+                                        localIdentifier: photo.asset.localIdentifier,
+                                        createdAt: photo.asset.creationDate ?? Date(),
+                                        latitude: photo.asset.location?.coordinate.latitude,
+                                        longitude: photo.asset.location?.coordinate.longitude,
+                                        year: year,
+                                        month: month,
+                                        labels: labels,
+                                        faceEmbedding: embedding
+                                    )
+                                    
+                                    return (newPhoto, labels)
                                 }
                             }
                             
-                            for try await (photo, labels) in group {
+                            for try await (photo, _) in group {
                                 completed += 1
                                 let progress = Double(Double(completed)/Double(total))
-                                let (year, month): (String?, String?) = {
-                                    guard let date = photo.asset.creationDate else { return (nil, nil) }
-                                    let components = Calendar.current.dateComponents([.year, .month], from: date)
-                                    return (components.year.map { String($0) }, components.month.map { String($0) })
-                                }()
-                                
-                                print("id: ", photo.asset.localIdentifier, "/ year: ", year ?? "?", ", month:",month ?? "?")
-                                print("labels: ", (labels).map{ $0.name }.joined(separator: ", "))
-                                print("location: ", photo.asset.location?.coordinate ?? "")
                                 continuation.yield(
                                     ProgressAnalysis(
-                                        photo: Photo(
-                                            localIdentifier: photo.asset.localIdentifier,
-                                            createdAt: photo.asset.creationDate ?? Date(),
-                                            latitude: photo.asset.location?.coordinate.latitude,
-                                            longitude: photo.asset.location?.coordinate.longitude,
-                                            year: year,
-                                            month: month
-                                        ),
-                                        labels: labels,
+                                        photo: photo,
                                         state: progress == 1 ? .completed:.progress(progress)
                                     )
                                 )
@@ -131,7 +161,6 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                             
                             address = try await self.geocoderService.fetchAddress(
                                 from: location,
-                                id: asset.localIdentifier,
                                 locale: Locale(identifier: "ko"))
 //                            print(
 //                                "id: ", asset.localIdentifier,
@@ -159,11 +188,11 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                                     isoCountryCode: address?.isoCountryCode,
                                     address: address,
                                     addressEn: addressEn),
-                                labels: [],
+//                                labels: [],
                                 state: progress == 1 ? .completed:.progress(progress)
                             )
                         )
-                        try await Task.sleep(nanoseconds: 1_500_000_000)
+                        try await Task.sleep(nanoseconds: 1_200_000_000)
                     }
                     
                     continuation.finish()
@@ -176,17 +205,24 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
     
     /// 단일 사진 분석
     public func analyzeSingle(photoId: String) async throws -> [PhotoLabel] {
-        guard let cgImage = try? await loadImage(photoId: photoId) else {
+        guard let cgImage = try? await loadImage(photoId: photoId, size: 224) else {
             return []
         }
         return try await self.analysisService.analyze(image: cgImage)
     }
     
+    public func analyzeFaceEmbedding(photoId: String) async throws -> [FaceEmbedding] {
+        guard let cgImage = try? await loadImage(photoId: photoId, size: 1024) else {
+            return []
+        }
+        return await self.faceEmbeddingService.extractEmbeddings(from: cgImage)
+    }
+    
     // MARK: - Private
-    private func loadImage(photoId: String) async throws -> CGImage? {
+    private func loadImage(photoId: String, size: CGFloat = 1024) async throws -> CGImage? {
         try await libraryService.loadImage(
             id: photoId,
-            type: .specialSize(CGSize(width: 224, height: 224))
+            type: .specialSize(CGSize(width: size, height: size))
         )
     }
     

@@ -36,8 +36,10 @@ public final class TabbarDIContainer {
             photoDataRepository: appDiContainer.photoDataRepository,
             folderDataRepository: appDiContainer.folderDataRepository,
             photoCategoryRepository: appDiContainer.photoCategoryRepository,
-            userDefaultRepository: appDiContainer.userDefaultRepository//,
-//            travelRepository: appDiContainer.travelRepository
+            userDefaultRepository: appDiContainer.userDefaultRepository,
+            travelRepository: appDiContainer.travelRepository,
+            homeZoneRepository: appDiContainer.homeZoneRepository,
+            faceClusterRepository: appDiContainer.faceClusterRepository
         )
         
         return TabbarViewModel(permissionUseCase: permissionUseCase,

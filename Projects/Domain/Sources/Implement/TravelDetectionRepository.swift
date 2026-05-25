@@ -9,5 +9,6 @@
 
 
 public protocol TravelDetectionRepository {
-    func detect(from photos: [PhotoLocationSnapshot]) -> [TravelCluster]
+//    func detect(from photos: [PhotoLocationSnapshot]) async throws -> [TravelCluster]
+    func detect(from photos: [PhotoLocationSnapshot], homeZones: [HomeZone]) async throws -> [TravelCluster]
 }

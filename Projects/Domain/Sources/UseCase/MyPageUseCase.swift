@@ -14,6 +14,7 @@ public protocol MyPageUseCase {
     func photoUnanalysisCount() async throws -> Int
     func checkPermission() async throws -> PhotoPermission
     func getDisplayMode() async throws -> String
+    func changeDisplayMode(_ mode: String) async throws
     func nextDisplayMode() async throws -> String
 }
 
@@ -51,6 +52,10 @@ public final class DefaultMyPageUseCase: MyPageUseCase {
     
     public func getDisplayMode() async throws -> String {
         try await userDefaultRepository.fetchDisplayMode()
+    }
+    
+    public func changeDisplayMode(_ mode: String) async throws {
+        try await userDefaultRepository.saveDisplayMode(mode)
     }
     
     public func nextDisplayMode() async throws -> String {

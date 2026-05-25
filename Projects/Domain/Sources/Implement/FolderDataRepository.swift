@@ -20,7 +20,7 @@ public protocol FolderDataRepository {
     func updateFolder(folder: Folder) throws
     func updateFolderName(new name: String, id: UUID) throws
     func delete(id: UUID) throws
-    func deleteAutoFolders() throws  // 자동 폴더만 삭제
+    func deleteAutoFolders(by from: String) throws  // 자동 폴더만 삭제
     func addPhoto(folderId: UUID, photoIdentifier: String) throws
     func addPhotos(folderId: UUID, photoIdentifiers: [String]) throws
     func removePhoto(folderId: UUID, photoIdentifier: String) throws
@@ -32,5 +32,9 @@ public protocol FolderDataRepository {
 extension FolderDataRepository {
     func saveFolder(folder: Folder, returnExist: Bool = false) throws -> Folder? {
         try self.saveFolder(folder: folder, returnExist: returnExist)
+    }
+    
+    func deleteAutoFolders(by from: String = "all") throws {
+        try self.deleteAutoFolders(by: from)
     }
 }

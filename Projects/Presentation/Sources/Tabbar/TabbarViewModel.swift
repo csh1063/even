@@ -26,6 +26,8 @@ public final class TabbarViewModel: BaseViewModel {
     
     enum Input {
         case analysis
+        case autoTravelFolder
+        case reAutoFolder
         case reanalysis
         case clear
         case permission
@@ -43,6 +45,7 @@ public final class TabbarViewModel: BaseViewModel {
         let onboarding: AnyPublisher<Bool?, Never>
         let consent: AnyPublisher<Bool?, Never>
         let permission: AnyPublisher<PhotoPermission, Never>
+        let isCleared: AnyPublisher<Bool, Never>
     }
     
     @Published private var progressRatio: Double = 0
@@ -50,6 +53,7 @@ public final class TabbarViewModel: BaseViewModel {
     @Published private var locationProgressRatio: Double = 0
     @Published private var locationFolderProgressRatio: Double = 0
     @Published private var isAnalyzing : Bool = false
+    @Published private var isCleared: Bool = false
     @Published private var onboarding: Bool?
     @Published private var consent: Bool?
     @Published private var permission: PhotoPermission = .notDetermined
@@ -86,7 +90,8 @@ public final class TabbarViewModel: BaseViewModel {
             locationFolderProgress: $locationFolderProgressRatio.eraseToAnyPublisher(),
             onboarding: $onboarding.eraseToAnyPublisher(),
             consent: $consent.eraseToAnyPublisher(),
-            permission: $permission.eraseToAnyPublisher()
+            permission: $permission.eraseToAnyPublisher(),
+            isCleared: $isCleared.eraseToAnyPublisher()
         )
     }
     
@@ -139,8 +144,58 @@ public final class TabbarViewModel: BaseViewModel {
                                 locationFolderProgress: self.$locationFolderProgressRatio.eraseToAnyPublisher()
                             )))
 //                            self.isLoading = true
+                            print("start date!!!:", Date())
                             await self.analysis()
 //                            self.isLoading = false
+                            print("end date!!!:", Date())
+                        }
+                    }
+                ]
+            )
+        case .autoTravelFolder:
+            print("autoTravelFolder")
+            showAlert(
+                title: "여행 사진",
+                message: "여행 앨범을 만들어 볼까요",
+                buttons: [
+                    AlertButtonConfig(title: "취소", style: .cancel, action: nil),
+                    AlertButtonConfig(title: "만들어줘", style: .default) { [weak self] in
+                        Task {
+                            guard let self else {return}
+//                            self.isLoading = true
+                            print("start date!!!:", Date())
+                            await self.createTravelAutoFolder()
+//                            self.isLoading = false
+                            print("end date!!!:", Date())
+                        }
+                    }
+                ]
+            )
+        case .reAutoFolder:
+            showAlert(
+                title: "자동 폴더 재생성",
+                message: "자동 생서된 앨범들을\n삭제 후 다시 생성합니다.\n다시 생성할까요?",
+                buttons: [
+                    AlertButtonConfig(title: "취소", style: .cancel, action: nil),
+                    AlertButtonConfig(title: "재분석하기", style: .default) { [weak self] in
+                        Task {
+                            guard let self else {return}
+                            self.isLoading = true
+                            await self.folderClear()
+                            self.isLoading = false
+                            
+                            self.onAction?(.progressSheet(AnalyzeProgress(
+                                photoProgress: self.$progressRatio.eraseToAnyPublisher(),
+                                folderProgress: self.$autoFolderProgressRatio.eraseToAnyPublisher(),
+                                locationProgress: self.$locationProgressRatio.eraseToAnyPublisher(),
+                                locationFolderProgress: self.$locationFolderProgressRatio.eraseToAnyPublisher()
+                            )))
+                            
+                            self.progressRatio = 1.0
+                            
+                            _ = await self.createdAutoFolder(isPhoto: true) {
+                                self.autoFolderProgressRatio = $0
+                            }
                         }
                     }
                 ]
@@ -217,9 +272,39 @@ public final class TabbarViewModel: BaseViewModel {
         }
     }
     
+    private func createTravelAutoFolder() async {
+        do {
+            self.isLoading = true
+            
+            for try await progress in autoFolderUseCase.createTravelAutoFolder() {
+                await MainActor.run {
+                    if case .completed = progress.step {
+                        self.isLoading = false
+                    }
+                }
+            }
+        } catch {
+            self.isLoading = false
+        }
+    }
+    
     private func clear() async {
         do {
+            self.isCleared = false
             try await self.autoFolderUseCase.deletePhotos()
+            self.isCleared = true
+        } catch {
+            print("error", error.localizedDescription)
+        }
+    }
+    
+    private func folderClear() async {
+        do {
+            self.isCleared = false
+            print("delete all folder")
+            try await self.autoFolderUseCase.deleteAutoFolders()
+            print("deleted all folder")
+            self.isCleared = true
         } catch {
             print("error", error.localizedDescription)
         }

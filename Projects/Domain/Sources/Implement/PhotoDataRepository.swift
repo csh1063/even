@@ -15,6 +15,7 @@ public protocol PhotoDataRepository {
     func fetchAll(page: Int, pageSize: Int) throws -> [Photo]
     func fetchPhotoCount() throws -> Int
     func fetchIds(page: Int, pageSize: Int) throws -> [String]
+    func fetchHasCoordinators() throws -> [Photo]
     func fetchAnalyzed() throws -> [String]
     func fetchLocationUnanalyzed() throws -> [Photo]
     func fetchUnanalyzed() throws -> [Photo]

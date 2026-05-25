@@ -33,6 +33,9 @@ public final class PhotoEntity {
     @Relationship(deleteRule: .cascade)
     public var labels: [PhotoLabelEntity] = []
     
+    @Relationship(deleteRule: .cascade)
+    public var faceEmbeddings: [FaceEmbeddingEntity] = []
+    
     @Relationship(deleteRule: .nullify, inverse: \FolderEntity.photos)
     public var folders: [FolderEntity] = []
     

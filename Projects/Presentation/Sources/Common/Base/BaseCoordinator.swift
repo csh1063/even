@@ -13,9 +13,9 @@ import Combine
 @MainActor
 open class BaseCoordinator: NSObject {
     
-    public var viewController: UIViewController?
-    public var hideTabBar: (() -> Void)?
-    public var showTabBar: (() -> Void)?
+    var viewController: UIViewController?
+    var hideTabBar: (() -> Void)?
+    var showTabBar: (() -> Void)?
     
     private var childCoordinators: [BaseCoordinator] = []
     

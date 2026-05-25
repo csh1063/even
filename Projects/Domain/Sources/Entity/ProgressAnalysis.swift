@@ -8,12 +8,15 @@
 
 public struct ProgressAnalysis {
     public let photo: Photo
-    public let labels: [PhotoLabel]
+//    public let labels: [PhotoLabel]
     public let state: ProgressState
     
-    public init(photo: Photo, labels: [PhotoLabel], state: ProgressState) {
+    public init(
+        photo: Photo,
+//        labels: [PhotoLabel],
+        state: ProgressState) {
         self.photo = photo
-        self.labels = labels
+//        self.labels = labels
         self.state = state
     }
 }

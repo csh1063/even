@@ -36,6 +36,7 @@ public struct Photo: Hashable {
     public var month: String?
     
     public var labels: [PhotoLabel]
+    public var faceEmbedding: [FaceEmbedding]
     
     public init(
         id: UUID = UUID(),
@@ -49,7 +50,8 @@ public struct Photo: Hashable {
         addressEn: PhotoLocation? = nil,
         year: String? = nil,
         month: String? = nil,
-        labels: [PhotoLabel] = []
+        labels: [PhotoLabel] = [],
+        faceEmbedding: [FaceEmbedding] = []
     ) {
         self.id = id
         self.localIdentifier = localIdentifier
@@ -63,6 +65,7 @@ public struct Photo: Hashable {
         self.year = year
         self.month = month
         self.labels = labels
+        self.faceEmbedding = faceEmbedding
     }
     
     public static func == (lhs: Photo, rhs: Photo) -> Bool {

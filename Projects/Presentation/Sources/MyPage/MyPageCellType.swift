@@ -6,6 +6,49 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
+import UIKit
+
+enum DisplayMode: String, CaseIterable {
+    case system
+    case light
+    case dark
+    
+    init(_ key: String) {
+        self = DisplayMode(rawValue: key) ?? .system
+    }
+    
+    static func from(_ text: String) -> DisplayMode {
+        DisplayMode.allCases.first { $0.text == text } ?? .system
+    }
+    
+    var text: String {
+        switch self {
+        case .light: return "라이트"
+        case .dark: return "다크"
+        default: return "시스템"
+        }
+    }
+    
+    var style: UIUserInterfaceStyle {
+        switch self {
+        case .light: return .light
+        case .dark: return .dark
+        default: return .unspecified
+        }
+    }
+    
+    var next: DisplayMode {
+        switch self {
+        case .system:
+            return .light
+        case .light:
+            return .dark
+        case .dark:
+            return .system
+        }
+    }
+}
+
 enum MyPageCellStyle {
     case info
     case open // chevron.right
@@ -32,6 +75,8 @@ enum MyPageCellType {
     // analysis
     case analyzedDate
     case analysis
+    case travelFolder
+    case reAutoFolder
     case reAnalysis
     case reset
     
@@ -65,6 +110,8 @@ enum MyPageCellType {
         case .unanalysisPhoto: return "lasso.badge.sparkles"
         case .analyzedDate: return "clock.arrow.circlepath"
         case .analysis: return "sparkles"
+        case .travelFolder: return "globe.desk"
+        case .reAutoFolder: return "arrow.clockwise"
         case .reAnalysis: return "arrow.clockwise"
         case .reset: return "eraser"
         case .locationAnalysis: return "location.fill.viewfinder"
@@ -91,6 +138,8 @@ enum MyPageCellType {
         case .unanalysisPhoto: return "미분석 사진 수"
         case .analyzedDate: return "최근 분석"
         case .analysis: return "분석하기"
+        case .travelFolder: return "여행 폴더 만들기"
+        case .reAutoFolder: return "자동 폴더 재생성"
         case .reAnalysis: return "처음부터 분석하기"
         case .reset: return "분석 정보 삭제하기"
         case .locationAnalysis: return "사진 좌표를 주소로 변환"
@@ -122,13 +171,13 @@ enum MyPageCellType {
         switch self {
         case .allLibraryPhoto, .allPhoto, .unanalysisPhoto, .analyzedDate:
             return .info
-        case .analysis, .reAnalysis, .reset, .displayMode:
+        case .analysis, .travelFolder, .reAnalysis, .reset, .displayMode, .reAutoFolder:
             return .button
         case .locationAnalysis, .locationAutoFolder:
             return .info
         case .autoAnalysis, .continueLocation:
             return .toggle
-        case .terms, .privacy,/* .displayMode,*/ .openSource, .feedback:
+        case .terms, .privacy/*, .displayMode*/, .openSource, .feedback:
             return .open
         case .version, .photoPermission:
             return .link

@@ -16,7 +16,6 @@ final class ImageViewerViewController: UIViewController {
     private let viewModel: ImageViewerViewModel
     private var showOverlay = true
     private var cancellables = Set<AnyCancellable>()
-    private let pageChangedSubject = PassthroughSubject<Int, Never>()
     private var currentIndex: Int
     private var beganY: CGFloat = 0
 
@@ -69,6 +68,14 @@ final class ImageViewerViewController: UIViewController {
         label.font = .systemFont(ofSize: 14, weight: .regular)
         return label
     }()
+    
+    private let label: UILabel = {
+        let label = UILabel()
+        label.numberOfLines = 0
+        label.font = UIFont.systemFont(ofSize: 16)
+        label.textColor = .white
+        return label
+    }()
 
     init(viewModel: ImageViewerViewModel) {
         self.viewModel = viewModel
@@ -84,6 +91,8 @@ final class ImageViewerViewController: UIViewController {
         view.backgroundColor = Theme.viewerBackground
         setupViews()
         bind()
+        
+        self.viewModel.send(.pageChanged(self.currentIndex))
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -137,6 +146,12 @@ final class ImageViewerViewController: UIViewController {
             make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-8)
             make.height.equalTo(96)
         }
+        
+        view.addSubview(label)
+        label.snp.makeConstraints { make in
+            make.top.equalTo(100)
+            make.leading.trailing.equalToSuperview().inset(20)
+        }
     }
 
     private func scrollToInitialIndex() {
@@ -152,7 +167,9 @@ final class ImageViewerViewController: UIViewController {
         output.currentPhoto
             .receive(on: DispatchQueue.main)
             .sink { [weak self] photoDetail in
-                self?.updateInfo(with: photoDetail)
+                if let photoDetail {
+                    self?.updateInfo(with: photoDetail)
+                }
             }
             .store(in: &cancellables)
         
@@ -222,6 +239,7 @@ final class ImageViewerViewController: UIViewController {
 //            albumBadgeLabel.text = "연결된 앨범 2개"
             
             let components = [photo.country, photo.administrativeArea, photo.locality].compactMap { $0 }
+            print("photo address", photo.address)
             
             if components.isEmpty {
                 locationIcon.image = UIImage(systemName: "location.slash")
@@ -234,6 +252,10 @@ final class ImageViewerViewController: UIViewController {
                 locationLabel.text = components.joined(separator: " ")
                 locationLabel.textColor = .white.withAlphaComponent(0.92)
             }
+            
+            print("labels", photoDetail.labels.map {$0.name}.joined(separator: ", ")
+)
+            label.text = photoDetail.labels.map {$0.name}.joined(separator: ", ")
         } else {
             albumBadge.isHidden = false
             albumBadgeLabel.text = "미분석"
@@ -316,7 +338,6 @@ extension ImageViewerViewController: UICollectionViewDelegateFlowLayout {
         let page = Int(scrollView.contentOffset.x / scrollView.bounds.width)
         guard page != currentIndex else { return }
         currentIndex = page
-        pageChangedSubject.send(page)
         viewModel.send(.pageChanged(page))
     }
 }

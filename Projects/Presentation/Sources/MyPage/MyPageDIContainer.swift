@@ -28,6 +28,14 @@ public final class MyPageDIContainer {
 
         return MyPageViewModel(tabbarViewModel: tabbarViewModel, myPageUseCase: useCase)
     }
+    
+    func makeFeedbackViewModel() -> FeedbackViewModel {
+        let useCase = DefaultFeedbackUseCase(
+            repository: appDIContainer.settingsRepository
+        )
+        
+        return FeedbackViewModel(useCase: useCase)
+    }
 
     func makeLabelsDIContainer(isLabel: Bool) -> LabelsDIContainer {
         LabelsDIContainer(

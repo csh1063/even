@@ -27,12 +27,13 @@ final class ImageViewerViewModel: BaseViewModel {
     }
 
     struct Output {
-        let currentPhoto: AnyPublisher<PhotoDetail, Never>
+        let currentIndex: AnyPublisher<Int, Never>
+        let currentPhoto: AnyPublisher<PhotoDetail?, Never>
     }
 
     // MARK: - Properties
     @Published var currentIndex: Int
-    @Published private var currentPhoto: PhotoDetail
+    @Published private var currentPhoto: PhotoDetail?
     let photoDetails: [PhotoDetail]
     
     let input = PassthroughSubject<Input, Never>()
@@ -49,7 +50,6 @@ final class ImageViewerViewModel: BaseViewModel {
         self.photoDetails = photoDetails
         self.imageUseCase = imageUseCase
         self.currentIndex = initialIndex
-        self.currentPhoto = photoDetails[initialIndex]
         
         super.init()
         
@@ -67,11 +67,7 @@ final class ImageViewerViewModel: BaseViewModel {
     private func handle(_ input: Input) async {
         switch input {
         case .pageChanged(let index):
-            self.currentIndex = index
-            let detail = photoDetails[index]
-            self.currentPhoto = detail
-            await self.loadLabels(by: detail.id)
-            self.onAction?(.pageChanged(detail.id))
+            await self.setCurrentPhoto(index: index)
         }
     }
     
@@ -80,7 +76,10 @@ final class ImageViewerViewModel: BaseViewModel {
     }
 
     func transform() -> Output {
-        return Output(currentPhoto: $currentPhoto.eraseToAnyPublisher())
+        return Output(
+            currentIndex: $currentIndex.eraseToAnyPublisher(),
+            currentPhoto: $currentPhoto.eraseToAnyPublisher()
+        )
     }
     
     func loadImage(for index: Int, size: CGSize) async -> UIImage? {
@@ -112,10 +111,18 @@ final class ImageViewerViewModel: BaseViewModel {
     private func loadLabels(by id: String) async {
         do {
             let labels = try await imageUseCase.getLabels(by: id)
-            self.currentPhoto.labels = labels
+            self.currentPhoto?.labels = labels
         } catch {
             print("error", error.localizedDescription)
         }
+    }
+    
+    private func setCurrentPhoto(index: Int) async {
+        self.currentIndex = index
+        let detail = photoDetails[index]
+        self.currentPhoto = detail
+        await self.loadLabels(by: detail.id)
+        self.onAction?(.pageChanged(detail.id))
     }
 }
 

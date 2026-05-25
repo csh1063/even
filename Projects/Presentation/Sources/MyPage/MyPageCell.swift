@@ -286,6 +286,9 @@ final class MyPageCell: UITableViewCell {
             switchView.isHidden = true
             valueLabel.isHidden = false
             styleIconView.isHidden = true
+            valueLabel.snp.updateConstraints { make in
+                make.trailing.equalTo(boxView).offset(-14)
+            }
             
             if data.isPrimary {
                 titleLabel.textColor = Theme.primary

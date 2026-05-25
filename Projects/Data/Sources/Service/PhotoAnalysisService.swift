@@ -10,10 +10,10 @@ import Domain
 import Vision
 import CoreGraphics
 
-public final class PhotoAnalysisService {
+public final class PhotoAnalysisService { // : @unchecked Sendable {
     
     private var removeKeywords: [String] = {
-        let bundle = Bundle(for: PhotoCategoryService.self)
+        let bundle = Bundle.module
         guard let url = bundle.url(forResource: "RemoveKeywords", withExtension: "json"),
               let data = try? Data(contentsOf: url),
               let array = try? JSONDecoder().decode([String].self, from: data)
@@ -57,7 +57,7 @@ public final class PhotoAnalysisService {
                         continuation.resume(returning: [])
                         return
                     }
-                    print("removeKeywords", removeKeywords)
+
                     let labels = results
                         .filter { $0.confidence >= 0.3 }
                         .filter {
@@ -87,17 +87,18 @@ public final class PhotoAnalysisService {
                 do {
                     try handler.perform([request])
                     
-                    guard let results = request.results,
-                          !results.isEmpty else {
+                    let filter = request.results?
+//                        .filter { $0.faceCaptureQuality ?? 0 >= 0.3 }
+                        .filter { $0.boundingBox.width >= 0.05 && $0.boundingBox.height >= 0.05 }
+                    
+                    guard let results = filter, !results.isEmpty else {
                         continuation.resume(returning: [])
                         return
                     }
-                    
-                    let label = "people"
+
 //                    let label = results.count > 1 ? "people_group" : "people"
                     continuation.resume(returning: [
-                        PhotoLabel(name: label, confidence: 1.0),
-                        PhotoLabel(name: "portrait", confidence: 1.0)
+                        PhotoLabel(name: "people", confidence: 1.0)
                     ])
                 } catch {
                     print("Vision detectFace 에러:", error)

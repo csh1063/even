@@ -1,5 +1,4 @@
-{
-    [
+[
         "structure", "material", "land", "liquid", "textile", "conveyance",
         "portal", "raw_glass", "wood_processed", "wood_natural", "foliage",
         "shrub", "branch", "vegetation", "daytime", "haze", "celestial_body",
@@ -27,4 +26,4 @@
         "adult_cat", "train_real", "shellfish_prepared",
         "flower_arrangement", "water_body", "blue_sky"
     ]
-}
+

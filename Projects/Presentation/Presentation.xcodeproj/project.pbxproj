@@ -256,6 +256,8 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		1946CAA72FB71BE60038B256 /* OptionPicker */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = OptionPicker; sourceTree = "<group>"; };
+		1946CAAA2FB8E14B0038B256 /* Feedback */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Feedback; sourceTree = "<group>"; };
 		196CB1A02FABB73C00824005 /* ImageViewer */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = ImageViewer; sourceTree = "<group>"; };
 		196CB1AD2FB1ED4C00824005 /* OpenSource */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = OpenSource; sourceTree = "<group>"; };
 		196CB1B62FB1FFA700824005 /* Consent */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Consent; sourceTree = "<group>"; };
@@ -452,6 +454,8 @@
 		ACFC6E8F6D299B22A1D9900B /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				1946CAAA2FB8E14B0038B256 /* Feedback */,
+				1946CAA72FB71BE60038B256 /* OptionPicker */,
 				196CB1BE2FB32C9300824005 /* OnBoard */,
 				196CB1B92FB238AB00824005 /* Web */,
 				196CB1B62FB1FFA700824005 /* Consent */,
@@ -692,6 +696,8 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				1946CAA72FB71BE60038B256 /* OptionPicker */,
+				1946CAAA2FB8E14B0038B256 /* Feedback */,
 				196CB1A02FABB73C00824005 /* ImageViewer */,
 				196CB1AD2FB1ED4C00824005 /* OpenSource */,
 				196CB1B62FB1FFA700824005 /* Consent */,

@@ -93,6 +93,20 @@ public final class DefaultPhotoDataRepository: PhotoDataRepository {
                 }
             }
             
+            let faceEmbeddings = photo.faceEmbedding
+            if photo.faceEmbedding.count > 0 {
+                
+                entity.faceEmbeddings.forEach { context.delete($0) }
+                
+                faceEmbeddings.forEach {
+                    let labelEntity = FaceEmbeddingEntity.from(
+                        domain: $0,
+                        photo: entity
+                    )
+                    context.insert(labelEntity)
+                }
+            }
+            
             entity.analyzedAt = Date()
             try context.save()
         }.value
@@ -154,6 +168,14 @@ public final class DefaultPhotoDataRepository: PhotoDataRepository {
             predicate: #Predicate { $0.analyzedAt != nil }
         )
         return try context.fetch(fetchDescriptor).map { $0.localIdentifier }
+    }
+    
+    public func fetchHasCoordinators() throws -> [Photo] {
+        let context = ModelContext(container)
+        let fetchDescriptor = FetchDescriptor<PhotoEntity>(
+            predicate: #Predicate { $0.longitude != nil && $0.latitude != nil }
+        )
+        return try context.fetch(fetchDescriptor).map { $0.toDomain() }
     }
     
     public func fetchLocationUnanalyzed() throws -> [Photo] {

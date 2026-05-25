@@ -6,13 +6,15 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
-
+import CoreLocation
 import Foundation
 
 public protocol AutoFolderUseCase {
     func execute(_ isPhoto: Bool) -> AsyncThrowingStream<ProgressFolder, Error>
+    func createTravelAutoFolder() -> AsyncThrowingStream<ProgressFolder, Error>
     func syncPhotoCount() async throws
     func deletePhotos() async throws
+    func deleteAutoFolders() async throws
 }
 
 public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
@@ -21,7 +23,13 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
     private let folderDataRepository: FolderDataRepository
     private let photoCategoryRepository: PhotoCategoryRepository
     private let userDefaultRepository: UserDefaultRepository
-//    private let travelRepository: TravelDetectionRepository
+    private let travelRepository: TravelDetectionRepository
+    private let homeZoneRepository: HomeZoneRepository
+    private let faceClusterRepository: FaceClusterRepository
+    
+    private let reanalyzePeriod: TimeInterval = 90 * 24 * 60 * 60  // 3개월
+    private let gridSize: Double = 50                               // 10km
+    private let maxHomeZones: Int = 5
     
     // 폴더 생성 최소 비율
     private let threshold: Double = 0.05
@@ -30,14 +38,18 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
         photoDataRepository: PhotoDataRepository,
         folderDataRepository: FolderDataRepository,
         photoCategoryRepository: PhotoCategoryRepository,
-        userDefaultRepository: UserDefaultRepository//,
-//        travelRepository: TravelDetectionRepository
+        userDefaultRepository: UserDefaultRepository,
+        travelRepository: TravelDetectionRepository,
+        homeZoneRepository: HomeZoneRepository,
+        faceClusterRepository: FaceClusterRepository
     ) {
         self.photoDataRepository = photoDataRepository
         self.folderDataRepository = folderDataRepository
         self.photoCategoryRepository = photoCategoryRepository
         self.userDefaultRepository = userDefaultRepository
-//        self.travelRepository = travelRepository
+        self.travelRepository = travelRepository
+        self.homeZoneRepository = homeZoneRepository
+        self.faceClusterRepository = faceClusterRepository
     }
     
     public func execute(_ isPhoto: Bool) -> AsyncThrowingStream<ProgressFolder, Error> {
@@ -53,7 +65,7 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
                     var folders: [Folder] = try folderDataRepository.fetchAutoAll()
                     var folderPhotoMap: [UUID: [String]] = [:]
 
-//                    var allPhotosForTravel: [PhotoLocationSnapshot] = []
+                    var allPhotosForTravel: [PhotoLocationSnapshot] = []
                     
                     while true {
                         
@@ -131,7 +143,10 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
                         }
                         
                         if !isPhoto {
-//                            allPhotosForTravel.append(contentsOf: photos.map { PhotoLocationSnapshot(from: $0) })
+                            allPhotosForTravel.append(
+                                contentsOf: photos
+                                    .filter { $0.latitude != nil && $0.longitude != nil }
+                                    .map { PhotoLocationSnapshot(from: $0) })
                             // MARK: - 주소로 사진 분류
                             print("주소로 사진 분류")
                             for (address, _) in addressCount {
@@ -195,10 +210,10 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
                         continuation.yield(ProgressFolder(step: .classifying, ratio: ratio))
                     }
                     
-                    // 추후 좀 더 연구해보자
+//                    // 추후 좀 더 연구해보자
 //                    if !isPhoto {
 //                        print("여행 앨범 생성")
-//                        let clusters = travelRepository.detect(from: allPhotosForTravel)
+//                        let clusters = try await travelRepository.detect(from: allPhotosForTravel)
 //                        
 //                        print("clusters count", clusters.count)
 //                        for cluster in clusters {
@@ -224,6 +239,13 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
 //                        }
 //                    }
                     
+                    
+                    // MARK: - 얼굴 클러스터링으로 사람 폴더 생성
+                    if isPhoto {
+                        print("얼굴 클러스터링 시작")
+                        try await faceClusterRepository.clusterAndSaveFolders()
+                    }
+                    
                     try folderDataRepository.syncFolders()
                     
                     if isPhoto {
@@ -240,11 +262,136 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
         }
     }
     
+    public func createTravelAutoFolder() -> AsyncThrowingStream<ProgressFolder, Error> {
+        
+        AsyncThrowingStream { continuation in
+            Task {
+                do {
+                    try self.folderDataRepository.deleteAutoFolders(by: "travel")
+                    
+                    var allPhotosForTravel: [PhotoLocationSnapshot] = []
+                    allPhotosForTravel = try photoDataRepository.fetchHasCoordinators()
+                        .map { PhotoLocationSnapshot(from: $0) }
+                    
+                    try analyze(from: allPhotosForTravel)
+                    
+                    let homeZones = try fetchHomeZones()
+                    for home in homeZones {
+                        print("홈존", home.latitude, home.longitude)
+                    }
+                    
+                    print("여행 앨범 생성")
+                    let clusters = try await travelRepository.detect(from: allPhotosForTravel, homeZones: homeZones)
+//                    let clusters = try await travelRepository.detect(from: allPhotosForTravel)
+                    
+                    print("clusters count", clusters.count)
+                    for cluster in clusters {
+                        print("clusters \(cluster.folderDisplayName), start:", cluster.startDate, ", end:", cluster.endDate)
+                        let folder = Folder(
+                            name: cluster.folderName,
+                            displayName: cluster.folderDisplayName,
+                            isAuto: true,
+                            coverPhotoIdentifier: cluster.photos.first?.localIdentifier,
+                            keywords: [],
+                            photoCount: cluster.photos.count,
+                            from: "travel"
+                        )
+                        if let saved = try folderDataRepository.saveFolder(
+                            folder: folder,
+                            returnExist: true
+                        ) {
+                            let identifiers = cluster.photos.map { $0.localIdentifier }
+                            try folderDataRepository.addPhotos(
+                                folderId: saved.id,
+                                photoIdentifiers: identifiers
+                            )
+                        }
+                    }
+                    
+                    try folderDataRepository.syncFolders()
+                    
+                    continuation.yield(ProgressFolder(step: .completed, ratio: 1))
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+        }
+        
+    }
+    
     public func syncPhotoCount() async throws {
         try folderDataRepository.syncPhotoCount()
     }
     
     public func deletePhotos() async throws {
         try self.folderDataRepository.deleteAll()
+        try await userDefaultRepository.resetAnalyzedDate()
     }
+    
+    public func deleteAutoFolders() async throws {
+        try self.folderDataRepository.deleteAutoFolders()
+    }
+    
+    // 홈존 분석 필요 여부 체크 후 실행
+    private func analyzeIfNeeded(from photos: [PhotoLocationSnapshot]) throws {
+        let existing = try homeZoneRepository.fetchHomeZones()
+        if let last = existing.first, Date().timeIntervalSince(last.analyzedAt) < reanalyzePeriod {
+            return  // 3개월 이내면 스킵
+        }
+        try analyze(from: photos)
+    }
+    
+    // 강제 재분석
+    private func analyze(from photos: [PhotoLocationSnapshot]) throws {
+        let threeMonthsAgo = Date().addingTimeInterval(-reanalyzePeriod)
+        let recent = photos.filter { $0.createdAt >= threeMonthsAgo }
+        
+        guard !recent.isEmpty else { return }
+        
+        let grid = Dictionary(grouping: recent) { photo -> String in
+            let latKey = (photo.latitude * Double(gridSize)).rounded()
+            let lngKey = (photo.longitude * Double(gridSize)).rounded()
+            return "\(latKey),\(lngKey)"
+        }
+        
+//        let average = Double(recent.count) / Double(grid.count)
+
+        let zones = grid
+//            .filter { Double($0.value.count) >= average }
+            .filter { $0.value.count >= 5 }
+            .filter { _, photos in
+                let uniqueWeeks = Set(photos.map {
+                    Calendar.current.component(.weekOfYear, from: $0.createdAt)
+                }).count
+                return uniqueWeeks >= 4
+            }
+            .sorted { $0.value.count > $1.value.count }
+            .prefix(maxHomeZones)
+            .compactMap { _, photos -> HomeZone? in
+                guard let first = photos.first else { return nil }
+                return HomeZone(
+                    latitude: first.latitude,
+                    longitude: first.longitude,
+                    analyzedAt: Date()
+                )
+            }
+        
+        try homeZoneRepository.saveHomeZones(zones)
+    }
+    
+    // 홈존 목록 반환 (여행 필터링용)
+    private func fetchHomeZones() throws -> [HomeZone] {
+        try homeZoneRepository.fetchHomeZones()
+    }
+//
+//    // 특정 좌표가 홈존 반경 내인지 체크
+//    private func isHomeZone(latitude: Double, longitude: Double) throws -> Bool {
+//        let zones = try homeZoneRepository.fetchHomeZones()
+//        let location = CLLocation(latitude: latitude, longitude: longitude)
+//        return zones.contains { zone in
+//            let zoneLocation = CLLocation(latitude: zone.latitude, longitude: zone.longitude)
+//            return location.distance(from: zoneLocation) < homeZoneRadius
+//        }
+//    }
 }

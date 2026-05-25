@@ -64,10 +64,11 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
         let context = ModelContext(container)
         
         let fetchDescriptor = FetchDescriptor<FolderEntity>(
+//            predicate: #Predicate{$0.from == "travel"},
             sortBy: [
 //                SortDescriptor(\.from, order: .forward),
                 SortDescriptor(\.photoCount, order: .reverse),
-                SortDescriptor(\.displayName, order: .forward)
+                SortDescriptor(\.displayName, order: .forward),
             ]
         )
         return try context.fetch(fetchDescriptor).map {$0.toDomain()}
@@ -226,15 +227,24 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
 //        try context.save()
     }
     
-    public func deleteAutoFolders() throws {
+    public func deleteAutoFolders(by from: String) throws {
         
         let context = ModelContext(container)
         
-        let folderDescriptor = FetchDescriptor<FolderEntity>(
-            predicate: #Predicate { $0.isAuto == true }
-        )
+        let folderDescriptor: FetchDescriptor<FolderEntity>
+        if from == "all" {
+            folderDescriptor = FetchDescriptor<FolderEntity>(
+                predicate: #Predicate { $0.isAuto == true }
+            )
+        } else {
+            folderDescriptor = FetchDescriptor<FolderEntity>(
+                predicate: #Predicate { $0.isAuto == true && $0.from == from }
+            )
+        }
+        
         let autoFolders = try context.fetch(folderDescriptor)
         
+        autoFolders.forEach { $0.photos.removeAll() }
         autoFolders.forEach { context.delete($0) }
         try context.save()
     }
@@ -270,6 +280,11 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
         
         print("photo 삭제")
         try context.delete(model: PhotoEntity.self)
+        try context.save()
+        
+        print("label embedding 삭제")
+        try context.delete(model: PhotoLabelEntity.self)
+        try context.delete(model: FaceEmbeddingEntity.self)
         try context.save()
         
         try self.syncFolders()

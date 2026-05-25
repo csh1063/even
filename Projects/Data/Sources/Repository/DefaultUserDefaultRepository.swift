@@ -31,6 +31,10 @@ public final class DefaultUserDefaultRepository: UserDefaultRepository {
         service.string(UserDefaultsKey.lastAnalyzedDate)
     }
     
+    public func resetAnalyzedDate() async throws {
+        service.set("", forK: UserDefaultsKey.lastAnalyzedDate)
+    }
+    
     public func saveLocationAnalyzedDate() async throws {
         service.set(now, forK: UserDefaultsKey.lastLocationAnalyzedDate)
     }

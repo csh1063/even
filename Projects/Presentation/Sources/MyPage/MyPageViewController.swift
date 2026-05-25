@@ -55,11 +55,11 @@ final class MyPageViewController: BaseViewController {
     
     private func setupView() {
         
-        naviView.setTitle("마이 페이지",
+        naviView.setTitle("설정",
                           color: Theme.textPrimary,
                           font: .systemFont(ofSize: 32, weight: .bold))
         
-        naviView.addButtons([RightButton(type: .setting)])
+//        naviView.addButtons([RightButton(type: .setting)])
         
         tableView.delegate = self
         

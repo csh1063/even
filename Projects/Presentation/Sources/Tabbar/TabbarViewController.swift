@@ -80,8 +80,8 @@ final class TabbarViewController: CustomTabBarController {
     
     private func binding() {
         
-        let outlet = viewModel.transform()
-        outlet.onboarding
+        let output = viewModel.transform()
+        output.onboarding
             .sink { [weak self] isShow in
                 if let isShow {
                     if !isShow {
@@ -98,10 +98,10 @@ final class TabbarViewController: CustomTabBarController {
             }
             .store(in: &cancellables)
         
-        outlet.consent
+        output.consent
             .sink { [weak self] isShow in
                 if let isShow, !isShow {
-                    let vc = ConsentViewController()
+                    let vc = TermsViewController()
                     vc.modalPresentationStyle = .fullScreen
                     vc.onConsented = { [weak self] in
                         self?.viewModel.send(.afterConsent)

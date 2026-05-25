@@ -14,6 +14,8 @@ public struct PhotoLocationSnapshot {
     public let country: String?
     public let administrativeArea: String?
     public let locality: String?
+    public let latitude: Double
+    public let longitude: Double
     
     public init(from photo: Photo) {
         self.localIdentifier = photo.localIdentifier
@@ -21,5 +23,7 @@ public struct PhotoLocationSnapshot {
         self.country = photo.country
         self.administrativeArea = photo.administrativeArea
         self.locality = photo.locality
+        self.latitude = photo.latitude ?? 0
+        self.longitude = photo.longitude ?? 0
     }
 }

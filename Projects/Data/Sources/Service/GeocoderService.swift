@@ -32,7 +32,7 @@ public final class GeocoderService {
     }
 
     // MARK: - Public
-    func fetchAddress(from location: CLLocation, id: String, locale: Locale = .current) async throws -> PhotoLocation? {
+    func fetchAddress(from location: CLLocation, locale: Locale = .current) async throws -> PhotoLocation? {
         
         let geocoder = CLGeocoder()
         do {

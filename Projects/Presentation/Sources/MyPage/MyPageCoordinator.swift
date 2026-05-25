@@ -10,6 +10,7 @@ import Foundation
 import UIKit
 import SafariServices
 
+
 @MainActor
 public final class MyPageCoordinator: BaseCoordinator {
     
@@ -36,20 +37,33 @@ public final class MyPageCoordinator: BaseCoordinator {
                     self?.moveLabels(isLabel: false)
                 case .privacy:
                     let vc = WebDocuViewController(type: .privacy)
+                    self?.hideTabBar?()
                     self?.navigationController.pushViewController(vc, animated: true)
                 case .terms:
                     let vc = WebDocuViewController(type: .terms)
+                    self?.hideTabBar?()
                     self?.navigationController.pushViewController(vc, animated: true)
-//                    let urlString = data.type == .terms
-//                        ? "https://csh1063.github.io/moa-web/terms-of-service.html"
-//                        : "https://csh1063.github.io/moa-web/privacy-policy.html"
-//                    guard let url = URL(string: urlString) else { return }
-//
-//                    let vc = SFSafariViewController(url: url)
-//                    
+                case .feedback:
+                    self?.moveFeedback()
+//                case .displayMode:
+//                    let vc = OptionPickerViewController(
+//                        title: "디스플레이 모드",
+//                        options: DisplayMode.allCases.map {$0.text},
+//                        selected: data.value
+//                    )
+//                    vc.onSelect = { [weak viewModel] selected in
+//                        // 저장 버튼 눌렀을 때 여기서 selected 사용
+//                        print("??")
+//                        Task { @MainActor in
+//                            print("?!")
+//                            await viewModel?.changeDisplayMode(selected)
+//                        }
+//                    }
+//                    self?.hideTabBar?()
 //                    self?.navigationController.pushViewController(vc, animated: true)
                 case .openSource:
                     let vc = OpenSourceViewController()
+                    self?.hideTabBar?()
                     self?.navigationController.pushViewController(vc, animated: true)
                 case .test:
                     self?.moveTest()
@@ -70,6 +84,14 @@ public final class MyPageCoordinator: BaseCoordinator {
     func startAndReturn() -> UINavigationController {
         start(coordinator: self)
         return navigationController
+    }
+    
+    func moveFeedback() {
+        let viewModel = diContainer.makeFeedbackViewModel()
+        bindAlert(from: viewModel)
+        let vc = FeedbackViewController(viewModel: viewModel)
+        self.hideTabBar?()
+        self.navigationController.pushViewController(vc, animated: true)
     }
     
     func moveLabels(isLabel: Bool) {
