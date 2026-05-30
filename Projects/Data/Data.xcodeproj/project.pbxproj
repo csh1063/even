@@ -28,6 +28,9 @@
 		19751FA32FC2E8FA008685A9 /* HomeZoneEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19751FA22FC2E8FA008685A9 /* HomeZoneEntity.swift */; };
 		19751FA72FC2E935008685A9 /* HomeZoneEntityMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19751FA62FC2E935008685A9 /* HomeZoneEntityMapper.swift */; };
 		19751FAB2FC2E973008685A9 /* DefaultHomeZoneRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19751FAA2FC2E973008685A9 /* DefaultHomeZoneRepository.swift */; };
+		19751FAD2FC4B88F008685A9 /* PhotoCategories_old.json in Resources */ = {isa = PBXBuildFile; fileRef = 19751FAC2FC4B88F008685A9 /* PhotoCategories_old.json */; };
+		19751FB12FC4BBFC008685A9 /* PhotoCategoriesRule.json in Resources */ = {isa = PBXBuildFile; fileRef = 19751FB02FC4BBFC008685A9 /* PhotoCategoriesRule.json */; };
+		19751FD32FCB42D3008685A9 /* AlbumEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19751FD22FCB42D3008685A9 /* AlbumEntity.swift */; };
 		1989135D2D6A2C2BA17A6B60 /* PhotoAssetEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1818CB29A1914B6416E20D3E /* PhotoAssetEntity.swift */; };
 		1A9938F2B9F9AD2825A0FC20 /* DefaultPhotoLabelDataRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76713B0DD0063DA264DCB484 /* DefaultPhotoLabelDataRepository.swift */; };
 		2169AA2311BA60ACAA3F77E2 /* FolderEntityMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13D68148ECEC00D5F0D873BA /* FolderEntityMapper.swift */; };
@@ -107,6 +110,9 @@
 		19751FA22FC2E8FA008685A9 /* HomeZoneEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeZoneEntity.swift; sourceTree = "<group>"; };
 		19751FA62FC2E935008685A9 /* HomeZoneEntityMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeZoneEntityMapper.swift; sourceTree = "<group>"; };
 		19751FAA2FC2E973008685A9 /* DefaultHomeZoneRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultHomeZoneRepository.swift; sourceTree = "<group>"; };
+		19751FAC2FC4B88F008685A9 /* PhotoCategories_old.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = PhotoCategories_old.json; sourceTree = "<group>"; };
+		19751FB02FC4BBFC008685A9 /* PhotoCategoriesRule.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = PhotoCategoriesRule.json; sourceTree = "<group>"; };
+		19751FD22FCB42D3008685A9 /* AlbumEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumEntity.swift; sourceTree = "<group>"; };
 		1D6BD6C0BFFB08B0574D32AF /* PhotoCategoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCategoryService.swift; sourceTree = "<group>"; };
 		1E0A1E65D202F027E3B90C53 /* PhotoLabelEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLabelEntity.swift; sourceTree = "<group>"; };
 		2FEE537A6453D74F3910F7C2 /* DefaultFolderDataRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultFolderDataRepository.swift; sourceTree = "<group>"; };
@@ -187,6 +193,8 @@
 			children = (
 				1946CAB92FBAD66F0038B256 /* AdaFace_IR18.mlpackage */,
 				6D8A1A11088B68A6F132362E /* PhotoCategories.json */,
+				19751FB02FC4BBFC008685A9 /* PhotoCategoriesRule.json */,
+				19751FAC2FC4B88F008685A9 /* PhotoCategories_old.json */,
 				196CB1922FA8985600824005 /* RemoveKeywords.json */,
 				7C6F4F8847EEDF2F518DCDFA /* ReplaceWord.json */,
 			);
@@ -199,6 +207,7 @@
 				5BC6B88EC3E842B3E1E181DF /* AddressDTO.swift */,
 				FA2C733233FE6C2AD8240B99 /* BaseDTO.swift */,
 				796BED270FC1A8E67F8083F2 /* LocationParam.swift */,
+				136F5B333BEF3ED61F96C299 /* UserDefaultsKey.swift */,
 				1818CB29A1914B6416E20D3E /* PhotoAssetEntity.swift */,
 				1946CAB52FBA14F10038B256 /* FeedbackParam.swift */,
 			);
@@ -229,6 +238,7 @@
 		89D788F8E3DF4D755C2EE674 /* SwiftData */ = {
 			isa = PBXGroup;
 			children = (
+				19751FD22FCB42D3008685A9 /* AlbumEntity.swift */,
 				19751FA22FC2E8FA008685A9 /* HomeZoneEntity.swift */,
 				1946CABD2FBAD6B20038B256 /* FaceEmbeddingEntity.swift */,
 				196CB1C72FB332E700824005 /* MoaSchemaMigrationPlan.swift */,
@@ -294,7 +304,6 @@
 				1D6BD6C0BFFB08B0574D32AF /* PhotoCategoryService.swift */,
 				69864E8955090C5B3C4E7CF2 /* PhotoLibararyService.swift */,
 				90F6C7ACBF6ED2FAD561E78D /* ServiceFactory.swift */,
-				136F5B333BEF3ED61F96C299 /* UserDefaultsKey.swift */,
 				4D1CCABEC1645F0152B5B6D4 /* UserDefaultsService.swift */,
 			);
 			path = Service;
@@ -399,6 +408,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				19751FB12FC4BBFC008685A9 /* PhotoCategoriesRule.json in Resources */,
+				19751FAD2FC4B88F008685A9 /* PhotoCategories_old.json in Resources */,
 				196CB1932FA8985600824005 /* RemoveKeywords.json in Resources */,
 				6F110D428C48DDE7B9472154 /* PhotoCategories.json in Resources */,
 				6F33010F296BA936918BD397 /* ReplaceWord.json in Resources */,
@@ -430,6 +441,7 @@
 				025400DBA1FBCED05EECA3ED /* PhotoModelMapper.swift in Sources */,
 				196CB1CC2FB4E7BE00824005 /* DefaultPermissionRepository.swift in Sources */,
 				1946CABE2FBAD6B20038B256 /* FaceEmbeddingEntity.swift in Sources */,
+				19751FD32FCB42D3008685A9 /* AlbumEntity.swift in Sources */,
 				88C3254258A9147BB32522D0 /* BaseProvider.swift in Sources */,
 				7FB70958E7BF4019A5C80763 /* MoyaLoggingPlugin.swift in Sources */,
 				6E426C1732C4F413AC7A8218 /* NetworkExecutor.swift in Sources */,

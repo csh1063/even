@@ -1,5 +1,5 @@
 //
-//  FolderEntity.swift
+//  AlbumEntity.swift
 //  Data
 //
 //  Created by sanghyeon on 3/21/26.
@@ -10,7 +10,7 @@ import SwiftData
 import Foundation
 
 @Model
-public final class FolderEntity {
+public final class AlbumEntity {
     @Attribute(.unique) public var id: UUID
     public var name: String
     public var displayName: String

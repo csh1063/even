@@ -239,7 +239,6 @@ final class ImageViewerViewController: UIViewController {
 //            albumBadgeLabel.text = "연결된 앨범 2개"
             
             let components = [photo.country, photo.administrativeArea, photo.locality].compactMap { $0 }
-            print("photo address", photo.address)
             
             if components.isEmpty {
                 locationIcon.image = UIImage(systemName: "location.slash")
@@ -255,7 +254,7 @@ final class ImageViewerViewController: UIViewController {
             
             print("labels", photoDetail.labels.map {$0.name}.joined(separator: ", ")
 )
-            label.text = photoDetail.labels.map {$0.name}.joined(separator: ", ")
+            label.text = photoDetail.labels.map {"\($0.name): \($0.confidence)"}.joined(separator: ", ")
         } else {
             albumBadge.isHidden = false
             albumBadgeLabel.text = "미분석"

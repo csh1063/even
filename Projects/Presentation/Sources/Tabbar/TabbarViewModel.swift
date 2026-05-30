@@ -196,6 +196,11 @@ public final class TabbarViewModel: BaseViewModel {
                             _ = await self.createdAutoFolder(isPhoto: true) {
                                 self.autoFolderProgressRatio = $0
                             }
+                            self.locationProgressRatio = 1.0
+                            _ = await self.createdAutoFolder(isPhoto: false) {
+                                self.locationFolderProgressRatio = $0
+                            }
+                            await self.createTravelAutoFolder()
                         }
                     }
                 ]

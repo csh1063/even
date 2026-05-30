@@ -21,10 +21,23 @@ public final class PhotoCategoryService {
         return array
     }()
     
+    private var photoCategoriesRule: [String: AlbumRule] = {
+        let bundle = Bundle.module
+        guard let url = bundle.url(forResource: "PhotoCategoriesRule", withExtension: "json"),
+              let data = try? Data(contentsOf: url),
+              let array = try? JSONDecoder().decode([String: AlbumRule].self, from: data)
+        else { return [:] }
+        return array
+    }()
+    
     public init() {
     }
     
     public func fetchCategories() async throws-> [String: [String]] {
         return photoCategories
+    }
+    
+    public func fetchRuleCategories() async throws -> [String: AlbumRule] {
+        return photoCategoriesRule
     }
 }

@@ -12,8 +12,8 @@ import CoreLocation
 
 public final class DefaultTravelDetectionRepository: TravelDetectionRepository {
     
-    private let timeGapThreshold: TimeInterval = 3 * 24 * 60 * 60
-    private let moveDistanceThreshold: Double = 100_000
+    private let timeGapThreshold: TimeInterval = 2 * 24 * 60 * 60
+    private let moveDistanceThreshold: Double = 55_000
     private let stayDistanceThreshold: Double = 20_000
     private let minimumClusterSize: Int = 10
     private let localityDominanceThreshold: Double = 0.7

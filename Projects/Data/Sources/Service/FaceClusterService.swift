@@ -179,7 +179,7 @@ public final class FaceClusterService {
         let dim = embeddings[0].embedding.count
         
         // 1. 각 클러스터의 centroid 계산
-        var centroids: [[Float]] = clusterEmbeddingIndices.map { indices in
+        let centroids: [[Float]] = clusterEmbeddingIndices.map { indices in
             var centroid = [Float](repeating: 0, count: dim)
             for idx in indices {
                 let emb = embeddings[idx].embedding
@@ -234,7 +234,10 @@ public final class FaceClusterService {
         
         func find(_ x: Int) -> Int {
             var x = x
-            while parent[x] != x { parent[x] = parent[parent[x]]; x = parent[x] }
+            while parent[x] != x {
+                parent[x] = parent[parent[x]]
+                x = parent[x]
+            }
             return x
         }
         

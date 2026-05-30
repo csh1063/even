@@ -71,7 +71,7 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
                 SortDescriptor(\.displayName, order: .forward),
             ]
         )
-        return try context.fetch(fetchDescriptor).map {$0.toDomain()}
+        return try context.fetch(fetchDescriptor).map {$0.toDomainWithKey()}
     }
     
     public func fetchAutoAll() throws -> [Folder] {
@@ -81,7 +81,7 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
         let fetchDescriptor = FetchDescriptor<FolderEntity>(
             predicate: #Predicate { $0.isAuto == true }
         )
-        return try context.fetch(fetchDescriptor).map {$0.toDomainWithKey()}
+        return try context.fetch(fetchDescriptor).map {$0.toDomain()}
     }
     
     public func fetchPhotos(by folderId: UUID) throws -> [Photo] {
@@ -206,6 +206,11 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
         let uniqueNewPhotos = photos.filter { !existingIds.contains($0.localIdentifier) }
         
         folder.photos.append(contentsOf: uniqueNewPhotos)
+        
+        let allPhotos = folder.photos.sorted {$0.createdAt < $1.createdAt}
+        folder.startDate = allPhotos.first?.createdAt ?? Date()
+        folder.endDate = allPhotos.last?.createdAt ?? Date()
+        
         folder.photoCount = folder.photos.count
         folder.coverPhotoIdentifier = folder.photos.sorted {
             $0.createdAt > $1.createdAt

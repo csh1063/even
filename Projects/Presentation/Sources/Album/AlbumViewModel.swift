@@ -15,6 +15,52 @@ enum AlbumViewModelAction {
     case moveDetail(folder: Folder)
 }
 
+struct AlbumSectionsData {
+    var items: [AlbumSection: [AlbumType]] = [:]
+    var totalCount: Int = 0
+
+    var sections: [AlbumSection] {
+        AlbumSection.allCases.filter { items[$0]?.isEmpty == false }
+    }
+}
+
+//struct AlbumSectionsData {
+//    
+//    var sections: [AlbumSection] {
+//        var result = [AlbumSection]()
+//        
+//        if !travelItems.isEmpty {
+//            result.append(.travel)
+//        }
+//        
+//        if !dateItems.isEmpty {
+//            result.append(.date)
+//        }
+//        
+//        if !locationItems.isEmpty {
+//            result.append(.location)
+//        }
+//        
+//        if !categoryItems.isEmpty {
+//            result.append(.category)
+//        }
+//        
+//        if !faceItems.isEmpty {
+//            result.append(.face)
+//        }
+//        
+//        return result
+//    }
+//    
+//    var dateItems:     [DateAlbumCellViewModel]   = []
+//    var travelItems:     [TravelAlbumCellViewModel]  = []
+//    var locationItems:  [LocationAlbumCellViewModel]    = []
+//    var categoryItems: [CategoryAlbumCellViewModel]   = []
+//    var faceItems:     [FaceCellViewModel]       = []
+//    
+//    var totalCount: Int = 0
+//}
+
 @MainActor
 public final class AlbumViewModel: BaseViewModel {
     
@@ -27,11 +73,13 @@ public final class AlbumViewModel: BaseViewModel {
     }
     
     public struct Output {
+        let sections: AnyPublisher<AlbumSectionsData, Never>
         let folders: AnyPublisher<[Folder], Never>
         let isLoading: AnyPublisher<Bool, Never>
         let permission: AnyPublisher<PhotoPermission, Never>
     }
     
+    @Published private var sections = AlbumSectionsData()
     @Published private var folders: [Folder] = []
     
     var onAction: ((AlbumViewModelAction) -> Void)?
@@ -66,6 +114,7 @@ public final class AlbumViewModel: BaseViewModel {
     
     public func transform() -> Output {
         return Output(
+            sections: $sections.eraseToAnyPublisher(),
             folders: $folders.eraseToAnyPublisher(),
             isLoading: $isLoading.eraseToAnyPublisher(),
             permission: tabbarViewModel.transform().permission
@@ -115,9 +164,58 @@ public final class AlbumViewModel: BaseViewModel {
             print("load folders")
             let folders = try await self.folderUseCase.fetchAll()
             self.folders = folders
+            
+            self.buildSections(from: folders)
         } catch {
             print("loadFodlers error")
         }
+    }
+    
+    private func buildSections(from folders: [Folder]) {
+        
+        var data = AlbumSectionsData()
+        
+        data.items[.travel] = folders.filter { $0.from == "travel" }
+            .sorted {
+                $0.startDate > $1.startDate
+            }
+            .map {
+                .travel(TravelAlbumCellViewModel(folder: $0, imageLoader: self))
+            }
+        
+        data.items[.date] = folders.filter { $0.from == "date" }
+            .sorted { $0.displayName > $1.displayName }
+            .map {
+                .date(DateAlbumCellViewModel(folder: $0, imageLoader: self))
+            }
+        
+        data.items[.location] = folders.filter { $0.from == "location" }
+            .sorted { $0.photoCount > $1.photoCount }
+            .map {
+//                print("keyword:", $0.keywords.joined(separator: ", "))
+                return $0
+            }
+            .prefix(3)
+            .enumerated()
+            .map {
+                .location(LocationAlbumCellViewModel(folder: $1, imageLoader: self, isMost: $0 == 0))
+            }
+        
+        data.items[.category] = folders.filter { $0.from == "category" }
+            .sorted { $0.photoCount > $1.photoCount }
+            .map {
+                .category(CategoryAlbumCellViewModel(folder: $0, imageLoader: self))
+            }
+        
+        data.items[.face] = folders.filter { $0.from == "face" }
+            .sorted { $0.photoCount > $1.photoCount }
+            .map {
+                .face(FaceCellViewModel(folder: $0, imageLoader: self))
+            }
+        
+        data.totalCount = folders.count
+ 
+        self.sections = data
     }
     
     func loadImage(id: String, size: CGSize) async -> UIImage? {

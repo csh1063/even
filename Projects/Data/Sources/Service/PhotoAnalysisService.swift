@@ -78,28 +78,46 @@ public final class PhotoAnalysisService { // : @unchecked Sendable {
     
     /// 얼굴 감지
     private func detectFace(_ image: CGImage) async throws -> [PhotoLabel] {
-        return await withCheckedContinuation { continuation in
+        return try await withCheckedThrowingContinuation { continuation in
             faceQueue.async {
-                
                 let request = VNDetectFaceRectanglesRequest()
                 let handler = VNImageRequestHandler(cgImage: image, options: [:])
-                
+
                 do {
                     try handler.perform([request])
-                    
-                    let filter = request.results?
-//                        .filter { $0.faceCaptureQuality ?? 0 >= 0.3 }
-                        .filter { $0.boundingBox.width >= 0.05 && $0.boundingBox.height >= 0.05 }
-                    
-                    guard let results = filter, !results.isEmpty else {
+
+                    let validFaces = request.results?.filter {
+                        $0.boundingBox.width >= 0.05 && $0.boundingBox.height >= 0.05
+                    } ?? []
+
+                    guard !validFaces.isEmpty else {
                         continuation.resume(returning: [])
                         return
                     }
 
-//                    let label = results.count > 1 ? "people_group" : "people"
-                    continuation.resume(returning: [
-                        PhotoLabel(name: "people", confidence: 1.0)
-                    ])
+                    var labels: [PhotoLabel] = []
+
+                    // 사람 존재 여부 (binary)
+                    labels.append(PhotoLabel(name: "people", confidence: 1.0))
+
+                    // 다수 여부 (binary)
+                    if validFaces.count >= 2 {
+                        labels.append(PhotoLabel(name: "peoples", confidence: 1.0))
+                    }
+
+                    // 가장 큰 얼굴 기준 부각 정도
+                    if let maxFace = validFaces.max(by: {
+                        ($0.boundingBox.width * $0.boundingBox.height)
+                        < ($1.boundingBox.width * $1.boundingBox.height)
+                    }) {
+                        
+                        let area = maxFace.boundingBox.width * maxFace.boundingBox.height
+                        let focusConfidence = min(1.0, Float(sqrt(area)) * 3.5)
+                        labels.append(PhotoLabel(name: "person_focus", confidence: focusConfidence))
+                    }
+
+                    continuation.resume(returning: labels)
+
                 } catch {
                     print("Vision detectFace 에러:", error)
                     continuation.resume(returning: [])
@@ -119,7 +137,9 @@ public final class PhotoAnalysisService { // : @unchecked Sendable {
                 do {
                     try handler.perform([request])
                 
-                    guard let results = request.results,
+                    guard let results = request.results?.filter({
+                        $0.boundingBox.width >= 0.05 && $0.boundingBox.height >= 0.05
+                    }),
                           !results.isEmpty else {
                         continuation.resume(returning: [])
                         return

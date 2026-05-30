@@ -118,7 +118,7 @@ public final class SplashViewModel: BaseViewModel {
 
     private func start() async {
         print("start")
-        try? await Task.sleep(nanoseconds: 3_000_000_000) // 3초 (1초 = 1_000_000_000 ns)
+        try? await Task.sleep(nanoseconds: 1_000_000_000) // 3초 (1초 = 1_000_000_000 ns)
         self.finished = true
     }
 }

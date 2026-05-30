@@ -1,0 +1,111 @@
+{
+  "음식": {
+    "type": "AND_OR_COMBINED",
+    "min_confidence": 0.65,
+    "label_filters": [],
+    "must_have_one_of": ["food", "soup", "baked_goods", "dessert", "cake", "birthday_cake", "wedding_cake", "tableware", "utensil", "plate", "bowl", "restaurant"],
+    "match_tags": ["meat", "steak", "beef", "hamburger", "fried_chicken", "pizza", "spaghetti", "pasta", "ramen", "sushi", "gyoza", "wonton", "dumpling", "pierogi", "satay", "souvlaki", "taco", "quesadilla", "tortilla", "nachos", "stir_fry", "paella", "rice", "fried_egg", "egg", "yolk", "sandwich", "cheese", "hotdog", "sausage", "teriyaki", "cakestand", "cupcake", "ice_cream", "waffle", "croissant", "donut", "popcorn", "bread", "white_bread", "jelly", "candy", "chocolate", "vegetable", "tomato", "lettuce", "broccoli", "spinach", "cucumber", "arugula", "asparagus", "carrot", "potato", "corn", "pumpkin", "bean", "green_beans", "pea", "edamame", "fruit", "citrus_fruit", "lemon", "avocado", "strawberry", "blueberry", "berry", "pineapple", "mango", "melon", "watermelon", "oranges", "nut", "pecan", "seed", "sesame", "herb", "cilantro", "wasabi", "seasonings", "condiment", "mustard", "seafood", "shellfish", "salmon", "tuna", "seabass", "sardine", "lobster", "crab", "oyster", "clam", "mussel", "roe", "noodle", "beverage", "juice", "smoothie"],
+    "exclude_tags": ["dog", "cat", "animal", "zoo", "farm"]
+  },
+  "여행": {
+    "type": "AND_OR_COMBINED",
+    "notes": "일상 스냅과 구분하기 위해 야외 풍경과 여행 이동 수단/장소가 결합된 경우",
+    "min_confidence": 0.60,
+    "label_filters": [],
+    "must_have_one_of": ["outdoor", "recreation", "trail", "park", "amusement_park", "carousel", "ferris_wheel"],
+    "match_tags": ["airplane", "airport", "train", "train_station", "luggage", "suitcase", "backpack", "bag", "map", "passport", "hotel", "resort", "tent", "sandcastle"],
+    "exclude_tags": ["screenshot", "document", "text"]
+  },
+  "풍경": {
+    "type": "OR",
+    "notes": "하늘과 바다를 제외한 순수 자연 풍경",
+    "min_confidence": 0.60,
+    "label_filters": [
+      { "name": "person_focus", "max": 0.4 }
+    ],
+    "match_tags": ["mountain", "forest", "desert", "sand_dune", "cave", "snow", "blizzard", "waterfall", "fountain", "creek", "wetland", "nature", "valley", "canyon", "glacier", "cliff", "meadow", "landscape", "hill"],
+    "exclude_tags": ["building", "street", "cityscape", "ocean", "beach", "sky"]
+  },
+  "하늘": {
+    "type": "OR",
+    "notes": "하늘, 구름, 일출/일몰 등 천체 위주의 사진",
+    "min_confidence": 0.65,
+    "label_filters": [
+      { "name": "person_focus", "max": 0.3 }
+    ],
+    "match_tags": ["sky", "cloudy", "sunset_sunrise", "night_sky", "sun", "moon", "rainbow", "aurora", "star", "overcast", "dusk", "dawn", "horizon"],
+    "exclude_tags": ["interior", "indoor"]
+  },
+  "바다": {
+    "type": "AND_OR_COMBINED",
+    "min_confidence": 0.75,
+    "label_filters": [
+      { "name": "person_focus", "max": 0.5 }
+    ],
+    "must_have_one_of": ["ocean", "beach", "pool", "lake", "river", "water"],
+    "match_tags": ["surfboard", "yacht", "sailboat", "speedboat", "boat", "mast", "porthole", "wetsuit", "lifejacket", "lifesaver", "swimming", "sunbathing", "watersport", "underwater", "coral_reef", "dock", "harbour", "pier", "wave", "tide", "sea", "lagoon"],
+    "exclude_tags": ["snow", "blizzard", "ice", "winter", "restaurant", "food", "kitchen"]
+  },
+  "사람": {
+    "type": "OR",
+    "min_confidence": 0.60,
+    "label_filters": [],
+    "match_tags": ["people", "peoples", "child", "baby", "pacifier", "man", "woman", "face", "portrait"],
+    "exclude_tags": ["screenshot", "document"]
+  },
+  "동물": {
+    "type": "OR",
+    "min_confidence": 0.65,
+    "label_filters": [],
+    "match_tags": ["animal", "dog", "pomeranian", "bichon", "chihuahua", "bulldog", "retriever", "pug", "poodle", "cat", "kitten", "bird", "gull", "rabbit", "panda", "kangaroo", "deer", "tiger", "bear", "zebra", "donkey", "horse", "dinosaur", "reptile", "zoo", "farm", "cage", "stuffed_animals", "toy", "figurine", "dolphin", "whale", "penguin", "cetacean", "fish", "insect", "butterfly", "dragonfly", "lizard", "turtle", "hamster", "parrot"],
+    "exclude_tags": ["food", "cooked", "restaurant"]
+  },
+  "카페": {
+    "type": "AND_OR_COMBINED",
+    "notes": "집방 사진을 거르고 상업적 카페 공간 느낌을 주기 위한 조명/가구 조합",
+    "min_confidence": 0.65,
+    "label_filters": [],
+    "must_have_one_of": ["restaurant", "bar", "interior_shop", "coffee", "juice", "soda", "wine", "beer", "drink", "milkshake", "smoothie", "chandelier", "lamp"],
+    "match_tags": ["furniture", "table", "chair", "sofa", "armchair", "stool", "folding_chair", "cup", "mug", "bottle", "wine_bottle", "straw_drinking", "jar", "dessert", "cake", "bakery", "pastry", "latte", "espresso", "cappuccino", "brunch"],
+    "exclude_tags": ["outdoor", "sky", "bedroom", "bathroom", "laundry_machine", "stove"]
+  },
+  "거리": {
+    "type": "OR",
+    "min_confidence": 0.60,
+    "label_filters": [],
+    "match_tags": ["building", "cityscape", "skyscraper", "apartment", "house_single", "tower", "lighthouse", "bridge", "dam", "road", "street", "driveway", "alley", "tunnel", "lamppost", "traffic_light", "pylon", "manhole", "graffiti", "storefront", "crosswalk", "sidewalk", "fence", "gate", "parking_lot", "sign"],
+    "exclude_tags": ["mountain", "forest", "desert", "nature"]
+  },
+  "특별한 날": {
+    "type": "OR",
+    "min_confidence": 0.60,
+    "label_filters": [],
+    "match_tags": ["celebration", "ceremony", "wedding", "wedding_dress", "gown", "tuxedo", "bride", "groom", "graduation", "birthday_cake", "parade", "balloon", "christmas_tree", "christmas_decoration", "poinsettia", "gift", "bouquet", "rose", "flower", "blossom", "orchid", "chrysanthemum", "vase", "podium", "party", "festival", "candle", "confetti", "ribbon", "lantern", "firework"],
+    "exclude_tags": []
+  },
+  "문서": {
+    "type": "OR",
+    "notes": "책, 노트, 영수증이 아닌 일반 서류 및 증명서 형태",
+    "min_confidence": 0.70,
+    "label_filters": [],
+    "match_tags": ["document", "text", "screenshot", "paper", "receipt", "form", "passport", "id_card", "certificate", "book", "chart", "diagram"],
+    "exclude_tags": ["outdoor", "scenery", "food", "animal", "plant"]
+  },
+  "쿠폰": {
+    "type": "AND_OR_COMBINED",
+    "notes": "텍스트나 바코드가 포함된 스크린샷 형태의 바우처 유추 규칙",
+    "min_confidence": 0.65,
+    "label_filters": [],
+    "must_have_one_of": ["screenshot", "text", "document"],
+    "match_tags": ["barcode", "qr_code", "ticket", "coupon", "voucher", "gift_card", "sticky_note"],
+    "exclude_tags": ["outdoor", "person", "food", "animal"]
+  },
+  "일상": {
+    "type": "OR",
+    "notes": "위의 특수 카테고리들에 속하지 않는 패션, 가전, 일상 소품 및 모빌리티 스냅",
+    "min_confidence": 0.55,
+    "label_filters": [],
+    "match_tags": ["clothing", "jacket", "jeans", "suit", "hoodie", "hat", "shoes", "sneaker", "footwear", "watch", "purse", "car", "automobile", "suv", "van", "limousine", "truck", "scooter", "motorcycle", "bicycle", "wheel", "tire", "dashboard", "sport", "ballgames", "soccer", "golf", "sports_equipment", "goggles", "television", "computer", "laptop", "headphones", "phone", "computer_mouse", "electric_fan", "clock", "pillow", "bed", "bedding", "stroller", "playground", "umbrella", "gym", "yoga", "selfie", "mirror", "notebook"],
+    "exclude_tags": ["screenshot", "document", "wedding", "celebration", "ocean"]
+  }
+}

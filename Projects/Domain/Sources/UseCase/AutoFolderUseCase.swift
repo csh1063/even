@@ -34,6 +34,16 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
     // 폴더 생성 최소 비율
     private let threshold: Double = 0.05
     
+    private static let administrativeAreaReplacements: [String: String] = [
+        "전북특별자치도": "전라북도",
+        "강원특별자치도": "강원도",
+        "제주특별자치도": "제주도"
+    ]
+
+    private static let suffixesToRemove = [
+        "특별자치시", "특별광역시", "광역시", "특별시", "시"
+    ]
+    
     public init(
         photoDataRepository: PhotoDataRepository,
         folderDataRepository: FolderDataRepository,
@@ -60,7 +70,8 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
                     let countPerPage = 300
                     var page = 0
                     
-                    let categories: [String: [String]] = try await photoCategoryRepository.fetchCategories()
+//                    let categories: [String: [String]] = try await photoCategoryRepository.fetchCategories()
+                    let ruleCategories: [String: AlbumRule] = try await photoCategoryRepository.fetchRuleCategories()
                     
                     var folders: [Folder] = try folderDataRepository.fetchAutoAll()
                     var folderPhotoMap: [UUID: [String]] = [:]
@@ -75,7 +86,8 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
                         if photos.isEmpty { break }
                         
                         var yearCount: [String: Int] = [:]
-                        var addressCount: [String: Int] = [:]
+                        var addressCount: [String: [String]] = [:]
+
                         photos.map { ($0.year, $0.address) }.enumerated().forEach { (i, item) in
                             
                             let (year, address) = item
@@ -84,13 +96,38 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
                             }
                             if let address, !isPhoto {
                                 if let country = address.country, !country.isEmpty {
-                                    addressCount[country, default: 0] += 1
+                                    
+                                    let administrativeArea = cleanAreaName(address.administrativeArea ?? "")
+                                    let locality = cleanAreaName(address.locality ?? "")
+                                    let key = "\(cleanAreaName(country)) \(administrativeArea)".trimmingCharacters(in: .whitespaces)
+                                    
+                                    let addressText: String
+                                    if locality == administrativeArea || locality.hasSuffix("도") {
+                                        addressText = address.subLocality ?? ""
+                                    } else {
+                                        addressText = [locality, address.subLocality]
+                                            .compactMap { $0 }
+                                            .reduce(into: [String]()) { result, value in
+                                                if result.last != value { result.append(value) }
+                                            }
+                                            .joined(separator: " ")
+                                    }
+                                    
+                                    if !addressText.isEmpty && !addressCount[key, default: []].contains(addressText) {
+                                        addressCount[key, default: []].append(addressText)
+                                    }
                                 }
-//                                if let locality = address.locality, !locality.isEmpty {
-//                                    addressCount[locality, default: 0] += 1
-//                                }
-//                                if let ocean = address.ocean, !ocean.isEmpty {
-//                                    addressCount[ocean, default: 0] += 1
+//                                if let country = address.country, !country.isEmpty {
+//                                    let addressText = [address.administrativeArea, address.locality, address.subLocality]
+//                                        .compactMap { $0 }
+//                                        .reduce(into: [String]()) { result, value in
+//                                            if result.last != value { result.append(value) }
+//                                        }
+//                                        .joined(separator: " ")
+//
+//                                    if !addressCount[country, default: []].contains(addressText) {
+//                                        addressCount[country, default: []].append(addressText)
+//                                    }
 //                                }
                             }
                         }
@@ -100,22 +137,15 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
                         if isPhoto {
                             // MARK: - 라벨로 사진 분류
                             print("라벨로 사진 분류")
-                            for (folderName, keywords) in categories {
-                                let matchedPhotos = photos.filter { photo in
-                                    let labelNames = Set(photo.labels
-                                        .filter { $0.confidence >= 0.6 }
-                                        .map { $0.name })
-                                    return keywords.contains { labelNames.contains($0) }
-                                }
-                                
-                                // 매칭된 사진이 있을 때만 폴더 생성
+
+                            for (folderName, rule) in ruleCategories {
+                                let matchedPhotos = photos.filter { matchesRule($0, rule: rule) }
                                 guard !matchedPhotos.isEmpty else { continue }
                                 
                                 let folder = Folder(
                                     name: folderName,
                                     displayName: folderName,
                                     isAuto: true,
-                                    keywords: keywords,
                                     photoCount: 0,
                                     from: "category"
                                 )
@@ -123,16 +153,15 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
                                     folders.append(savedFolder)
                                 }
                             }
-                            
+                        
                             // MARK: - 년도로 사진 분류
                             print("년도로 사진 분류")
                             for (year, _) in yearCount {
-                                
                                 let folder = Folder(
                                     name: year,
-                                    displayName: "\(year)년",
+                                    displayName: "\(year)",
                                     isAuto: true,
-                                    keywords: [year, "\(year)년"],
+                                    keywords: ["\(year)", "\(year)년"],
                                     photoCount: 0,
                                     from: "date"
                                 )
@@ -149,13 +178,13 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
                                     .map { PhotoLocationSnapshot(from: $0) })
                             // MARK: - 주소로 사진 분류
                             print("주소로 사진 분류")
-                            for (address, _) in addressCount {
-                                
+                            for (address, areas) in addressCount {
+                                print("address: ", address, ", areas:", areas)
                                 let folder = Folder(
                                     name: address,
                                     displayName: address,
                                     isAuto: true,
-                                    keywords: [address],
+                                    keywords: areas,
                                     photoCount: 0,
                                     from: "location"
                                 )
@@ -169,26 +198,46 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
                         
                         // 폴더별로 한번에 추가
                         for folder in folders {
-                            let matchedIdentifiers = photos
-                                .filter { photo in
-                                    if isPhoto {
-                                        let photoLabelNames = Set(photo.labels.map { $0.name })
-                                        return folder.keywords.contains {
-                                            photoLabelNames.contains($0)
-                                            || (photo.year != nil && photo.year == $0)
+                            let matchedIdentifiers: [String]
+
+                            switch folder.from {
+                            case "category":
+                                guard let rule = ruleCategories[folder.name] else { continue }
+                                matchedIdentifiers = photos
+                                    .filter { matchesRule($0, rule: rule) }
+                                    .map { $0.localIdentifier }
+
+                            case "date":
+                                matchedIdentifiers = photos
+                                    .filter { folder.keywords.contains($0.year ?? "") }
+                                    .map { $0.localIdentifier }
+
+                            case "location":
+                                matchedIdentifiers = photos
+                                    .filter {
+                                        let administrativeArea = cleanAreaName($0.address?.administrativeArea ?? "")
+                                        let locality = cleanAreaName($0.address?.locality ?? "")
+                                        
+                                        let addressText: String
+                                        if locality == administrativeArea || locality.hasSuffix("도") {
+                                            addressText = $0.address?.subLocality ?? ""
+                                        } else {
+                                            addressText = [locality, $0.address?.subLocality]
+                                                .compactMap { $0 }
+                                                .reduce(into: [String]()) { result, value in
+                                                    if result.last != value { result.append(value) }
+                                                }
+                                                .joined(separator: " ")
                                         }
-                                    } else {
-                                        return folder.keywords.contains {
-                                            photo.address != nil
-                                            && (photo.address?.country == $0
-//                                                || photo.address?.locality == $0
-//                                                || photo.address?.ocean == $0
-                                            )
-                                        }
+                                        return folder.keywords.contains(addressText)
                                     }
-                                }
-                                .map { $0.localIdentifier }
-                            
+//                                        || $0.address?.locality == $0
+//                                        || $0.address ?.ocean == $0
+                                    .map { $0.localIdentifier }
+                            default:
+                                continue
+                            }
+
                             folderPhotoMap[folder.id, default: []].append(contentsOf: matchedIdentifiers)
                         }
                         
@@ -209,36 +258,6 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
                         print("classifying ratio:", ratio)
                         continuation.yield(ProgressFolder(step: .classifying, ratio: ratio))
                     }
-                    
-//                    // 추후 좀 더 연구해보자
-//                    if !isPhoto {
-//                        print("여행 앨범 생성")
-//                        let clusters = try await travelRepository.detect(from: allPhotosForTravel)
-//                        
-//                        print("clusters count", clusters.count)
-//                        for cluster in clusters {
-//                            let folder = Folder(
-//                                name: cluster.folderName,
-//                                displayName: cluster.folderDisplayName,
-//                                isAuto: true,
-//                                coverPhotoIdentifier: cluster.photos.first?.localIdentifier,
-//                                keywords: [],
-//                                photoCount: cluster.photos.count,
-//                                from: "travel"
-//                            )
-//                            if let saved = try folderDataRepository.saveFolder(
-//                                folder: folder,
-//                                returnExist: true
-//                            ) {
-//                                let identifiers = cluster.photos.map { $0.localIdentifier }
-//                                try folderDataRepository.addPhotos(
-//                                    folderId: saved.id,
-//                                    photoIdentifiers: identifiers
-//                                )
-//                            }
-//                        }
-//                    }
-                    
                     
                     // MARK: - 얼굴 클러스터링으로 사람 폴더 생성
                     if isPhoto {
@@ -292,7 +311,6 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
                             displayName: cluster.folderDisplayName,
                             isAuto: true,
                             coverPhotoIdentifier: cluster.photos.first?.localIdentifier,
-                            keywords: [],
                             photoCount: cluster.photos.count,
                             from: "travel"
                         )
@@ -364,7 +382,7 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
                 let uniqueWeeks = Set(photos.map {
                     Calendar.current.component(.weekOfYear, from: $0.createdAt)
                 }).count
-                return uniqueWeeks >= 4
+                return uniqueWeeks >= 3
             }
             .sorted { $0.value.count > $1.value.count }
             .prefix(maxHomeZones)
@@ -384,14 +402,48 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
     private func fetchHomeZones() throws -> [HomeZone] {
         try homeZoneRepository.fetchHomeZones()
     }
-//
-//    // 특정 좌표가 홈존 반경 내인지 체크
-//    private func isHomeZone(latitude: Double, longitude: Double) throws -> Bool {
-//        let zones = try homeZoneRepository.fetchHomeZones()
-//        let location = CLLocation(latitude: latitude, longitude: longitude)
-//        return zones.contains { zone in
-//            let zoneLocation = CLLocation(latitude: zone.latitude, longitude: zone.longitude)
-//            return location.distance(from: zoneLocation) < homeZoneRadius
-//        }
-//    }
+    
+    private func matchesRule(_ photo: Photo, rule: AlbumRule) -> Bool {
+        let allPhotoTags = Set(photo.labels.map { $0.name })
+
+        // [검증 1] exclude_tags (confidence 무관하게 태그 존재 자체로 제외)
+        let excludeSet = Set(rule.excludeTags)
+        if !allPhotoTags.isDisjoint(with: excludeSet) { return false }
+
+        let labelNames = Set(photo.labels
+            .filter { $0.confidence >= rule.minConfidence }
+            .map { $0.name }
+        )
+        guard !labelNames.isEmpty else { return false }
+
+        // [검증 2] label_filters (confidence 범위 조건)
+        if let filters = rule.labelFilters {
+            let passed = filters.allSatisfy { filter in
+                let score = photo.labels.first { $0.name == filter.name }?.confidence ?? 0.0
+                if let min = filter.min, score < min { return false }
+                if let max = filter.max, score > max { return false }
+                return true
+            }
+            if !passed { return false }
+        }
+
+        // [검증 3] 타입별 매칭
+        if rule.type == "AND_OR_COMBINED", let mustHaveList = rule.mustHaveOneOf {
+            return !labelNames.isDisjoint(with: Set(mustHaveList))
+                && !labelNames.isDisjoint(with: Set(rule.matchTags))
+        } else {
+            return !labelNames.isDisjoint(with: Set(rule.matchTags))
+        }
+    }
+    
+    private func cleanAreaName(_ name: String) -> String {
+        var result = Self.administrativeAreaReplacements[name] ?? name
+        for suffix in Self.suffixesToRemove {
+            if result.hasSuffix(suffix) {
+                result = String(result.dropLast(suffix.count))
+                break
+            }
+        }
+        return result
+    }
 }
