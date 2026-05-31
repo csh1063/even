@@ -24,20 +24,20 @@ public final class AlbumDIContainer {
             repository: appDIContainer.photoLibraryRepository
         )
         
-        let folderUseCase = DefaultFolderUseCase(
-            folderRepository: appDIContainer.folderDataRepository
+        let albumUseCase = DefaultAlbumUseCase(
+            albumRepository: appDIContainer.albumDataRepository
         )
         
         return AlbumViewModel(tabbarViewModel: tabbarViewModel,
                               imageUseCase: imageUseCase,
-                              folderUseCase: folderUseCase)
+                              albumUseCase: albumUseCase)
     }
 
-    func makeDetailDIContainer(folder: Folder) -> AlbumDetailDIContainer {
+    func makeDetailDIContainer(album: Album) -> AlbumDetailDIContainer {
         AlbumDetailDIContainer(
-            folder: folder,
+            album: album,
             photoLibraryRepository: appDIContainer.photoLibraryRepository,
-            folderDataRepository: appDIContainer.folderDataRepository,
+            albumDataRepository: appDIContainer.albumDataRepository,
             labelRepository: appDIContainer.photoLabelDataRepository
         )
     }

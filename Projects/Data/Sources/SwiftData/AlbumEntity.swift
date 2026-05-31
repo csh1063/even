@@ -29,7 +29,7 @@ public final class AlbumEntity {
     public var photos: [PhotoEntity] = []
     
     @Relationship(deleteRule: .cascade)
-    public var keywords: [FolderKeywordEntity] = []
+    public var keywords: [AlbumKeywordEntity] = []
     
     public init(
         id: UUID = UUID(),

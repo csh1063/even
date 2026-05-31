@@ -186,11 +186,11 @@ public final class DefaultPhotoDataRepository: PhotoDataRepository {
         return try context.fetch(fetchDescriptor).map { $0.toDomain() }
     }
     
-    public func fetchSyncPhotoId(byFolder localIdentifier: UUID) throws -> String? {
+    public func fetchSyncPhotoId(byAlbum localIdentifier: UUID) throws -> String? {
         let context = ModelContext(container)
         var fetchDescriptor = FetchDescriptor<PhotoEntity>(
             predicate: #Predicate<PhotoEntity> {
-                $0.folders.contains { $0.id == localIdentifier }
+                $0.albums.contains { $0.id == localIdentifier }
             },
             sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
         )
@@ -203,11 +203,11 @@ public final class DefaultPhotoDataRepository: PhotoDataRepository {
         return entity.localIdentifier
     }
     
-    public func fetchSyncPhotoCount(byFolder localIdentifier: UUID) throws -> Int {
+    public func fetchSyncPhotoCount(byAlbum localIdentifier: UUID) throws -> Int {
         let context = ModelContext(container)
         let fetchDescriptor = FetchDescriptor<PhotoEntity>(
             predicate: #Predicate<PhotoEntity> {
-                $0.folders.contains { $0.id == localIdentifier }
+                $0.albums.contains { $0.id == localIdentifier }
             }
         )
         return try context.fetchCount(fetchDescriptor)
@@ -231,14 +231,14 @@ public final class DefaultPhotoDataRepository: PhotoDataRepository {
             throw PhotoRepositoryError.photoNotFound
         }
         
-        for folder in entity.folders where folder.coverPhotoIdentifier == identifier {
-            let photos = folder.photos
+        for album in entity.albums where album.coverPhotoIdentifier == identifier {
+            let photos = album.photos
                 .filter { $0.localIdentifier != identifier }
                 .sorted { $0.createdAt > $1.createdAt }
-            folder.coverPhotoIdentifier = photos.first?.localIdentifier
+            album.coverPhotoIdentifier = photos.first?.localIdentifier
             
-            for folder in entity.folders {
-                folder.photoCount = photos.count
+            for album in entity.albums {
+                album.photoCount = photos.count
             }
         }
         

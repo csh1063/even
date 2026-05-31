@@ -20,7 +20,7 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
         self.clusterService = clusterService
     }
 
-    public func clusterAndSaveFolders() async throws {
+    public func clusterAndSaveAlbums() async throws {
         print("\n=== 🚀 [Repository] 클러스터링 및 폴더 저장 프로세스 시작 ===")
         let context = ModelContext(container)
         
@@ -35,10 +35,10 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
         }
 
         // 2. 기존에 이미 생성된 인물 폴더들 미리 로드
-        let existingFolders = try context.fetch(FetchDescriptor<FolderEntity>(
+        let existingAlbums = try context.fetch(FetchDescriptor<AlbumEntity>(
             predicate: #Predicate { $0.from == "face" }
         ))
-        print("📁 [Repository] 기존에 존재하는 인물 폴더 수: \(existingFolders.count)개")
+        print("📁 [Repository] 기존에 존재하는 인물 폴더 수: \(existingAlbums.count)개")
         
         // 3. 도메인 모델로 변환 후 클러스터링 서비스 호출
         let embeddings = allEntities.map { $0.toDomain() }
@@ -55,23 +55,23 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
                 continue
             }
             
-            let folderName = clusterId
-            let folder: FolderEntity
+            let albumName = clusterId
+            let album: AlbumEntity
             
             // 기존 폴더가 있으면 재사용, 없으면 신규 생성
-            if let existingFolder = existingFolders.first(where: { $0.name == folderName }) {
-                folder = existingFolder
+            if let existingAlbum = existingAlbums.first(where: { $0.name == albumName }) {
+                album = existingAlbum
                 print("🔄 [Repository] [\(clusterId)] 기존 폴더 활용")
             } else {
-                folder = FolderEntity(
+                album = AlbumEntity(
                     id: UUID(),
-                    name: folderName,
-                    displayName: folderName,
+                    name: albumName,
+                    displayName: albumName,
                     isAuto: true,
                     coverPhotoIdentifier: nil,
                     from: "face"
                 )
-                context.insert(folder)
+                context.insert(album)
                 print("✨ [Repository] [\(clusterId)] 신규 폴더 생성 및 켄텍스트 삽입")
             }
 
@@ -79,7 +79,7 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
             let matchedEntities = allEntities.filter { embeddingIds.contains($0.id) }
 
             // 중복 체크 속도 최적화를 위해 현재 폴더 내 사진 ID들을 Set으로 빌드
-            var currentPhotoIds = Set(folder.photos.map { $0.localIdentifier })
+            var currentPhotoIds = Set(album.photos.map { $0.localIdentifier })
             var newlyAddedCount = 0
 
             for entity in matchedEntities {
@@ -89,17 +89,17 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
                 
                 // O(1) 고속 중복 체크
                 if !currentPhotoIds.contains(photo.localIdentifier) {
-                    folder.photos.append(photo)
+                    album.photos.append(photo)
                     currentPhotoIds.insert(photo.localIdentifier)
                     newlyAddedCount += 1
                 }
             }
 
             // 폴더 메타데이터 갱신
-            folder.photoCount = folder.photos.count
-            folder.coverPhotoIdentifier = folder.photos.sorted { $0.createdAt > $1.createdAt }.first?.localIdentifier
+            album.photoCount = album.photos.count
+            album.coverPhotoIdentifier = album.photos.sorted { $0.createdAt > $1.createdAt }.first?.localIdentifier
             
-            print("📝 [Repository] [\(clusterId)] 매핑 완료 (새로 추가된 사진: \(newlyAddedCount)장 / 총 사진: \(folder.photoCount)장)")
+            print("📝 [Repository] [\(clusterId)] 매핑 완료 (새로 추가된 사진: \(newlyAddedCount)장 / 총 사진: \(album.photoCount)장)")
         }
 
         // 6. 최종 저장
@@ -119,7 +119,7 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
 //        self.clusterService = clusterService
 //    }
 //
-//    public func clusterAndSaveFolders() async throws {
+//    public func clusterAndSaveAlbums() async throws {
 //        let context = ModelContext(container)
 //
 //        // 1. people 라벨 가진 사진의 FaceEmbedding 전부 로드
@@ -141,26 +141,26 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
 //        for (clusterId, pairs) in groups {
 //            print("clusterId:", clusterId)
 //            // 폴더 생성
-//            let folderName = clusterId  // ex) "사람 1"
-//            let folderDescriptor = FetchDescriptor<FolderEntity>(
-//                predicate: #Predicate { $0.name == folderName }
+//            let albumName = clusterId  // ex) "사람 1"
+//            let albumDescriptor = FetchDescriptor<AlbumEntity>(
+//                predicate: #Predicate { $0.name == albumName }
 //            )
-//            let existing = try context.fetch(folderDescriptor)
+//            let existing = try context.fetch(albumDescriptor)
 //
-//            let folder: FolderEntity
-//            if let existingFolder = existing.first {
-//                folder = existingFolder
+//            let album: AlbumEntity
+//            if let existingAlbum = existing.first {
+//                album = existingAlbum
 //            } else {
-//                let newFolder = FolderEntity(
+//                let newAlbum = AlbumEntity(
 //                    id: UUID(),
-//                    name: folderName,
-//                    displayName: folderName,
+//                    name: albumName,
+//                    displayName: albumName,
 //                    isAuto: true,
 //                    coverPhotoIdentifier: nil,
 //                    from: "face"
 //                )
-//                context.insert(newFolder)
-//                folder = newFolder
+//                context.insert(newAlbum)
+//                album = newAlbum
 //            }
 //
 //            // 5. FaceEmbeddingEntity의 clusterId 업데이트 + 사진 연결
@@ -171,12 +171,12 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
 //                entity.clusterId = clusterId
 //
 //                guard let photo = entity.photo else { continue }
-//                guard !folder.photos.contains(where: { $0.localIdentifier == photo.localIdentifier }) else { continue }
-//                folder.photos.append(photo)
+//                guard !album.photos.contains(where: { $0.localIdentifier == photo.localIdentifier }) else { continue }
+//                album.photos.append(photo)
 //            }
 //
-//            folder.photoCount = folder.photos.count
-//            folder.coverPhotoIdentifier = folder.photos.sorted {
+//            album.photoCount = album.photos.count
+//            album.coverPhotoIdentifier = album.photos.sorted {
 //                $0.createdAt > $1.createdAt
 //            }.first?.localIdentifier
 //        }

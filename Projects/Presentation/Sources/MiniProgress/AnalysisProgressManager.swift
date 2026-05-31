@@ -20,14 +20,14 @@ final class AnalysisProgressManager {
     
     func show(
         locationProgress: AnyPublisher<Double, Never>,
-        folderProgress: AnyPublisher<Double, Never>
+        albumProgress: AnyPublisher<Double, Never>
     ) {
         guard !isPresenting else {return}
         
         isPresenting = true
         
         let view = MiniProgressView()
-        view.bind(locationProgress: locationProgress, folderProgress: folderProgress)
+        view.bind(locationProgress: locationProgress, albumProgress: albumProgress)
         
         guard let window = UIApplication.shared.connectedScenes
             .compactMap({ $0 as? UIWindowScene })

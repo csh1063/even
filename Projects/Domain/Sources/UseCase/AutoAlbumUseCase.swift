@@ -1,5 +1,5 @@
 //
-//  AutoFolderUseCase.swift
+//  AutoAlbumUseCase.swift
 //  Domain
 //
 //  Created by sanghyeon on 3/22/26.
@@ -9,18 +9,18 @@
 import CoreLocation
 import Foundation
 
-public protocol AutoFolderUseCase {
-    func execute(_ isPhoto: Bool) -> AsyncThrowingStream<ProgressFolder, Error>
-    func createTravelAutoFolder() -> AsyncThrowingStream<ProgressFolder, Error>
+public protocol AutoAlbumUseCase {
+    func execute(_ isPhoto: Bool) -> AsyncThrowingStream<ProgressAlbum, Error>
+    func createTravelAutoAlbum() -> AsyncThrowingStream<ProgressAlbum, Error>
     func syncPhotoCount() async throws
     func deletePhotos() async throws
-    func deleteAutoFolders() async throws
+    func deleteAutoAlbums() async throws
 }
 
-public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
+public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
     
     private let photoDataRepository: PhotoDataRepository
-    private let folderDataRepository: FolderDataRepository
+    private let albumDataRepository: AlbumDataRepository
     private let photoCategoryRepository: PhotoCategoryRepository
     private let userDefaultRepository: UserDefaultRepository
     private let travelRepository: TravelDetectionRepository
@@ -46,7 +46,7 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
     
     public init(
         photoDataRepository: PhotoDataRepository,
-        folderDataRepository: FolderDataRepository,
+        albumDataRepository: AlbumDataRepository,
         photoCategoryRepository: PhotoCategoryRepository,
         userDefaultRepository: UserDefaultRepository,
         travelRepository: TravelDetectionRepository,
@@ -54,7 +54,7 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
         faceClusterRepository: FaceClusterRepository
     ) {
         self.photoDataRepository = photoDataRepository
-        self.folderDataRepository = folderDataRepository
+        self.albumDataRepository = albumDataRepository
         self.photoCategoryRepository = photoCategoryRepository
         self.userDefaultRepository = userDefaultRepository
         self.travelRepository = travelRepository
@@ -62,7 +62,7 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
         self.faceClusterRepository = faceClusterRepository
     }
     
-    public func execute(_ isPhoto: Bool) -> AsyncThrowingStream<ProgressFolder, Error> {
+    public func execute(_ isPhoto: Bool) -> AsyncThrowingStream<ProgressAlbum, Error> {
         AsyncThrowingStream { continuation in
             Task {
                 do {
@@ -73,8 +73,8 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
 //                    let categories: [String: [String]] = try await photoCategoryRepository.fetchCategories()
                     let ruleCategories: [String: AlbumRule] = try await photoCategoryRepository.fetchRuleCategories()
                     
-                    var folders: [Folder] = try folderDataRepository.fetchAutoAll()
-                    var folderPhotoMap: [UUID: [String]] = [:]
+                    var albums: [Album] = try albumDataRepository.fetchAutoAll()
+                    var albumPhotoMap: [UUID: [String]] = [:]
 
                     var allPhotosForTravel: [PhotoLocationSnapshot] = []
                     
@@ -138,26 +138,26 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
                             // MARK: - 라벨로 사진 분류
                             print("라벨로 사진 분류")
 
-                            for (folderName, rule) in ruleCategories {
+                            for (albumName, rule) in ruleCategories {
                                 let matchedPhotos = photos.filter { matchesRule($0, rule: rule) }
                                 guard !matchedPhotos.isEmpty else { continue }
                                 
-                                let folder = Folder(
-                                    name: folderName,
-                                    displayName: folderName,
+                                let album = Album(
+                                    name: albumName,
+                                    displayName: albumName,
                                     isAuto: true,
                                     photoCount: 0,
                                     from: "category"
                                 )
-                                if let savedFolder = try folderDataRepository.saveFolder(folder: folder) {
-                                    folders.append(savedFolder)
+                                if let savedAlbum = try albumDataRepository.saveAlbum(album: album) {
+                                    albums.append(savedAlbum)
                                 }
                             }
                         
                             // MARK: - 년도로 사진 분류
                             print("년도로 사진 분류")
                             for (year, _) in yearCount {
-                                let folder = Folder(
+                                let album = Album(
                                     name: year,
                                     displayName: "\(year)",
                                     isAuto: true,
@@ -165,8 +165,8 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
                                     photoCount: 0,
                                     from: "date"
                                 )
-                                if let savedFolder = try folderDataRepository.saveFolder(folder: folder) {
-                                    folders.append(savedFolder)
+                                if let savedAlbum = try albumDataRepository.saveAlbum(album: album) {
+                                    albums.append(savedAlbum)
                                 }
                             }
                         }
@@ -180,7 +180,7 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
                             print("주소로 사진 분류")
                             for (address, areas) in addressCount {
                                 print("address: ", address, ", areas:", areas)
-                                let folder = Folder(
+                                let album = Album(
                                     name: address,
                                     displayName: address,
                                     isAuto: true,
@@ -188,8 +188,8 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
                                     photoCount: 0,
                                     from: "location"
                                 )
-                                if let savedFolder = try folderDataRepository.saveFolder(folder: folder) {
-                                    folders.append(savedFolder)
+                                if let savedAlbum = try albumDataRepository.saveAlbum(album: album) {
+                                    albums.append(savedAlbum)
                                 }
                             }
                         }
@@ -197,19 +197,19 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
                         //============================================================================
                         
                         // 폴더별로 한번에 추가
-                        for folder in folders {
+                        for album in albums {
                             let matchedIdentifiers: [String]
 
-                            switch folder.from {
+                            switch album.from {
                             case "category":
-                                guard let rule = ruleCategories[folder.name] else { continue }
+                                guard let rule = ruleCategories[album.name] else { continue }
                                 matchedIdentifiers = photos
                                     .filter { matchesRule($0, rule: rule) }
                                     .map { $0.localIdentifier }
 
                             case "date":
                                 matchedIdentifiers = photos
-                                    .filter { folder.keywords.contains($0.year ?? "") }
+                                    .filter { album.keywords.contains($0.year ?? "") }
                                     .map { $0.localIdentifier }
 
                             case "location":
@@ -229,7 +229,7 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
                                                 }
                                                 .joined(separator: " ")
                                         }
-                                        return folder.keywords.contains(addressText)
+                                        return album.keywords.contains(addressText)
                                     }
 //                                        || $0.address?.locality == $0
 //                                        || $0.address ?.ocean == $0
@@ -238,41 +238,41 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
                                 continue
                             }
 
-                            folderPhotoMap[folder.id, default: []].append(contentsOf: matchedIdentifiers)
+                            albumPhotoMap[album.id, default: []].append(contentsOf: matchedIdentifiers)
                         }
                         
                         let ratio = Double(page) / (Double(photoCount) / Double(countPerPage)) * 4.0 / 5.0
                         print("analyzing ratio:", ratio)
-                        continuation.yield(ProgressFolder(step: .analyzing, ratio: ratio))
+                        continuation.yield(ProgressAlbum(step: .analyzing, ratio: ratio))
                         page += 1
                     }
                     
-                    for (index, (folderId, photos)) in folderPhotoMap.enumerated() {
-                        print("folder: \(folderId), addPhoto count:", photos.count)
-                        try folderDataRepository.addPhotos(
-                            folderId: folderId,
+                    for (index, (albumId, photos)) in albumPhotoMap.enumerated() {
+                        print("album: \(albumId), addPhoto count:", photos.count)
+                        try albumDataRepository.addPhotos(
+                            albumId: albumId,
                             photoIdentifiers: photos
                         )
                         
-                        let ratio = (Double(index) / Double(folderPhotoMap.count)) * 1.0 / 5.0 + 0.8
+                        let ratio = (Double(index) / Double(albumPhotoMap.count)) * 1.0 / 5.0 + 0.8
                         print("classifying ratio:", ratio)
-                        continuation.yield(ProgressFolder(step: .classifying, ratio: ratio))
+                        continuation.yield(ProgressAlbum(step: .classifying, ratio: ratio))
                     }
                     
                     // MARK: - 얼굴 클러스터링으로 사람 폴더 생성
                     if isPhoto {
                         print("얼굴 클러스터링 시작")
-                        try await faceClusterRepository.clusterAndSaveFolders()
+                        try await faceClusterRepository.clusterAndSaveAlbums()
                     }
                     
-                    try folderDataRepository.syncFolders()
+                    try albumDataRepository.syncAlbums()
                     
                     if isPhoto {
                         try await userDefaultRepository.saveAnalyzedDate()
                     } else {
                         try await userDefaultRepository.saveLocationAnalyzedDate()
                     }
-                    continuation.yield(ProgressFolder(step: .completed, ratio: 1.0))
+                    continuation.yield(ProgressAlbum(step: .completed, ratio: 1.0))
                     continuation.finish()
                 } catch {
                     continuation.finish(throwing: error)
@@ -281,12 +281,12 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
         }
     }
     
-    public func createTravelAutoFolder() -> AsyncThrowingStream<ProgressFolder, Error> {
+    public func createTravelAutoAlbum() -> AsyncThrowingStream<ProgressAlbum, Error> {
         
         AsyncThrowingStream { continuation in
             Task {
                 do {
-                    try self.folderDataRepository.deleteAutoFolders(by: "travel")
+                    try self.albumDataRepository.deleteAutoAlbums(by: "travel")
                     
                     var allPhotosForTravel: [PhotoLocationSnapshot] = []
                     allPhotosForTravel = try photoDataRepository.fetchHasCoordinators()
@@ -305,30 +305,30 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
                     
                     print("clusters count", clusters.count)
                     for cluster in clusters {
-                        print("clusters \(cluster.folderDisplayName), start:", cluster.startDate, ", end:", cluster.endDate)
-                        let folder = Folder(
-                            name: cluster.folderName,
-                            displayName: cluster.folderDisplayName,
+                        print("clusters \(cluster.albumDisplayName), start:", cluster.startDate, ", end:", cluster.endDate)
+                        let album = Album(
+                            name: cluster.albumName,
+                            displayName: cluster.albumDisplayName,
                             isAuto: true,
                             coverPhotoIdentifier: cluster.photos.first?.localIdentifier,
                             photoCount: cluster.photos.count,
                             from: "travel"
                         )
-                        if let saved = try folderDataRepository.saveFolder(
-                            folder: folder,
+                        if let saved = try albumDataRepository.saveAlbum(
+                            album: album,
                             returnExist: true
                         ) {
                             let identifiers = cluster.photos.map { $0.localIdentifier }
-                            try folderDataRepository.addPhotos(
-                                folderId: saved.id,
+                            try albumDataRepository.addPhotos(
+                                albumId: saved.id,
                                 photoIdentifiers: identifiers
                             )
                         }
                     }
                     
-                    try folderDataRepository.syncFolders()
+                    try albumDataRepository.syncAlbums()
                     
-                    continuation.yield(ProgressFolder(step: .completed, ratio: 1))
+                    continuation.yield(ProgressAlbum(step: .completed, ratio: 1))
                     continuation.finish()
                 } catch {
                     continuation.finish(throwing: error)
@@ -339,16 +339,16 @@ public final class DefaultAutoFolderUseCase: AutoFolderUseCase {
     }
     
     public func syncPhotoCount() async throws {
-        try folderDataRepository.syncPhotoCount()
+        try albumDataRepository.syncPhotoCount()
     }
     
     public func deletePhotos() async throws {
-        try self.folderDataRepository.deleteAll()
+        try self.albumDataRepository.deleteAll()
         try await userDefaultRepository.resetAnalyzedDate()
     }
     
-    public func deleteAutoFolders() async throws {
-        try self.folderDataRepository.deleteAutoFolders()
+    public func deleteAutoAlbums() async throws {
+        try self.albumDataRepository.deleteAutoAlbums()
     }
     
     // 홈존 분석 필요 여부 체크 후 실행

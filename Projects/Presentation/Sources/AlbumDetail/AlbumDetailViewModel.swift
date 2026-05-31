@@ -12,7 +12,7 @@ import Domain
 import UIKit
 
 enum AlbumDetailViewModelAction {
-    case options(folder: Folder)
+    case options(album: Album)
     case pop
     case selectPhoto(_ photoDetails: [PhotoDetail], index: Int)
 }
@@ -43,8 +43,8 @@ public final class AlbumDetailViewModel: BaseViewModel {
  
     // 내부 상태값
 //    @Published private var photoList: PhotoList?
-    @Published private var folder: Folder
-    @Published private var folderName: String
+    @Published private var album: Album
+    @Published private var albumName: String
     @Published private var photos: [Photo] = []
     @Published private var hasNext: Bool = false
     @Published private var errorMessage: String?
@@ -55,15 +55,15 @@ public final class AlbumDetailViewModel: BaseViewModel {
     private var photoDetails: [PhotoDetail] = []
     
     private let imageUseCase: PhotoImageUseCase
-    private let detailUseCase: FolderDetailUseCase
+    private let detailUseCase: AlbumDetailUseCase
     
     private var cancellables = Set<AnyCancellable>()
     
-    public init(folder: Folder,
+    public init(album: Album,
                 imageUseCase: PhotoImageUseCase,
-                detailUseCase: FolderDetailUseCase) {
-        self.folder = folder
-        self.folderName = folder.displayName
+                detailUseCase: AlbumDetailUseCase) {
+        self.album = album
+        self.albumName = album.displayName
         self.imageUseCase = imageUseCase
         self.detailUseCase = detailUseCase
         
@@ -82,7 +82,7 @@ public final class AlbumDetailViewModel: BaseViewModel {
     
     public func transform() -> Output {
         return Output(
-            name: $folderName.eraseToAnyPublisher(),
+            name: $albumName.eraseToAnyPublisher(),
             photos: $photos.eraseToAnyPublisher(),
             isLoading: $isLoading.eraseToAnyPublisher(),
             errorMessage: $errorMessage.eraseToAnyPublisher()
@@ -126,7 +126,7 @@ public final class AlbumDetailViewModel: BaseViewModel {
         case .more:
 //            self.showEditView()
             print("more!")
-            self.onAction?(.options(folder: self.folder))
+            self.onAction?(.options(album: self.album))
         case .dismiss:
             self.onAction?(.pop)
         case .selectItem(let id):
@@ -140,7 +140,7 @@ public final class AlbumDetailViewModel: BaseViewModel {
         print("loadPhotos")
         do {
             self.isLoading = true
-            let photos = try await self.detailUseCase.fetchPhotos(by: folder.id)
+            let photos = try await self.detailUseCase.fetchPhotos(by: album.id)
             print("photos count: ", photos.count)
             self.photos = photos
             
@@ -156,9 +156,9 @@ public final class AlbumDetailViewModel: BaseViewModel {
     private func changeName(name: String) async {
         do {
             self.isLoading = true
-            try await self.detailUseCase.editFolderName(new: name, id: folder.id)
+            try await self.detailUseCase.editAlbumName(new: name, id: album.id)
             
-            self.folderName = name
+            self.albumName = name
 
             self.isLoading = false
         } catch {
@@ -166,11 +166,11 @@ public final class AlbumDetailViewModel: BaseViewModel {
         }
     }
     
-    private func deleteFolder() {
+    private func deleteAlbum() {
         print("삭제")
         self.isLoading = true
         Task {
-            try await detailUseCase.deleteFolder(folder.id)
+            try await detailUseCase.deleteAlbum(album.id)
             self.isLoading = false
             self.onAction?(.pop)
         }
@@ -195,7 +195,7 @@ extension AlbumDetailViewModel: AlbumDetailViewModelDelegate {
                         print("취소")
                     }),
                     AlertButtonConfig(title: "삭제", style: .destructive, action: {
-                        self.deleteFolder()
+                        self.deleteAlbum()
                     })
                   ])
     }

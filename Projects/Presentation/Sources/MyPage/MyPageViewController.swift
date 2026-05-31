@@ -101,7 +101,7 @@ extension MyPageViewController {
 //                    cell.configure(with: itemIdentifier.type)
 //                    return cell
 //                }
-            case .locationAnalysis, .locationAutoFolder:
+            case .locationAnalysis, .locationAutoAlbum:
                 break
             default:
                 if let cell = tableView.dequeueReusableCell(withIdentifier: MyPageCell.cellName, for: indexPath) as? MyPageCell {
@@ -138,15 +138,15 @@ extension MyPageViewController {
         return cellPosition
     }
     
-    private func applySnapshot(with folders: [MyCellHeader: [MyCellData]]) {
+    private func applySnapshot(with albums: [MyCellHeader: [MyCellData]]) {
         var snapshot = NSDiffableDataSourceSnapshot<MyCellHeader, MyCellData>()
         
-        let sections: [MyCellHeader] = Array(folders.keys).sorted { $0.order < $1.order }
+        let sections: [MyCellHeader] = Array(albums.keys).sorted { $0.order < $1.order }
         
         snapshot.appendSections(sections)
         
         sections.forEach { section in
-            snapshot.appendItems(folders[section] ?? [], toSection: section)
+            snapshot.appendItems(albums[section] ?? [], toSection: section)
         }
         
         dataSource.apply(snapshot, animatingDifferences: false)

@@ -10,5 +10,5 @@
 import Foundation
 
 public protocol FaceClusterRepository {
-    func clusterAndSaveFolders() async throws
+    func clusterAndSaveAlbums() async throws
 }

@@ -32,8 +32,8 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
         self.delegate = viewModel
         viewModel.onAction = { [weak self] action in
             switch action {
-            case .options(let folder):
-                self?.showAlbumOptions(album: folder)
+            case .options(let album):
+                self?.showAlbumOptions(album: album)
             case .pop:
                 self?.pop()
             case .selectPhoto(let photoDetails, let index):
@@ -54,7 +54,7 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
         self.remove(coordinator: self)
     }
     
-    func showAlbumRenameSheet(album: Folder) {
+    func showAlbumRenameSheet(album: Album) {
         let sheet = AlbumRenameSheet(albumName: album.displayName)
         sheet.onSave = { [weak self] newName in
             self?.delegate?.save(name: newName)
@@ -69,7 +69,7 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
         navigationController.present(sheet, animated: true)
     }
     
-    func showAlbumOptions(album: Folder) {
+    func showAlbumOptions(album: Album) {
         let sheet = AlbumOptionsSheet(albumTitle: album.displayName)
         sheet.onRename = { [weak self] in
             self?.showAlbumRenameSheet(album: album)

@@ -16,9 +16,9 @@ enum TabbarViewModelAction {
 
 struct AnalyzeProgress {
     let photoProgress: AnyPublisher<Double, Never>
-    let folderProgress: AnyPublisher<Double, Never>
+    let albumProgress: AnyPublisher<Double, Never>
     let locationProgress: AnyPublisher<Double, Never>
-    let locationFolderProgress: AnyPublisher<Double, Never>
+    let locationAlbumProgress: AnyPublisher<Double, Never>
 }
 
 @MainActor
@@ -26,8 +26,8 @@ public final class TabbarViewModel: BaseViewModel {
     
     enum Input {
         case analysis
-        case autoTravelFolder
-        case reAutoFolder
+        case autoTravelAlbum
+        case reAutoAlbum
         case reanalysis
         case clear
         case permission
@@ -39,9 +39,9 @@ public final class TabbarViewModel: BaseViewModel {
     
     public struct Output {
         let photoProgress: AnyPublisher<Double, Never>
-        let folderProgress: AnyPublisher<Double, Never>
+        let albumProgress: AnyPublisher<Double, Never>
         let locationProgress: AnyPublisher<Double, Never>
-        let locationFolderProgress: AnyPublisher<Double, Never>
+        let locationAlbumProgress: AnyPublisher<Double, Never>
         let onboarding: AnyPublisher<Bool?, Never>
         let consent: AnyPublisher<Bool?, Never>
         let permission: AnyPublisher<PhotoPermission, Never>
@@ -49,9 +49,9 @@ public final class TabbarViewModel: BaseViewModel {
     }
     
     @Published private var progressRatio: Double = 0
-    @Published private var autoFolderProgressRatio: Double = 0
+    @Published private var autoAlbumProgressRatio: Double = 0
     @Published private var locationProgressRatio: Double = 0
-    @Published private var locationFolderProgressRatio: Double = 0
+    @Published private var locationAlbumProgressRatio: Double = 0
     @Published private var isAnalyzing : Bool = false
     @Published private var isCleared: Bool = false
     @Published private var onboarding: Bool?
@@ -64,16 +64,16 @@ public final class TabbarViewModel: BaseViewModel {
     
     private let permissionUseCase: PermissionUseCase
     private let analysisUseCase: PhotoAnalysisUseCase
-    private let autoFolderUseCase: AutoFolderUseCase
+    private let autoAlbumUseCase: AutoAlbumUseCase
     
     private var cancellables = Set<AnyCancellable>()
     
     init(permissionUseCase: PermissionUseCase,
          analysisUseCase: PhotoAnalysisUseCase,
-         autoFolderUseCase: AutoFolderUseCase) {
+         autoAlbumUseCase: AutoAlbumUseCase) {
         self.permissionUseCase = permissionUseCase
         self.analysisUseCase = analysisUseCase
-        self.autoFolderUseCase = autoFolderUseCase
+        self.autoAlbumUseCase = autoAlbumUseCase
         
         super.init()
         
@@ -85,9 +85,9 @@ public final class TabbarViewModel: BaseViewModel {
     public func transform() -> Output {
         return Output(
             photoProgress: $progressRatio.eraseToAnyPublisher(),
-            folderProgress: $autoFolderProgressRatio.eraseToAnyPublisher(),
+            albumProgress: $autoAlbumProgressRatio.eraseToAnyPublisher(),
             locationProgress: $locationProgressRatio.eraseToAnyPublisher(),
-            locationFolderProgress: $locationFolderProgressRatio.eraseToAnyPublisher(),
+            locationAlbumProgress: $locationAlbumProgressRatio.eraseToAnyPublisher(),
             onboarding: $onboarding.eraseToAnyPublisher(),
             consent: $consent.eraseToAnyPublisher(),
             permission: $permission.eraseToAnyPublisher(),
@@ -139,9 +139,9 @@ public final class TabbarViewModel: BaseViewModel {
                             guard let self else {return}
                             self.onAction?(.progressSheet(AnalyzeProgress(
                                 photoProgress: self.$progressRatio.eraseToAnyPublisher(),
-                                folderProgress: self.$autoFolderProgressRatio.eraseToAnyPublisher(),
+                                albumProgress: self.$autoAlbumProgressRatio.eraseToAnyPublisher(),
                                 locationProgress: self.$locationProgressRatio.eraseToAnyPublisher(),
-                                locationFolderProgress: self.$locationFolderProgressRatio.eraseToAnyPublisher()
+                                locationAlbumProgress: self.$locationAlbumProgressRatio.eraseToAnyPublisher()
                             )))
 //                            self.isLoading = true
                             print("start date!!!:", Date())
@@ -152,8 +152,8 @@ public final class TabbarViewModel: BaseViewModel {
                     }
                 ]
             )
-        case .autoTravelFolder:
-            print("autoTravelFolder")
+        case .autoTravelAlbum:
+            print("autoTravelAlbum")
             showAlert(
                 title: "여행 사진",
                 message: "여행 앨범을 만들어 볼까요",
@@ -164,14 +164,14 @@ public final class TabbarViewModel: BaseViewModel {
                             guard let self else {return}
 //                            self.isLoading = true
                             print("start date!!!:", Date())
-                            await self.createTravelAutoFolder()
+                            await self.createTravelAutoAlbum()
 //                            self.isLoading = false
                             print("end date!!!:", Date())
                         }
                     }
                 ]
             )
-        case .reAutoFolder:
+        case .reAutoAlbum:
             showAlert(
                 title: "자동 폴더 재생성",
                 message: "자동 생서된 앨범들을\n삭제 후 다시 생성합니다.\n다시 생성할까요?",
@@ -181,26 +181,26 @@ public final class TabbarViewModel: BaseViewModel {
                         Task {
                             guard let self else {return}
                             self.isLoading = true
-                            await self.folderClear()
+                            await self.albumClear()
                             self.isLoading = false
                             
                             self.onAction?(.progressSheet(AnalyzeProgress(
                                 photoProgress: self.$progressRatio.eraseToAnyPublisher(),
-                                folderProgress: self.$autoFolderProgressRatio.eraseToAnyPublisher(),
+                                albumProgress: self.$autoAlbumProgressRatio.eraseToAnyPublisher(),
                                 locationProgress: self.$locationProgressRatio.eraseToAnyPublisher(),
-                                locationFolderProgress: self.$locationFolderProgressRatio.eraseToAnyPublisher()
+                                locationAlbumProgress: self.$locationAlbumProgressRatio.eraseToAnyPublisher()
                             )))
                             
                             self.progressRatio = 1.0
                             
-                            _ = await self.createdAutoFolder(isPhoto: true) {
-                                self.autoFolderProgressRatio = $0
+                            _ = await self.createdAutoAlbum(isPhoto: true) {
+                                self.autoAlbumProgressRatio = $0
                             }
                             self.locationProgressRatio = 1.0
-                            _ = await self.createdAutoFolder(isPhoto: false) {
-                                self.locationFolderProgressRatio = $0
+                            _ = await self.createdAutoAlbum(isPhoto: false) {
+                                self.locationAlbumProgressRatio = $0
                             }
-                            await self.createTravelAutoFolder()
+                            await self.createTravelAutoAlbum()
                         }
                     }
                 ]
@@ -220,9 +220,9 @@ public final class TabbarViewModel: BaseViewModel {
                             
                             self.onAction?(.progressSheet(AnalyzeProgress(
                                 photoProgress: self.$progressRatio.eraseToAnyPublisher(),
-                                folderProgress: self.$autoFolderProgressRatio.eraseToAnyPublisher(),
+                                albumProgress: self.$autoAlbumProgressRatio.eraseToAnyPublisher(),
                                 locationProgress: self.$locationProgressRatio.eraseToAnyPublisher(),
-                                locationFolderProgress: self.$locationFolderProgressRatio.eraseToAnyPublisher()
+                                locationAlbumProgress: self.$locationAlbumProgressRatio.eraseToAnyPublisher()
                             )))
                             await self.analysis()
                         }
@@ -277,11 +277,11 @@ public final class TabbarViewModel: BaseViewModel {
         }
     }
     
-    private func createTravelAutoFolder() async {
+    private func createTravelAutoAlbum() async {
         do {
             self.isLoading = true
             
-            for try await progress in autoFolderUseCase.createTravelAutoFolder() {
+            for try await progress in autoAlbumUseCase.createTravelAutoAlbum() {
                 await MainActor.run {
                     if case .completed = progress.step {
                         self.isLoading = false
@@ -296,28 +296,28 @@ public final class TabbarViewModel: BaseViewModel {
     private func clear() async {
         do {
             self.isCleared = false
-            try await self.autoFolderUseCase.deletePhotos()
+            try await self.autoAlbumUseCase.deletePhotos()
             self.isCleared = true
         } catch {
             print("error", error.localizedDescription)
         }
     }
     
-    private func folderClear() async {
+    private func albumClear() async {
         do {
             self.isCleared = false
-            print("delete all folder")
-            try await self.autoFolderUseCase.deleteAutoFolders()
-            print("deleted all folder")
+            print("delete all album")
+            try await self.autoAlbumUseCase.deleteAutoAlbums()
+            print("deleted all album")
             self.isCleared = true
         } catch {
             print("error", error.localizedDescription)
         }
     }
     
-    private func createdAutoFolder(isPhoto: Bool, updateProgress: @MainActor (Double) -> Void) async -> Bool {
+    private func createdAutoAlbum(isPhoto: Bool, updateProgress: @MainActor (Double) -> Void) async -> Bool {
         do {
-            for try await progress in autoFolderUseCase.execute(isPhoto) {
+            for try await progress in autoAlbumUseCase.execute(isPhoto) {
                 await MainActor.run {
                     updateProgress(progress.ratio)
                     if case .completed = progress.step {
@@ -348,8 +348,8 @@ public final class TabbarViewModel: BaseViewModel {
         }
         self.progressRatio = 1.0
         
-        return await createdAutoFolder(isPhoto: true) {
-            self.autoFolderProgressRatio = $0
+        return await createdAutoAlbum(isPhoto: true) {
+            self.autoAlbumProgressRatio = $0
         }
         
     }
@@ -376,8 +376,8 @@ public final class TabbarViewModel: BaseViewModel {
             self.locationProgressRatio = 1.0
         }
         
-        _ = await self.createdAutoFolder(isPhoto: false) {
-            self.locationFolderProgressRatio = $0
+        _ = await self.createdAutoAlbum(isPhoto: false) {
+            self.locationAlbumProgressRatio = $0
         }
     }
     

@@ -12,12 +12,16 @@ import Domain
 import UIKit
 
 enum AlbumViewModelAction {
-    case moveDetail(folder: Folder)
+    case moveDetail(album: Album)
 }
 
 struct AlbumSectionsData {
     var items: [AlbumSection: [AlbumType]] = [:]
     var totalCount: Int = 0
+    
+    var isEmpty: Bool {
+        items.values.allSatisfy { $0.isEmpty }
+    }
 
     var sections: [AlbumSection] {
         AlbumSection.allCases.filter { items[$0]?.isEmpty == false }
@@ -68,19 +72,19 @@ public final class AlbumViewModel: BaseViewModel {
         case appear
         case analysis
         case clear
-        case selectItem(Folder)
+        case selectItem(Album)
         case permission
     }
     
     public struct Output {
         let sections: AnyPublisher<AlbumSectionsData, Never>
-        let folders: AnyPublisher<[Folder], Never>
+        let albums: AnyPublisher<[Album], Never>
         let isLoading: AnyPublisher<Bool, Never>
         let permission: AnyPublisher<PhotoPermission, Never>
     }
     
     @Published private var sections = AlbumSectionsData()
-    @Published private var folders: [Folder] = []
+    @Published private var albums: [Album] = []
     
     var onAction: ((AlbumViewModelAction) -> Void)?
     
@@ -88,34 +92,34 @@ public final class AlbumViewModel: BaseViewModel {
     
     private let tabbarViewModel: TabbarViewModel
     private let imageUseCase: PhotoImageUseCase
-    private let folderUseCase: FolderUseCase
+    private let albumUseCase: AlbumUseCase
     
     private var cancellables = Set<AnyCancellable>()
     
     public init(tabbarViewModel: TabbarViewModel,
                 imageUseCase: PhotoImageUseCase,
-                folderUseCase: FolderUseCase) {
+                albumUseCase: AlbumUseCase) {
         
         self.tabbarViewModel = tabbarViewModel
         self.imageUseCase = imageUseCase
-        self.folderUseCase = folderUseCase
+        self.albumUseCase = albumUseCase
         
         super.init()
         
         self.bind()
         
-        folderUseCase.foldersPublisher
+        albumUseCase.albumsPublisher
             .receive(on: DispatchQueue.main)
-            .handleEvents(receiveOutput: { folders in
-                print("📂 foldersPublisher received: \(folders.count)")
+            .handleEvents(receiveOutput: { albums in
+                print("📂 albumsPublisher received: \(albums.count)")
             })
-            .assign(to: &$folders)
+            .assign(to: &$albums)
     }
     
     public func transform() -> Output {
         return Output(
             sections: $sections.eraseToAnyPublisher(),
-            folders: $folders.eraseToAnyPublisher(),
+            albums: $albums.eraseToAnyPublisher(),
             isLoading: $isLoading.eraseToAnyPublisher(),
             permission: tabbarViewModel.transform().permission
         )
@@ -151,9 +155,9 @@ public final class AlbumViewModel: BaseViewModel {
             tabbarViewModel.send(.analysis)
         case .clear:
             tabbarViewModel.send(.clear)
-        case .selectItem(let folder):
+        case .selectItem(let album):
             print("!!!")
-            self.onAction?(.moveDetail(folder: folder))
+            self.onAction?(.moveDetail(album: album))
         case .permission:
             tabbarViewModel.send(.permission)
         }
@@ -161,35 +165,35 @@ public final class AlbumViewModel: BaseViewModel {
     
     private func loadFodlers() async {
         do {
-            print("load folders")
-            let folders = try await self.folderUseCase.fetchAll()
-            self.folders = folders
+            print("load albums")
+            let albums = try await self.albumUseCase.fetchAll()
+            self.albums = albums
             
-            self.buildSections(from: folders)
+            self.buildSections(from: albums)
         } catch {
             print("loadFodlers error")
         }
     }
     
-    private func buildSections(from folders: [Folder]) {
+    private func buildSections(from albums: [Album]) {
         
         var data = AlbumSectionsData()
         
-        data.items[.travel] = folders.filter { $0.from == "travel" }
+        data.items[.travel] = albums.filter { $0.from == "travel" }
             .sorted {
                 $0.startDate > $1.startDate
             }
             .map {
-                .travel(TravelAlbumCellViewModel(folder: $0, imageLoader: self))
+                .travel(TravelAlbumCellViewModel(album: $0, imageLoader: self))
             }
         
-        data.items[.date] = folders.filter { $0.from == "date" }
+        data.items[.date] = albums.filter { $0.from == "date" }
             .sorted { $0.displayName > $1.displayName }
             .map {
-                .date(DateAlbumCellViewModel(folder: $0, imageLoader: self))
+                .date(DateAlbumCellViewModel(album: $0, imageLoader: self))
             }
         
-        data.items[.location] = folders.filter { $0.from == "location" }
+        data.items[.location] = albums.filter { $0.from == "location" }
             .sorted { $0.photoCount > $1.photoCount }
             .map {
 //                print("keyword:", $0.keywords.joined(separator: ", "))
@@ -198,22 +202,22 @@ public final class AlbumViewModel: BaseViewModel {
             .prefix(3)
             .enumerated()
             .map {
-                .location(LocationAlbumCellViewModel(folder: $1, imageLoader: self, isMost: $0 == 0))
+                .location(LocationAlbumCellViewModel(album: $1, imageLoader: self, isMost: $0 == 0))
             }
         
-        data.items[.category] = folders.filter { $0.from == "category" }
+        data.items[.category] = albums.filter { $0.from == "category" }
             .sorted { $0.photoCount > $1.photoCount }
             .map {
-                .category(CategoryAlbumCellViewModel(folder: $0, imageLoader: self))
+                .category(CategoryAlbumCellViewModel(album: $0, imageLoader: self))
             }
         
-        data.items[.face] = folders.filter { $0.from == "face" }
+        data.items[.face] = albums.filter { $0.from == "face" }
             .sorted { $0.photoCount > $1.photoCount }
             .map {
-                .face(FaceCellViewModel(folder: $0, imageLoader: self))
+                .face(FaceCellViewModel(album: $0, imageLoader: self))
             }
         
-        data.totalCount = folders.count
+        data.totalCount = albums.count
  
         self.sections = data
     }

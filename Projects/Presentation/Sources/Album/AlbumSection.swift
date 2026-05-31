@@ -33,13 +33,13 @@ enum AlbumType: Hashable {
     case category(CategoryAlbumCellViewModel)
     case face(FaceCellViewModel)
     
-    var folder: Folder {
+    var album: Album {
         switch self {
-        case .date(let vm):     return vm.folder
-        case .travel(let vm):   return vm.folder
-        case .location(let vm): return vm.folder
-        case .category(let vm): return vm.folder
-        case .face(let vm):     return vm.folder
+        case .date(let vm):     return vm.album
+        case .travel(let vm):   return vm.album
+        case .location(let vm): return vm.album
+        case .category(let vm): return vm.album
+        case .face(let vm):     return vm.album
         }
     }
 }

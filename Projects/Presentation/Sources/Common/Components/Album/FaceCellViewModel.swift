@@ -17,23 +17,23 @@ struct FaceCellViewModel: AlbumCellViewModel {
     var formattedDate: String
     var photoCount: Int
     
-    var folder: Folder
+    var album: Album
     var imageLoader: any ImageLoadable
     
     let isNamed: Bool             // 사용자가 이름 지정했는지
     let isHighlighted: Bool       // "나"로 지정된 경우
     
-    init(folder: Folder, imageLoader: any ImageLoadable) {
-        self.id = folder.id
-        self.localIdentifier = folder.coverPhotoIdentifier ?? ""
-        self.displayName = folder.displayName.replacingOccurrences(of: "_", with: " ")
+    init(album: Album, imageLoader: any ImageLoadable) {
+        self.id = album.id
+        self.localIdentifier = album.coverPhotoIdentifier ?? ""
+        self.displayName = album.displayName.replacingOccurrences(of: "_", with: " ")
         self.formattedDate = ""
-        self.photoCount = folder.photoCount
-        self.folder = folder
+        self.photoCount = album.photoCount
+        self.album = album
         self.imageLoader = imageLoader
 
-        let hasCustomName  = folder.displayName != folder.name && !folder.displayName.isEmpty
+        let hasCustomName  = album.displayName != album.name && !album.displayName.isEmpty
         self.isNamed       = hasCustomName
-        self.isHighlighted = folder.displayName == "나"
+        self.isHighlighted = album.displayName == "나"
     }
 }

@@ -17,14 +17,14 @@ public class DefaultPhotoCheckUseCase: PhotoCheckUseCase {
     
     private let photoLibraryRepository: PhotoLibraryRepository
     private let photoDataRepository: PhotoDataRepository
-    private let folderDataRepository: FolderDataRepository
+    private let albumDataRepository: AlbumDataRepository
     
     public init(photoLibraryRepository: PhotoLibraryRepository,
                 photoDataRepository: PhotoDataRepository,
-                folderDataRepository: FolderDataRepository) {
+                albumDataRepository: AlbumDataRepository) {
         self.photoLibraryRepository = photoLibraryRepository
         self.photoDataRepository = photoDataRepository
-        self.folderDataRepository = folderDataRepository
+        self.albumDataRepository = albumDataRepository
     }
     
     public func checkDeletedPhoto() async throws -> AsyncThrowingStream<ProgressState, Error> {
@@ -75,21 +75,21 @@ public class DefaultPhotoCheckUseCase: PhotoCheckUseCase {
         AsyncThrowingStream { continuation in
             Task {
                 do {
-                    let folders = try folderDataRepository.fetchAll()
+                    let albums = try albumDataRepository.fetchAll()
                     
-                    for (index, folder) in folders.enumerated() {
-                        let coverPhotoIdentifier = try photoDataRepository.fetchSyncPhotoId(byFolder: folder.id)
-                        let photoCount = try photoDataRepository.fetchSyncPhotoCount(byFolder: folder.id)
-                        let newFolder = Folder(id: folder.id,
-                                               name: folder.name,
-                                               displayName: folder.displayName,
+                    for (index, album) in albums.enumerated() {
+                        let coverPhotoIdentifier = try photoDataRepository.fetchSyncPhotoId(byAlbum: album.id)
+                        let photoCount = try photoDataRepository.fetchSyncPhotoCount(byAlbum: album.id)
+                        let newAlbum = Album(id: album.id,
+                                               name: album.name,
+                                               displayName: album.displayName,
                                                coverPhotoIdentifier: coverPhotoIdentifier,
                                                photoCount: photoCount,
-                                               from: folder.from)
+                                               from: album.from)
                         
-                        try folderDataRepository.updateFolder(folder: newFolder)
+                        try albumDataRepository.updateAlbum(album: newAlbum)
                         
-                        let ratio = Double(index) / Double(folders.count)
+                        let ratio = Double(index) / Double(albums.count)
                         continuation.yield(.progress(ratio))
                     }
                     

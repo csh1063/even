@@ -10,8 +10,8 @@ import Foundation
 import Domain
 
 extension AlbumAssetEntity {
-    func toDomain() -> Album {
-        return Album(
+    func toDomain() -> AlbumAsset {
+        return AlbumAsset(
             name: self.name,
             count: self.count,
             collection: self.collection)

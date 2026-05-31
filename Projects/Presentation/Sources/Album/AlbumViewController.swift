@@ -48,6 +48,12 @@ final class AlbumViewController: BaseViewController {
         self.setupView()
         self.setupBindings()
         
+//        self.viewModel.send(.appear)
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
         self.viewModel.send(.appear)
     }
     
@@ -111,13 +117,18 @@ final class AlbumViewController: BaseViewController {
         output.sections
             .sink { [weak self] data in
                 guard let self else { return }
-                self.emptyView.isHidden = true
-                self.naviView.isHidden = false
-                self.naviView.setMessage(
-                    "\(data.totalCount)개 앨범으로 정리되었어요",
-                    color: Theme.textPrimary,
-                    font: .systemFont(ofSize: 14, weight: .regular))
                 
+                if data.isEmpty {
+                    self.emptyView.isHidden = false
+                    self.naviView.isHidden = true
+                } else {
+                    self.emptyView.isHidden = true
+                    self.naviView.isHidden = false
+                    self.naviView.setMessage(
+                        "\(data.totalCount)개 앨범으로 정리되었어요",
+                        color: Theme.textPrimary,
+                        font: .systemFont(ofSize: 14, weight: .regular))
+                }
                 self.applySnapshot(data: data)
             }
             .store(in: &cancellables)
@@ -326,7 +337,7 @@ extension AlbumViewController {
 //            guard let section = AlbumSection(rawValue: indexPath.section) else { return }
 //            header.configure(title: section.title)
             let section = self.dataSource.snapshot().sectionIdentifiers[indexPath.section]
-                header.configure(title: section.title)
+            header.configure(section)
 //            header.onMoreTapped = { self?.navigateToAll(section: section) }
         }
         
@@ -385,7 +396,7 @@ extension AlbumViewController: UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard let albumType = dataSource.itemIdentifier(for: indexPath) else { return }
-        viewModel.send(.selectItem(albumType.folder))
+        viewModel.send(.selectItem(albumType.album))
     }
 
 }

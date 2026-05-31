@@ -17,23 +17,23 @@ struct CategoryAlbumCellViewModel: AlbumCellViewModel {
     var formattedDate: String
     var photoCount: Int
     
-    var folder: Folder
+    var album: Album
     var imageLoader: any ImageLoadable
     
     let systemIconName: String
     let iconColor: UIColor
     
-    init(folder: Folder, imageLoader: any ImageLoadable) {
-        self.id = folder.id
-        self.localIdentifier = folder.coverPhotoIdentifier ?? ""
-        self.displayName = folder.displayName.replacingOccurrences(of: "_", with: " ")
+    init(album: Album, imageLoader: any ImageLoadable) {
+        self.id = album.id
+        self.localIdentifier = album.coverPhotoIdentifier ?? ""
+        self.displayName = album.displayName.replacingOccurrences(of: "_", with: " ")
         self.formattedDate = ""
-        self.photoCount = folder.photoCount
-        self.folder = folder
+        self.photoCount = album.photoCount
+        self.album = album
         self.imageLoader = imageLoader
 
-        // folder.name == 카테고리 key
-        switch folder.name {
+        // album.name == 카테고리 key
+        switch album.name {
         case "food":
             systemIconName = "fork.knife"
             iconColor = Theme.primary

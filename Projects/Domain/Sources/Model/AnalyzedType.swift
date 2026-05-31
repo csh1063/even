@@ -10,5 +10,5 @@ import Foundation
 
 enum AnalyzedType {
     case photo
-    case folder
+    case album
 }

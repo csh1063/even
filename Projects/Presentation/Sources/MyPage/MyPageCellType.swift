@@ -75,14 +75,14 @@ enum MyPageCellType {
     // analysis
     case analyzedDate
     case analysis
-    case travelFolder
-    case reAutoFolder
+    case travelAlbum
+    case reAutoAlbum
     case reAnalysis
     case reset
     
     // background
     case locationAnalysis
-    case locationAutoFolder
+    case locationAutoAlbum
     
     // switch
     case autoAnalysis
@@ -110,12 +110,12 @@ enum MyPageCellType {
         case .unanalysisPhoto: return "lasso.badge.sparkles"
         case .analyzedDate: return "clock.arrow.circlepath"
         case .analysis: return "sparkles"
-        case .travelFolder: return "globe.desk"
-        case .reAutoFolder: return "arrow.clockwise"
+        case .travelAlbum: return "globe.desk"
+        case .reAutoAlbum: return "arrow.clockwise"
         case .reAnalysis: return "arrow.clockwise"
         case .reset: return "eraser"
         case .locationAnalysis: return "location.fill.viewfinder"
-        case .locationAutoFolder: return "map.fill"
+        case .locationAutoAlbum: return "map.fill"
         case .autoAnalysis: return "sparkles"
         case .continueLocation: return "location.fill.viewfinder"
         case .terms: return "doc.text"
@@ -138,12 +138,12 @@ enum MyPageCellType {
         case .unanalysisPhoto: return "미분석 사진 수"
         case .analyzedDate: return "최근 분석"
         case .analysis: return "분석하기"
-        case .travelFolder: return "여행 폴더 만들기"
-        case .reAutoFolder: return "자동 폴더 재생성"
+        case .travelAlbum: return "여행 폴더 만들기"
+        case .reAutoAlbum: return "자동 폴더 재생성"
         case .reAnalysis: return "처음부터 분석하기"
         case .reset: return "분석 정보 삭제하기"
         case .locationAnalysis: return "사진 좌표를 주소로 변환"
-        case .locationAutoFolder: return "장소 기반 앨범 생성"
+        case .locationAutoAlbum: return "장소 기반 앨범 생성"
         case .autoAnalysis: return "새 사진 자동 분석"
         case .continueLocation: return "사진 좌표 이어서 분석"
         case .terms: return "이용 약관"
@@ -162,7 +162,7 @@ enum MyPageCellType {
     var subText: String {
         switch self {
         case .locationAnalysis: return ""
-        case .locationAutoFolder: return ""
+        case .locationAutoAlbum: return ""
         default: return ""
         }
     }
@@ -171,9 +171,9 @@ enum MyPageCellType {
         switch self {
         case .allLibraryPhoto, .allPhoto, .unanalysisPhoto, .analyzedDate:
             return .info
-        case .analysis, .travelFolder, .reAnalysis, .reset, .displayMode, .reAutoFolder:
+        case .analysis, .travelAlbum, .reAnalysis, .reset, .displayMode, .reAutoAlbum:
             return .button
-        case .locationAnalysis, .locationAutoFolder:
+        case .locationAnalysis, .locationAutoAlbum:
             return .info
         case .autoAnalysis, .continueLocation:
             return .toggle

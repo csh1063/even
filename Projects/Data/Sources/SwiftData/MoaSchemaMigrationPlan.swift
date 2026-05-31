@@ -28,9 +28,9 @@ public enum MoaSchemaMigrationPlan: SchemaMigrationPlan {
 //        toVersion: MoaSchemaV2.self,
 //        willMigrate: nil,
 //        didMigrate: { context in
-//            let folders = try context.fetch(FetchDescriptor<FolderEntity>())
-//            for folder in folders {
-//                folder.from = ""
+//            let albums = try context.fetch(FetchDescriptor<AlbumEntity>())
+//            for album in albums {
+//                album.from = ""
 //            }
 //            try context.save()
 //        }

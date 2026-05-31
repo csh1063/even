@@ -16,7 +16,7 @@ protocol AlbumCellViewModel: Hashable {
     var formattedDate: String { get }
     var photoCount: Int { get }
     
-    var folder: Folder { get }
+    var album: Album { get }
     
     var imageLoader: any ImageLoadable {get}
 }

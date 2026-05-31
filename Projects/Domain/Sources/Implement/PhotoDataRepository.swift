@@ -19,8 +19,8 @@ public protocol PhotoDataRepository {
     func fetchAnalyzed() throws -> [String]
     func fetchLocationUnanalyzed() throws -> [Photo]
     func fetchUnanalyzed() throws -> [Photo]
-    func fetchSyncPhotoId(byFolder localIdentifier: UUID) throws -> String?
-    func fetchSyncPhotoCount(byFolder localIdentifier: UUID) throws -> Int
+    func fetchSyncPhotoId(byAlbum localIdentifier: UUID) throws -> String?
+    func fetchSyncPhotoCount(byAlbum localIdentifier: UUID) throws -> Int
     func delete(identifier: String) throws
 }
 

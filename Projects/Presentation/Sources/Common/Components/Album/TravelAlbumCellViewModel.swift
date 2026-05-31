@@ -17,22 +17,22 @@ struct TravelAlbumCellViewModel: AlbumCellViewModel {
     var formattedDate: String
     var photoCount: Int
     
-    var folder: Folder
+    var album: Album
     var imageLoader: any ImageLoadable
     
     let countryName: String       // targetAddress 첫 단어
     let dateRangeText: String     // photos creationDate 범위
     
-    init(folder: Folder, imageLoader: any ImageLoadable) {
-        self.id = folder.id
-        self.localIdentifier = folder.coverPhotoIdentifier ?? ""
-        self.displayName = folder.displayName.replacingOccurrences(of: "_", with: " ")
+    init(album: Album, imageLoader: any ImageLoadable) {
+        self.id = album.id
+        self.localIdentifier = album.coverPhotoIdentifier ?? ""
+        self.displayName = album.displayName.replacingOccurrences(of: "_", with: " ")
         self.formattedDate = ""
-        self.photoCount = folder.photoCount
-        self.folder = folder
+        self.photoCount = album.photoCount
+        self.album = album
         self.imageLoader = imageLoader
         
-        self.countryName = (folder.targetAddress ?? "")
+        self.countryName = (album.targetAddress ?? "")
             .components(separatedBy: " ").first ?? "해외"
 
         let formatter = DateIntervalFormatter()
@@ -41,7 +41,7 @@ struct TravelAlbumCellViewModel: AlbumCellViewModel {
         formatter.timeStyle = .none
         
         self.dateRangeText = formatter.string(
-            from: folder.startDate,
-            to: folder.endDate)
+            from: album.startDate,
+            to: album.endDate)
     }
 }

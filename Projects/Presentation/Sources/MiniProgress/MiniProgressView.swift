@@ -17,11 +17,11 @@ final class MiniProgressView: UIView {
     
     private let locationTrackLayer = CAShapeLayer()
     private let locationProgressLayer = CAShapeLayer()
-    private let folderTrackLayer = CAShapeLayer()
-    private let folderProgressLayer = CAShapeLayer()
+    private let albumTrackLayer = CAShapeLayer()
+    private let albumProgressLayer = CAShapeLayer()
     private let dividerLayer = CAShapeLayer()
     private let locationGlowLayer = CALayer()
-    private let folderGlowLayer = CALayer()
+    private let albumGlowLayer = CALayer()
     
     private let locationIconView: UIImageView = {
         let imageView = UIImageView(image: UIImage(systemName: "location.fill"))
@@ -30,8 +30,8 @@ final class MiniProgressView: UIView {
         return imageView
     }()
     
-    private let folderIconView: UIImageView = {
-        let imageView = UIImageView(image: UIImage(systemName: "folder.fill"))
+    private let albumIconView: UIImageView = {
+        let imageView = UIImageView(image: UIImage(systemName: "album.fill"))
         imageView.tintColor = Theme.textSecondary
         imageView.contentMode = .scaleAspectFit
         return imageView
@@ -62,7 +62,7 @@ final class MiniProgressView: UIView {
     
     private func setupLayers() {
         [locationTrackLayer, locationProgressLayer,
-         folderTrackLayer, folderProgressLayer,
+         albumTrackLayer, albumProgressLayer,
          dividerLayer].forEach { layer.addSublayer($0) }
         
         let trackColor = Theme.strokeSoft.cgColor
@@ -79,23 +79,23 @@ final class MiniProgressView: UIView {
         locationProgressLayer.lineCap = .round
         locationProgressLayer.strokeEnd = 0
         
-        folderTrackLayer.fillColor = UIColor.clear.cgColor
-        folderTrackLayer.strokeColor = trackColor
-        folderTrackLayer.lineWidth = 4
-        folderTrackLayer.lineCap = .round
+        albumTrackLayer.fillColor = UIColor.clear.cgColor
+        albumTrackLayer.strokeColor = trackColor
+        albumTrackLayer.lineWidth = 4
+        albumTrackLayer.lineCap = .round
         
-        folderProgressLayer.fillColor = UIColor.clear.cgColor
-        folderProgressLayer.strokeColor = progressColor
-        folderProgressLayer.lineWidth = 4
-        folderProgressLayer.lineCap = .round
-        folderProgressLayer.strokeEnd = 0
+        albumProgressLayer.fillColor = UIColor.clear.cgColor
+        albumProgressLayer.strokeColor = progressColor
+        albumProgressLayer.lineWidth = 4
+        albumProgressLayer.lineCap = .round
+        albumProgressLayer.strokeEnd = 0
         
         dividerLayer.strokeColor = trackColor
         dividerLayer.lineWidth = 0.5
     }
     
     private func setupGlowDots() {
-        [locationGlowLayer, folderGlowLayer].forEach {
+        [locationGlowLayer, albumGlowLayer].forEach {
             $0.bounds = CGRect(x: 0, y: 0, width: 6, height: 6)
             $0.cornerRadius = 3
             $0.backgroundColor = UIColor.white.cgColor
@@ -110,7 +110,7 @@ final class MiniProgressView: UIView {
     
     private func setupIcons() {
         addSubview(locationIconView)
-        addSubview(folderIconView)
+        addSubview(albumIconView)
         
         locationIconView.snp.makeConstraints { make in
             make.centerX.equalTo(self)
@@ -118,7 +118,7 @@ final class MiniProgressView: UIView {
             make.width.height.equalTo(13)
         }
         
-        folderIconView.snp.makeConstraints { make in
+        albumIconView.snp.makeConstraints { make in
             make.centerX.equalTo(self)
             make.bottom.equalTo(self).offset(-16)
             make.width.height.equalTo(13)
@@ -132,7 +132,7 @@ final class MiniProgressView: UIView {
         updateBorder()
         updatePaths()
         updateGlowDot(glowLayer: locationGlowLayer, progress: locationProgressLayer.strokeEnd, startAngle: .pi)
-        updateGlowDot(glowLayer: folderGlowLayer, progress: folderProgressLayer.strokeEnd, startAngle: 0)
+        updateGlowDot(glowLayer: albumGlowLayer, progress: albumProgressLayer.strokeEnd, startAngle: 0)
     }
     
     private func updateBorder() {
@@ -161,8 +161,8 @@ final class MiniProgressView: UIView {
             endAngle: .pi,
             clockwise: true
         )
-        folderTrackLayer.path = bottomPath.cgPath
-        folderProgressLayer.path = bottomPath.cgPath
+        albumTrackLayer.path = bottomPath.cgPath
+        albumProgressLayer.path = bottomPath.cgPath
         
         let dividerPath = UIBezierPath()
         dividerPath.move(to: CGPoint(x: center.x - 22, y: center.y))
@@ -222,7 +222,7 @@ final class MiniProgressView: UIView {
     
     func bind(
         locationProgress: AnyPublisher<Double, Never>,
-        folderProgress: AnyPublisher<Double, Never>
+        albumProgress: AnyPublisher<Double, Never>
     ) {
         locationProgress
             .receive(on: DispatchQueue.main)
@@ -234,14 +234,14 @@ final class MiniProgressView: UIView {
             }
             .store(in: &cancellables)
         
-        folderProgress
+        albumProgress
             .receive(on: DispatchQueue.main)
             .sink { [weak self] progress in
                 guard let self else { return }
-                self.folderProgressLayer.strokeEnd = CGFloat(progress)
-                self.updateGlowDot(glowLayer: self.folderGlowLayer, progress: CGFloat(progress), startAngle: 0)
+                self.albumProgressLayer.strokeEnd = CGFloat(progress)
+                self.updateGlowDot(glowLayer: self.albumGlowLayer, progress: CGFloat(progress), startAngle: 0)
                 if progress > 0 {
-                    self.startPulseAnimation(on: self.folderGlowLayer)
+                    self.startPulseAnimation(on: self.albumGlowLayer)
                     locationGlowLayer.removeAnimation(forKey: "pulse")
                     locationGlowLayer.isHidden = true
                 }

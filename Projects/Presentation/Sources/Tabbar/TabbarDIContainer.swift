@@ -32,9 +32,9 @@ public final class TabbarDIContainer {
             geoRepository: appDiContainer.geoRepository
         )
         
-        let autoFolderUseCase = DefaultAutoFolderUseCase(
+        let autoAlbumUseCase = DefaultAutoAlbumUseCase(
             photoDataRepository: appDiContainer.photoDataRepository,
-            folderDataRepository: appDiContainer.folderDataRepository,
+            albumDataRepository: appDiContainer.albumDataRepository,
             photoCategoryRepository: appDiContainer.photoCategoryRepository,
             userDefaultRepository: appDiContainer.userDefaultRepository,
             travelRepository: appDiContainer.travelRepository,
@@ -44,7 +44,7 @@ public final class TabbarDIContainer {
         
         return TabbarViewModel(permissionUseCase: permissionUseCase,
                                analysisUseCase: analysisUseCase,
-                               autoFolderUseCase: autoFolderUseCase)
+                               autoAlbumUseCase: autoAlbumUseCase)
     }
     
     func makePhotoLibraryDIContainer() -> PhotoLibraryDIContainer {

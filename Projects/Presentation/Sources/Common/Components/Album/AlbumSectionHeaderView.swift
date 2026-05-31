@@ -60,7 +60,23 @@ final class AlbumSectionHeaderView: UICollectionReusableView {
         onMoreTapped?()
     }
 
-    func configure(title: String) {
-        titleLabel.text = title
+//    func configure(title: String) {
+//        titleLabel.text = title
+//    }
+    func configure(_ section: AlbumSection) {
+        titleLabel.text = section.title
+        
+        switch section {
+        case .travel:
+            self.moreButton.isHidden = false
+        case .location:
+            self.moreButton.isHidden = false
+        case .date:
+            self.moreButton.isHidden = false
+        case .category:
+            self.moreButton.isHidden = true
+        case .face:
+            self.moreButton.isHidden = true
+        }
     }
 }

@@ -83,14 +83,14 @@ final class AlbumAnalysisSheet: UIViewController {
     }()
     
     private let progressPublisher: AnyPublisher<Double, Never>
-    private let folderProgressPublisher: AnyPublisher<Double, Never>
+    private let albumProgressPublisher: AnyPublisher<Double, Never>
     private var cancellables = Set<AnyCancellable>()
 
     init(progress: AnalyzeProgress) {
         self.progress = progress
         
         self.progressPublisher = progress.photoProgress
-        self.folderProgressPublisher = progress.folderProgress
+        self.albumProgressPublisher = progress.albumProgress
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -201,10 +201,10 @@ final class AlbumAnalysisSheet: UIViewController {
             }
             .store(in: &cancellables)
         
-        folderProgressPublisher
+        albumProgressPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] progress in
-                print("folderProgressPublisher \(progress)")
+                print("albumProgressPublisher \(progress)")
                 self?.albumRow.updateProgress(progress)
                 if progress >= 1.0 {
                     self?.endPage()

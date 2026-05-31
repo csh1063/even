@@ -13,18 +13,18 @@ import Domain
 public final class AlbumDetailDIContainer {
 
     private let photoLibraryRepository: PhotoLibraryRepository
-    private let folderDataRepository: FolderDataRepository
+    private let albumDataRepository: AlbumDataRepository
     private let labelRepository: PhotoLabelDataRepository
     
-    private let folder: Folder
+    private let album: Album
 
-    public init(folder: Folder,
+    public init(album: Album,
                 photoLibraryRepository: PhotoLibraryRepository,
-                folderDataRepository: FolderDataRepository,
+                albumDataRepository: AlbumDataRepository,
                 labelRepository: PhotoLabelDataRepository) {
-        self.folder = folder
+        self.album = album
         self.photoLibraryRepository = photoLibraryRepository
-        self.folderDataRepository = folderDataRepository
+        self.albumDataRepository = albumDataRepository
         self.labelRepository = labelRepository
     }
 
@@ -34,13 +34,13 @@ public final class AlbumDetailDIContainer {
             repository: photoLibraryRepository
         )
         
-        let folderDetailUseCase = DefaultFolderDetailUseCase(
-            repository: folderDataRepository
+        let albumDetailUseCase = DefaultAlbumDetailUseCase(
+            repository: albumDataRepository
         )
         
-        return AlbumDetailViewModel(folder: folder,
+        return AlbumDetailViewModel(album: album,
                                     imageUseCase: imageUseCase,
-                                    detailUseCase: folderDetailUseCase)
+                                    detailUseCase: albumDetailUseCase)
     }
     
     func makeImageViewerViewModel(photoDetails: [PhotoDetail], index: Int) -> ImageViewerViewModel {

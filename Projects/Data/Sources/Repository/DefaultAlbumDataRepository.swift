@@ -1,5 +1,5 @@
 //
-//  DefaultFolderDataRepository.swift
+//  DefaultAlbumDataRepository.swift
 //  Data
 //
 //  Created by sanghyeon on 3/21/26.
@@ -11,59 +11,59 @@ import SwiftData
 import Domain
 import Combine
 
-public final class DefaultFolderDataRepository: FolderDataRepository {
+public final class DefaultAlbumDataRepository: AlbumDataRepository {
     
     private let container: ModelContainer
     
-    private let foldersSubject = CurrentValueSubject<[Folder], Never>([])
-    public var foldersPublisher: AnyPublisher<[Folder], Never> {
-        foldersSubject.eraseToAnyPublisher()
+    private let albumsSubject = CurrentValueSubject<[Album], Never>([])
+    public var albumsPublisher: AnyPublisher<[Album], Never> {
+        albumsSubject.eraseToAnyPublisher()
     }
     
     public init(container: ModelContainer) {
         self.container = container
     }
     
-    public func saveFolder(folder: Folder, returnExist: Bool = false) throws -> Folder? {
+    public func saveAlbum(album: Album, returnExist: Bool = false) throws -> Album? {
         
         let context = ModelContext(container)
         
-        let name = folder.name
-        let fetchDescriptor = FetchDescriptor<FolderEntity>(
+        let name = album.name
+        let fetchDescriptor = FetchDescriptor<AlbumEntity>(
             predicate: #Predicate { $0.name == name }
         )
         
         let existing = try context.fetch(fetchDescriptor)
         guard existing.isEmpty else { return returnExist ? existing.first?.toDomain():nil }
         
-        let entity = FolderEntity(
-            id: folder.id,
-            name: folder.name,
-            displayName: folder.displayName,
-            isAuto: folder.isAuto,
-            coverPhotoIdentifier: folder.coverPhotoIdentifier,
-            from: folder.from
+        let entity = AlbumEntity(
+            id: album.id,
+            name: album.name,
+            displayName: album.displayName,
+            isAuto: album.isAuto,
+            coverPhotoIdentifier: album.coverPhotoIdentifier,
+            from: album.from
         )
         context.insert(entity)
         
-        folder.keywords.forEach {
-            let keywordEntity = FolderKeywordEntity(
+        album.keywords.forEach {
+            let keywordEntity = AlbumKeywordEntity(
                 keyword: $0,
                 weight: 1.0,
-                folder: entity
+                album: entity
             )
             context.insert(keywordEntity)
         }
         
         try context.save()
-        return folder
+        return album
     }
     
-    public func fetchAll() throws -> [Folder] {
+    public func fetchAll() throws -> [Album] {
         
         let context = ModelContext(container)
         
-        let fetchDescriptor = FetchDescriptor<FolderEntity>(
+        let fetchDescriptor = FetchDescriptor<AlbumEntity>(
 //            predicate: #Predicate{$0.from == "travel"},
             sortBy: [
 //                SortDescriptor(\.from, order: .forward),
@@ -74,22 +74,22 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
         return try context.fetch(fetchDescriptor).map {$0.toDomainWithKey()}
     }
     
-    public func fetchAutoAll() throws -> [Folder] {
+    public func fetchAutoAll() throws -> [Album] {
         
         let context = ModelContext(container)
         
-        let fetchDescriptor = FetchDescriptor<FolderEntity>(
+        let fetchDescriptor = FetchDescriptor<AlbumEntity>(
             predicate: #Predicate { $0.isAuto == true }
         )
         return try context.fetch(fetchDescriptor).map {$0.toDomain()}
     }
     
-    public func fetchPhotos(by folderId: UUID) throws -> [Photo] {
+    public func fetchPhotos(by albumId: UUID) throws -> [Photo] {
         
         let context = ModelContext(container)
         let photoFetchDescriptor = FetchDescriptor<PhotoEntity>(
             predicate: #Predicate { photo in
-                photo.folders.contains { $0.id == folderId }
+                photo.albums.contains { $0.id == albumId }
             },
             sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
         )
@@ -98,101 +98,101 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
         return photos.map { $0.toDomain() }
     }
     
-    public func updateFolder(folder: Folder) throws {
+    public func updateAlbum(album: Album) throws {
         
         let context = ModelContext(container)
         
-        let id = folder.id
-        let fetchDescriptor = FetchDescriptor<FolderEntity>(
+        let id = album.id
+        let fetchDescriptor = FetchDescriptor<AlbumEntity>(
             predicate: #Predicate { $0.id == id }
         )
         
         guard let entity = try context.fetch(fetchDescriptor).first else {
-            throw FolderRepositoryError.folderNotFound
+            throw AlbumRepositoryError.albumNotFound
         }
         
-        entity.name = folder.name
-        entity.displayName = folder.displayName
-        entity.coverPhotoIdentifier = folder.coverPhotoIdentifier
-        entity.photoCount = folder.photoCount
+        entity.name = album.name
+        entity.displayName = album.displayName
+        entity.coverPhotoIdentifier = album.coverPhotoIdentifier
+        entity.photoCount = album.photoCount
         
         try context.save()
     }
     
-    public func updateFolderName(new name: String, id: UUID) throws {
+    public func updateAlbumName(new name: String, id: UUID) throws {
         
         let context = ModelContext(container)
         
-        let fetchDescriptor = FetchDescriptor<FolderEntity>(
+        let fetchDescriptor = FetchDescriptor<AlbumEntity>(
             predicate: #Predicate { $0.id == id }
         )
         
         guard let entity = try context.fetch(fetchDescriptor).first else {
-            throw FolderRepositoryError.folderNotFound
+            throw AlbumRepositoryError.albumNotFound
         }
         
         entity.displayName = name
         
         try context.save()
         
-        try self.syncFolders()
+        try self.syncAlbums()
     }
     
     public func delete(id: UUID) throws {
         
         let context = ModelContext(container)
         
-        let fetchDescriptor = FetchDescriptor<FolderEntity>(
+        let fetchDescriptor = FetchDescriptor<AlbumEntity>(
             predicate: #Predicate { $0.id == id }
         )
         
         guard let entity = try context.fetch(fetchDescriptor).first else {
-            throw FolderRepositoryError.folderNotFound
+            throw AlbumRepositoryError.albumNotFound
         }
         
         context.delete(entity)
         try context.save()
         
-        try self.syncFolders()
+        try self.syncAlbums()
     }
     
-    public func addPhoto(folderId: UUID, photoIdentifier: String) throws {
+    public func addPhoto(albumId: UUID, photoIdentifier: String) throws {
         
         let context = ModelContext(container)
         
-        let folderDescriptor = FetchDescriptor<FolderEntity>(
-            predicate: #Predicate { $0.id == folderId }
+        let albumDescriptor = FetchDescriptor<AlbumEntity>(
+            predicate: #Predicate { $0.id == albumId }
         )
         
         let photoDescriptor = FetchDescriptor<PhotoEntity>(
             predicate: #Predicate { $0.localIdentifier == photoIdentifier }
         )
         
-        guard let folder = try context.fetch(folderDescriptor).first else {
-            throw FolderRepositoryError.folderNotFound
+        guard let album = try context.fetch(albumDescriptor).first else {
+            throw AlbumRepositoryError.albumNotFound
         }
         
         guard let photo = try context.fetch(photoDescriptor).first else {
-            throw FolderRepositoryError.photoNotFound
+            throw AlbumRepositoryError.photoNotFound
         }
         
         // 중복 체크
-        guard !folder.photos.contains(where: { $0.localIdentifier == photoIdentifier }) else { return }
+        guard !album.photos.contains(where: { $0.localIdentifier == photoIdentifier }) else { return }
         
-        folder.photos.append(photo)
+        album.photos.append(photo)
         
         try context.save()
     }
     
-    public func addPhotos(folderId: UUID, photoIdentifiers: [String]) throws {
+    public func addPhotos(albumId: UUID, photoIdentifiers: [String]) throws {
         
         let context = ModelContext(container)
         
-        let folderDescriptor = FetchDescriptor<FolderEntity>(
-            predicate: #Predicate { $0.id == folderId }
+        let albumDescriptor = FetchDescriptor<AlbumEntity>(
+            predicate: #Predicate { $0.id == albumId }
         )
-        guard let folder = try context.fetch(folderDescriptor).first else {
-            throw FolderRepositoryError.folderNotFound
+        guard let album = try context.fetch(albumDescriptor).first else {
+            throw AlbumRepositoryError.albumNotFound
         }
         
         let ids = photoIdentifiers
@@ -202,27 +202,27 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
         
         let photos = try context.fetch(photoDescriptor)
         
-        let existingIds = Set(folder.photos.map { $0.localIdentifier })
+        let existingIds = Set(album.photos.map { $0.localIdentifier })
         let uniqueNewPhotos = photos.filter { !existingIds.contains($0.localIdentifier) }
         
-        folder.photos.append(contentsOf: uniqueNewPhotos)
+        album.photos.append(contentsOf: uniqueNewPhotos)
         
-        let allPhotos = folder.photos.sorted {$0.createdAt < $1.createdAt}
-        folder.startDate = allPhotos.first?.createdAt ?? Date()
-        folder.endDate = allPhotos.last?.createdAt ?? Date()
+        let allPhotos = album.photos.sorted {$0.createdAt < $1.createdAt}
+        album.startDate = allPhotos.first?.createdAt ?? Date()
+        album.endDate = allPhotos.last?.createdAt ?? Date()
         
-        folder.photoCount = folder.photos.count
-        folder.coverPhotoIdentifier = folder.photos.sorted {
+        album.photoCount = album.photos.count
+        album.coverPhotoIdentifier = album.photos.sorted {
             $0.createdAt > $1.createdAt
         }.first?.localIdentifier
         
         try context.save()
     }
     
-    public func removePhoto(folderId: UUID, photoIdentifier: String) throws {
-//        let fetchDescriptor = FetchDescriptor<FolderPhotoMapEntity>(
+    public func removePhoto(albumId: UUID, photoIdentifier: String) throws {
+//        let fetchDescriptor = FetchDescriptor<AlbumPhotoMapEntity>(
 //            predicate: #Predicate {
-//                $0.folder?.id == folderId &&
+//                $0.album?.id == albumId &&
 //                $0.photo?.localIdentifier == photoIdentifier
 //            }
 //        )
@@ -232,55 +232,55 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
 //        try context.save()
     }
     
-    public func deleteAutoFolders(by from: String) throws {
+    public func deleteAutoAlbums(by from: String) throws {
         
         let context = ModelContext(container)
         
-        let folderDescriptor: FetchDescriptor<FolderEntity>
+        let albumDescriptor: FetchDescriptor<AlbumEntity>
         if from == "all" {
-            folderDescriptor = FetchDescriptor<FolderEntity>(
+            albumDescriptor = FetchDescriptor<AlbumEntity>(
                 predicate: #Predicate { $0.isAuto == true }
             )
         } else {
-            folderDescriptor = FetchDescriptor<FolderEntity>(
+            albumDescriptor = FetchDescriptor<AlbumEntity>(
                 predicate: #Predicate { $0.isAuto == true && $0.from == from }
             )
         }
         
-        let autoFolders = try context.fetch(folderDescriptor)
+        let autoAlbums = try context.fetch(albumDescriptor)
         
-        autoFolders.forEach { $0.photos.removeAll() }
-        autoFolders.forEach { context.delete($0) }
+        autoAlbums.forEach { $0.photos.removeAll() }
+        autoAlbums.forEach { context.delete($0) }
         try context.save()
     }
     
     public func syncPhotoCount() throws {
         let context = ModelContext(container)
         
-        let folderDescriptor = FetchDescriptor<FolderEntity>()
-        let folders = try context.fetch(folderDescriptor)
+        let albumDescriptor = FetchDescriptor<AlbumEntity>()
+        let albums = try context.fetch(albumDescriptor)
         
-        folders.forEach { folder in
-            folder.photoCount = folder.photos.count
+        albums.forEach { album in
+            album.photoCount = album.photos.count
         }
         
         try context.save()
     }
     
-    public func syncFolders() throws {
+    public func syncAlbums() throws {
         let updated = try fetchAll()
-        foldersSubject.send(updated)
+        albumsSubject.send(updated)
     }
     
     public func deleteAll() throws {
         let context = ModelContext(container)
         
-        print("photo-folder 연결 제거")
-        let folders = try context.fetch(FetchDescriptor<FolderEntity>())
-        folders.forEach { $0.photos.removeAll() }
+        print("photo-album 연결 제거")
+        let albums = try context.fetch(FetchDescriptor<AlbumEntity>())
+        albums.forEach { $0.photos.removeAll() }
         try context.save()
         
-        folders.forEach { context.delete($0) }
+        albums.forEach { context.delete($0) }
         try context.save()
         
         print("photo 삭제")
@@ -292,6 +292,6 @@ public final class DefaultFolderDataRepository: FolderDataRepository {
         try context.delete(model: FaceEmbeddingEntity.self)
         try context.save()
         
-        try self.syncFolders()
+        try self.syncAlbums()
     }
 }

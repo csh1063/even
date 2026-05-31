@@ -24,21 +24,21 @@ public struct TravelCluster {
     }()
     
 
-    public var folderName: String {
+    public var albumName: String {
         let raw = locality?.isEmpty == false ? locality! :
                   administrativeArea.isEmpty ? country :
                   administrativeArea
         let place = cleanAreaName(raw)
         return "\(place) · \(Self.dateFormatter.string(from: startDate))"
     }
-//    public var folderName: String {
+//    public var albumName: String {
 //        let place = locality?.isEmpty == false ? locality! :
 //                    administrativeArea.isEmpty ? country :
 //                    administrativeArea
 //        return "\(place) · \(Self.dateFormatter.string(from: startDate))"
 //    }
     
-    public var folderDisplayName: String { folderName }
+    public var albumDisplayName: String { albumName }
     
     public init(
         photos: [PhotoLocationSnapshot],

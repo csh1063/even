@@ -1,5 +1,5 @@
 //
-//  FolderEntityMapper.swift
+//  AlbumEntityMapper.swift
 //  Data
 //
 //  Created by sanghyeon on 3/21/26.
@@ -9,9 +9,9 @@
 import Foundation
 import Domain
 
-extension FolderEntity {
-    func toDomain() -> Folder {
-        Folder(
+extension AlbumEntity {
+    func toDomain() -> Album {
+        Album(
             id: id,
             name: name,
             displayName: displayName,
@@ -27,8 +27,8 @@ extension FolderEntity {
         )
     }
     
-    func toDomainWithKey() -> Folder {
-        Folder(
+    func toDomainWithKey() -> Album {
+        Album(
             id: id,
             name: name,
             displayName: displayName,
@@ -44,8 +44,8 @@ extension FolderEntity {
         )
     }
     
-    func toDomainWithPhoto() -> Folder {
-        Folder(
+    func toDomainWithPhoto() -> Album {
+        Album(
             id: id,
             name: name,
             displayName: displayName,
@@ -61,8 +61,8 @@ extension FolderEntity {
         )
     }
     
-    func toDomainAll() -> Folder {
-        Folder(
+    func toDomainAll() -> Album {
+        Album(
             id: id,
             name: name,
             displayName: displayName,

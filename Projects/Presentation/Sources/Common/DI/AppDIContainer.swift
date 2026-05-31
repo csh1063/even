@@ -15,7 +15,7 @@ public protocol AppDIContainer {
     var photoLibraryRepository: PhotoLibraryRepository {get}
     var photoAnalysisRepository: PhotoAnalysisRepository {get}
     var photoDataRepository: PhotoDataRepository {get}
-    var folderDataRepository: FolderDataRepository {get}
+    var albumDataRepository: AlbumDataRepository {get}
     var photoLabelDataRepository: PhotoLabelDataRepository {get}
     var photoCategoryRepository: PhotoCategoryRepository {get}
     var geoRepository: GeoRepository {get}

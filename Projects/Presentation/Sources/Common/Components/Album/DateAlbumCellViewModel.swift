@@ -18,17 +18,17 @@ struct DateAlbumCellViewModel: AlbumCellViewModel {
     
     var photoCount: Int
     
-    var folder: Folder
+    var album: Album
     
     var imageLoader: any ImageLoadable
     
-    init(folder: Folder, imageLoader: any ImageLoadable) {
-        self.id = folder.id
-        self.localIdentifier = folder.coverPhotoIdentifier ?? ""
-        self.displayName = folder.displayName.replacingOccurrences(of: "_", with: " ")
+    init(album: Album, imageLoader: any ImageLoadable) {
+        self.id = album.id
+        self.localIdentifier = album.coverPhotoIdentifier ?? ""
+        self.displayName = album.displayName.replacingOccurrences(of: "_", with: " ")
         self.formattedDate = ""
-        self.photoCount = folder.photoCount
-        self.folder = folder
+        self.photoCount = album.photoCount
+        self.album = album
         self.imageLoader = imageLoader
     }
 }

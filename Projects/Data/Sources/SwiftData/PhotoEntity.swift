@@ -36,8 +36,8 @@ public final class PhotoEntity {
     @Relationship(deleteRule: .cascade)
     public var faceEmbeddings: [FaceEmbeddingEntity] = []
     
-    @Relationship(deleteRule: .nullify, inverse: \FolderEntity.photos)
-    public var folders: [FolderEntity] = []
+    @Relationship(deleteRule: .nullify, inverse: \AlbumEntity.photos)
+    public var albums: [AlbumEntity] = []
     
     public init(
         id: UUID = UUID(),

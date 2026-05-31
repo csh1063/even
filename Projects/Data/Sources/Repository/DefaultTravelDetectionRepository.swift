@@ -132,7 +132,7 @@ public final class DefaultTravelDetectionRepository: TravelDetectionRepository {
         let allCountries = countries + geocodedCountries
         
         // 3. 폴더명 결정
-        let locality = resolveFolderLocality(localities: allLocalities, administrativeAreas: allAdministrativeAreas)
+        let locality = resolveAlbumLocality(localities: allLocalities, administrativeAreas: allAdministrativeAreas)
         let administrativeArea = mostFrequent(allAdministrativeAreas) ?? ""
         let country = mostFrequent(allCountries) ?? ""
         
@@ -157,7 +157,7 @@ public final class DefaultTravelDetectionRepository: TravelDetectionRepository {
     }
     
     // locality 분포 보고 시/도 결정
-    private func resolveFolderLocality(localities: [String], administrativeAreas: [String]) -> String? {
+    private func resolveAlbumLocality(localities: [String], administrativeAreas: [String]) -> String? {
         guard !localities.isEmpty else {
             return administrativeAreas.isEmpty ? nil : mostFrequent(administrativeAreas)
         }

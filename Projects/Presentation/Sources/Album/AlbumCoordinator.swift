@@ -29,8 +29,8 @@ public final class AlbumCoordinator: BaseCoordinator {
         let viewModel = diContainer.makeAlbumViewModel(tabbarViewModel: tabbarViewModel)
         viewModel.onAction = { [weak self] type in
             switch type {
-            case .moveDetail(let folder):
-                self?.moveDetail(folder: folder)
+            case .moveDetail(let album):
+                self?.moveDetail(album: album)
             }
         }
         
@@ -48,9 +48,9 @@ public final class AlbumCoordinator: BaseCoordinator {
         return navigationController
     }
     
-    func moveDetail(folder: Folder) {
+    func moveDetail(album: Album) {
         print("move!")
-        let detailDI = diContainer.makeDetailDIContainer(folder: folder)
+        let detailDI = diContainer.makeDetailDIContainer(album: album)
         
         let detailCoordinator = AlbumDetailCoordinator(
             diContainer: detailDI,

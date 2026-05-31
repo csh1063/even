@@ -95,7 +95,7 @@ final class TabbarCoordinator: BaseCoordinator {
         sheet.onEnd = {
             AnalysisProgressManager.shared.show(
                 locationProgress: progress.locationProgress,
-                folderProgress: progress.locationFolderProgress
+                albumProgress: progress.locationAlbumProgress
             )
         }
 

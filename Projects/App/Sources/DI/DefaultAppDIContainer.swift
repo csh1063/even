@@ -29,8 +29,8 @@ final class DefaultAppDIContainer: AppDIContainer {
         repositoryFactory.photoDataRepository
     }
     
-    var folderDataRepository: FolderDataRepository{
-        repositoryFactory.folderDataRepository
+    var albumDataRepository: AlbumDataRepository{
+        repositoryFactory.albumDataRepository
     }
     
     var photoLabelDataRepository: PhotoLabelDataRepository {
@@ -95,7 +95,7 @@ final class DefaultAppDIContainer: AppDIContainer {
     func makePhotoCheckUseCase() -> PhotoCheckUseCase {
         DefaultPhotoCheckUseCase(photoLibraryRepository: photoLibraryRepository,
                                  photoDataRepository: photoDataRepository,
-                                 folderDataRepository: folderDataRepository
+                                 albumDataRepository: albumDataRepository
         )
     }
     

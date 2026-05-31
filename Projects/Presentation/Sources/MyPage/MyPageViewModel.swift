@@ -95,11 +95,11 @@ final class MyPageViewModel: BaseViewModel {
             switch data.type {
             case .allLibraryPhoto, .allPhoto, .unanalysisPhoto, .analyzedDate: break
             case .analysis: tabbarViewModel.send(.analysis)
-            case .travelFolder: tabbarViewModel.send(.autoTravelFolder)
-            case .reAutoFolder: tabbarViewModel.send(.reAutoFolder)
+            case .travelAlbum: tabbarViewModel.send(.autoTravelAlbum)
+            case .reAutoAlbum: tabbarViewModel.send(.reAutoAlbum)
             case .reAnalysis: tabbarViewModel.send(.reanalysis)
             case .reset: tabbarViewModel.send(.clear)
-            case .locationAnalysis, .locationAutoFolder: break
+            case .locationAnalysis, .locationAutoAlbum: break
             case .autoAnalysis: break // toggle
             case .photoPermission:
                 showAlert(
@@ -192,8 +192,8 @@ final class MyPageViewModel: BaseViewModel {
             [
                 MyCellData(type: .analyzedDate, value: analyzedDate),
                 MyCellData(type: .analysis),
-                MyCellData(type: .travelFolder),
-                MyCellData(type: .reAutoFolder),
+                MyCellData(type: .travelAlbum),
+                MyCellData(type: .reAutoAlbum),
 //                MyCellData(type: .reAnalysis),
                 MyCellData(type: .reset)
             ]
@@ -207,7 +207,7 @@ final class MyPageViewModel: BaseViewModel {
             MyCellHeader(name: "사진 분석", order: 10): analyzedItems,
 //            MyCellHeader(name: "백 그라운드 작업", order: 20): [
 //                MyCellData(type: .locationAnalysis, value: "-", isOn: false),
-//                MyCellData(type: .locationAutoFolder, value: "-", isOn: false)
+//                MyCellData(type: .locationAutoAlbum, value: "-", isOn: false)
 //            ],
 //            MyCellHeader(name: "정리 옵션", order: 30): [
 //                MyCellData(type: .autoAnalysis, isOn: false, isPrimary: false),

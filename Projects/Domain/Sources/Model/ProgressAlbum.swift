@@ -1,5 +1,5 @@
 //
-//  ProgressFolder.swift
+//  ProgressAlbum.swift
 //  Domain
 //
 //  Created by sanghyeon on 3/22/26.
@@ -7,13 +7,13 @@
 //
 
 
-public struct ProgressFolder {
-    public let step: FolderStep
+public struct ProgressAlbum {
+    public let step: AlbumStep
     public let ratio: Double
     
-    public enum FolderStep {
+    public enum AlbumStep {
         case analyzing      // 라벨 집계 중
-        case creatingFolders // 폴더 생성 중
+        case creatingAlbums // 폴더 생성 중
         case classifying    // 사진 분류 중
         case completed
     }

@@ -1,5 +1,5 @@
 //
-//  FolderKeyword.swift
+//  AlbumKeyword.swift
 //  Domain
 //
 //  Created by sanghyeon on 3/21/26.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct FolderKeyword {
+public struct AlbumKeyword {
     public let keyword: String
     public let weight: Float
     

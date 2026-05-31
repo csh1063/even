@@ -1,5 +1,5 @@
 //
-//  FolderKeywordEntity.swift
+//  AlbumKeywordEntity.swift
 //  Data
 //
 //  Created by sanghyeon on 3/21/26.
@@ -10,22 +10,22 @@ import SwiftData
 import Foundation
 
 @Model
-public final class FolderKeywordEntity {
+public final class AlbumKeywordEntity {
     @Attribute(.unique) public var id: UUID
     public var keyword: String
     public var weight: Float             // 키워드 중요도
     
-    public var folder: FolderEntity?
+    public var album: AlbumEntity?
     
     public init(
         id: UUID = UUID(),
         keyword: String,
         weight: Float = 1.0,
-        folder: FolderEntity? = nil
+        album: AlbumEntity? = nil
     ) {
         self.id = id
         self.keyword = keyword
         self.weight = weight
-        self.folder = folder
+        self.album = album
     }
 }

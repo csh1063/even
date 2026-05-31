@@ -12,9 +12,9 @@ public enum MoaSchemaV0: VersionedSchema {
     public static let versionIdentifier = Schema.Version(0, 0, 3)
     public static let models: [any PersistentModel.Type] = [
         PhotoEntity.self,
-        FolderEntity.self,
+        AlbumEntity.self,
         PhotoLabelEntity.self,
-        FolderKeywordEntity.self,
+        AlbumKeywordEntity.self,
         FaceEmbeddingEntity.self,
         HomeZoneEntity.self
     ]
