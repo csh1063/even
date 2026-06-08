@@ -28,6 +28,22 @@ public final class NetworkService {
         return try await excuteor.request(GeoJsonAPI.coordiToAddress(params))
     }
     
+    func locationOverseas(_ photosInCoordi: [String: [Photo]]) async throws -> [AddressDTO] {
+        var params = [OverseasParam]()
+        for (coordiString, photos) in photosInCoordi {
+            print("etcPhotos coordiString", coordiString)
+            let coordi = coordiString.split(separator: ",")
+            if coordi.count >= 2,
+                let latitude = Double(coordi[0]),
+                let longitude = Double(coordi[1]) {
+                params.append(OverseasParam(ids: photos.map{ $0.localIdentifier },
+                                            lat: latitude,
+                                            lng: longitude))
+            }
+        }
+        return try await excuteor.request(GeoJsonAPI.coordiForOverseas(params))
+    }
+    
     func writeFeedback(_ feedback: FeedbackParam) async throws {
         let _: BaseNil = try await excuteor.request(SettingAPI.feedback(feedback))
     }

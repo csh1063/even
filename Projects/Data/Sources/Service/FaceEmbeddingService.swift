@@ -11,146 +11,6 @@ import Vision
 import CoreGraphics
 import Foundation
 import Domain
-//
-//public actor FaceEmbeddingService {
-//
-//    private let inputSize = CGSize(width: 112, height: 112)
-//
-//    private lazy var model: MLModel? = {
-//        if let resourcePath = Bundle.module.resourcePath {
-//            let files = try? FileManager.default.contentsOfDirectory(atPath: resourcePath)
-//            print("현재 모듈 번들 내부 파일 목록: \(files ?? [])")
-//        }
-//        
-//        guard let url = Bundle.module.url(forResource: "AdaFace_IR18", withExtension: "mlmodelc") else {
-//            print("FaceEmbeddingService: AdaFace_IR18.mlpackage를 찾을 수 없음")
-//            return nil
-//        }
-//        return try? MLModel(contentsOf: url)
-//    }()
-//
-//    public init() { }
-//
-//    // MARK: - Public
-//
-//    public func extractEmbeddings(from image: CGImage) -> [FaceEmbedding] {
-//        print("extractEmbeddings")
-//        guard let observations = detectFaces(in: image), !observations.isEmpty else {
-//            return []
-//        }
-//        print("extractEmbeddings", observations.count)
-//        return observations.compactMap { extractEmbedding(from: image, observation: $0) }
-//    }
-//
-//    // MARK: - Private
-//
-//    private func detectFaces(in image: CGImage) -> [VNFaceObservation]? {
-//        let request = VNDetectFaceRectanglesRequest()
-//        let handler = VNImageRequestHandler(cgImage: image, options: [:])
-//        do {
-//            try handler.perform([request])
-//            return request.results?
-////                .filter { $0.faceCaptureQuality ?? 0 >= 0.3 }
-//                .filter { $0.boundingBox.width >= 0.05 && $0.boundingBox.height >= 0.05 }
-//        } catch {
-//            print("FaceEmbeddingService detectFaces 에러:", error)
-//            return nil
-//        }
-//    }
-//
-//    private func extractEmbedding(from image: CGImage, observation: VNFaceObservation) -> FaceEmbedding? {
-//        guard let cropped = cropFace(from: image, boundingBox: observation.boundingBox),
-//              let resized = resize(image: cropped, to: inputSize),
-//              let embedding = runModel(on: resized) else {
-//            return nil
-//        }
-//        return FaceEmbedding(embedding: embedding, boundingBox: observation.boundingBox)
-//    }
-//
-//    private func cropFace(from image: CGImage, boundingBox: CGRect) -> CGImage? {
-//        let width = CGFloat(image.width)
-//        let height = CGFloat(image.height)
-//        let rect = CGRect(
-//            x: boundingBox.minX * width,
-//            y: (1 - boundingBox.maxY) * height,
-//            width: boundingBox.width * width,
-//            height: boundingBox.height * height
-//        )
-//        return image.cropping(to: rect)
-//    }
-//
-//    private func resize(image: CGImage, to size: CGSize) -> CGImage? {
-//        let context = CGContext(
-//            data: nil,
-//            width: Int(size.width),
-//            height: Int(size.height),
-//            bitsPerComponent: image.bitsPerComponent,
-//            bytesPerRow: 0,
-//            space: image.colorSpace ?? CGColorSpaceCreateDeviceRGB(),
-//            bitmapInfo: image.bitmapInfo.rawValue
-//        )
-//        context?.draw(image, in: CGRect(origin: .zero, size: size))
-//        return context?.makeImage()
-//    }
-//
-//    private func runModel(on image: CGImage) -> [Float]? {
-//        guard let model,
-//              let pixelBuffer = image.toPixelBuffer(),
-//              let input = try? MLDictionaryFeatureProvider(dictionary: ["face_image": pixelBuffer]),
-//              let output = try? model.prediction(from: input),
-//              let multiArray = output.featureValue(for: "embedding")?.multiArrayValue else {
-//            return nil
-//        }
-//
-//        let count = multiArray.count
-//        var result = [Float](repeating: 0, count: count)
-//        for i in 0..<count {
-//            result[i] = multiArray[i].floatValue
-//        }
-//        return l2Normalize(result)
-//    }
-//
-//    private func l2Normalize(_ vector: [Float]) -> [Float] {
-//        let norm = sqrt(vector.map { $0 * $0 }.reduce(0, +))
-//        guard norm > 0 else { return vector }
-//        return vector.map { $0 / norm }
-//    }
-//}
-//
-//// MARK: - CGImage Extension
-//private extension CGImage {
-//    func toPixelBuffer() -> CVPixelBuffer? {
-//        let width = self.width
-//        let height = self.height
-//
-//        var pixelBuffer: CVPixelBuffer?
-//        let status = CVPixelBufferCreate(
-//            kCFAllocatorDefault,
-//            width, height,
-//            kCVPixelFormatType_32ARGB,
-//            [kCVPixelBufferCGImageCompatibilityKey: true,
-//             kCVPixelBufferCGBitmapContextCompatibilityKey: true] as CFDictionary,
-//            &pixelBuffer
-//        )
-//        guard status == kCVReturnSuccess, let buffer = pixelBuffer else { return nil }
-//
-//        CVPixelBufferLockBaseAddress(buffer, [])
-//        defer { CVPixelBufferUnlockBaseAddress(buffer, []) }
-//
-//        let context = CGContext(
-//            data: CVPixelBufferGetBaseAddress(buffer),
-//            width: width,
-//            height: height,
-//            bitsPerComponent: 8,
-//            bytesPerRow: CVPixelBufferGetBytesPerRow(buffer),
-//            space: CGColorSpaceCreateDeviceRGB(),
-//            bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue
-//        )
-//        context?.draw(self, in: CGRect(x: 0, y: 0, width: width, height: height))
-//        return buffer
-//    }
-//}
-
 import UIKit
 
 public actor FaceEmbeddingService {
@@ -158,7 +18,7 @@ public actor FaceEmbeddingService {
     private let inputSize = CGSize(width: 112, height: 112)
 
     private lazy var model: MLModel? = {
-        guard let url = Bundle.module.url(forResource: "AdaFace_IR18", withExtension: "mlmodelc") else {
+        guard let url = Bundle.module.url(forResource: "AdaFace_IR50", withExtension: "mlmodelc") else {
             print("FaceEmbeddingService: AdaFace_IR18.mlmodelc를 찾을 수 없음")
             return nil
         }
@@ -169,7 +29,7 @@ public actor FaceEmbeddingService {
 
     // MARK: - Public
 
-    public func extractEmbeddings(from image: CGImage) async -> [FaceEmbedding] {
+    public func extractEmbeddings(from image: CGImage, hasGlass: Bool = false) async -> [FaceEmbedding] {
         guard let observations = detectFacesWithLandmarks(in: image),
               !observations.isEmpty else {
             return []
@@ -180,8 +40,14 @@ public actor FaceEmbeddingService {
 //            if Int.random(in: 1...10) == 4 {
 //                saveDebugCrop(image, boundingBox: observation.boundingBox)
 //            }
-            if let embedding = extractEmbedding(from: image, observation: observation) {
-                embeddings.append(embedding)
+            if hasGlass {
+                if let embedding = extractEmbeddingWithGlass(from: image, observation: observation) {
+                    embeddings.append(embedding)
+                }
+            } else {
+                if let embedding = extractEmbedding(from: image, observation: observation) {
+                    embeddings.append(embedding)
+                }
             }
         }
         return embeddings
@@ -207,10 +73,11 @@ public actor FaceEmbeddingService {
         do {
             try handler.perform([request])
             return request.results?.filter {
-//                print("faceCaptureQuality", $0.faceCaptureQuality ?? "???")
-//                print("yaw", $0.yaw ?? "???")
-                return $0.boundingBox.width >= 0.05 && $0.boundingBox.height >= 0.05
-                && abs($0.yaw?.floatValue ?? 1.0) < 0.5
+                $0.boundingBox.width >= 0.05 && $0.boundingBox.height >= 0.05
+                && abs($0.yaw?.floatValue ?? 1.0) < 0.9
+                && $0.boundingBox.width * CGFloat(image.width) >= 100.0
+                && !isFaceTruncated($0.boundingBox)
+                && hasCompleteLandmarks($0)
             }
         } catch {
             print("FaceEmbeddingService detectFacesWithLandmarks 에러:", error)
@@ -219,10 +86,15 @@ public actor FaceEmbeddingService {
     }
 
     // MARK: - Private: Embedding
-
     private func extractEmbedding(from image: CGImage, observation: VNFaceObservation) -> FaceEmbedding? {
         guard let cropped = cropFace(from: image, boundingBox: observation.boundingBox) else {
             return nil
+        }
+        
+        let hasGlasses = hasGlasses(in: cropped)
+        if hasGlasses {
+            print("🕶️ 안경 감지 → 클러스터링 제외")
+//            return nil
         }
 
         // landmark가 있으면 alignment 적용, 없으면 crop만 사용
@@ -237,7 +109,37 @@ public actor FaceEmbeddingService {
               let embedding = runModel(on: resized) else {
             return nil
         }
-        return FaceEmbedding(embedding: embedding, boundingBox: observation.boundingBox)
+        return FaceEmbedding(embedding: embedding, boundingBox: observation.boundingBox, hasGlasses: hasGlasses)
+    }
+    
+    func extractEmbeddingWithGlass(from image: CGImage, observation: VNFaceObservation) -> FaceEmbedding? {
+        guard let cropped = cropFace(from: image, boundingBox: observation.boundingBox) else {
+            return nil
+        }
+
+        // 크롭 단계에서 안경 체크 (aligned 전)
+        let hasGlasses = hasGlasses(in: cropped)
+        if hasGlasses {
+            print("🕶️ 안경 감지 → 클러스터링 제외")
+//            return nil
+        }
+
+//        saveDebugCrop(image, boundingBox: observation.boundingBox)
+        // 안경 없는 얼굴만 계속 진행
+        let aligned: CGImage
+        if let landmarks = observation.landmarks {
+            aligned = alignFace(image: cropped, landmarks: landmarks, boundingBox: observation.boundingBox) ?? cropped
+        } else {
+            aligned = cropped
+        }
+//        saveDebugCrop(image, boundingBox: observation.boundingBox)
+
+
+        guard let resized = resize(image: aligned, to: inputSize),
+              let embedding = runModel(on: resized) else {
+            return nil
+        }
+        return FaceEmbedding(embedding: embedding, boundingBox: observation.boundingBox, hasGlasses: hasGlasses)
     }
 
     // MARK: - Private: Alignment
@@ -322,7 +224,7 @@ public actor FaceEmbeddingService {
         let width = CGFloat(image.width)
         let height = CGFloat(image.height)
         
-        let scale: CGFloat = 1.1
+        let scale: CGFloat = 1.3
         let expandedWidth = boundingBox.width * scale
         let expandedHeight = boundingBox.height * scale
         let expandedX = boundingBox.minX - (expandedWidth - boundingBox.width) / 2
@@ -342,17 +244,6 @@ public actor FaceEmbeddingService {
         )
         return image.cropping(to: rect)
     }
-//    private func cropFace(from image: CGImage, boundingBox: CGRect) -> CGImage? {
-//        let width = CGFloat(image.width)
-//        let height = CGFloat(image.height)
-//        let rect = CGRect(
-//            x: boundingBox.minX * width,
-//            y: (1.0 - boundingBox.minY - boundingBox.height) * height,
-//            width: boundingBox.width * width,
-//            height: boundingBox.height * height
-//        )
-//        return image.cropping(to: rect)
-//    }
 
     private func resize(image: CGImage, to size: CGSize) -> CGImage? {
         let context = CGContext(
@@ -394,6 +285,44 @@ public actor FaceEmbeddingService {
         let norm = sqrt(vector.map { $0 * $0 }.reduce(0, +))
         guard norm > 0 else { return vector }
         return vector.map { $0 / norm }
+    }
+    
+    private func hasGlasses(in image: CGImage) -> Bool {
+        let request = VNClassifyImageRequest()
+        let handler = VNImageRequestHandler(cgImage: image, options: [:])
+
+        do {
+            try handler.perform([request])
+        } catch {
+            return false
+        }
+
+        let glassesIdentifiers: Set<String> = ["sunglasses", "goggles"]// ["eyeglasses", "sunglasses", "goggles"]
+
+//        // 로그 — 안정되면 제거
+//        request.results?.filter { glassesIdentifiers.contains($0.identifier) }.forEach {
+//            print("🔍 glasses label: \($0.identifier), confidence: \($0.confidence)")
+//        }
+
+        return request.results?.contains {
+            glassesIdentifiers.contains($0.identifier) && $0.confidence >= 0.25
+        } ?? false
+    }
+    
+    private func isFaceTruncated(_ boundingBox: CGRect) -> Bool {
+        let margin: CGFloat = 0.02 // 2% 여유
+        return boundingBox.minX < margin ||
+               boundingBox.minY < margin ||
+               boundingBox.maxX > 1.0 - margin ||
+               boundingBox.maxY > 1.0 - margin
+    }
+    
+    private func hasCompleteLandmarks(_ observation: VNFaceObservation) -> Bool {
+        guard let landmarks = observation.landmarks else { return false }
+        return landmarks.leftEye != nil &&
+               landmarks.rightEye != nil &&
+               landmarks.nose != nil &&
+               landmarks.outerLips != nil
     }
 }
 

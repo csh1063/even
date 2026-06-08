@@ -26,4 +26,14 @@ public final class DefaultGeoRepository: GeoRepository {
         }
         return result
     }
+    
+    public func locationOverseas(_ photosInCoordi: [String: [Photo]]) async throws -> [String: PhotoLocation] {
+        var result: [String: PhotoLocation] = [:]
+        if photosInCoordi.count != 0 {
+            for address in try await self.service.locationOverseas(photosInCoordi) {
+                result[address.id] = address.toOverseasDomain()
+            }
+        }
+        return result
+    }
 }

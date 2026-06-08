@@ -10,4 +10,5 @@ import Foundation
 
 public protocol GeoRepository {
     func locationToaddress(_ photos: [Photo]) async throws -> [String: PhotoLocation]
+    func locationOverseas(_ photosInCoordi: [String: [Photo]]) async throws -> [String: PhotoLocation]
 }

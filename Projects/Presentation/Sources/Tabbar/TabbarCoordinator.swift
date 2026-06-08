@@ -33,6 +33,11 @@ final class TabbarCoordinator: BaseCoordinator {
             switch type {
             case .progressSheet(let progress):
                 self?.showAnalysisSheet(progress: progress)
+            case .locationProgressSheet(let progress):
+                AnalysisProgressManager.shared.show(
+                    locationProgress: progress.locationProgress,
+                    albumProgress: progress.locationAlbumProgress
+                )
             }
         }
         

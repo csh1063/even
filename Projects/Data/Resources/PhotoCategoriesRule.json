@@ -21,7 +21,7 @@
     "notes": "하늘과 바다를 제외한 순수 자연 풍경",
     "min_confidence": 0.60,
     "label_filters": [
-      { "name": "person_focus", "max": 0.4 }
+      { "name": "person_focus", "max": 0.2 }
     ],
     "match_tags": ["mountain", "forest", "desert", "sand_dune", "cave", "snow", "blizzard", "waterfall", "fountain", "creek", "wetland", "nature", "valley", "canyon", "glacier", "cliff", "meadow", "landscape", "hill"],
     "exclude_tags": ["building", "street", "cityscape", "ocean", "beach", "sky"]
@@ -31,7 +31,7 @@
     "notes": "하늘, 구름, 일출/일몰 등 천체 위주의 사진",
     "min_confidence": 0.65,
     "label_filters": [
-      { "name": "person_focus", "max": 0.3 }
+      { "name": "person_focus", "max": 0.2 }
     ],
     "match_tags": ["sky", "cloudy", "sunset_sunrise", "night_sky", "sun", "moon", "rainbow", "aurora", "star", "overcast", "dusk", "dawn", "horizon"],
     "exclude_tags": ["interior", "indoor"]
@@ -40,7 +40,7 @@
     "type": "AND_OR_COMBINED",
     "min_confidence": 0.75,
     "label_filters": [
-      { "name": "person_focus", "max": 0.5 }
+      { "name": "person_focus", "max": 0.3 }
     ],
     "must_have_one_of": ["ocean", "beach", "pool", "lake", "river", "water"],
     "match_tags": ["surfboard", "yacht", "sailboat", "speedboat", "boat", "mast", "porthole", "wetsuit", "lifejacket", "lifesaver", "swimming", "sunbathing", "watersport", "underwater", "coral_reef", "dock", "harbour", "pier", "wave", "tide", "sea", "lagoon"],

@@ -20,8 +20,8 @@ struct TravelAlbumCellViewModel: AlbumCellViewModel {
     var album: Album
     var imageLoader: any ImageLoadable
     
-    let countryName: String       // targetAddress 첫 단어
-    let dateRangeText: String     // photos creationDate 범위
+    let countryName: String
+    let dateRangeText: String
     
     init(album: Album, imageLoader: any ImageLoadable) {
         self.id = album.id
@@ -32,8 +32,7 @@ struct TravelAlbumCellViewModel: AlbumCellViewModel {
         self.album = album
         self.imageLoader = imageLoader
         
-        self.countryName = (album.targetAddress ?? "")
-            .components(separatedBy: " ").first ?? "해외"
+        self.countryName = ""
 
         let formatter = DateIntervalFormatter()
         formatter.locale = Locale(identifier: "ko")

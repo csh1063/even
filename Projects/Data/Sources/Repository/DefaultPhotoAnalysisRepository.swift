@@ -71,7 +71,11 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                                         labels = try await self.analysisService.analyze(image: image)
                                         
                                         if labels.contains(where: { $0.name == "people" }) {
-                                            embedding = await self.faceEmbeddingService.extractEmbeddings(from: image)
+                                            if labels.contains(where: { /*$0.name == "eyeglasses" ||*/ $0.name ==  "sunglasses" || $0.name == "goggles" }) {
+                                                embedding = await self.faceEmbeddingService.extractEmbeddings(from: image, hasGlass: true)
+                                            } else {
+                                                embedding = await self.faceEmbeddingService.extractEmbeddings(from: image)
+                                            }
                                         } else {
                                             embedding = []
                                         }
@@ -79,15 +83,6 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                                         labels = []
                                         embedding = []
                                     }
-//                                    
-//                                    let labels = try await self.analyzeSingle(photoId: photoId)
-//                                    
-//                                    let embedding: [FaceEmbedding]
-//                                    if labels.contains(where: { $0.name == "people" }) {
-//                                        embedding = try await self.analyzeFaceEmbedding(photoId: photoId)
-//                                    } else {
-//                                        embedding = []
-//                                    }
                                     
                                     print("id: ", photo.asset.localIdentifier, "/ year: ", year ?? "?", ", month:",month ?? "?")
                                     print("labels: ", (labels).map{ $0.name }.joined(separator: ", "))

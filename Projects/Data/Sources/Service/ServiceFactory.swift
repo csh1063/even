@@ -57,7 +57,7 @@ public final class ServiceFactory {
         FaceEmbeddingService()
     }()
     
-    public var faceClusterService: FaceClusterService = {
-        FaceClusterService()
+    public lazy var faceClusterService: FaceClusterService = {
+        FaceClusterService(libraryService: photoLibraryService)
     }()
 }

@@ -108,12 +108,14 @@ public final class DefaultTravelDetectionRepository: TravelDetectionRepository {
         let localities = photos.compactMap { $0.locality }.filter { !$0.isEmpty }
         let administrativeAreas = photos.compactMap { $0.administrativeArea }.filter { !$0.isEmpty }
         let countries = photos.compactMap { $0.country }.filter { !$0.isEmpty }
+        let isoCountryCodes = photos.compactMap { $0.isoCountryCode }.filter { !$0.isEmpty }
         
         // 2. 주소 없는 사진이 많으면 geocoding으로 보충
         let withoutAddress = photos.filter { $0.locality == nil && $0.administrativeArea == nil }
         var geocodedLocalities: [String] = []
         var geocodedAdministrativeAreas: [String] = []
         var geocodedCountries: [String] = []
+        var geocodedIsoCodes: [String] = []
         
         if !withoutAddress.isEmpty {
             let samples = sampleByGrid(withoutAddress)
@@ -123,6 +125,7 @@ public final class DefaultTravelDetectionRepository: TravelDetectionRepository {
                     if let l = photoLocation.locality { geocodedLocalities.append(l) }
                     if let a = photoLocation.administrativeArea { geocodedAdministrativeAreas.append(a) }
                     if let c = photoLocation.country { geocodedCountries.append(c) }
+                    if let i = photoLocation.isoCountryCode { geocodedIsoCodes.append(i) }
                 }
             }
         }
@@ -130,17 +133,20 @@ public final class DefaultTravelDetectionRepository: TravelDetectionRepository {
         let allLocalities = localities + geocodedLocalities
         let allAdministrativeAreas = administrativeAreas + geocodedAdministrativeAreas
         let allCountries = countries + geocodedCountries
+        let allCodes = isoCountryCodes + geocodedIsoCodes
         
         // 3. 폴더명 결정
         let locality = resolveAlbumLocality(localities: allLocalities, administrativeAreas: allAdministrativeAreas)
         let administrativeArea = mostFrequent(allAdministrativeAreas) ?? ""
         let country = mostFrequent(allCountries) ?? ""
+        let isoCode = mostFrequent(allCodes) ?? ""
         
         return TravelCluster(
             photos: photos,
             country: country,
             administrativeArea: administrativeArea,
             locality: locality,
+            isoCountryCode: isoCode,
             startDate: startDate,
             endDate: endDate
         )

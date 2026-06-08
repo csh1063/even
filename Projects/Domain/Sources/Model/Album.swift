@@ -25,10 +25,6 @@ public struct Album {
     
     public var isEdited: Bool = false
     
-    // 폴더 생성용 변수
-    public var targetYear: String?   // "date"일 때
-    public var targetAddress: String? // "location"일 때
-    
     public init(
         id: UUID = UUID(),
         name: String,
@@ -41,9 +37,7 @@ public struct Album {
         keywords: [String] = [],
         photos: [Photo] = [],
         photoCount: Int,
-        from: String,
-        targetYear: String? = nil,
-        targetAddress: String? = nil
+        from: String
     ) {
         self.id = id
         self.name = name

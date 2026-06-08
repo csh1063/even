@@ -34,15 +34,27 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
     // 폴더 생성 최소 비율
     private let threshold: Double = 0.05
     
-    private static let administrativeAreaReplacements: [String: String] = [
+    private let administrativeAreaReplacements: [String: String] = [
         "전북특별자치도": "전라북도",
         "강원특별자치도": "강원도",
-        "제주특별자치도": "제주도"
+        "제주특별자치도": "제주도",
+        "도쿄도": "도쿄"
     ]
 
-    private static let suffixesToRemove = [
+    private let suffixesToRemove = [
         "특별자치시", "특별광역시", "광역시", "특별시", "시"
     ]
+    
+    private let suffixesForOverseas = [
+        "부", "SAR", "특별행정구", "현"
+    ]
+    
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy년 M월 d일"
+        formatter.locale = Locale(identifier: "ko_KR")
+        return formatter
+    }()
     
     public init(
         photoDataRepository: PhotoDataRepository,
@@ -70,7 +82,6 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
                     let countPerPage = 300
                     var page = 0
                     
-//                    let categories: [String: [String]] = try await photoCategoryRepository.fetchCategories()
                     let ruleCategories: [String: AlbumRule] = try await photoCategoryRepository.fetchRuleCategories()
                     
                     var albums: [Album] = try albumDataRepository.fetchAutoAll()
@@ -88,47 +99,19 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
                         var yearCount: [String: Int] = [:]
                         var addressCount: [String: [String]] = [:]
 
-                        photos.map { ($0.year, $0.address) }.enumerated().forEach { (i, item) in
+                        photos.map { ($0.year, $0.address) }.enumerated().forEach { [weak self] (i, item) in
                             
                             let (year, address) = item
                             if let year, isPhoto {
                                 yearCount[year, default: 0] += 1
                             }
                             if let address, !isPhoto {
-                                if let country = address.country, !country.isEmpty {
-                                    
-                                    let administrativeArea = cleanAreaName(address.administrativeArea ?? "")
-                                    let locality = cleanAreaName(address.locality ?? "")
-                                    let key = "\(cleanAreaName(country)) \(administrativeArea)".trimmingCharacters(in: .whitespaces)
-                                    
-                                    let addressText: String
-                                    if locality == administrativeArea || locality.hasSuffix("도") {
-                                        addressText = address.subLocality ?? ""
-                                    } else {
-                                        addressText = [locality, address.subLocality]
-                                            .compactMap { $0 }
-                                            .reduce(into: [String]()) { result, value in
-                                                if result.last != value { result.append(value) }
-                                            }
-                                            .joined(separator: " ")
-                                    }
+                                if let (key, addressText) = self?.addressKeyValue(address) {
                                     
                                     if !addressText.isEmpty && !addressCount[key, default: []].contains(addressText) {
                                         addressCount[key, default: []].append(addressText)
                                     }
                                 }
-//                                if let country = address.country, !country.isEmpty {
-//                                    let addressText = [address.administrativeArea, address.locality, address.subLocality]
-//                                        .compactMap { $0 }
-//                                        .reduce(into: [String]()) { result, value in
-//                                            if result.last != value { result.append(value) }
-//                                        }
-//                                        .joined(separator: " ")
-//
-//                                    if !addressCount[country, default: []].contains(addressText) {
-//                                        addressCount[country, default: []].append(addressText)
-//                                    }
-//                                }
                             }
                         }
                         print("yearCount: ", yearCount)
@@ -214,25 +197,12 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
 
                             case "location":
                                 matchedIdentifiers = photos
-                                    .filter {
-                                        let administrativeArea = cleanAreaName($0.address?.administrativeArea ?? "")
-                                        let locality = cleanAreaName($0.address?.locality ?? "")
-                                        
-                                        let addressText: String
-                                        if locality == administrativeArea || locality.hasSuffix("도") {
-                                            addressText = $0.address?.subLocality ?? ""
-                                        } else {
-                                            addressText = [locality, $0.address?.subLocality]
-                                                .compactMap { $0 }
-                                                .reduce(into: [String]()) { result, value in
-                                                    if result.last != value { result.append(value) }
-                                                }
-                                                .joined(separator: " ")
+                                    .filter { [weak self] in
+                                        if let address = $0.address, let (_, addressText) = self?.addressKeyValue(address) {
+                                            return album.keywords.contains(addressText)
                                         }
-                                        return album.keywords.contains(addressText)
+                                        return false
                                     }
-//                                        || $0.address?.locality == $0
-//                                        || $0.address ?.ocean == $0
                                     .map { $0.localIdentifier }
                             default:
                                 continue
@@ -305,10 +275,15 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
                     
                     print("clusters count", clusters.count)
                     for cluster in clusters {
-                        print("clusters \(cluster.albumDisplayName), start:", cluster.startDate, ", end:", cluster.endDate)
+                        
+                        let place = cleanAreaName(cluster.address, isoCode: cluster.isoCountryCode)
+                        let albumName = "\(place) · \(self.dateFormatter.string(from: cluster.startDate))"
+                        
+                        print("clusters \(albumName), start:", cluster.startDate, ", end:", cluster.endDate)
+                        
                         let album = Album(
-                            name: cluster.albumName,
-                            displayName: cluster.albumDisplayName,
+                            name: albumName,
+                            displayName: albumName,
                             isAuto: true,
                             coverPhotoIdentifier: cluster.photos.first?.localIdentifier,
                             photoCount: cluster.photos.count,
@@ -436,14 +411,48 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
         }
     }
     
-    private func cleanAreaName(_ name: String) -> String {
-        var result = Self.administrativeAreaReplacements[name] ?? name
-        for suffix in Self.suffixesToRemove {
-            if result.hasSuffix(suffix) {
-                result = String(result.dropLast(suffix.count))
-                break
+    private func cleanAreaName(_ name: String, isoCode: String) -> String {
+        var result = self.administrativeAreaReplacements[name] ?? name
+        if isoCode.uppercased() == "KR" {
+            for suffix in self.suffixesToRemove {
+                if result.hasSuffix(suffix) {
+                    result = String(result.dropLast(suffix.count)).trimmingCharacters(in: .whitespaces)
+                    break
+                }
+            }
+        } else {
+            for suffix in self.suffixesForOverseas {
+                if result.uppercased().hasSuffix(suffix.uppercased()) {
+                    result = String(result.dropLast(suffix.count)).trimmingCharacters(in: .whitespaces)
+                    break
+                }
             }
         }
         return result
+    }
+    
+    private func addressKeyValue(_ address: PhotoLocation) -> (key: String, value: String)? {
+        if let country = address.country, !country.isEmpty {
+            let isoCode = address.isoCountryCode ?? ""
+            let administrativeArea = cleanAreaName(address.administrativeArea ?? "", isoCode: isoCode)
+            let locality = cleanAreaName(address.locality ?? "", isoCode: isoCode)
+            let subLocality = cleanAreaName(address.subLocality ?? "", isoCode: isoCode)
+            let key = "\(cleanAreaName(country, isoCode: isoCode)) \(administrativeArea)".trimmingCharacters(in: .whitespaces)
+            
+            let addressText: String
+            if locality == administrativeArea || locality.hasSuffix("도") {
+                addressText = subLocality
+            } else {
+                addressText = [locality, subLocality]
+                    .compactMap { $0 }
+                    .reduce(into: [String]()) { result, value in
+                        if result.last != value { result.append(value) }
+                    }
+                    .joined(separator: " ")
+            }
+            
+            return (key, addressText)
+        }
+        return nil
     }
 }

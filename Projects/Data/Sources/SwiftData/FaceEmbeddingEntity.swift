@@ -18,6 +18,7 @@ public final class FaceEmbeddingEntity {
     public var boundingBoxY: Double
     public var boundingBoxWidth: Double
     public var boundingBoxHeight: Double
+    public var hasGlasses: Bool = false
     public var clusterId: String?
 
     public var photo: PhotoEntity?
@@ -29,6 +30,7 @@ public final class FaceEmbeddingEntity {
         boundingBoxY: Double,
         boundingBoxWidth: Double,
         boundingBoxHeight: Double,
+        hasGlasses: Bool,
         clusterId: String? = nil,
         photo: PhotoEntity? = nil
     ) {
@@ -38,6 +40,7 @@ public final class FaceEmbeddingEntity {
         self.boundingBoxY = boundingBoxY
         self.boundingBoxWidth = boundingBoxWidth
         self.boundingBoxHeight = boundingBoxHeight
+        self.hasGlasses = hasGlasses
         self.clusterId = clusterId
         self.photo = photo
     }

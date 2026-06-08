@@ -48,13 +48,13 @@ final class AlbumViewController: BaseViewController {
         self.setupView()
         self.setupBindings()
         
-//        self.viewModel.send(.appear)
+        self.viewModel.send(.appear)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        self.viewModel.send(.appear)
+//        self.viewModel.send(.appear)
     }
     
     private func setupView() {

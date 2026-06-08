@@ -11,6 +11,7 @@ import Foundation
 public struct PhotoLocationSnapshot {
     public let localIdentifier: String
     public let createdAt: Date
+    public let isoCountryCode: String?
     public let country: String?
     public let administrativeArea: String?
     public let locality: String?
@@ -20,6 +21,7 @@ public struct PhotoLocationSnapshot {
     public init(from photo: Photo) {
         self.localIdentifier = photo.localIdentifier
         self.createdAt = photo.createdAt
+        self.isoCountryCode = photo.isoCountryCode
         self.country = photo.country
         self.administrativeArea = photo.administrativeArea
         self.locality = photo.locality

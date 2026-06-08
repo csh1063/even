@@ -25,7 +25,9 @@ extension FaceEmbeddingEntity {
                 width: boundingBoxWidth,
                 height: boundingBoxHeight
             ),
-            clusterId: clusterId
+            hasGlasses: hasGlasses,
+            clusterId: clusterId,
+            photoId: photo?.localIdentifier ?? "nil"
         )
     }
 
@@ -38,6 +40,7 @@ extension FaceEmbeddingEntity {
             boundingBoxY: domain.boundingBox.origin.y,
             boundingBoxWidth: domain.boundingBox.width,
             boundingBoxHeight: domain.boundingBox.height,
+            hasGlasses: domain.hasGlasses,
             clusterId: domain.clusterId,
             photo: photo
         )

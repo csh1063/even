@@ -73,9 +73,9 @@ final class MyPageViewModel: BaseViewModel {
         .store(in: &cancellables)
         
         self.tabbarViewModel.transform()
-            .isCleared
-            .sink { isCleared in
-                if isCleared {
+            .isComplete
+            .sink { isComplete in
+                if isComplete {
                     self.send(.appear)
                 }
             }

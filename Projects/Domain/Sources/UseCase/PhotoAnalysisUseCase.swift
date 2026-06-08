@@ -87,7 +87,7 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                                             isoCountryCode: address.isoCountryCode,
                                             address: address),
 //                                        labels: [],
-                                        state: .progress(index/Double(total) / 2.0)
+                                        state: .progress(index/Double(total))
                                     )
                                 )
                                 index += 1
@@ -107,39 +107,79 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                         }
                         print("etcPhotos after", unique.count)
                         
-                        var totalSec = Double(unique.count) * 1.2
-                        print("totalSec", totalSec)
+//                        var totalSec = Double(unique.count) * 1.2
+//                        print("totalSec", totalSec)
                         
-                        for (_, photos) in unique {
-                            
-                            let avgLat = photos.compactMap { $0.latitude }.reduce(0, +) / Double(photos.count)
-                            let avgLng = photos.compactMap { $0.longitude }.reduce(0, +) / Double(photos.count)
+                        let batchSize = 500
+                        let uniqueArray = Array(unique)
+                        let batches = stride(from: 0, to: uniqueArray.count, by: batchSize).map {
+                            Array(uniqueArray[$0..<min($0 + batchSize, uniqueArray.count)])
+                        }
 
-                            guard let address = try await self.analysisRepository.geocoderAnalyze(latitude: avgLat, longitude: avgLng) else {
-                                continue
-                            }
-                            
-                            // 3. 같은 그룹 사진들은 결과 재사용
-                            for photo in photos {
-                                index += 1
+                        var overseasAddress: [String: PhotoLocation] = [:]
+                        for (i, batch) in batches.enumerated() {
+                            let batchDict = Dictionary(uniqueKeysWithValues: batch)
+                            print("etcPhotos batch \(i+1)/\(batches.count) start - \(batch.count)개")
+                            let batchResult = try await self.geoRepository.locationOverseas(batchDict)
+                            print("etcPhotos batch \(i+1) done - 결과 \(batchResult.count)개")
+                            overseasAddress.merge(batchResult) { _, new in new }
+                        }
+
+                        print("etcPhotos result:", overseasAddress.count)
+//                        let overseasAddress = try await self.geoRepository.locationOverseas(unique)
+                        
+//                        index = 0
+                        for etcPhoto in etcPhotos {
+                            if let address = overseasAddress[etcPhoto.localIdentifier] {
+                                
                                 continuation.yield(
                                     ProgressAnalysis(
                                         photo: Photo(
-                                            localIdentifier: photo.localIdentifier,
-                                            createdAt: photo.createdAt,
-                                            latitude: photo.latitude,
-                                            longitude: photo.longitude,
-                                            isoCountryCode: address.isoCountryCode == "" ? "None":address.isoCountryCode,
+                                            localIdentifier: etcPhoto.localIdentifier,
+                                            createdAt: etcPhoto.createdAt,
+                                            latitude: etcPhoto.latitude,
+                                            longitude: etcPhoto.longitude,
+                                            isoCountryCode: address.isoCountryCode ?? "none",
                                             address: address),
 //                                        labels: [],
-                                        state: .progress(index / Double(total))
+                                        state: .progress(index/Double(total))
                                     )
                                 )
+                                index += 1
+                            } else {
+                                print("etcPhotos 매핑 실패", etcPhoto.localIdentifier)
                             }
-                            totalSec -= 1.2
-                            
-                            self.timeLog(sec: totalSec)
                         }
+//                        for (_, photos) in unique {
+//                            
+//                            let avgLat = photos.compactMap { $0.latitude }.reduce(0, +) / Double(photos.count)
+//                            let avgLng = photos.compactMap { $0.longitude }.reduce(0, +) / Double(photos.count)
+//
+//                            guard let address = try await self.analysisRepository.geocoderAnalyze(latitude: avgLat, longitude: avgLng) else {
+//                                continue
+//                            }
+//                            
+//                            // 3. 같은 그룹 사진들은 결과 재사용
+//                            for photo in photos {
+//                                index += 1
+//                                continuation.yield(
+//                                    ProgressAnalysis(
+//                                        photo: Photo(
+//                                            localIdentifier: photo.localIdentifier,
+//                                            createdAt: photo.createdAt,
+//                                            latitude: photo.latitude,
+//                                            longitude: photo.longitude,
+//                                            isoCountryCode: address.isoCountryCode == "" ? "None":address.isoCountryCode,
+//                                            address: address),
+////                                        labels: [],
+//                                        state: .progress(index / Double(total))
+//                                    )
+//                                )
+//                            }
+//                            totalSec -= 1.2
+//                            
+//                            self.timeLog(sec: totalSec)
+//                        }
                         continuation.finish()
                     } catch {
                         continuation.finish(throwing: error)

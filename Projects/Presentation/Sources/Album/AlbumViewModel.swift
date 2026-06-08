@@ -137,11 +137,14 @@ public final class AlbumViewModel: BaseViewModel {
         }
         .store(in: &cancellables)
         
-//        tabbarViewModel.transform().permission
-//            .sink { permission in
-//                self.permission = permission
-//            }
-//            .store(in: &cancellables)
+        self.tabbarViewModel.transform()
+            .isComplete
+            .sink { isComplete in
+                if isComplete {
+                    self.send(.appear)
+                }
+            }
+            .store(in: &cancellables)
     }
     
     private func handle(_ input: Input) async {
@@ -196,6 +199,7 @@ public final class AlbumViewModel: BaseViewModel {
         data.items[.location] = albums.filter { $0.from == "location" }
             .sorted { $0.photoCount > $1.photoCount }
             .map {
+                print("displayName", $0.displayName)
 //                print("keyword:", $0.keywords.joined(separator: ", "))
                 return $0
             }
