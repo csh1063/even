@@ -5,12 +5,10 @@
 //  Created by sanghyeon on 5/18/26.
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
-
 import Domain
 import CoreGraphics
 import Foundation
 
-// MARK: - Mapping
 extension FaceEmbeddingEntity {
     public func toDomain() -> FaceEmbedding {
         let embedding = embeddingData.withUnsafeBytes {
@@ -26,8 +24,7 @@ extension FaceEmbeddingEntity {
                 height: boundingBoxHeight
             ),
             hasGlasses: hasGlasses,
-            clusterId: clusterId,
-            photoId: photo?.localIdentifier ?? "nil"
+            photoId: photo?.localIdentifier ?? ""
         )
     }
 
@@ -41,7 +38,6 @@ extension FaceEmbeddingEntity {
             boundingBoxWidth: domain.boundingBox.width,
             boundingBoxHeight: domain.boundingBox.height,
             hasGlasses: domain.hasGlasses,
-            clusterId: domain.clusterId,
             photo: photo
         )
     }

@@ -8,20 +8,21 @@
 
 import SwiftData
 import Foundation
-import Domain
 
 @Model
 public final class FaceEmbeddingEntity {
     @Attribute(.unique) public var id: UUID
-    public var embeddingData: Data       // [Float] → Data 직렬화
+    public var embeddingData: Data
     public var boundingBoxX: Double
     public var boundingBoxY: Double
     public var boundingBoxWidth: Double
     public var boundingBoxHeight: Double
     public var hasGlasses: Bool = false
-    public var clusterId: String?
 
     public var photo: PhotoEntity?
+
+    @Relationship(deleteRule: .nullify)
+    public var cluster: ClusterEntity?
 
     public init(
         id: UUID = UUID(),
@@ -31,8 +32,8 @@ public final class FaceEmbeddingEntity {
         boundingBoxWidth: Double,
         boundingBoxHeight: Double,
         hasGlasses: Bool,
-        clusterId: String? = nil,
-        photo: PhotoEntity? = nil
+        photo: PhotoEntity? = nil,
+        cluster: ClusterEntity? = nil
     ) {
         self.id = id
         self.embeddingData = embeddingData
@@ -41,7 +42,7 @@ public final class FaceEmbeddingEntity {
         self.boundingBoxWidth = boundingBoxWidth
         self.boundingBoxHeight = boundingBoxHeight
         self.hasGlasses = hasGlasses
-        self.clusterId = clusterId
         self.photo = photo
+        self.cluster = cluster
     }
 }

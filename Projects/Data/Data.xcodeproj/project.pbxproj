@@ -33,6 +33,8 @@
 		19751FD52FCC6EF1008685A9 /* OverseasParam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19751FD42FCC6EF1008685A9 /* OverseasParam.swift */; };
 		1989135D2D6A2C2BA17A6B60 /* PhotoAssetEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1818CB29A1914B6416E20D3E /* PhotoAssetEntity.swift */; };
 		19EABEFD2FD2DA0D00430373 /* AdaFace_IR50.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 19EABEFC2FD2DA0D00430373 /* AdaFace_IR50.mlpackage */; };
+		19EABF002FD717ED00430373 /* ClusterEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19EABEFF2FD717ED00430373 /* ClusterEntity.swift */; };
+		19EABF022FD7180500430373 /* ClusterBlacklistEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19EABF012FD7180500430373 /* ClusterBlacklistEntity.swift */; };
 		1A9938F2B9F9AD2825A0FC20 /* DefaultPhotoLabelDataRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76713B0DD0063DA264DCB484 /* DefaultPhotoLabelDataRepository.swift */; };
 		2169AA2311BA60ACAA3F77E2 /* AlbumEntityMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13D68148ECEC00D5F0D873BA /* AlbumEntityMapper.swift */; };
 		22AD151C6F8F526A63C49DF8 /* GeocoderService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34FC610C922DCAAD54F6B871 /* GeocoderService.swift */; };
@@ -115,6 +117,8 @@
 		19751FB02FC4BBFC008685A9 /* PhotoCategoriesRule.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = PhotoCategoriesRule.json; sourceTree = "<group>"; };
 		19751FD42FCC6EF1008685A9 /* OverseasParam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverseasParam.swift; sourceTree = "<group>"; };
 		19EABEFC2FD2DA0D00430373 /* AdaFace_IR50.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = AdaFace_IR50.mlpackage; sourceTree = "<group>"; };
+		19EABEFF2FD717ED00430373 /* ClusterEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusterEntity.swift; sourceTree = "<group>"; };
+		19EABF012FD7180500430373 /* ClusterBlacklistEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusterBlacklistEntity.swift; sourceTree = "<group>"; };
 		1D6BD6C0BFFB08B0574D32AF /* PhotoCategoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCategoryService.swift; sourceTree = "<group>"; };
 		1E0A1E65D202F027E3B90C53 /* PhotoLabelEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLabelEntity.swift; sourceTree = "<group>"; };
 		2FEE537A6453D74F3910F7C2 /* DefaultAlbumDataRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultAlbumDataRepository.swift; sourceTree = "<group>"; };
@@ -242,6 +246,8 @@
 		89D788F8E3DF4D755C2EE674 /* SwiftData */ = {
 			isa = PBXGroup;
 			children = (
+				19EABF012FD7180500430373 /* ClusterBlacklistEntity.swift */,
+				19EABEFF2FD717ED00430373 /* ClusterEntity.swift */,
 				19751FA22FC2E8FA008685A9 /* HomeZoneEntity.swift */,
 				1946CABD2FBAD6B20038B256 /* FaceEmbeddingEntity.swift */,
 				196CB1C72FB332E700824005 /* MoaSchemaMigrationPlan.swift */,
@@ -431,6 +437,7 @@
 				196CB1C82FB332E700824005 /* MoaSchemaMigrationPlan.swift in Sources */,
 				AD861DF5503B4403B94CBB97 /* GeoJsonAPI.swift in Sources */,
 				C99A8E1D02DE967288404002 /* ServerType.swift in Sources */,
+				19EABF002FD717ED00430373 /* ClusterEntity.swift in Sources */,
 				19751FAB2FC2E973008685A9 /* DefaultHomeZoneRepository.swift in Sources */,
 				ADA6AE621778E96DDFC27980 /* AddressDTO.swift in Sources */,
 				54A2E62D0EC1FE15C4EC0D50 /* BaseDTO.swift in Sources */,
@@ -473,6 +480,7 @@
 				96A50F032D49210391F99B80 /* PhotoCategoryService.swift in Sources */,
 				1946CABA2FBAD66F0038B256 /* AdaFace_IR18.mlpackage in Sources */,
 				1946CAC02FBAD6E10038B256 /* FaceEmbeddingService.swift in Sources */,
+				19EABF022FD7180500430373 /* ClusterBlacklistEntity.swift in Sources */,
 				19EABEFD2FD2DA0D00430373 /* AdaFace_IR50.mlpackage in Sources */,
 				C5E3901016A28982EE6D8EC0 /* PhotoLibararyService.swift in Sources */,
 				63D44D51A5150AE02FB8D98E /* ServiceFactory.swift in Sources */,

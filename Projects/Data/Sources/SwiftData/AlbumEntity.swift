@@ -17,20 +17,37 @@ public final class AlbumEntity {
     public var createdAt: Date
     public var startDate: Date = Date()
     public var endDate: Date = Date()
-    
-    public var isAuto: Bool              // 자동 생성 폴더 여부
+
+    public var isAuto: Bool
     public var coverPhotoIdentifier: String?
     public var photoCount: Int = 0
     public var from: String
-    
     public var isEdited: Bool = false
-    
+
+    // 대표 얼굴 boundingBox
+    public var representativeBoundingBoxX: Double = 0
+    public var representativeBoundingBoxY: Double = 0
+    public var representativeBoundingBoxWidth: Double = 0
+    public var representativeBoundingBoxHeight: Double = 0
+
+    public var representativeBoundingBox: CGRect {
+        CGRect(
+            x: representativeBoundingBoxX,
+            y: representativeBoundingBoxY,
+            width: representativeBoundingBoxWidth,
+            height: representativeBoundingBoxHeight
+        )
+    }
+
     @Relationship(deleteRule: .nullify)
     public var photos: [PhotoEntity] = []
-    
+
     @Relationship(deleteRule: .cascade)
     public var keywords: [AlbumKeywordEntity] = []
-    
+
+    @Relationship(deleteRule: .cascade)
+    public var clusters: [ClusterEntity] = []
+
     public init(
         id: UUID = UUID(),
         name: String,

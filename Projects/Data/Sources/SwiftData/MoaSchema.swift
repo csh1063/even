@@ -16,6 +16,8 @@ public enum MoaSchemaV0: VersionedSchema {
         PhotoLabelEntity.self,
         AlbumKeywordEntity.self,
         FaceEmbeddingEntity.self,
-        HomeZoneEntity.self
+        HomeZoneEntity.self,
+        ClusterEntity.self,
+        ClusterBlacklistEntity.self
     ]
 }
