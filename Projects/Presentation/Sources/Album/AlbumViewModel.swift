@@ -184,7 +184,7 @@ public final class AlbumViewModel: BaseViewModel {
         
         data.items[.travel] = albums.filter { $0.from == "travel" }
             .sorted {
-                $0.startDate > $1.startDate
+                ($0.startDate ?? Date()) > ($1.startDate ?? Date())
             }
             .map {
                 .travel(TravelAlbumCellViewModel(album: $0, imageLoader: self))

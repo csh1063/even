@@ -79,7 +79,7 @@ public final class FaceClusterService {
         return image.cropping(to: rect)
     }
     
-    private func loadImage(photoId: String, size: CGFloat = 1024) async throws -> CGImage? {
+    private func loadImage(photoId: String, size: CGFloat = 2048) async throws -> CGImage? {
         try await libraryService.loadImage(
             id: photoId,
             type: .specialSize(CGSize(width: size, height: size))

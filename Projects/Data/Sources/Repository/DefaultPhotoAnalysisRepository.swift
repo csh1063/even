@@ -70,15 +70,15 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                                         
                                         labels = try await self.analysisService.analyze(image: image)
                                         
-                                        if labels.contains(where: { $0.name == "people" }) {
-                                            if labels.contains(where: { /*$0.name == "eyeglasses" ||*/ $0.name ==  "sunglasses" || $0.name == "goggles" }) {
-                                                embedding = await self.faceEmbeddingService.extractEmbeddings(from: image, hasGlass: true)
-                                            } else {
-                                                embedding = await self.faceEmbeddingService.extractEmbeddings(from: image)
-                                            }
-                                        } else {
+//                                        if labels.contains(where: { $0.name == "people" }) {
+//                                            if labels.contains(where: { /*$0.name == "eyeglasses" ||*/ $0.name ==  "sunglasses" || $0.name == "goggles" }) {
+//                                                embedding = await self.faceEmbeddingService.extractEmbeddings(from: image, hasGlass: true)
+//                                            } else {
+//                                                embedding = await self.faceEmbeddingService.extractEmbeddings(from: image)
+//                                            }
+//                                        } else {
                                             embedding = []
-                                        }
+//                                        }
                                     } else {
                                         labels = []
                                         embedding = []
@@ -207,14 +207,14 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
     }
     
     public func analyzeFaceEmbedding(photoId: String) async throws -> [FaceEmbedding] {
-        guard let cgImage = try? await loadImage(photoId: photoId, size: 1024) else {
+        guard let cgImage = try? await loadImage(photoId: photoId, size: 2048) else {
             return []
         }
         return await self.faceEmbeddingService.extractEmbeddings(from: cgImage)
     }
     
     // MARK: - Private
-    private func loadImage(photoId: String, size: CGFloat = 1024) async throws -> CGImage? {
+    private func loadImage(photoId: String, size: CGFloat = 2048) async throws -> CGImage? {
         try await libraryService.loadImage(
             id: photoId,
             type: .specialSize(CGSize(width: size, height: size))

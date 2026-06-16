@@ -71,7 +71,8 @@ final class LocationAlbumCell: UICollectionViewCell {
         thumbImageView.layer.cornerRadius = 14
         thumbImageView.layer.masksToBounds = true
         contentView.addSubview(thumbImageView)
-        containerView.backgroundColor = Theme.viewerBackground.withAlphaComponent(0.6)
+//        containerView.backgroundColor = Theme.surface.withAlphaComponent(0.6)
+        containerView.backgroundColor = Theme.viewerBackground.withAlphaComponent(0.4)
         containerView.layer.cornerRadius = 14
         containerView.layer.masksToBounds = true
         containerView.addBorder(color: Theme.divider, borderWidth: 1)
@@ -102,18 +103,21 @@ final class LocationAlbumCell: UICollectionViewCell {
         cellStyle = style
 
         placeLabel.text = viewModel.displayName
-        placeLabel.textColor = Theme.textPrimary
+//        placeLabel.textColor = Theme.textPrimary
+        placeLabel.textColor = .white// Theme.textPrimary
         placeLabel.font = .systemFont(ofSize: 15, weight: .semibold)
         placeLabel.numberOfLines = 1
         
         print("viewModel.displayName:", viewModel.displayName, ", viewModel.subText:", viewModel.subText)
         subLabel.text = viewModel.subText
-        subLabel.textColor = Theme.textSecondary
+//        subLabel.textColor = Theme.textSecondary
+        subLabel.textColor = .white.withAlphaComponent(0.92) // Theme.textSecondary
         subLabel.font = .systemFont(ofSize: 12, weight: .regular)
         subLabel.numberOfLines = 1
 
         countLabel.text = "사진 \(viewModel.photoCount.formatted())장"
-        countLabel.textColor = Theme.textTertiary
+//        countLabel.textColor = Theme.textTertiary
+        countLabel.textColor = .white.withAlphaComponent(0.75) //Theme.textTertiary
         countLabel.font = .systemFont(ofSize: 11, weight: .regular)
 
         switch style {

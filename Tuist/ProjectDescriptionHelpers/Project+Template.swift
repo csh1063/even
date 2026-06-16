@@ -106,6 +106,16 @@ public extension TargetDependency {
     static let moya: TargetDependency            = .external(name: "Moya")
     static let combineMoya: TargetDependency     = .external(name: "CombineMoya")
     static let snapKit: TargetDependency         = .external(name: "SnapKit")
+    static let firebaseCore: TargetDependency = .external(name: "FirebaseCore")
+//    "FirebaseAuth": .framework,
+//    "FirebaseFirestore": .framework,
+//    "FirebaseFirestoreInternal": .framework,
+//    "FirebaseMessaging": .framework,
+//    "GoogleUtilities": .framework,
+//    "GTMSessionFetcher": .framework,
+//    "nanopb": .framework,
+//    "FirebaseSharedSwift": .framework,
+    
 //    static let kingfisher: TargetDependency      = .external(name: "Kingfisher")
 //    static let lottie: TargetDependency          = .external(name: "Lottie")
 }

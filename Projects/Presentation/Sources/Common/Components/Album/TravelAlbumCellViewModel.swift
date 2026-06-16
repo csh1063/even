@@ -39,8 +39,10 @@ struct TravelAlbumCellViewModel: AlbumCellViewModel {
         formatter.dateStyle = .medium
         formatter.timeStyle = .none
         
-        self.dateRangeText = formatter.string(
-            from: album.startDate,
-            to: album.endDate)
+        if let startDate = album.startDate, let endDate = album.endDate {
+            self.dateRangeText = formatter.string(from: startDate, to: endDate)
+        } else {
+            self.dateRangeText = "-"
+        }
     }
 }

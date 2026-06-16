@@ -13,8 +13,8 @@ public struct Album {
     public let name: String
     public let displayName: String
     public let createdAt: Date
-    public var startDate: Date
-    public var endDate: Date
+    public var startDate: Date?
+    public var endDate: Date?
     
     public var isAuto: Bool
     public var coverPhotoIdentifier: String?
@@ -30,8 +30,8 @@ public struct Album {
         name: String,
         displayName: String,
         createdAt: Date = Date(),
-        startDate: Date = Date(),
-        endDate: Date = Date(),
+        startDate: Date? = nil,
+        endDate: Date? = nil,
         isAuto: Bool = false,
         coverPhotoIdentifier: String? = nil,
         keywords: [String] = [],
