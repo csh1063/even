@@ -200,21 +200,40 @@ public final class DefaultAlbumDataRepository: AlbumDataRepository {
             predicate: #Predicate { ids.contains($0.localIdentifier) }
         )
         
-        let photos = try context.fetch(photoDescriptor)
+        let fetchedPhotos = try context.fetch(photoDescriptor)
         
         let existingIds = Set(album.photos.map { $0.localIdentifier })
-        let uniqueNewPhotos = photos.filter { !existingIds.contains($0.localIdentifier) }
+        let uniqueNewPhotos = fetchedPhotos.filter { !existingIds.contains($0.localIdentifier) }
+        
+        guard !uniqueNewPhotos.isEmpty else { return }
         
         album.photos.append(contentsOf: uniqueNewPhotos)
-        
-        let allPhotos = album.photos.sorted {$0.createdAt < $1.createdAt}
-        album.startDate = allPhotos.first?.createdAt ?? Date()
-        album.endDate = allPhotos.last?.createdAt ?? Date()
-        
         album.photoCount = album.photos.count
-        album.coverPhotoIdentifier = album.photos.sorted {
-            $0.createdAt > $1.createdAt
-        }.first?.localIdentifier
+        
+        let newDates = uniqueNewPhotos.map { $0.createdAt }
+        if let newMinDate = newDates.min(), let newMaxDate = newDates.max() {
+            album.startDate = min(album.startDate ?? newMinDate, newMinDate)
+            album.endDate = max(album.endDate ?? newMaxDate, newMaxDate)
+        }
+        
+//        let allPhotos = album.photos.sorted {$0.createdAt < $1.createdAt}
+//        album.startDate = allPhotos.first?.createdAt ?? Date()
+//        album.endDate = allPhotos.last?.createdAt ?? Date()
+//        
+//        album.coverPhotoIdentifier = album.photos.sorted {
+//            $0.createdAt > $1.createdAt
+//        }.first?.localIdentifier
+        
+        let latestNewPhoto = uniqueNewPhotos.max(by: { $0.createdAt < $1.createdAt })
+        let currentCoverPhoto = album.photos.first(where: { $0.localIdentifier == album.coverPhotoIdentifier })
+        
+        if let latestNew = latestNewPhoto {
+            if let currentCover = currentCoverPhoto, currentCover.createdAt >= latestNew.createdAt {
+                // 기존 커버가 더 최신이면 유지 (아무것도 안 함)
+            } else {
+                album.coverPhotoIdentifier = latestNew.localIdentifier
+            }
+        }
         
         try context.save()
     }

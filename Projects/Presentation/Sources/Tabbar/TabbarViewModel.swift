@@ -151,22 +151,22 @@ public final class TabbarViewModel: BaseViewModel {
                             print("end date!!!:", Date())
                         }
                     },
-                    AlertButtonConfig(title: "좌표분석하기", style: .default) { [weak self] in
-                        Task {
-                            guard let self else {return}
-                            self.onAction?(.locationProgressSheet(AnalyzeProgress(
-                                photoProgress: self.$progressRatio.eraseToAnyPublisher(),
-                                albumProgress: self.$autoAlbumProgressRatio.eraseToAnyPublisher(),
-                                locationProgress: self.$locationProgressRatio.eraseToAnyPublisher(),
-                                locationAlbumProgress: self.$locationAlbumProgressRatio.eraseToAnyPublisher()
-                            )))
-//                            self.isLoading = true
-                            print("start date!!!:", Date())
-                            await self.locationAnalysis()
-//                            self.isLoading = false
-                            print("end date!!!:", Date())
-                        }
-                    }
+//                    AlertButtonConfig(title: "좌표분석하기", style: .default) { [weak self] in
+//                        Task {
+//                            guard let self else {return}
+//                            self.onAction?(.locationProgressSheet(AnalyzeProgress(
+//                                photoProgress: self.$progressRatio.eraseToAnyPublisher(),
+//                                albumProgress: self.$autoAlbumProgressRatio.eraseToAnyPublisher(),
+//                                locationProgress: self.$locationProgressRatio.eraseToAnyPublisher(),
+//                                locationAlbumProgress: self.$locationAlbumProgressRatio.eraseToAnyPublisher()
+//                            )))
+////                            self.isLoading = true
+//                            print("start date!!!:", Date())
+//                            await self.locationAnalysis()
+////                            self.isLoading = false
+//                            print("end date!!!:", Date())
+//                        }
+//                    }
                 ]
             )
         case .autoTravelAlbum:

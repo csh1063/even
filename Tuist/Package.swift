@@ -15,6 +15,10 @@ import PackageDescription
                        "SnapKit": .framework,
 //                       "Kingfisher": .framework,
 //                       "Lottie": .framework
+                       "FirebaseCore": .framework,
+                       "FirebaseCoreInternal": .framework,
+                       "FirebaseCoreExtension": .framework,
+                       "GoogleUtilities": .framework,
         ]
         ,
         baseSettings: .settings(
@@ -31,6 +35,7 @@ let package = Package(
 //        .package(url: "https://github.com/Alamofire/Alamofire.git", from: "5.10.0"),
         .package(url: "https://github.com/Moya/Moya.git", from: "15.0.0"),
         .package(url: "https://github.com/SnapKit/SnapKit", from: "5.0.1"),
+        .package(url: "https://github.com/firebase/firebase-ios-sdk", from: "12.14.0")
 //        .package(url: "https://github.com/onevcat/Kingfisher", from: "5.15.6"),
 //        .package(url: "https://github.com/airbnb/lottie-ios.git", from: "3.2.1")
     ]

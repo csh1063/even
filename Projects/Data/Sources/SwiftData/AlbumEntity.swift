@@ -15,8 +15,8 @@ public final class AlbumEntity {
     public var name: String
     public var displayName: String
     public var createdAt: Date
-    public var startDate: Date = Date()
-    public var endDate: Date = Date()
+    public var startDate: Date?
+    public var endDate: Date?
     
     public var isAuto: Bool              // 자동 생성 폴더 여부
     public var coverPhotoIdentifier: String?
@@ -36,8 +36,8 @@ public final class AlbumEntity {
         name: String,
         displayName: String,
         createdAt: Date = Date(),
-        startDate: Date = Date(),
-        endDate: Date = Date(),
+        startDate: Date? = nil,
+        endDate: Date? = nil,
         isAuto: Bool = false,
         coverPhotoIdentifier: String? = nil,
         from: String

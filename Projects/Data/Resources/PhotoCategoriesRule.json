@@ -38,7 +38,7 @@
   },
   "바다": {
     "type": "AND_OR_COMBINED",
-    "min_confidence": 0.75,
+    "min_confidence": 0.5,
     "label_filters": [
       { "name": "person_focus", "max": 0.3 }
     ],

@@ -230,10 +230,10 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
                     }
                     
                     // MARK: - 얼굴 클러스터링으로 사람 폴더 생성
-                    if isPhoto {
-                        print("얼굴 클러스터링 시작")
-                        try await faceClusterRepository.clusterAndSaveAlbums()
-                    }
+//                    if isPhoto {
+//                        print("얼굴 클러스터링 시작")
+//                        try await faceClusterRepository.clusterAndSaveAlbums()
+//                    }
                     
                     try albumDataRepository.syncAlbums()
                     
