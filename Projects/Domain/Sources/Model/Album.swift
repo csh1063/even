@@ -25,6 +25,8 @@ public struct Album {
     public var from: String
     public var isEdited: Bool = false
     public var representativeBoundingBox: CGRect
+    
+    public var clusterId: [String] = []
 
     public init(
         id: UUID = UUID(),
@@ -39,7 +41,8 @@ public struct Album {
         photos: [Photo] = [],
         photoCount: Int,
         from: String,
-        representativeBoundingBox: CGRect = .zero
+        representativeBoundingBox: CGRect = .zero,
+        clusterId: [String] = []
     ) {
         self.id = id
         self.name = name

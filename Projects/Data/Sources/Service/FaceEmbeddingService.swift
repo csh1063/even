@@ -19,8 +19,8 @@ public actor FaceEmbeddingService {
     private let inputSize = CGSize(width: 112, height: 112)
 
     private lazy var model: MLModel? = {
-        guard let url = Bundle.module.url(forResource: "AdaFace_IR50", withExtension: "mlmodelc") else {
-            print("FaceEmbeddingService: AdaFace_IR50.mlmodelc를 찾을 수 없음")
+        guard let url = Bundle.module.url(forResource: "InsightFace_buffalo_l", withExtension: "mlmodelc") else {
+            print("FaceEmbeddingService: InsightFace_buffalo_l.mlmodelc를 찾을 수 없음")
             return nil
         }
         return try? MLModel(contentsOf: url, configuration: MLModelConfiguration())
@@ -213,12 +213,16 @@ public actor FaceEmbeddingService {
     private func runModel(on image: CGImage) -> [Float]? {
         guard let model else { return nil }
         
+//        guard let input = try? MLDictionaryFeatureProvider(dictionary: [
+//            "face_image": MLFeatureValue(cgImage: image, pixelsWide: 112, pixelsHigh: 112, pixelFormatType: kCVPixelFormatType_32BGRA, options: nil)
+//        ]) else { return nil }
         guard let input = try? MLDictionaryFeatureProvider(dictionary: [
-            "face_image": MLFeatureValue(cgImage: image, pixelsWide: 112, pixelsHigh: 112, pixelFormatType: kCVPixelFormatType_32BGRA, options: nil)
+            "input_1": MLFeatureValue(cgImage: image, pixelsWide: 112, pixelsHigh: 112, pixelFormatType: kCVPixelFormatType_32BGRA, options: nil)
         ]) else { return nil }
         
         guard let output = try? model.prediction(from: input),
-              let multiArray = output.featureValue(for: "embedding")?.multiArrayValue else {
+//              let multiArray = output.featureValue(for: "embedding")?.multiArrayValue else {
+              let multiArray = output.featureValue(for: "var_1110")?.multiArrayValue else {
             return nil
         }
 

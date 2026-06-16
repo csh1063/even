@@ -31,6 +31,7 @@
 		19751FAD2FC4B88F008685A9 /* PhotoCategories_old.json in Resources */ = {isa = PBXBuildFile; fileRef = 19751FAC2FC4B88F008685A9 /* PhotoCategories_old.json */; };
 		19751FB12FC4BBFC008685A9 /* PhotoCategoriesRule.json in Resources */ = {isa = PBXBuildFile; fileRef = 19751FB02FC4BBFC008685A9 /* PhotoCategoriesRule.json */; };
 		19751FD52FCC6EF1008685A9 /* OverseasParam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19751FD42FCC6EF1008685A9 /* OverseasParam.swift */; };
+		197BDC292FE1219100DA0F0F /* InsightFace_buffalo_l.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 197BDC282FE1219100DA0F0F /* InsightFace_buffalo_l.mlpackage */; };
 		1989135D2D6A2C2BA17A6B60 /* PhotoAssetEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1818CB29A1914B6416E20D3E /* PhotoAssetEntity.swift */; };
 		19EABEFD2FD2DA0D00430373 /* AdaFace_IR50.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 19EABEFC2FD2DA0D00430373 /* AdaFace_IR50.mlpackage */; };
 		19EABF002FD717ED00430373 /* ClusterEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19EABEFF2FD717ED00430373 /* ClusterEntity.swift */; };
@@ -116,6 +117,7 @@
 		19751FAC2FC4B88F008685A9 /* PhotoCategories_old.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = PhotoCategories_old.json; sourceTree = "<group>"; };
 		19751FB02FC4BBFC008685A9 /* PhotoCategoriesRule.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = PhotoCategoriesRule.json; sourceTree = "<group>"; };
 		19751FD42FCC6EF1008685A9 /* OverseasParam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverseasParam.swift; sourceTree = "<group>"; };
+		197BDC282FE1219100DA0F0F /* InsightFace_buffalo_l.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = InsightFace_buffalo_l.mlpackage; sourceTree = "<group>"; };
 		19EABEFC2FD2DA0D00430373 /* AdaFace_IR50.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = AdaFace_IR50.mlpackage; sourceTree = "<group>"; };
 		19EABEFF2FD717ED00430373 /* ClusterEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusterEntity.swift; sourceTree = "<group>"; };
 		19EABF012FD7180500430373 /* ClusterBlacklistEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusterBlacklistEntity.swift; sourceTree = "<group>"; };
@@ -198,6 +200,7 @@
 			isa = PBXGroup;
 			children = (
 				19EABEFC2FD2DA0D00430373 /* AdaFace_IR50.mlpackage */,
+				197BDC282FE1219100DA0F0F /* InsightFace_buffalo_l.mlpackage */,
 				1946CAB92FBAD66F0038B256 /* AdaFace_IR18.mlpackage */,
 				6D8A1A11088B68A6F132362E /* PhotoCategories.json */,
 				19751FB02FC4BBFC008685A9 /* PhotoCategoriesRule.json */,
@@ -480,6 +483,7 @@
 				96A50F032D49210391F99B80 /* PhotoCategoryService.swift in Sources */,
 				1946CABA2FBAD66F0038B256 /* AdaFace_IR18.mlpackage in Sources */,
 				1946CAC02FBAD6E10038B256 /* FaceEmbeddingService.swift in Sources */,
+				197BDC292FE1219100DA0F0F /* InsightFace_buffalo_l.mlpackage in Sources */,
 				19EABF022FD7180500430373 /* ClusterBlacklistEntity.swift in Sources */,
 				19EABEFD2FD2DA0D00430373 /* AdaFace_IR50.mlpackage in Sources */,
 				C5E3901016A28982EE6D8EC0 /* PhotoLibararyService.swift in Sources */,

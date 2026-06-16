@@ -131,7 +131,6 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
 //                        index = 0
                         for etcPhoto in etcPhotos {
                             if let address = overseasAddress[etcPhoto.localIdentifier] {
-                                
                                 continuation.yield(
                                     ProgressAnalysis(
                                         photo: Photo(
@@ -180,6 +179,9 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
 //                            
 //                            self.timeLog(sec: totalSec)
 //                        }
+                        
+                        print("fail empty photos:", etcPhotos.map {$0.address == nil}.count)
+                        
                         continuation.finish()
                     } catch {
                         continuation.finish(throwing: error)
