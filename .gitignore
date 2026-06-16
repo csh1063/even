@@ -77,3 +77,6 @@ Derived/
 Tuist/Cache/
 Tuist/Config.swift
 
+# Firebase
+GoogleService-Info.plist
+
