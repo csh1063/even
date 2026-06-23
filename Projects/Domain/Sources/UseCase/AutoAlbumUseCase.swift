@@ -38,6 +38,8 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
         "전북특별자치도": "전라북도",
         "강원특별자치도": "강원도",
         "제주특별자치도": "제주도",
+        "제주시": "제주도",
+        "서귀포시": "제주도",
         "도쿄도": "도쿄"
     ]
 
@@ -48,13 +50,6 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
     private let suffixesForOverseas = [
         "부", "SAR", "특별행정구", "현"
     ]
-    
-    private let dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy년 M월 d일"
-        formatter.locale = Locale(identifier: "ko_KR")
-        return formatter
-    }()
     
     public init(
         photoDataRepository: PhotoDataRepository,
@@ -258,10 +253,10 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
                 do {
                     try self.albumDataRepository.deleteAutoAlbums(by: "travel")
                     
-                    var allPhotosForTravel: [PhotoLocationSnapshot] = []
-                    allPhotosForTravel = try photoDataRepository.fetchHasCoordinators()
+                    let allPhotosForTravel = try photoDataRepository.fetchHasCoordinators()
                         .map { PhotoLocationSnapshot(from: $0) }
                     
+                    // 홈존 만들기
                     try analyze(from: allPhotosForTravel)
                     
                     let homeZones = try fetchHomeZones()
@@ -271,19 +266,26 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
                     
                     print("여행 앨범 생성")
                     let clusters = try await travelRepository.detect(from: allPhotosForTravel, homeZones: homeZones)
-//                    let clusters = try await travelRepository.detect(from: allPhotosForTravel)
                     
                     print("clusters count", clusters.count)
+                    var placeCounts: [String: Int] = [:]
+                        
                     for cluster in clusters {
-                        
                         let place = cleanAreaName(cluster.address, isoCode: cluster.isoCountryCode)
-                        let albumName = "\(place) · \(self.dateFormatter.string(from: cluster.startDate))"
                         
-                        print("clusters \(albumName), start:", cluster.startDate, ", end:", cluster.endDate)
+                        // 2. 해당 지역의 현재 카운트를 가져오고, 없으면 0부터 시작
+                        let currentCount = placeCounts[place, default: 0]
+                        let albumName = "\(place) \(currentCount)"
                         
+                        // 3. 다음 카운트를 위해 1을 더해줌
+                        placeCounts[place] = currentCount + 1
+                        
+                        let displayName = "\(place) 여행"
+                        
+                        print("clusters \(albumName)/\(displayName), start:", cluster.startDate, ", end:", cluster.endDate)
                         let album = Album(
                             name: albumName,
-                            displayName: albumName,
+                            displayName: displayName,
                             isAuto: true,
                             coverPhotoIdentifier: cluster.photos.first?.localIdentifier,
                             photoCount: cluster.photos.count,
@@ -377,24 +379,24 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
     private func fetchHomeZones() throws -> [HomeZone] {
         try homeZoneRepository.fetchHomeZones()
     }
-    
     private func matchesRule(_ photo: Photo, rule: AlbumRule) -> Bool {
-        let allPhotoTags = Set(photo.labels.map { $0.name })
-
-        // [검증 1] exclude_tags (confidence 무관하게 태그 존재 자체로 제외)
-        let excludeSet = Set(rule.excludeTags)
-        if !allPhotoTags.isDisjoint(with: excludeSet) { return false }
-
-        let labelNames = Set(photo.labels
-            .filter { $0.confidence >= rule.minConfidence }
+        // 1. 전체 태그 맵 생성 (이름 검색 속도 최적화 및 원본 점수 보존)
+        let labelMap = Dictionary(uniqueKeysWithValues: photo.labels.map { ($0.name, $0.confidence) })
+        
+        // [검증 1] exclude_tags (최소한의 유의미한 점수 이상일 때만 제외 처리를 하는 것이 안전함, 여기선 0.3 기준)
+        // 만약 점수 무관하게 무조건 제외가 기획 의도라면 `labelMap.keys`로 비교하세요.
+        let validExcludeTags = photo.labels
+            .filter { $0.confidence >= 0.3 } // 노이즈 태그로 인한 억울한 탈락 방지
             .map { $0.name }
-        )
-        guard !labelNames.isEmpty else { return false }
+        
+        if !Set(validExcludeTags).isDisjoint(with: Set(rule.excludeTags)) {
+            return false
+        }
 
-        // [검증 2] label_filters (confidence 범위 조건)
+        // [검증 2] label_filters (특정 태그의 수치 범위 제한 검사 - minConfidence 제한을 받지 않음)
         if let filters = rule.labelFilters {
             let passed = filters.allSatisfy { filter in
-                let score = photo.labels.first { $0.name == filter.name }?.confidence ?? 0.0
+                let score = labelMap[filter.name] ?? 0.0
                 if let min = filter.min, score < min { return false }
                 if let max = filter.max, score > max { return false }
                 return true
@@ -402,14 +404,56 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
             if !passed { return false }
         }
 
-        // [검증 3] 타입별 매칭
+        // [검증 3] 기준 점수(minConfidence) 이상을 기록한 유효 태그들만 추출
+        let validLabels = Set(photo.labels
+            .filter { $0.confidence >= rule.minConfidence }
+            .map { $0.name }
+        )
+        
+        guard !validLabels.isEmpty else { return false }
+
+        // [검증 4] 타입별 매칭 (AND_OR_COMBINED vs OR)
         if rule.type == "AND_OR_COMBINED", let mustHaveList = rule.mustHaveOneOf {
-            return !labelNames.isDisjoint(with: Set(mustHaveList))
-                && !labelNames.isDisjoint(with: Set(rule.matchTags))
+            // must_have_one_of 중 하나 이상 존재 'AND' match_tags 중 하나 이상 존재
+            return !validLabels.isDisjoint(with: Set(mustHaveList))
+                && !validLabels.isDisjoint(with: Set(rule.matchTags))
         } else {
-            return !labelNames.isDisjoint(with: Set(rule.matchTags))
+            // OR 타입: match_tags 중 하나만 있으면 패스
+            return !validLabels.isDisjoint(with: Set(rule.matchTags))
         }
     }
+//    private func matchesRule(_ photo: Photo, rule: AlbumRule) -> Bool {
+//        let allPhotoTags = Set(photo.labels.map { $0.name })
+//
+//        // [검증 1] exclude_tags (confidence 무관하게 태그 존재 자체로 제외)
+//        let excludeSet = Set(rule.excludeTags)
+//        if !allPhotoTags.isDisjoint(with: excludeSet) { return false }
+//
+//        let labelNames = Set(photo.labels
+//            .filter { $0.confidence >= rule.minConfidence }
+//            .map { $0.name }
+//        )
+//        guard !labelNames.isEmpty else { return false }
+//
+//        // [검증 2] label_filters (confidence 범위 조건)
+//        if let filters = rule.labelFilters {
+//            let passed = filters.allSatisfy { filter in
+//                let score = photo.labels.first { $0.name == filter.name }?.confidence ?? 0.0
+//                if let min = filter.min, score < min { return false }
+//                if let max = filter.max, score > max { return false }
+//                return true
+//            }
+//            if !passed { return false }
+//        }
+//
+//        // [검증 3] 타입별 매칭
+//        if rule.type == "AND_OR_COMBINED", let mustHaveList = rule.mustHaveOneOf {
+//            return !labelNames.isDisjoint(with: Set(mustHaveList))
+//                && !labelNames.isDisjoint(with: Set(rule.matchTags))
+//        } else {
+//            return !labelNames.isDisjoint(with: Set(rule.matchTags))
+//        }
+//    }
     
     private func cleanAreaName(_ name: String, isoCode: String) -> String {
         var result = self.administrativeAreaReplacements[name] ?? name
@@ -454,5 +498,12 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
             return (key, addressText)
         }
         return nil
+    }
+    
+    private func dateFormatter(form: String = "yyyy년 M월 d일") -> DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateFormat = form
+        formatter.locale = Locale(identifier: "ko_KR")
+        return formatter
     }
 }

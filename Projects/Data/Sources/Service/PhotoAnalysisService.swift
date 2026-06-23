@@ -59,7 +59,7 @@ public final class PhotoAnalysisService { // : @unchecked Sendable {
                     }
 
                     let labels = results
-                        .filter { $0.confidence >= 0.3 }
+                        .filter { $0.confidence >= 0.1 }
                         .filter {
                             
                             return !removeKeywords.contains($0.identifier)

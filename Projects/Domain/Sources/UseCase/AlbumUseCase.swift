@@ -32,6 +32,10 @@ public final class DefaultAlbumUseCase: AlbumUseCase {
         try self.albumRepository.fetchAll()
     }
     
+    public func fetchAll(from: String) async throws -> [Album] {
+        try self.albumRepository.fetchAll(from: from)
+    }
+    
     public func createDummy() async throws {
         print("usecase create dummy!")
         let albums = [

@@ -165,7 +165,7 @@ final class NaviBarView: UIView {
                 coverView.addSubview(messageLabel)
                 messageLabel.snp.makeConstraints { make in
                     make.top.equalTo(coverView.snp.bottom).offset(6)
-                    make.bottom.equalTo(self)
+                    make.bottom.equalTo(self).offset(-8)
                     make.leading.equalTo(titleLabel)
                 }
             }

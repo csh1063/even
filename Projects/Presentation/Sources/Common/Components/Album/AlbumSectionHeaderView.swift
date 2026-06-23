@@ -15,7 +15,7 @@ final class AlbumSectionHeaderView: UICollectionReusableView {
     // MARK: - UI
 
     private let titleLabel = UILabel()
-    let moreButton = UIButton(type: .system)
+    private let moreButton = UIButton(type: .system)
 
     var onMoreTapped: (() -> Void)?
 
@@ -59,16 +59,13 @@ final class AlbumSectionHeaderView: UICollectionReusableView {
     @objc private func moreTapped() {
         onMoreTapped?()
     }
-
-//    func configure(title: String) {
-//        titleLabel.text = title
-//    }
-    func configure(_ section: AlbumSection) {
+    
+    func configure(_ section: AlbumSection, itemCount: Int) {
         titleLabel.text = section.title
         
         switch section {
         case .travel:
-            self.moreButton.isHidden = false
+            self.moreButton.isHidden = itemCount < 8
         case .location:
             self.moreButton.isHidden = false
         case .date:

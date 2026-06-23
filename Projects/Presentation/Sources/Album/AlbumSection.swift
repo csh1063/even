@@ -10,10 +10,10 @@ import Domain
 
 enum AlbumSection: Int, CaseIterable {
     case travel
-    case location
-    case date
     case category
     case face
+    case location
+    case date
 
     var title: String {
         switch self {
@@ -22,6 +22,16 @@ enum AlbumSection: Int, CaseIterable {
         case .location:  return "장소"
         case .category: return "분류"
         case .face:     return "인물"
+        }
+    }
+    
+    var type: String {
+        switch self {
+        case .date:     return "date"
+        case .travel:     return "travel"
+        case .location:  return "location"
+        case .category: return "category"
+        case .face:     return "face"
         }
     }
 }

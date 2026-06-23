@@ -238,7 +238,15 @@ final class ImageViewerViewController: UIViewController {
             albumBadge.isHidden = true
 //            albumBadgeLabel.text = "연결된 앨범 2개"
             
-            let components = [photo.country, photo.administrativeArea, photo.locality].compactMap { $0 }
+//            let components = [photo.address?.country, photo.address?.administrativeArea, photo.address?.locality, photo.address?.subLocality].compactMap { $0 }
+            let components = [photo.address?.country, photo.address?.administrativeArea, photo.address?.locality, photo.address?.subLocality]
+                .compactMap { $0 }
+                .filter { !$0.isEmpty }
+                .reduce(into: [String]()) { result, value in
+                    if !result.contains(value) {
+                        result.append(value)
+                    }
+                }
             
             if components.isEmpty {
                 locationIcon.image = UIImage(systemName: "location.slash")
@@ -252,8 +260,9 @@ final class ImageViewerViewController: UIViewController {
                 locationLabel.textColor = .white.withAlphaComponent(0.92)
             }
             
-            print("labels", photoDetail.labels.map {$0.name}.joined(separator: ", ")
-)
+            print("code", photoDetail.photo?.isoCountryCode ?? "???")
+            print("address code", photoDetail.photo?.address?.isoCountryCode ?? "????")
+            print("labels", photoDetail.labels.map {$0.name}.joined(separator: ", "))
             label.text = photoDetail.labels.map {"\($0.name): \($0.confidence)"}.joined(separator: ", ")
         } else {
             albumBadge.isHidden = false

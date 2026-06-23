@@ -99,5 +99,4 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
         
         navigationController.present(vc, animated: true)
     }
-    
 }

@@ -41,4 +41,13 @@ public final class AlbumDIContainer {
             labelRepository: appDIContainer.photoLabelDataRepository
         )
     }
+    
+    func makeListDIContainer(from: String) -> AlbumListDIContainer {
+        AlbumListDIContainer(
+            from: from,
+            photoLibraryRepository: appDIContainer.photoLibraryRepository,
+            albumDataRepository: appDIContainer.albumDataRepository,
+            photoLabelDataRepository: appDIContainer.photoLabelDataRepository
+        )
+    }
 }

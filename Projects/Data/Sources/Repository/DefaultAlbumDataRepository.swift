@@ -29,8 +29,9 @@ public final class DefaultAlbumDataRepository: AlbumDataRepository {
         let context = ModelContext(container)
         
         let name = album.name
+        let from = album.from
         let fetchDescriptor = FetchDescriptor<AlbumEntity>(
-            predicate: #Predicate { $0.name == name }
+            predicate: #Predicate { $0.name == name && $0.from == from }
         )
         
         let existing = try context.fetch(fetchDescriptor)
@@ -67,6 +68,20 @@ public final class DefaultAlbumDataRepository: AlbumDataRepository {
 //            predicate: #Predicate{$0.from == "travel"},
             sortBy: [
 //                SortDescriptor(\.from, order: .forward),
+                SortDescriptor(\.photoCount, order: .reverse),
+                SortDescriptor(\.displayName, order: .forward),
+            ]
+        )
+        return try context.fetch(fetchDescriptor).map {$0.toDomainWithKey()}
+    }
+    
+    public func fetchAll(from: String) throws -> [Album] {
+        
+        let context = ModelContext(container)
+        
+        let fetchDescriptor = FetchDescriptor<AlbumEntity>(
+            predicate: #Predicate{$0.from == from},
+            sortBy: [
                 SortDescriptor(\.photoCount, order: .reverse),
                 SortDescriptor(\.displayName, order: .forward),
             ]

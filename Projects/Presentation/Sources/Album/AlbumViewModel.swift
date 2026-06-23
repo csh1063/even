@@ -13,6 +13,8 @@ import UIKit
 
 enum AlbumViewModelAction {
     case moveDetail(album: Album)
+    case more(from: String)
+    case pop
 }
 
 struct AlbumSectionsData {
@@ -28,43 +30,6 @@ struct AlbumSectionsData {
     }
 }
 
-//struct AlbumSectionsData {
-//    
-//    var sections: [AlbumSection] {
-//        var result = [AlbumSection]()
-//        
-//        if !travelItems.isEmpty {
-//            result.append(.travel)
-//        }
-//        
-//        if !dateItems.isEmpty {
-//            result.append(.date)
-//        }
-//        
-//        if !locationItems.isEmpty {
-//            result.append(.location)
-//        }
-//        
-//        if !categoryItems.isEmpty {
-//            result.append(.category)
-//        }
-//        
-//        if !faceItems.isEmpty {
-//            result.append(.face)
-//        }
-//        
-//        return result
-//    }
-//    
-//    var dateItems:     [DateAlbumCellViewModel]   = []
-//    var travelItems:     [TravelAlbumCellViewModel]  = []
-//    var locationItems:  [LocationAlbumCellViewModel]    = []
-//    var categoryItems: [CategoryAlbumCellViewModel]   = []
-//    var faceItems:     [FaceCellViewModel]       = []
-//    
-//    var totalCount: Int = 0
-//}
-
 @MainActor
 public final class AlbumViewModel: BaseViewModel {
     
@@ -73,6 +38,7 @@ public final class AlbumViewModel: BaseViewModel {
         case analysis
         case clear
         case selectItem(Album)
+        case more(String)
         case permission
     }
     
@@ -151,7 +117,7 @@ public final class AlbumViewModel: BaseViewModel {
         switch input {
         case .appear:
             self.isLoading = true
-            await self.loadFodlers()
+            await self.loadAlbums()
             self.isLoading = false
         case .analysis:
             print("analysis 1")
@@ -161,12 +127,14 @@ public final class AlbumViewModel: BaseViewModel {
         case .selectItem(let album):
             print("!!!")
             self.onAction?(.moveDetail(album: album))
+        case .more(let type):
+            self.onAction?(.more(from: type))
         case .permission:
             tabbarViewModel.send(.permission)
         }
     }
     
-    private func loadFodlers() async {
+    private func loadAlbums() async {
         do {
             print("load albums")
             let albums = try await self.albumUseCase.fetchAll()
@@ -190,11 +158,11 @@ public final class AlbumViewModel: BaseViewModel {
                 .travel(TravelAlbumCellViewModel(album: $0, imageLoader: self))
             }
         
-        data.items[.date] = albums.filter { $0.from == "date" }
-            .sorted { $0.displayName > $1.displayName }
-            .map {
-                .date(DateAlbumCellViewModel(album: $0, imageLoader: self))
-            }
+        data.items[.date] = []//albums.filter { $0.from == "date" }
+//            .sorted { $0.displayName > $1.displayName }
+//            .map {
+//                .date(DateAlbumCellViewModel(album: $0, imageLoader: self))
+//            }
         
         data.items[.location] = albums.filter { $0.from == "location" }
             .sorted { $0.photoCount > $1.photoCount }

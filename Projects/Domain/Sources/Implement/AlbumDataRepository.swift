@@ -15,6 +15,7 @@ public protocol AlbumDataRepository {
     
     func saveAlbum(album: Album, returnExist: Bool) throws -> Album?
     func fetchAll() throws -> [Album]
+    func fetchAll(from: String) throws -> [Album]
     func fetchAutoAll() throws -> [Album]
     func fetchPhotos(by albumId: UUID) throws -> [Photo]
     func updateAlbum(album: Album) throws

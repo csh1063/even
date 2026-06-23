@@ -31,6 +31,9 @@ public final class AlbumCoordinator: BaseCoordinator {
             switch type {
             case .moveDetail(let album):
                 self?.moveDetail(album: album)
+            case .more(let from):
+                self?.moveFromList(from)
+            default: break
             }
         }
         
@@ -58,6 +61,18 @@ public final class AlbumCoordinator: BaseCoordinator {
         )
         self.hideTabBar?()
         self.start(coordinator: detailCoordinator)
+    }
+    
+    func moveFromList(_ from: String) {
+        print("move!")
+        let listDI = diContainer.makeListDIContainer(from: from)
+        
+        let listCoordinator = AlbumListCoordinator(
+            diContainer: listDI,
+            navigationController: self.navigationController
+        )
+        self.hideTabBar?()
+        self.start(coordinator: listCoordinator)
     }
 }
 

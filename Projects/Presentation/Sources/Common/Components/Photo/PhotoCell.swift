@@ -12,7 +12,7 @@ import Domain
 
 final class PhotoCell: UICollectionViewCell {
     
-    private let colors: [UIColor] = [Theme.primary, Theme.secondary, Theme.accent]
+    private let colors: [UIColor] = [Theme.strokeSoft]// Theme.primary, Theme.secondary, Theme.accent]
     
     private let coverView: UIView = UIView()
     
