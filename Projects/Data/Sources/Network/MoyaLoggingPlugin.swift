@@ -9,29 +9,29 @@ import Foundation
 import Moya
 
 final class MoyaLoggingPlugin: PluginType {
-    
+
     func prepare(_ request: URLRequest, target: TargetType) -> URLRequest {
-        
+
         print("")
         print("prepare")
-        
+
         return request
     }
-    
+
     func willSend(_ request: RequestType, target: TargetType) {
-        
+
         print("")
         print("willSend")
-        
+
         print("👉 NETWORK Reqeust LOG start =====================================")
 //        print(request.description)
         print("* URL: " + (request.request?.url?.absoluteString ?? ""))
         print("* Method: " + (request.request?.httpMethod ?? ""))
-        
+
         if let header = request.request?.allHTTPHeaderFields {
-            
+
             print("* Headers: [")
-            
+
 //            if let configHeader = request.request?.headers {
 //                for (key, value) in configHeader.dictionary {
 //                    print("\t\(key): \(value)")
@@ -46,17 +46,17 @@ final class MoyaLoggingPlugin: PluginType {
         if let body = request.request?.httpBody {
             print("* Body: " + (body.toPrettyPrintedString ?? ""))
         }
-        
+
         print("👉 NETWORK Reqeust LOG end   =====================================")
     }
-    
+
     func didReceive(_ result: Result<Moya.Response, MoyaError>, target: TargetType) {
-        
+
         print("")
         print("didReceive")
-        
+
         print("✊ NETWORK Response LOG start ====================================")
-        
+
         switch result {
         case .success(let response):
             if let header = response.request?.allHTTPHeaderFields,
@@ -67,7 +67,7 @@ final class MoyaLoggingPlugin: PluginType {
                 print("* Request Time: \(loggerTime.components(separatedBy: " ").dropLast().joined(separator: " "))")
                 print("* Response Time: \(Date()) \(executionTime)")
             }
-            
+
             print("* URL: " + (response.request?.url?.absoluteString ?? ""))
             print("* Result: SUCCESS")
             print("* StatusCode: " + "\(response.response?.statusCode ?? 0)")
@@ -77,23 +77,22 @@ final class MoyaLoggingPlugin: PluginType {
             print("* Error: \(failure.localizedDescription)")
             print("* Data: \(failure.response?.data.toPrettyPrintedString ?? "")")
         }
-        
+
         print("✊ NETWORK Response LOG end   ====================================")
-        
+
     }
-    
+
     func process(_ result: Result<Moya.Response, MoyaError>, target: TargetType) -> Result<Moya.Response, MoyaError> {
-        
+
 //        print("process")
 //        
 //        let _ = result.map { response in
 //            print("process: \(response.data.toPrettyPrintedString ?? "")")
 //        }
-        
+
         return result
     }
-    
-    
+
     func onFail(_ error: MoyaError, target: TargetType) {
         var log = "DEBUG - <네트워크 오류> ------------ "
         log.append("DEBUG - <----- \(error.errorCode) \(target) -----> \n")

@@ -141,11 +141,11 @@ final class ImageViewerViewModel: BaseViewModel {
 
 extension ImageViewerViewModel: ImageLoadable {}
 
-//enum ImageViewerViewModelAction {
+// enum ImageViewerViewModelAction {
 //    case pageChanged(String)
-//}
+// }
 //
-//final class ImageViewerViewModel: BaseViewModel {
+// final class ImageViewerViewModel: BaseViewModel {
 //
 //    enum Input {
 //        case pageChanged(Int)
@@ -249,7 +249,7 @@ extension ImageViewerViewModel: ImageLoadable {}
 //        await self.loadLabels(by: detail.id)
 //        self.onAction?(.pageChanged(detail.id))
 //    }
-//}
+// }
 //
-//extension ImageViewerViewModel: ImageLoadable {
-//}
+// extension ImageViewerViewModel: ImageLoadable {
+// }

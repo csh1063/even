@@ -16,10 +16,10 @@ public protocol PhotoLabelUseCase {
 }
 
 public final class DefaultPhotoLabelUseCase: PhotoLabelUseCase {
-    
+
     private let photoRepository: PhotoDataRepository
     private let labelRepository: PhotoLabelDataRepository
-    
+
     public init(
         photoRepository: PhotoDataRepository,
         labelRepository: PhotoLabelDataRepository
@@ -27,22 +27,22 @@ public final class DefaultPhotoLabelUseCase: PhotoLabelUseCase {
         self.photoRepository = photoRepository
         self.labelRepository = labelRepository
     }
-    
+
     public func fetchAll() async throws -> [PhotoLabel] {
         try labelRepository.fetchAll()
     }
-    
+
     public func fetchUniqueNames() async throws -> [String] {
         try labelRepository.fetchUniqueNames()
     }
-    
+
     public func fetchLabelCounts() async throws -> [(name: String, count: Int)] {
         try labelRepository.fetchLabelCounts()
     }
-    
+
     public func fetchAddressCounts() async throws -> [(name: String, count: Int)] {
         let photo = try photoRepository.fetchPhotos()
-        
+
         let map = Dictionary(grouping: photo) {
             if let address = $0.address,
                let country = address.country,
@@ -59,7 +59,7 @@ public final class DefaultPhotoLabelUseCase: PhotoLabelUseCase {
             .sorted {
                 $0.name < $1.name
             }
-        
+
         return map
     }
 }

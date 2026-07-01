@@ -9,17 +9,17 @@
 import UIKit
 
 class BoxView: UIView {
-    
+
     private var position: CellPosition = .middle
-    
+
     func applyStyle(_ position: CellPosition) {
         self.position = position
         self.layer.sublayers?.removeAll()
-        
+
         let path: UIBezierPath
         let radius: CGFloat = 12
         let rect = self.bounds
-        
+
         switch position {
         case .top:
             path = UIBezierPath(roundedRect: rect, byRoundingCorners: [.topLeft, .topRight], cornerRadii: CGSize(width: radius, height: radius))
@@ -30,11 +30,11 @@ class BoxView: UIView {
         case .single:
             path = UIBezierPath(roundedRect: rect, cornerRadius: radius)
         }
-        
+
         let mask = CAShapeLayer()
         mask.path = path.cgPath
         self.layer.mask = mask
-        
+
         // 보더
         let border = CAShapeLayer()
         border.path = path.cgPath
@@ -43,7 +43,7 @@ class BoxView: UIView {
         border.lineWidth = 1
         self.layer.addSublayer(border)
     }
-    
+
     override func layoutSubviews() {
         super.layoutSubviews()
         // 여기서 applyStyle 호출하면 bounds 보장

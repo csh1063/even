@@ -17,28 +17,28 @@ public final class PhotoEntity {
     public var createdAt: Date
     public var analyzedAt: Date?
     public var locationAnalyzedAt: Date?
-    
+
     public var latitude: Double?
     public var longitude: Double?
-    
+
     // address
     public var isoCountryCode: String?
     public var address: PhotoLocation?
     public var addressEn: PhotoLocation?
-    
+
     // date
     public var year: String?
     public var month: String?
-    
+
     @Relationship(deleteRule: .cascade)
     public var labels: [PhotoLabelEntity] = []
-    
+
     @Relationship(deleteRule: .cascade)
     public var faceEmbeddings: [FaceEmbeddingEntity] = []
-    
+
     @Relationship(deleteRule: .nullify, inverse: \AlbumEntity.photos)
     public var albums: [AlbumEntity] = []
-    
+
     public init(
         id: UUID = UUID(),
         localIdentifier: String,

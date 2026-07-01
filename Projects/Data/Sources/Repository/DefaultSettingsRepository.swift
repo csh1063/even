@@ -11,15 +11,15 @@ import Domain
 import UIKit
 
 public final class DefaultSettingsRepository: SettingsRepository {
-    
+
     private let service: NetworkService
-    
+
     public init(service: NetworkService) {
         self.service = service
     }
- 
+
     public func writeFeedback(type: String, content: String) async throws {
-        
+
         let param = await FeedbackParam(
             type: type,
             content: content,
@@ -29,7 +29,7 @@ public final class DefaultSettingsRepository: SettingsRepository {
             osVersion: UIDevice.current.systemVersion,
             locale: Locale.current.identifier
         )
-        
+
         return try await service.writeFeedback(param)
     }
 }

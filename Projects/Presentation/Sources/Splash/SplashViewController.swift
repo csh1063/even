@@ -84,13 +84,13 @@ final class SplashViewController: BaseViewController {
     }()
 
     private let viewModel: SplashViewModel
-    
+
     init(viewModel: SplashViewModel) {
         self.viewModel = viewModel
-        
+
         super.init(nibName: nil, bundle: nil)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError(Self.fatalMessage)
     }
@@ -108,7 +108,7 @@ final class SplashViewController: BaseViewController {
             self?.viewModel.send(.endAnim)
         }
     }
-    
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         layoutCardFrames()
@@ -125,7 +125,7 @@ final class SplashViewController: BaseViewController {
             card.addSubview(inner)
             card.alpha = 0
         }
-        
+
         cardCenter.addSubview(moaCardLabel)
 
         textStack.addArrangedSubview(titleLabel)
@@ -179,7 +179,7 @@ final class SplashViewController: BaseViewController {
         let step1 = UIViewPropertyAnimator(duration: 0.5, timingParameters: spring)
         step1.addAnimations {
             self.cardCenter.alpha = 1
-            self.cardCenter.transform = .identity//.scaledBy(x: 0.95, y: 0.95)
+            self.cardCenter.transform = .identity// .scaledBy(x: 0.95, y: 0.95)
         }
 
         // step2: 좌우 fan-out
@@ -230,7 +230,7 @@ final class SplashViewController: BaseViewController {
             step1.startAnimation()
         }
     }
-    
+
     private func makeCard() -> UIView {
         let view = UIView()
         view.backgroundColor = Theme.surface
@@ -240,4 +240,3 @@ final class SplashViewController: BaseViewController {
         return view
     }
 }
-

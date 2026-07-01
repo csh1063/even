@@ -6,7 +6,6 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
-
 import Foundation
 
 public protocol FaceClusterRepository {

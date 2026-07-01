@@ -20,7 +20,7 @@ extension AddressDTO {
             country: "대한민국"
         )
     }
-    
+
     func toOverseasDomain() -> PhotoLocation {
         return PhotoLocation(
             thoroughfare: thoroughfare,

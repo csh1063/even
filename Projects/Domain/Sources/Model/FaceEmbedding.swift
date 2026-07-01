@@ -6,7 +6,6 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
-
 import Foundation
 
 public struct FaceEmbedding: Hashable {
@@ -32,11 +31,11 @@ public struct FaceEmbedding: Hashable {
         self.clusterId = clusterId
         self.photoId = photoId
     }
-    
+
     public static func == (lhs: FaceEmbedding, rhs: FaceEmbedding) -> Bool {
         lhs.id == rhs.id
     }
-    
+
     public func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }

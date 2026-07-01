@@ -17,7 +17,7 @@ public struct TravelCluster {
     public let isoCountryCode: String
     public let startDate: Date
     public let endDate: Date
-    
+
     public var address: String {
         return locality?.isEmpty == false ? locality! :
         administrativeArea.isEmpty ? country :

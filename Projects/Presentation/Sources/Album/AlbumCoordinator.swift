@@ -12,16 +12,16 @@ import Domain
 
 @MainActor
 public final class AlbumCoordinator: BaseCoordinator {
-    
+
     private let diContainer: AlbumDIContainer
     private let tabbarViewModel: TabbarViewModel
-    
+
     private let navigationController = UINavigationController()
-    
+
     init(diContainer: AlbumDIContainer, tabbarViewModel: TabbarViewModel) {
         self.diContainer = diContainer
         self.tabbarViewModel = tabbarViewModel
-        
+
         super.init()
     }
 
@@ -36,11 +36,11 @@ public final class AlbumCoordinator: BaseCoordinator {
             default: break
             }
         }
-        
+
         let vc = AlbumViewController(viewModel: viewModel)
 
         bindAlert(from: viewModel)
-        
+
         navigationController.delegate = self
         navigationController.viewControllers = [vc]
         self.viewController = vc
@@ -50,11 +50,11 @@ public final class AlbumCoordinator: BaseCoordinator {
         start(coordinator: self)
         return navigationController
     }
-    
+
     func moveDetail(album: Album, isSelectMode: Bool) {
         print("move!")
         let detailDI = diContainer.makeDetailDIContainer(album: album, isSelectMode: isSelectMode)
-        
+
         let detailCoordinator = AlbumDetailCoordinator(
             diContainer: detailDI,
             navigationController: self.navigationController
@@ -62,11 +62,11 @@ public final class AlbumCoordinator: BaseCoordinator {
         self.hideTabBar?()
         self.start(coordinator: detailCoordinator)
     }
-    
+
     func moveFromList(_ from: String) {
         print("move!")
         let listDI = diContainer.makeListDIContainer(from: from)
-        
+
         let listCoordinator = AlbumListCoordinator(
             diContainer: listDI,
             navigationController: self.navigationController
@@ -76,7 +76,7 @@ public final class AlbumCoordinator: BaseCoordinator {
     }
 }
 
-//extension AlbumCoordinator: UINavigationControllerDelegate {
+// extension AlbumCoordinator: UINavigationControllerDelegate {
 //    
 //    public func navigationController(_ navigationController: UINavigationController,
 //                            didShow viewController: UIViewController,
@@ -98,4 +98,4 @@ public final class AlbumCoordinator: BaseCoordinator {
 //            }
 //        }
 //    }
-//}
+// }

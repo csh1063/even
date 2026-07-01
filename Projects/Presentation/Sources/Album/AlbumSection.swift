@@ -26,7 +26,7 @@ enum AlbumSection: Int, CaseIterable {
         case .similar: return "중복"
         }
     }
-    
+
     var type: String {
         switch self {
         case .date:     return "date"
@@ -46,7 +46,7 @@ enum AlbumType: Hashable {
     case category(CategoryAlbumCellViewModel)
     case face(FaceCellViewModel)
     case similar(SimilarAlbumCellViewModel)
-    
+
     var album: Album {
         switch self {
         case .date(let vm):     return vm.album

@@ -28,7 +28,7 @@ extension PhotoDataRepository {
     func fetchAll(page: Int = -1, pageSize: Int = 50) throws -> [Photo] {
         return try fetchAll(page: page, pageSize: pageSize)
     }
-    
+
     func fetchPhotos(page: Int = -1, pageSize: Int = 300) throws -> [Photo] {
         return try fetchPhotos(page: page, pageSize: pageSize)
     }

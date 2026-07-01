@@ -266,14 +266,14 @@ public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepo
             }
         }
     }
-    
+
     private func euclideanDistance(_ a: [Float], _ b: [Float]) -> Float {
         var squaredSum: Float = 0
         vDSP_distancesq(a, 1, b, 1, &squaredSum, vDSP_Length(a.count))
         return squaredSum.squareRoot()
     }
 }
-//public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepository {
+// public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepository {
 //
 //    public var threshold: Float = 0.35
 //    public var timeWindowMinutes: Double = 1440.0
@@ -455,4 +455,4 @@ public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepo
 //            }
 //        }
 //    }
-//}
+// }

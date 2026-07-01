@@ -51,13 +51,13 @@ final class OnboardingPageViewController: UIViewController {
         let titleLabel = UILabel()
         titleLabel.text = page.title
         titleLabel.font = .systemFont(ofSize: 20, weight: .semibold)
-        titleLabel.textColor = Theme.textPrimary//.white
+        titleLabel.textColor = Theme.textPrimary// .white
         titleLabel.textAlignment = .center
 
         let descLabel = UILabel()
         descLabel.text = page.description
         descLabel.font = .systemFont(ofSize: 15, weight: .light)
-        descLabel.textColor = Theme.textSecondary //UIColor.white.withAlphaComponent(0.85)
+        descLabel.textColor = Theme.textSecondary // UIColor.white.withAlphaComponent(0.85)
         descLabel.textAlignment = .center
         descLabel.numberOfLines = 0
 
@@ -129,15 +129,15 @@ final class GradientView: UIView {
 
     override class var layerClass: AnyClass { CAGradientLayer.self }
 
-    private var gradientLayer: CAGradientLayer { layer as! CAGradientLayer }
+    private var gradientLayer: CAGradientLayer? { layer as? CAGradientLayer }
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        gradientLayer.colors = [
+        gradientLayer?.colors = [
             UIColor.black.withAlphaComponent(0).cgColor,
             UIColor.black.withAlphaComponent(0.6).cgColor
         ]
-        gradientLayer.locations = [0, 1]
+        gradientLayer?.locations = [0, 1]
     }
 
     required init?(coder: NSCoder) { fatalError() }

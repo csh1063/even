@@ -14,12 +14,12 @@ public protocol PhotoAnalysisUseCase {
 }
 
 public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
-    
+
     private let libraryRepository: PhotoLibraryRepository
     private let analysisRepository: PhotoAnalysisRepository
     private let dataRepository: PhotoDataRepository
     private let geoRepository: GeoRepository
-    
+
     public init(
         libraryRepository: PhotoLibraryRepository,
         analysisRepository: PhotoAnalysisRepository,
@@ -31,7 +31,7 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
         self.dataRepository = dataRepository
         self.geoRepository = geoRepository
     }
-    
+
     // 이미지 분석
     public func analysis() -> AsyncThrowingStream<ProgressAnalysis, Error> {
         execute { [weak self] in
@@ -40,17 +40,17 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
             return self.analysisRepository.analyze(excludingIds: analyzedIds)
         }
     }
-    
+
     // 위치 분석
     public func locationAnalysis() -> AsyncThrowingStream<ProgressAnalysis, Error> {
         execute { [weak self] in
             AsyncThrowingStream { continuation in
-                Task.detached(priority: .userInitiated)  {
+                Task.detached(priority: .userInitiated) {
                     do {
                         guard let self else { throw PhotoRepositoryError.photoNotFound }
-                        
+
                         let unanalyzedPhotos = try self.dataRepository.fetchLocationUnanalyzed()
-                        
+
                         var koreaPhotos: [Photo] = []
                         var etcPhotos: [Photo] = []
                         var noCodePhotos: [Photo] = []
@@ -64,19 +64,19 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                                 }
                             }
                         }
-                        
+
                         let total = koreaPhotos.count + etcPhotos.count
                         print("koreaPhotos", koreaPhotos.count)
                         print("etcPhotos", etcPhotos.count)
                         print("total", total)
-                        
+
                         // 한국 주소
                         let koreaAddress = try await self.geoRepository.locationToaddress(koreaPhotos)
-                        
+
                         var index: Double = 0
                         for koreaPhoto in koreaPhotos {
                             if let address = koreaAddress[koreaPhoto.localIdentifier] {
-                                
+
                                 index += 1
                                 continuation.yield(
                                     ProgressAnalysis(
@@ -91,12 +91,12 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                                         state: .progress(index/Double(total))
                                     )
                                 )
-                                
+
                             } else {
                                 etcPhotos.append(koreaPhoto)
                             }
                         }
-                        
+
                         // 외국 주소
                         print("etcPhotos before", etcPhotos.count)
                         let unique = Dictionary(grouping: etcPhotos) {
@@ -106,10 +106,10 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                             return ""
                         }
                         print("etcPhotos after", unique.count)
-                        
+
 //                        var totalSec = Double(unique.count) * 1.2
 //                        print("totalSec", totalSec)
-                        
+
                         let batchSize = 50
                         let uniqueArray = Array(unique)
                         let batches = stride(from: 0, to: uniqueArray.count, by: batchSize).map {
@@ -127,13 +127,13 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
 
                         print("etcPhotos result:", overseasAddress.count)
 //                        let overseasAddress = try await self.geoRepository.locationOverseas(unique)
-                        
+
 //                        index = 0
                         for etcPhoto in etcPhotos {
                             if let address = overseasAddress[etcPhoto.localIdentifier],
                                let isoCountryCode = address.isoCountryCode,
                                address.isoCountryCode != "none" {
-                                
+
                                 index += 1
                                 continuation.yield(
                                     ProgressAnalysis(
@@ -153,16 +153,16 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                                 noCodePhotos.append(etcPhoto)
                             }
                         }
-                        
+
                         for photo in noCodePhotos {
-                            
+
                             guard let latitude = photo.latitude,
                                   let longitude = photo.longitude,
                                   let address = try await self.analysisRepository.geocoderAnalyze(
                                     latitude: latitude, longitude: longitude) else {
                                 continue
                             }
-                            
+
                             index += 1
                             continuation.yield(
                                 ProgressAnalysis(
@@ -177,10 +177,10 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                                     state: .progress(index / Double(total))
                                 )
                             )
-                            
+
                             try await Task.sleep(nanoseconds: 1_500_000_000)
                         }
-                        
+
                         continuation.finish()
                     } catch {
                         continuation.finish(throwing: error)
@@ -189,10 +189,10 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
             }
         }
     }
-    
+
     // MARK: - Private
     private func execute(
-        stream: @escaping () async throws  -> AsyncThrowingStream<ProgressAnalysis, Error>?
+        stream: @escaping () async throws -> AsyncThrowingStream<ProgressAnalysis, Error>?
     ) -> AsyncThrowingStream<ProgressAnalysis, Error> {
         AsyncThrowingStream { continuation in
             Task {
@@ -201,7 +201,7 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                         continuation.finish()
                         return
                     }
-                    
+
                     for try await progress in analysisStream {
                         try await dataRepository.saveAndUpdateLabels(
                             photo: progress.photo,
@@ -216,19 +216,19 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
             }
         }
     }
-    
+
     private func isKorea(latitude: Double, longitude: Double) -> Bool {
         // 한국 바운딩 박스로 1차 필터 — 폴리곤 순회보다 훨씬 빠름
         return (32.0...39.5).contains(latitude) &&
                (123.5...132.5).contains(longitude)
     }
-    
+
     private func timeLog(sec: Double) {
-        
+
         let hour = Int(sec / 3600)
         let min = Int(sec.truncatingRemainder(dividingBy: 3600) / 60)
         let sec = Int(sec.truncatingRemainder(dividingBy: 60))
-        
+
         if hour != 0 {
             print(hour, "시간")
         }

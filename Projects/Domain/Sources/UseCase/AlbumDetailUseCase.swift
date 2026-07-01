@@ -16,28 +16,28 @@ public protocol AlbumDetailUseCase {
 }
 
 public final class DefaultAlbumDetailUseCase: AlbumDetailUseCase {
-    
+
     private let repository: AlbumDataRepository
     private let libraryRepository: PhotoLibraryRepository
-    
+
     public init(repository: AlbumDataRepository,
                 libraryRepository: PhotoLibraryRepository) {
         self.repository = repository
         self.libraryRepository = libraryRepository
     }
-    
+
     public func fetchPhotos(by albumId: UUID) async throws -> [Photo] {
         try repository.fetchPhotos(by: albumId)
     }
-    
+
     public func editAlbumName(new name: String, id: UUID) async throws {
         try repository.updateAlbumName(new: name, id: id)
     }
-    
+
     public func deleteAlbum(_ id: UUID) async throws {
         try repository.delete(id: id)
     }
-    
+
     public func deletePhotos(_ photoIds: [String], albumId: UUID, deleteInLibrary: Bool) async throws {
         if deleteInLibrary {
             try await libraryRepository.deletePhotos(by: photoIds)

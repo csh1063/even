@@ -44,7 +44,7 @@ final class PhotoCell: UICollectionViewCell {
         iv.isHidden = true
         return iv
     }()
-    
+
     var onImageTap: (() -> Void)?
 
     private var task: Task<Void, Never>?
@@ -102,21 +102,21 @@ final class PhotoCell: UICollectionViewCell {
             make.size.equalTo(12)
         }
     }
-    
+
     private func setupBinding() {
-        
+
         self.mainImageView.tapPublisher()
-            .sink { [weak self] gesture in
+            .sink { [weak self] _ in
                 self?.onImageTap?()
             }
             .store(in: &cancellables)
-        
+
         self.dimView.tapPublisher()
-            .sink { [weak self] gesture in
+            .sink { [weak self] _ in
                 self?.onImageTap?()
             }
             .store(in: &cancellables)
-        
+
     }
 
     // MARK: - Configure

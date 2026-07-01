@@ -6,7 +6,6 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
-
 import Foundation
 
 public enum NetworkError: Error {
@@ -26,7 +25,6 @@ extension NetworkError: LocalizedError {
         }
     }
 }
-
 
 public enum SwiftDataError: Error {
     //    SwiftData CRUD 실패

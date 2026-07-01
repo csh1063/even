@@ -15,24 +15,24 @@ protocol NaviButtonSetting {
 }
 
 struct LeftButton: NaviButtonSetting {
-    
+
     let isLeft = true
     var type: NaviBarButtonType
 //    var color: UIColor
-    
-    init(type: NaviBarButtonType) {//}, color: UIColor = Theme.textPrimary) {
+
+    init(type: NaviBarButtonType) {// }, color: UIColor = Theme.textPrimary) {
         self.type = type
 //        self.color = color
     }
 }
 
 struct RightButton: NaviButtonSetting {
-    
+
     let isLeft = false
     var type: NaviBarButtonType
 //    var color: UIColor
-    
-    init(type: NaviBarButtonType) {//}, color: UIColor) {
+
+    init(type: NaviBarButtonType) {// }, color: UIColor) {
         self.type = type
 //        self.color = color
     }

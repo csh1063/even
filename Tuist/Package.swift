@@ -18,7 +18,7 @@ import PackageDescription
                        "FirebaseCore": .framework,
                        "FirebaseCoreInternal": .framework,
                        "FirebaseCoreExtension": .framework,
-                       "GoogleUtilities": .framework,
+                       "GoogleUtilities": .framework
         ]
         ,
         baseSettings: .settings(
@@ -40,4 +40,3 @@ let package = Package(
 //        .package(url: "https://github.com/airbnb/lottie-ios.git", from: "3.2.1")
     ]
 )
-

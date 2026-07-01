@@ -144,7 +144,7 @@ public final class AlbumDetailViewModel: BaseViewModel {
                             print("end date!!!:", Date())
                         }
                     },
-                    AlertButtonConfig(title: "취소", style: .cancel, action: nil),
+                    AlertButtonConfig(title: "취소", style: .cancel, action: nil)
                 ]
             )
         }

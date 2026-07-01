@@ -5,19 +5,19 @@ import Data
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
-    var navigationController: UINavigationController = UINavigationController()
+    var navigationController = UINavigationController()
     var appCoordinator: AppCoordinator?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
-        
+
         guard let windowScene = (scene as? UIWindowScene) else { return }
 
         // UIWindow 생성
         let window = UIWindow(windowScene: windowScene)
-        
+
         // 다크모드 적용
         let mode = UserDefaults.standard.string(forKey: UserDefaultsKey.displayMode) ?? ""
         switch mode {
@@ -28,12 +28,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         default:
             window.overrideUserInterfaceStyle = .unspecified
         }
-        
+
         self.window = window
 
 //        let tokenRepository = DefaultTokenRepository()
         // DIContainer 생성
-        let diContainer = DefaultAppDIContainer()//tokenRepository: tokenRepository)
+        let diContainer = DefaultAppDIContainer()// tokenRepository: tokenRepository)
 
         // AppCoordinator 생성 및 시작
         let appCoordinator = AppCoordinator(container: diContainer, window: window)
@@ -68,6 +68,5 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
     }
-
 
 }

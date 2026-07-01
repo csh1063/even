@@ -6,7 +6,6 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
-
 import UIKit
 import SnapKit
 import Combine
@@ -24,8 +23,8 @@ final class OptionPickerViewController: UIViewController {
     private var selectedOption: String
 
     // MARK: - UI
-    private let naviView: NaviBarView = NaviBarView()
-    
+    private let naviView = NaviBarView()
+
     private let tableView: UITableView = {
         let tv = UITableView(frame: .zero, style: .insetGrouped)
         tv.backgroundColor = .clear
@@ -33,7 +32,7 @@ final class OptionPickerViewController: UIViewController {
         tv.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         return tv
     }()
-    
+
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Init
@@ -59,26 +58,26 @@ final class OptionPickerViewController: UIViewController {
     // MARK: - Setup
 
     private func setupViews() {
-        
+
         naviView.setTitle(pageTitle)
         naviView.addButtons([LeftButton(type: .back), RightButton(type: .confirm)])
-        
+
         view.addSubview(tableView)
         view.addSubview(naviView)
-        
+
         tableView.dataSource = self
         tableView.delegate = self
 
         naviView.snp.makeConstraints { make in
             make.top.leading.trailing.equalToSuperview()
         }
-        
+
         tableView.snp.makeConstraints { make in
             make.top.equalTo(naviView.snp.bottom)
             make.leading.trailing.bottom.equalToSuperview()
         }
     }
-    
+
     private func binding() {
         naviView.publisher
             .sink { [weak self]type in

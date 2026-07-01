@@ -6,11 +6,11 @@
 ////  Copyright © 2025 sanghyeon. All rights reserved.
 ////
 //
-//import Foundation
-//import UIKit
+// import Foundation
+// import UIKit
 //
-//@MainActor
-//final class ListCoordinator: BaseCoordinator {
+// @MainActor
+// final class ListCoordinator: BaseCoordinator {
 //    
 //    private let diContainer: ListDIContainer
 //    private let navigationController = UINavigationController()
@@ -45,4 +45,4 @@
 ////        )
 ////        coordinator.start()
 ////    }
-//}
+// }

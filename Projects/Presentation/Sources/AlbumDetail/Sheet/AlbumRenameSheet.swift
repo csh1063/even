@@ -6,7 +6,6 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
-
 import UIKit
 import Combine
 
@@ -16,7 +15,7 @@ final class AlbumRenameSheet: UIViewController {
     var onCancel: (() -> Void)?
 
     private var albumName: String
-    
+
     private let grabberView: UIView = {
         let grabberView = UIView()
         grabberView.backgroundColor = Theme.strokeSoft
@@ -109,7 +108,7 @@ final class AlbumRenameSheet: UIViewController {
         super.viewDidAppear(animated)
         textField.becomeFirstResponder()
     }
-    
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         if textField.isFirstResponder {
@@ -122,9 +121,9 @@ final class AlbumRenameSheet: UIViewController {
     // MARK: - Layout
 
     private func setupLayout() {
-        
+
         textField.delegate = self
-        
+
         let buttonStack = UIStackView(arrangedSubviews: [cancelButton, saveButton])
         buttonStack.axis = .horizontal
         buttonStack.spacing = 10
@@ -148,30 +147,30 @@ final class AlbumRenameSheet: UIViewController {
             make.width.equalTo(42)
             make.height.equalTo(5)
         }
-        
+
         headerStack.snp.makeConstraints { make in
             make.top.equalTo(grabberView.snp.bottom).offset(16)
             make.leading.trailing.equalTo(view).inset(20)
         }
-        
+
         fieldStack.snp.makeConstraints { make in
             make.top.equalTo(headerStack.snp.bottom).offset(20)
             make.leading.trailing.equalTo(view).inset(20)
         }
-        
+
         textField.snp.makeConstraints { make in
             make.height.equalTo(50)
         }
-        
+
         buttonStack.snp.makeConstraints { make in
             make.top.equalTo(fieldStack.snp.bottom).offset(16)
             make.leading.trailing.equalTo(view).inset(20)
             make.height.equalTo(50)
         }
     }
-    
+
     private func setupBinding() {
-        
+
         cancelButton.addTarget(self, action: #selector(didTapCancel), for: .touchUpInside)
         saveButton.addTarget(self, action: #selector(didTapSave), for: .touchUpInside)
     }
@@ -193,7 +192,7 @@ extension AlbumRenameSheet: UITextFieldDelegate {
     func textFieldDidBeginEditing(_ textField: UITextField) {
         textField.addBorder(color: Theme.textPrimary, borderWidth: 1)
     }
-    
+
     func textFieldDidEndEditing(_ textField: UITextField) {
         textField.addBorder(color: Theme.strokeSoft, borderWidth: 1)
     }

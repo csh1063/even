@@ -1,11 +1,11 @@
 import UIKit
 
-//"Font-Light" = "Ubuntu-Light";
-//"Font-DemiLight" = "Ubuntu-Light";
-//"Font-Regular" = "Ubuntu";
-//"Font-Medium" = "Ubuntu-Medium";
-//"Font-Bold" = "Ubuntu-Bold";
-//"Font-Bold-Medium" = "Ubuntu-Bold";
+// "Font-Light" = "Ubuntu-Light";
+// "Font-DemiLight" = "Ubuntu-Light";
+// "Font-Regular" = "Ubuntu";
+// "Font-Medium" = "Ubuntu-Medium";
+// "Font-Bold" = "Ubuntu-Bold";
+// "Font-Bold-Medium" = "Ubuntu-Bold";
 extension UIFont {
     // Localized Font
     class func boldLocalizedFont(ofSize size: CGFloat) -> UIFont {

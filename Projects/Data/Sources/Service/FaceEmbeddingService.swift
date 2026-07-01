@@ -52,9 +52,9 @@ public actor FaceEmbeddingService {
         }
         return embeddings
     }
-    
+
     private var debugSaveCount = 0
-    
+
     private func saveDebugCrop(_ image: CGImage, boundingBox: CGRect) {
         guard debugSaveCount < 20 else { return }
         guard let cropped = cropFace(from: image, boundingBox: boundingBox) else { return }
@@ -90,7 +90,7 @@ public actor FaceEmbeddingService {
         guard let cropped = cropFace(from: image, boundingBox: observation.boundingBox) else {
             return nil
         }
-        
+
         let hasGlasses = hasGlasses(in: cropped)
         if hasGlasses {
             print("🕶️ 안경 감지 → 클러스터링 제외")
@@ -111,7 +111,7 @@ public actor FaceEmbeddingService {
         }
         return FaceEmbedding(embedding: embedding, boundingBox: observation.boundingBox, hasGlasses: hasGlasses)
     }
-    
+
     func extractEmbeddingWithGlass(from image: CGImage, observation: VNFaceObservation) -> FaceEmbedding? {
         guard let cropped = cropFace(from: image, boundingBox: observation.boundingBox) else {
             return nil
@@ -133,7 +133,6 @@ public actor FaceEmbeddingService {
             aligned = cropped
         }
 //        saveDebugCrop(image, boundingBox: observation.boundingBox)
-
 
         guard let resized = resize(image: aligned, to: inputSize),
               let embedding = runModel(on: resized) else {
@@ -223,19 +222,19 @@ public actor FaceEmbeddingService {
     private func cropFace(from image: CGImage, boundingBox: CGRect) -> CGImage? {
         let width = CGFloat(image.width)
         let height = CGFloat(image.height)
-        
+
         let scale: CGFloat = 1.3
         let expandedWidth = boundingBox.width * scale
         let expandedHeight = boundingBox.height * scale
         let expandedX = boundingBox.minX - (expandedWidth - boundingBox.width) / 2
         let expandedY = boundingBox.minY - (expandedHeight - boundingBox.height) / 2
-        
+
         // 이미지 경계 벗어나지 않도록 클램핑
         let clampedX = max(0, expandedX)
         let clampedY = max(0, expandedY)
         let clampedWidth = min(expandedWidth, 1.0 - clampedX)
         let clampedHeight = min(expandedHeight, 1.0 - clampedY)
-        
+
         let rect = CGRect(
             x: clampedX * width,
             y: (1.0 - clampedY - clampedHeight) * height,
@@ -262,12 +261,12 @@ public actor FaceEmbeddingService {
     // MARK: - Private: Model
     private func runModel(on image: CGImage) -> [Float]? {
         guard let model else { return nil }
-        
+
         // CVPixelBuffer 변환 없이 CGImage 직접 사용
         guard let input = try? MLDictionaryFeatureProvider(dictionary: [
             "face_image": MLFeatureValue(cgImage: image, pixelsWide: 112, pixelsHigh: 112, pixelFormatType: kCVPixelFormatType_32BGRA, options: nil)
         ]) else { return nil }
-        
+
         guard let output = try? model.prediction(from: input),
               let multiArray = output.featureValue(for: "embedding")?.multiArrayValue else {
             return nil
@@ -286,7 +285,7 @@ public actor FaceEmbeddingService {
         guard norm > 0 else { return vector }
         return vector.map { $0 / norm }
     }
-    
+
     private func hasGlasses(in image: CGImage) -> Bool {
         let request = VNClassifyImageRequest()
         let handler = VNImageRequestHandler(cgImage: image, options: [:])
@@ -308,7 +307,7 @@ public actor FaceEmbeddingService {
             glassesIdentifiers.contains($0.identifier) && $0.confidence >= 0.25
         } ?? false
     }
-    
+
     private func isFaceTruncated(_ boundingBox: CGRect) -> Bool {
         let margin: CGFloat = 0.02 // 2% 여유
         return boundingBox.minX < margin ||
@@ -316,7 +315,7 @@ public actor FaceEmbeddingService {
                boundingBox.maxX > 1.0 - margin ||
                boundingBox.maxY > 1.0 - margin
     }
-    
+
     private func hasCompleteLandmarks(_ observation: VNFaceObservation) -> Bool {
         guard let landmarks = observation.landmarks else { return false }
         return landmarks.leftEye != nil &&

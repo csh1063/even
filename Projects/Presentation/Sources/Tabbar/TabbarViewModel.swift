@@ -24,7 +24,7 @@ struct AnalyzeProgress {
 
 @MainActor
 public final class TabbarViewModel: BaseViewModel {
-    
+
     enum Input {
         case analysis
         case autoTravelAlbum
@@ -37,7 +37,7 @@ public final class TabbarViewModel: BaseViewModel {
         case showOnboarding
         case afterOnboarding
     }
-    
+
     public struct Output {
         let photoProgress: AnyPublisher<Double, Never>
         let albumProgress: AnyPublisher<Double, Never>
@@ -48,41 +48,41 @@ public final class TabbarViewModel: BaseViewModel {
         let permission: AnyPublisher<PhotoPermission, Never>
         let isComplete: AnyPublisher<Bool, Never>
     }
-    
+
     @Published private var progressRatio: Double = 0
     @Published private var autoAlbumProgressRatio: Double = 0
     @Published private var locationProgressRatio: Double = 0
     @Published private var locationAlbumProgressRatio: Double = 0
-    @Published private var isAnalyzing : Bool = false
+    @Published private var isAnalyzing: Bool = false
     @Published private var isComplete: Bool = false
     @Published private var onboarding: Bool?
     @Published private var consent: Bool?
     @Published private var permission: PhotoPermission = .notDetermined
-    
+
     var onAction: ((TabbarViewModelAction) -> Void)?
-    
+
     let input = PassthroughSubject<Input, Never>()
-    
+
     private let permissionUseCase: PermissionUseCase
     private let analysisUseCase: PhotoAnalysisUseCase
     private let autoAlbumUseCase: AutoAlbumUseCase
-    
+
     private var cancellables = Set<AnyCancellable>()
-    
+
     init(permissionUseCase: PermissionUseCase,
          analysisUseCase: PhotoAnalysisUseCase,
          autoAlbumUseCase: AutoAlbumUseCase) {
         self.permissionUseCase = permissionUseCase
         self.analysisUseCase = analysisUseCase
         self.autoAlbumUseCase = autoAlbumUseCase
-        
+
         super.init()
-        
+
         self.bind()
-        
+
 //        self.resetForTest()
     }
-    
+
     public func transform() -> Output {
         return Output(
             photoProgress: $progressRatio.eraseToAnyPublisher(),
@@ -95,12 +95,12 @@ public final class TabbarViewModel: BaseViewModel {
             isComplete: $isComplete.eraseToAnyPublisher()
         )
     }
-    
+
     func send(_ input: Input) {
         print("send", input)
         self.input.send(input)
     }
-    
+
     private func bind() {
         self.input.sink { [weak self] input in
             guard let self else { return }
@@ -108,7 +108,7 @@ public final class TabbarViewModel: BaseViewModel {
         }
         .store(in: &cancellables)
     }
-    
+
     private func resetForTest() {
         Task {
             do {
@@ -117,7 +117,7 @@ public final class TabbarViewModel: BaseViewModel {
             }
         }
     }
-    
+
     private func handle(_ input: Input) async {
         switch input {
         case .showConsent:
@@ -200,16 +200,16 @@ public final class TabbarViewModel: BaseViewModel {
                             self.isLoading = true
                             await self.albumClear()
                             self.isLoading = false
-                            
+
                             self.onAction?(.progressSheet(AnalyzeProgress(
                                 photoProgress: self.$progressRatio.eraseToAnyPublisher(),
                                 albumProgress: self.$autoAlbumProgressRatio.eraseToAnyPublisher(),
                                 locationProgress: self.$locationProgressRatio.eraseToAnyPublisher(),
                                 locationAlbumProgress: self.$locationAlbumProgressRatio.eraseToAnyPublisher()
                             )))
-                            
+
                             self.progressRatio = 1.0
-                            
+
                             _ = await self.createdAutoAlbum(isPhoto: true) {
                                 self.autoAlbumProgressRatio = $0
                             }
@@ -253,7 +253,7 @@ public final class TabbarViewModel: BaseViewModel {
                             self.isLoading = true
                             await self.clear()
                             self.isLoading = false
-                            
+
                             self.onAction?(.progressSheet(AnalyzeProgress(
                                 photoProgress: self.$progressRatio.eraseToAnyPublisher(),
                                 albumProgress: self.$autoAlbumProgressRatio.eraseToAnyPublisher(),
@@ -284,7 +284,7 @@ public final class TabbarViewModel: BaseViewModel {
             await checkPermission()
         }
     }
-    
+
     private func analysis() async {
         self.isAnalyzing = true
         do {
@@ -293,7 +293,7 @@ public final class TabbarViewModel: BaseViewModel {
                 self.isAnalyzing = false
                 return
             }
-            
+
             await locationAnalysis()
         } catch {
             print("error", error.localizedDescription)
@@ -301,7 +301,7 @@ public final class TabbarViewModel: BaseViewModel {
             self.isAnalyzing = false
         }
     }
-    
+
     private func locationAnalysis() async {
         self.isAnalyzing = true
         Task.detached(priority: .background) { [weak self] in
@@ -312,12 +312,12 @@ public final class TabbarViewModel: BaseViewModel {
             }
         }
     }
-    
+
     private func createTravelAutoAlbum() async {
         self.isComplete = false
         do {
             self.isLoading = true
-            
+
             for try await progress in autoAlbumUseCase.createTravelAutoAlbum() {
                 await MainActor.run {
                     if case .completed = progress.step {
@@ -331,14 +331,14 @@ public final class TabbarViewModel: BaseViewModel {
             self.isComplete = true
         }
     }
-    
+
     private func createSimilarAutoAlbum() async {
         self.isComplete = false
         do {
             self.isLoading = true
-            
+
             try await autoAlbumUseCase.createSimilarAlbum()
-            
+
             self.isLoading = false
             self.isComplete = true
         } catch {
@@ -346,7 +346,7 @@ public final class TabbarViewModel: BaseViewModel {
             self.isComplete = true
         }
     }
-    
+
     private func clear() async {
         do {
             self.isComplete = false
@@ -356,7 +356,7 @@ public final class TabbarViewModel: BaseViewModel {
             print("error", error.localizedDescription)
         }
     }
-    
+
     private func albumClear() async {
         do {
             self.isComplete = false
@@ -368,7 +368,7 @@ public final class TabbarViewModel: BaseViewModel {
             print("error", error.localizedDescription)
         }
     }
-    
+
     private func createdAutoAlbum(isPhoto: Bool, updateProgress: @MainActor (Double) -> Void) async -> Bool {
         self.isComplete = false
         do {
@@ -381,7 +381,7 @@ public final class TabbarViewModel: BaseViewModel {
                     }
                 }
             }
-            
+
             self.isComplete = true
             return true
         } catch {
@@ -389,9 +389,9 @@ public final class TabbarViewModel: BaseViewModel {
             return false
         }
     }
-    
+
     private func analysisPhotoBase() async throws -> Bool {
-        
+
         for try await progress in analysisUseCase.analysis() {
             switch progress.state {
             case .progress(let ratio):
@@ -406,13 +406,13 @@ public final class TabbarViewModel: BaseViewModel {
             }
         }
         self.progressRatio = 1.0
-        
+
         return await createdAutoAlbum(isPhoto: true) {
             self.autoAlbumProgressRatio = $0
         }
-        
+
     }
-    
+
     private func analysisPhotoLocation() async {
         do {
             for try await progress in self.analysisUseCase.locationAnalysis() {
@@ -434,12 +434,12 @@ public final class TabbarViewModel: BaseViewModel {
             print("error", error.localizedDescription)
             self.locationProgressRatio = 1.0
         }
-        
+
         _ = await self.createdAutoAlbum(isPhoto: false) {
             self.locationAlbumProgressRatio = $0
         }
     }
-    
+
     private func checkConsent() async {
         do {
             self.consent = try await permissionUseCase.showConsent()
@@ -447,7 +447,7 @@ public final class TabbarViewModel: BaseViewModel {
             print("checkConsent failed")
         }
     }
-    
+
     private func consentComplete() async {
         do {
             try await permissionUseCase.completeConsent()
@@ -455,7 +455,7 @@ public final class TabbarViewModel: BaseViewModel {
             print("consentComplete fail")
         }
     }
-    
+
     private func checkOnboarding() async {
         do {
             self.onboarding = try await permissionUseCase.showOnboarding()
@@ -463,7 +463,7 @@ public final class TabbarViewModel: BaseViewModel {
             print("checkConsent failed")
         }
     }
-    
+
     private func onboardingComplete() async {
         do {
             try await permissionUseCase.completeOnboarding()
@@ -471,7 +471,7 @@ public final class TabbarViewModel: BaseViewModel {
             print("consentComplete fail")
         }
     }
-    
+
     private func checkPermission() async {
         do {
             self.permission = try await permissionUseCase.checkPermission()
@@ -479,7 +479,7 @@ public final class TabbarViewModel: BaseViewModel {
             print("checkPermission failed")
         }
     }
-    
+
     private func endAllProcess() {
         self.progressRatio = 0.0
         self.locationProgressRatio = 0.0

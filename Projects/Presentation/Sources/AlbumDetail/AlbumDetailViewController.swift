@@ -22,7 +22,7 @@ final class AlbumDetailViewController: BaseViewController {
 
     // MARK: - UI
 
-    private var naviView: NaviBarView = NaviBarView(type: .title(.leading))
+    private var naviView = NaviBarView(type: .title(.leading))
 
     private lazy var collectionView: UICollectionView = {
         let space: CGFloat = 2
@@ -281,7 +281,7 @@ extension AlbumDetailViewController {
 //                    self?.viewModel.send(.selectItem(id: cellViewModel.localIdentifier, inSelectionMode: self?.isSelectionMode ?? false))
 //                }
 //                .store(in: &cancellables)
-            
+
             cell.onImageTap = { [weak self] in
                 self?.viewModel.send(.selectItem(id: cellViewModel.localIdentifier, inSelectionMode: self?.isSelectionMode ?? false))
             }
@@ -306,7 +306,7 @@ extension AlbumDetailViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard let item = dataSource.itemIdentifier(for: indexPath),
               let cell = collectionView.cellForItem(at: indexPath) as? PhotoCell else { return }
-        
+
         selectedIdentifiers.insert(item.localIdentifier)
         cell.setSelected(true)
         updateSelectedCount()
@@ -315,7 +315,7 @@ extension AlbumDetailViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
         guard let item = dataSource.itemIdentifier(for: indexPath),
               let cell = collectionView.cellForItem(at: indexPath) as? PhotoCell else { return }
-        
+
         selectedIdentifiers.remove(item.localIdentifier)
         cell.setSelected(false)
         updateSelectedCount()
@@ -330,12 +330,12 @@ extension AlbumDetailViewController: UICollectionViewDelegate {
     }
 }
 
-//import Foundation
-//import UIKit
-//import Combine
-//import Domain
+// import Foundation
+// import UIKit
+// import Combine
+// import Domain
 //
-//final class AlbumDetailViewController: BaseViewController {
+// final class AlbumDetailViewController: BaseViewController {
 //
 //    // MARK: - UI
 //
@@ -666,11 +666,11 @@ extension AlbumDetailViewController: UICollectionViewDelegate {
 //            }
 //        }
 //    }
-//}
+// }
 //
 //// MARK: - DataSource
 //
-//extension AlbumDetailViewController {
+// extension AlbumDetailViewController {
 //    private func configureDataSource() {
 //        let cellRegistration = UICollectionView.CellRegistration<PhotoCell, PhotoCellItemViewModel> { [weak self] cell, indexPath, cellViewModel in
 //            guard let self else { return }
@@ -691,11 +691,11 @@ extension AlbumDetailViewController: UICollectionViewDelegate {
 //        snapshot.appendItems(photos)
 //        dataSource.apply(snapshot, animatingDifferences: true)
 //    }
-//}
+// }
 //
 //// MARK: - UICollectionViewDelegate
 //
-//extension AlbumDetailViewController: UICollectionViewDelegate {
+// extension AlbumDetailViewController: UICollectionViewDelegate {
 //    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
 //        guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
 //        if isSelectionMode {
@@ -726,4 +726,4 @@ extension AlbumDetailViewController: UICollectionViewDelegate {
 //    func collectionView(_ collectionView: UICollectionView, didBeginMultipleSelectionInteractionAt indexPath: IndexPath) {
 //        if !isSelectionMode { enterSelectionMode(.select) }
 //    }
-//}
+// }

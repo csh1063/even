@@ -15,16 +15,16 @@ public struct Album {
     public let createdAt: Date
     public var startDate: Date?
     public var endDate: Date?
-    
+
     public var isAuto: Bool
     public var coverPhotoIdentifier: String?
     public var keywords: [String]
     public var photos: [Photo]
     public var photoCount: Int
     public var from: String
-    
+
     public var isEdited: Bool = false
-    
+
     public init(
         id: UUID = UUID(),
         name: String,

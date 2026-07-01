@@ -10,9 +10,9 @@ import Foundation
 import Combine
 
 public protocol AlbumDataRepository {
-    
+
     var albumsPublisher: AnyPublisher<[Album], Never> {get}
-    
+
     func saveAlbum(album: Album, returnExist: Bool) throws -> Album?
     func fetchAll() throws -> [Album]
     func fetchAll(from: String) throws -> [Album]
@@ -35,7 +35,7 @@ extension AlbumDataRepository {
     func saveAlbum(album: Album, returnExist: Bool = false) throws -> Album? {
         try self.saveAlbum(album: album, returnExist: returnExist)
     }
-    
+
     func deleteAutoAlbums(by from: String = "all") throws {
         try self.deleteAutoAlbums(by: from)
     }

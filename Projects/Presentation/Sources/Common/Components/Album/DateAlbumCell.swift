@@ -6,7 +6,6 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
-
 import UIKit
 import SnapKit
 import Domain
@@ -58,12 +57,12 @@ final class DateAlbumCell: UICollectionViewCell {
 //        bottomTrailingPhotoView.image = nil
         placeholderIcon.isHidden = false
     }
-    
+
     override func layoutSubviews() {
 //            super.layoutSubviews()
             // Cell의 최종 bounds 크기를 레이어에 주입
 //        self.layoutIfNeeded()
-            
+
             super.layoutSubviews()
         overlayView.layoutIfNeeded()
         if let gradient = overlayView.layer.sublayers?.first as? CAGradientLayer {
@@ -141,7 +140,7 @@ final class DateAlbumCell: UICollectionViewCell {
             make.bottom.equalTo(countLabel.snp.top).offset(-2)
         }
     }
-    
+
     // MARK: - Configure
 
     func configure(with viewModel: DateAlbumCellViewModel) {

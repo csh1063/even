@@ -18,43 +18,43 @@ struct AlbumListData {
 
 @MainActor
 final class AlbumListViewModel: BaseViewModel {
-    
+
     enum Input {
         case appear
         case selectItem(Album)
         case dismiss
     }
-    
+
     struct Output {
         let albumData: AnyPublisher<AlbumListData, Never>
     }
-    
+
 //    @Published private var albums: [Album] = []
     @Published private var albumData: AlbumListData
-    
+
     let input = PassthroughSubject<Input, Never>()
     var onAction: ((AlbumViewModelAction) -> Void)?
-    
+
     private let from: String
     private let imageUseCase: PhotoImageUseCase
     private let albumUseCase: AlbumUseCase
-    
+
     private var cancellables = Set<AnyCancellable>()
-    
+
     init(from: String,
          imageUseCase: PhotoImageUseCase,
          albumUseCase: AlbumUseCase) {
-        
+
         self.from = from
         self.imageUseCase = imageUseCase
         self.albumUseCase = albumUseCase
-        
+
         self.albumData = AlbumListData(type: from)
-        
+
         super.init()
-        
+
         self.bind()
-        
+
 //        albumUseCase.albumsPublisher
 //            .receive(on: DispatchQueue.main)
 //            .handleEvents(receiveOutput: { albums in
@@ -62,16 +62,16 @@ final class AlbumListViewModel: BaseViewModel {
 //            })
 //            .assign(to: &$albums)
     }
-    
+
     func transform() -> Output {
         Output(albumData: $albumData.eraseToAnyPublisher())
     }
-    
+
     func send(_ input: Input) {
         print("send", input)
         self.input.send(input)
     }
-    
+
     private func bind() {
         self.input.sink { [weak self] input in
             guard let self else { return }
@@ -79,7 +79,7 @@ final class AlbumListViewModel: BaseViewModel {
         }
         .store(in: &cancellables)
     }
-    
+
     private func handle(_ input: Input) async {
         switch input {
         case .appear:
@@ -90,7 +90,7 @@ final class AlbumListViewModel: BaseViewModel {
             self.onAction?(.pop)
         }
     }
-    
+
     private func loadAlbumFrom() async {
         do {
             print("load albums", self.from)
@@ -101,9 +101,9 @@ final class AlbumListViewModel: BaseViewModel {
             print("loadFodlers error")
         }
     }
-    
+
     private func buildSections(from albums: [Album]) {
-        
+
         var list = [AlbumType]()
         switch from {
         case "travel":
@@ -114,7 +114,7 @@ final class AlbumListViewModel: BaseViewModel {
                 .map {
                     .travel(TravelAlbumCellViewModel(album: $0, imageLoader: self))
                 }
-            
+
         case "location":
             list = albums.filter { $0.from == "location" }
                 .sorted { $0.photoCount > $1.photoCount }
@@ -169,7 +169,7 @@ final class AlbumListViewModel: BaseViewModel {
 //        data.totalCount = albums.count
         self.albumData = AlbumListData(type: from, albums: list)
     }
-    
+
     func loadImage(id: String, size: CGSize) async -> UIImage? {
         do {
             guard let cgImage: CGImage = try await imageUseCase.loadImage(
@@ -178,7 +178,7 @@ final class AlbumListViewModel: BaseViewModel {
             ).cgImage else {
                 return nil
             }
-            
+
             return UIImage(cgImage: cgImage)
         } catch {
             print("이미지 로딩 실패: \(error.localizedDescription)")
@@ -188,5 +188,5 @@ final class AlbumListViewModel: BaseViewModel {
 }
 
 extension AlbumListViewModel: ImageLoadable {
-    
+
 }

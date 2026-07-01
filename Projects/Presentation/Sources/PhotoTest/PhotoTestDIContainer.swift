@@ -14,7 +14,7 @@ public final class PhotoTestDIContainer {
 
     private let photoDataRepository: PhotoDataRepository
     private let geoRepository: GeoRepository
-    
+
     public init(photoDataRepository: PhotoDataRepository,
                 geoRepository: GeoRepository) {
         self.photoDataRepository = photoDataRepository
@@ -22,12 +22,12 @@ public final class PhotoTestDIContainer {
     }
 
     func makePhotoTestViewModel(pop: @escaping () -> Void) -> PhotoTestViewModel {
-        
+
         let useCase = DefaultPhotoTestUseCase(
             repository: photoDataRepository,
             geoRepository: geoRepository
         )
-        
+
         return PhotoTestViewModel(useCase: useCase, pop: pop)
     }
 }

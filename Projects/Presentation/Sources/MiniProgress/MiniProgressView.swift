@@ -10,11 +10,11 @@ import UIKit
 import Combine
 
 final class MiniProgressView: UIView {
-    
+
     var cancellables = Set<AnyCancellable>()
-    
+
     // MARK: - Layers
-    
+
     private let locationTrackLayer = CAShapeLayer()
     private let locationProgressLayer = CAShapeLayer()
     private let albumTrackLayer = CAShapeLayer()
@@ -22,23 +22,23 @@ final class MiniProgressView: UIView {
     private let dividerLayer = CAShapeLayer()
     private let locationGlowLayer = CALayer()
     private let albumGlowLayer = CALayer()
-    
+
     private let locationIconView: UIImageView = {
         let imageView = UIImageView(image: UIImage(systemName: "location.fill"))
         imageView.tintColor = Theme.textSecondary
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
-    
+
     private let albumIconView: UIImageView = {
         let imageView = UIImageView(image: UIImage(systemName: "album.fill"))
         imageView.tintColor = Theme.textSecondary
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
-    
+
     // MARK: - Init
-    
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = Theme.surface
@@ -51,49 +51,49 @@ final class MiniProgressView: UIView {
         setupGlowDots()
         setupIcons()
     }
-    
+
     required init?(coder: NSCoder) { fatalError() }
-    
+
     override var intrinsicContentSize: CGSize {
         CGSize(width: 72, height: 72)
     }
-    
+
     // MARK: - Setup
-    
+
     private func setupLayers() {
         [locationTrackLayer, locationProgressLayer,
          albumTrackLayer, albumProgressLayer,
          dividerLayer].forEach { layer.addSublayer($0) }
-        
+
         let trackColor = Theme.strokeSoft.cgColor
         let progressColor = Theme.primary.cgColor
-        
+
         locationTrackLayer.fillColor = UIColor.clear.cgColor
         locationTrackLayer.strokeColor = trackColor
         locationTrackLayer.lineWidth = 4
         locationTrackLayer.lineCap = .round
-        
+
         locationProgressLayer.fillColor = UIColor.clear.cgColor
         locationProgressLayer.strokeColor = progressColor
         locationProgressLayer.lineWidth = 4
         locationProgressLayer.lineCap = .round
         locationProgressLayer.strokeEnd = 0
-        
+
         albumTrackLayer.fillColor = UIColor.clear.cgColor
         albumTrackLayer.strokeColor = trackColor
         albumTrackLayer.lineWidth = 4
         albumTrackLayer.lineCap = .round
-        
+
         albumProgressLayer.fillColor = UIColor.clear.cgColor
         albumProgressLayer.strokeColor = progressColor
         albumProgressLayer.lineWidth = 4
         albumProgressLayer.lineCap = .round
         albumProgressLayer.strokeEnd = 0
-        
+
         dividerLayer.strokeColor = trackColor
         dividerLayer.lineWidth = 0.5
     }
-    
+
     private func setupGlowDots() {
         [locationGlowLayer, albumGlowLayer].forEach {
             $0.bounds = CGRect(x: 0, y: 0, width: 6, height: 6)
@@ -107,26 +107,26 @@ final class MiniProgressView: UIView {
             layer.addSublayer($0)
         }
     }
-    
+
     private func setupIcons() {
         addSubview(locationIconView)
         addSubview(albumIconView)
-        
+
         locationIconView.snp.makeConstraints { make in
             make.centerX.equalTo(self)
             make.top.equalTo(self).offset(16)
             make.width.height.equalTo(13)
         }
-        
+
         albumIconView.snp.makeConstraints { make in
             make.centerX.equalTo(self)
             make.bottom.equalTo(self).offset(-16)
             make.width.height.equalTo(13)
         }
     }
-    
+
     // MARK: - Layout
-    
+
     override func layoutSubviews() {
         super.layoutSubviews()
         updateBorder()
@@ -134,16 +134,16 @@ final class MiniProgressView: UIView {
         updateGlowDot(glowLayer: locationGlowLayer, progress: locationProgressLayer.strokeEnd, startAngle: .pi)
         updateGlowDot(glowLayer: albumGlowLayer, progress: albumProgressLayer.strokeEnd, startAngle: 0)
     }
-    
+
     private func updateBorder() {
         layer.borderWidth = 0.5
         layer.borderColor = Theme.strokeSoft.cgColor
     }
-    
+
     private func updatePaths() {
         let center = CGPoint(x: bounds.midX, y: bounds.midY)
         let radius: CGFloat = 26
-        
+
         let topPath = UIBezierPath(
             arcCenter: center,
             radius: radius,
@@ -153,7 +153,7 @@ final class MiniProgressView: UIView {
         )
         locationTrackLayer.path = topPath.cgPath
         locationProgressLayer.path = topPath.cgPath
-        
+
         let bottomPath = UIBezierPath(
             arcCenter: center,
             radius: radius,
@@ -163,22 +163,22 @@ final class MiniProgressView: UIView {
         )
         albumTrackLayer.path = bottomPath.cgPath
         albumProgressLayer.path = bottomPath.cgPath
-        
+
         let dividerPath = UIBezierPath()
         dividerPath.move(to: CGPoint(x: center.x - 22, y: center.y))
         dividerPath.addLine(to: CGPoint(x: center.x + 22, y: center.y))
         dividerLayer.path = dividerPath.cgPath
     }
-    
+
     // MARK: - Glow Dot
-    
+
     private func arcPoint(center: CGPoint, radius: CGFloat, angle: CGFloat) -> CGPoint {
         CGPoint(
             x: center.x + radius * cos(angle),
             y: center.y + radius * sin(angle)
         )
     }
-    
+
     private func updateGlowDot(glowLayer: CALayer, progress: CGFloat, startAngle: CGFloat) {
         guard progress > 0 else {
             glowLayer.isHidden = true
@@ -193,33 +193,33 @@ final class MiniProgressView: UIView {
         glowLayer.position = point
         CATransaction.commit()
     }
-    
+
     private func startPulseAnimation(on glowLayer: CALayer) {
         guard glowLayer.animation(forKey: "pulse") == nil else { return }
-        
+
         let shadowAnim = CAKeyframeAnimation(keyPath: "shadowOpacity")
         shadowAnim.values = [0.4, 0.9, 0.4]
         shadowAnim.keyTimes = [0, 0.5, 1]
-        
+
         let shadowRadiusAnim = CAKeyframeAnimation(keyPath: "shadowRadius")
         shadowRadiusAnim.values = [2, 8, 2]
         shadowRadiusAnim.keyTimes = [0, 0.5, 1]
-        
+
         let scaleAnim = CAKeyframeAnimation(keyPath: "transform.scale")
         scaleAnim.values = [0.8, 1.2, 0.8]
         scaleAnim.keyTimes = [0, 0.5, 1]
-        
+
         let group = CAAnimationGroup()
         group.animations = [shadowAnim, shadowRadiusAnim, scaleAnim]
         group.duration = 1.2
         group.repeatCount = .infinity
         group.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-        
+
         glowLayer.add(group, forKey: "pulse")
     }
-    
+
     // MARK: - Bind
-    
+
     func bind(
         locationProgress: AnyPublisher<Double, Never>,
         albumProgress: AnyPublisher<Double, Never>
@@ -233,7 +233,7 @@ final class MiniProgressView: UIView {
                 if progress > 0 { self.startPulseAnimation(on: self.locationGlowLayer) }
             }
             .store(in: &cancellables)
-        
+
         albumProgress
             .receive(on: DispatchQueue.main)
             .sink { [weak self] progress in

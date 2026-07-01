@@ -14,9 +14,9 @@ public final class AlbumKeywordEntity {
     @Attribute(.unique) public var id: UUID
     public var keyword: String
     public var weight: Float             // 키워드 중요도
-    
+
     public var album: AlbumEntity?
-    
+
     public init(
         id: UUID = UUID(),
         keyword: String,

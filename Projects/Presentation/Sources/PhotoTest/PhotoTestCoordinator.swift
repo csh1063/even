@@ -12,15 +12,15 @@ import Domain
 
 @MainActor
 public final class PhotoTestCoordinator: BaseCoordinator {
-    
+
     private let diContainer: PhotoTestDIContainer
     private let navigationController: UINavigationController
-    
+
     init(diContainer: PhotoTestDIContainer,
          navigationController: UINavigationController) {
         self.diContainer = diContainer
         self.navigationController = navigationController
-        
+
         super.init()
     }
 
@@ -29,15 +29,15 @@ public final class PhotoTestCoordinator: BaseCoordinator {
         let viewModel = diContainer.makePhotoTestViewModel { [weak self] in
             self?.pop()
         }
-        
+
         bindAlert(from: viewModel)
-        
+
         let vc = PhotoTestViewController(viewModel: viewModel)
 
         navigationController.pushViewController(vc, animated: true)
         self.viewController = vc
     }
-    
+
     private func pop() {
         navigationController.popViewController(animated: true)
         self.remove(coordinator: self)

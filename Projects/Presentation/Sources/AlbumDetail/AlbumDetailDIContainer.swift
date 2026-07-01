@@ -15,7 +15,7 @@ public final class AlbumDetailDIContainer {
     private let photoLibraryRepository: PhotoLibraryRepository
     private let albumDataRepository: AlbumDataRepository
     private let labelRepository: PhotoLabelDataRepository
-    
+
     private let album: Album
     private let isSelectMode: Bool
 
@@ -32,31 +32,31 @@ public final class AlbumDetailDIContainer {
     }
 
     func makeAlbumDetailViewModel() -> AlbumDetailViewModel {
-        
+
         let imageUseCase = DefaultPhotoImageUseCase(
             repository: photoLibraryRepository
         )
-        
+
         let albumDetailUseCase = DefaultAlbumDetailUseCase(
             repository: albumDataRepository,
             libraryRepository: photoLibraryRepository
         )
-        
+
         return AlbumDetailViewModel(album: album,
                                     imageUseCase: imageUseCase,
                                     detailUseCase: albumDetailUseCase,
                                     startInSelectionMode: isSelectMode)
     }
-    
+
     func makeImageViewerViewModel(photoDetails: [PhotoDetail], index: Int,
                                   isSelectionMode: Bool = false,
                                   selectedIdentifiers: Set<String> = []) -> ImageViewerViewModel {
-        
+
         let imageUseCase = DefaultImageViewerUseCase(
             repository: photoLibraryRepository,
             labelRepository: labelRepository
         )
-        
+
         return ImageViewerViewModel(photoDetails: photoDetails,
                                     initialIndex: index,
                                     imageUseCase: imageUseCase,

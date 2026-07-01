@@ -183,7 +183,7 @@ extension UILabel {
     }
 
     func addTextSpacing(_ letterSpacing: CGFloat) {
-        if let labelText = text, labelText.count > 0 {
+        if let labelText = text, !labelText.isEmpty {
             let nsString = NSString(format: "%@", labelText)
             let attributedString = NSMutableAttributedString(string: labelText)
             attributedString.addAttribute(NSAttributedString.Key.kern, value: letterSpacing,
@@ -193,7 +193,7 @@ extension UILabel {
     }
 
     func withTextSpacing(_ letterSpacing: CGFloat) -> UILabel {
-        if let labelText = text, labelText.count > 0 {
+        if let labelText = text, !labelText.isEmpty {
             let nsString = NSString(format: "%@", labelText)
             let attributedString = NSMutableAttributedString(string: labelText)
             attributedString.addAttribute(NSAttributedString.Key.kern, value: letterSpacing,

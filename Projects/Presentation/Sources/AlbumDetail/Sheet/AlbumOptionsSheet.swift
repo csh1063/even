@@ -6,10 +6,9 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
-
-//import UIKit
+// import UIKit
 //
-//final class AlbumOptionsSheet: UIViewController {
+// final class AlbumOptionsSheet: UIViewController {
 //
 //    let albumTitle: String
 //    var onRename: (() -> Void)?
@@ -119,11 +118,11 @@
 //    @objc private func didTapDelete() {
 //        dismiss(animated: true) { self.onDelete?() }
 //    }
-//}
+// }
 //
 //// MARK: - OptionRow
 //
-//final class OptionRow: UIControl {
+// final class OptionRow: UIControl {
 //
 //    private let iconView: UIImageView = {
 //        let iconView = UIImageView()
@@ -199,7 +198,7 @@
 //    @objc private func handleTouchUp() {
 //        alpha = 1.0
 //    }
-//}
+// }
 
 import UIKit
 import SnapKit

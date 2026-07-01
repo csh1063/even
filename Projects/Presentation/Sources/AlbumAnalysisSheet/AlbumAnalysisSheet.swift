@@ -14,7 +14,7 @@ final class AlbumAnalysisSheet: UIViewController {
 
     var progress: AnalyzeProgress
     var onEnd: (() -> Void)?
-    
+
     private let grabberView: UIView = {
         let view = UIView()
         view.backgroundColor = Theme.strokeStrong
@@ -81,20 +81,20 @@ final class AlbumAnalysisSheet: UIViewController {
         label.numberOfLines = 0
         return label
     }()
-    
+
     private let progressPublisher: AnyPublisher<Double, Never>
     private let albumProgressPublisher: AnyPublisher<Double, Never>
     private var cancellables = Set<AnyCancellable>()
 
     init(progress: AnalyzeProgress) {
         self.progress = progress
-        
+
         self.progressPublisher = progress.photoProgress
         self.albumProgressPublisher = progress.albumProgress
-        
+
         super.init(nibName: nil, bundle: nil)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("AlbumAnalysisSheet does not support NSCoding.")
     }
@@ -125,13 +125,13 @@ final class AlbumAnalysisSheet: UIViewController {
         // Location note
         locationNoteView.addSubview(locationIcon)
         locationNoteView.addSubview(locationLabel)
-        
+
         locationIcon.snp.makeConstraints { make in
             make.leading.equalTo(locationNoteView).offset(14)
             make.centerY.equalTo(locationNoteView)
             make.width.height.equalTo(18)
         }
-        
+
         locationLabel.snp.makeConstraints { make in
             make.leading.equalTo(locationIcon.snp.trailing).offset(8)
             make.trailing.equalTo(locationNoteView).offset(-14)
@@ -169,29 +169,29 @@ final class AlbumAnalysisSheet: UIViewController {
             make.width.equalTo(42)
             make.height.equalTo(5)
         }
-        
+
         circleBackground.snp.makeConstraints { make in
             make.width.height.equalTo(84)
         }
-        
+
         mainStack.snp.makeConstraints { make in
             make.top.equalTo(grabberView.snp.bottom).offset(20)
             make.leading.trailing.equalTo(view).inset(20)
         }
-        
+
         locationNoteView.snp.makeConstraints { make in
             make.leading.trailing.equalTo(mainStack)
         }
-        
+
         rowStack.snp.makeConstraints { make in
             make.leading.trailing.equalTo(mainStack)
         }
-        
+
         subtitleLabel.snp.makeConstraints { make in
             make.leading.trailing.equalTo(view).inset(24)
         }
     }
-    
+
     private func setupBindings() {
         progressPublisher
             .receive(on: DispatchQueue.main)
@@ -200,7 +200,7 @@ final class AlbumAnalysisSheet: UIViewController {
                 self?.photoRow.updateProgress(progress)
             }
             .store(in: &cancellables)
-        
+
         albumProgressPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] progress in
@@ -212,7 +212,7 @@ final class AlbumAnalysisSheet: UIViewController {
             }
             .store(in: &cancellables)
     }
-    
+
     private func endPage() {
         self.onEnd?()
         self.dismiss(animated: true)

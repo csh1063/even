@@ -29,14 +29,14 @@ extension NetworkExecutor {
 public final class DefaultNetworkExecutor: NetworkExecutor {
     private let providerFactory: ProviderFactory
 //    private let tokenRefresher: TokenRefresher
-    
+
     public init(providerFactory: ProviderFactory) {
         self.providerFactory = providerFactory
     }
-    
+
     public func request<T: TargetType, R: Decodable>(_ target: T) async throws -> R {
         let provider = providerFactory.makeProvider(for: type(of: target))
-        
+
 //        do {
             return try await provider.request(target)
 //        } catch let error as NetworkError {

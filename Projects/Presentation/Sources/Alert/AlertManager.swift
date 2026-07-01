@@ -6,7 +6,6 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
-
 import UIKit
 
 public final class AlertManager {
@@ -47,15 +46,15 @@ public final class AlertManager {
             isPresenting = false
             return
         }
-        
+
         let style: UIUserInterfaceStyle
         if let keyWindow = UIApplication.shared.connectedScenes
             .compactMap({ $0 as? UIWindowScene })
             .flatMap({ $0.windows })
             .first(where: { $0.isKeyWindow }) {
-            
+
             style = keyWindow.overrideUserInterfaceStyle
-            
+
         } else {
             style = .unspecified
         }
