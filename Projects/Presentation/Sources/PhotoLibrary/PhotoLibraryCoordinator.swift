@@ -56,6 +56,7 @@ final class PhotoLibraryCoordinator: BaseCoordinator {
             switch action {
             case .pageChanged(let id):
                 (self?.viewController as? PhotoLibraryViewController)?.scrollToItem(id: id)
+            case .selectionChanged: break
             }
         }
         let vc = ImageViewerViewController(viewModel: vm)

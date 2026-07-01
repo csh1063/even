@@ -45,7 +45,7 @@ extension SwiftDataError: LocalizedError {
 }
 
 public enum DomainError: Error {
-//    폴더 생성/삭제/조회 실패
+//    앨범 생성/삭제/조회 실패
 //    자동 분류 실패 (AutoAlbumUseCase)
 //    지오코딩 실패
 }

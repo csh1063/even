@@ -13,7 +13,7 @@ public struct ProgressAlbum {
     
     public enum AlbumStep {
         case analyzing      // 라벨 집계 중
-        case creatingAlbums // 폴더 생성 중
+        case creatingAlbums // 앨범 생성 중
         case classifying    // 사진 분류 중
         case completed
     }

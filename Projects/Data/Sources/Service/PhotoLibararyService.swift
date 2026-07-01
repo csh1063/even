@@ -231,6 +231,15 @@ public final class PhotoLibraryService {
         return photosWithLocation
     }
     
+    public func deletePhotos(localIdentifiers: [String]) async throws {
+        let assets = PHAsset.fetchAssets(withLocalIdentifiers: localIdentifiers, options: nil)
+        let assetsArray = assets.objects(at: IndexSet(0..<assets.count)) as NSArray
+        
+        try await PHPhotoLibrary.shared().performChanges {
+            PHAssetChangeRequest.deleteAssets(assetsArray)
+        }
+    }
+    
     private func getAsset(id: String) async -> PHAsset? {
         
 //        if let cached = assetCache[id] { return cached }

@@ -74,6 +74,8 @@ final class AlbumSectionHeaderView: UICollectionReusableView {
             self.moreButton.isHidden = true
         case .face:
             self.moreButton.isHidden = true
+        case .similar:
+            self.moreButton.isHidden = false
         }
     }
 }

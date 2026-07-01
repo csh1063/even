@@ -6,12 +6,6 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
-
-//
-//  ImageViewerCell.swift
-//  Presentation
-//
-
 import UIKit
 import SnapKit
 

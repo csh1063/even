@@ -69,6 +69,10 @@ final class DefaultAppDIContainer: AppDIContainer {
         repositoryFactory.faceClusterRepository
     }
     
+    var similarRepository: SimilarPhotoClusterRepository {
+        repositoryFactory.similarRepository
+    }
+    
     private let providerFactory: ProviderFactory
     private lazy var executor: DefaultNetworkExecutor = {
         DefaultNetworkExecutor(providerFactory: providerFactory)

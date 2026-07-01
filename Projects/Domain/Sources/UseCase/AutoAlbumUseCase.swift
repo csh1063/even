@@ -12,6 +12,7 @@ import Foundation
 public protocol AutoAlbumUseCase {
     func execute(_ isPhoto: Bool) -> AsyncThrowingStream<ProgressAlbum, Error>
     func createTravelAutoAlbum() -> AsyncThrowingStream<ProgressAlbum, Error>
+    func createSimilarAlbum() async throws
     func syncPhotoCount() async throws
     func deletePhotos() async throws
     func deleteAutoAlbums() async throws
@@ -26,12 +27,13 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
     private let travelRepository: TravelDetectionRepository
     private let homeZoneRepository: HomeZoneRepository
     private let faceClusterRepository: FaceClusterRepository
+    private let similarRepository: SimilarPhotoClusterRepository
     
     private let reanalyzePeriod: TimeInterval = 90 * 24 * 60 * 60  // 3개월
     private let gridSize: Double = 50                               // 10km
     private let maxHomeZones: Int = 5
     
-    // 폴더 생성 최소 비율
+    // 앨범 생성 최소 비율
     private let threshold: Double = 0.05
     
     private let administrativeAreaReplacements: [String: String] = [
@@ -58,7 +60,8 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
         userDefaultRepository: UserDefaultRepository,
         travelRepository: TravelDetectionRepository,
         homeZoneRepository: HomeZoneRepository,
-        faceClusterRepository: FaceClusterRepository
+        faceClusterRepository: FaceClusterRepository,
+        similarRepository: SimilarPhotoClusterRepository
     ) {
         self.photoDataRepository = photoDataRepository
         self.albumDataRepository = albumDataRepository
@@ -67,6 +70,7 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
         self.travelRepository = travelRepository
         self.homeZoneRepository = homeZoneRepository
         self.faceClusterRepository = faceClusterRepository
+        self.similarRepository = similarRepository
     }
     
     public func execute(_ isPhoto: Bool) -> AsyncThrowingStream<ProgressAlbum, Error> {
@@ -82,7 +86,7 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
                     var albums: [Album] = try albumDataRepository.fetchAutoAll()
                     var albumPhotoMap: [UUID: [String]] = [:]
 
-                    var allPhotosForTravel: [PhotoLocationSnapshot] = []
+                    var allPhotos: [Photo] = []
                     
                     while true {
                         
@@ -90,6 +94,8 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
                         let photos = try photoDataRepository.fetchAll(page: page, pageSize: countPerPage)
                         print("end load page: ", page)
                         if photos.isEmpty { break }
+                        
+                        allPhotos.append(contentsOf: photos)
                         
                         var yearCount: [String: Int] = [:]
                         var addressCount: [String: [String]] = [:]
@@ -150,10 +156,6 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
                         }
                         
                         if !isPhoto {
-                            allPhotosForTravel.append(
-                                contentsOf: photos
-                                    .filter { $0.latitude != nil && $0.longitude != nil }
-                                    .map { PhotoLocationSnapshot(from: $0) })
                             // MARK: - 주소로 사진 분류
                             print("주소로 사진 분류")
                             for (address, areas) in addressCount {
@@ -174,7 +176,7 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
                         
                         //============================================================================
                         
-                        // 폴더별로 한번에 추가
+                        // 앨범 별로 한번에 추가
                         for album in albums {
                             let matchedIdentifiers: [String]
 
@@ -224,11 +226,18 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
                         continuation.yield(ProgressAlbum(step: .classifying, ratio: ratio))
                     }
                     
-                    // MARK: - 얼굴 클러스터링으로 사람 폴더 생성
+                    // MARK: - 얼굴 클러스터링으로 사람 앨범 생성
 //                    if isPhoto {
 //                        print("얼굴 클러스터링 시작")
 //                        try await faceClusterRepository.clusterAndSaveAlbums()
 //                    }
+                    
+                    // MARK: - 비슷한 사진 찾기
+                    if isPhoto {
+                        print("비슷한 사진 찾기")
+                        let similarAlbum = albums.filter { $0.from == "similar" }
+                        try await similarRepository.clusterAndSaveAlbums(photos: allPhotos, existingAlbums: similarAlbum)
+                    }
                     
                     try albumDataRepository.syncAlbums()
                     
@@ -244,6 +253,20 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
                 }
             }
         }
+    }
+    
+    public func createSimilarAlbum() async throws {
+        
+        try self.albumDataRepository.deleteAutoAlbums(by: "similar")
+        
+        let allPhotos = try photoDataRepository.fetchPhotos()
+        let similarAlbum = try albumDataRepository.fetchAll(from: "similar")
+        
+        print("비슷한 사진 찾기")
+//        let similarAlbum = albums.filter { $0.from == "similar" }
+        try await similarRepository.clusterAndSaveAlbums(photos: allPhotos, existingAlbums: similarAlbum)
+        
+        try albumDataRepository.syncAlbums()
     }
     
     public func createTravelAutoAlbum() -> AsyncThrowingStream<ProgressAlbum, Error> {
@@ -328,6 +351,7 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
         try self.albumDataRepository.deleteAutoAlbums()
     }
     
+    // MARK: - 여행 관련 함수
     // 홈존 분석 필요 여부 체크 후 실행
     private func analyzeIfNeeded(from photos: [PhotoLocationSnapshot]) throws {
         let existing = try homeZoneRepository.fetchHomeZones()
@@ -379,6 +403,8 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
     private func fetchHomeZones() throws -> [HomeZone] {
         try homeZoneRepository.fetchHomeZones()
     }
+    
+    // MARK: - 장소 관련 함수
     private func matchesRule(_ photo: Photo, rule: AlbumRule) -> Bool {
         // 1. 전체 태그 맵 생성 (이름 검색 속도 최적화 및 원본 점수 보존)
         let labelMap = Dictionary(uniqueKeysWithValues: photo.labels.map { ($0.name, $0.confidence) })
@@ -422,38 +448,6 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
             return !validLabels.isDisjoint(with: Set(rule.matchTags))
         }
     }
-//    private func matchesRule(_ photo: Photo, rule: AlbumRule) -> Bool {
-//        let allPhotoTags = Set(photo.labels.map { $0.name })
-//
-//        // [검증 1] exclude_tags (confidence 무관하게 태그 존재 자체로 제외)
-//        let excludeSet = Set(rule.excludeTags)
-//        if !allPhotoTags.isDisjoint(with: excludeSet) { return false }
-//
-//        let labelNames = Set(photo.labels
-//            .filter { $0.confidence >= rule.minConfidence }
-//            .map { $0.name }
-//        )
-//        guard !labelNames.isEmpty else { return false }
-//
-//        // [검증 2] label_filters (confidence 범위 조건)
-//        if let filters = rule.labelFilters {
-//            let passed = filters.allSatisfy { filter in
-//                let score = photo.labels.first { $0.name == filter.name }?.confidence ?? 0.0
-//                if let min = filter.min, score < min { return false }
-//                if let max = filter.max, score > max { return false }
-//                return true
-//            }
-//            if !passed { return false }
-//        }
-//
-//        // [검증 3] 타입별 매칭
-//        if rule.type == "AND_OR_COMBINED", let mustHaveList = rule.mustHaveOneOf {
-//            return !labelNames.isDisjoint(with: Set(mustHaveList))
-//                && !labelNames.isDisjoint(with: Set(rule.matchTags))
-//        } else {
-//            return !labelNames.isDisjoint(with: Set(rule.matchTags))
-//        }
-//    }
     
     private func cleanAreaName(_ name: String, isoCode: String) -> String {
         var result = self.administrativeAreaReplacements[name] ?? name

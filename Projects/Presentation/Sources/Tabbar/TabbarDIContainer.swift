@@ -39,7 +39,8 @@ public final class TabbarDIContainer {
             userDefaultRepository: appDiContainer.userDefaultRepository,
             travelRepository: appDiContainer.travelRepository,
             homeZoneRepository: appDiContainer.homeZoneRepository,
-            faceClusterRepository: appDiContainer.faceClusterRepository
+            faceClusterRepository: appDiContainer.faceClusterRepository,
+            similarRepository: appDiContainer.similarRepository
         )
         
         return TabbarViewModel(permissionUseCase: permissionUseCase,

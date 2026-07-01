@@ -21,10 +21,11 @@ public protocol AlbumDataRepository {
     func updateAlbum(album: Album) throws
     func updateAlbumName(new name: String, id: UUID) throws
     func delete(id: UUID) throws
-    func deleteAutoAlbums(by from: String) throws  // 자동 폴더만 삭제
+    func deleteAutoAlbums(by from: String) throws  // 자동 앨범만 삭제
     func addPhoto(albumId: UUID, photoIdentifier: String) throws
     func addPhotos(albumId: UUID, photoIdentifiers: [String]) throws
     func removePhoto(albumId: UUID, photoIdentifier: String) throws
+    func deletePhotos(albumId: UUID, photoIdentifiers: [String]) throws
     func syncPhotoCount() throws
     func syncAlbums() throws
     func deleteAll() throws

@@ -38,6 +38,10 @@ public final class DefaultPhotoLibraryRepository: PhotoLibraryRepository {
         try await self.permissionService.checkPermission()
     }
     
+    public func deletePhotos(by ids: [String]) async throws {
+        try await self.libraryService.deletePhotos(localIdentifiers: ids)
+    }
+    
     public func loadImage<T>(id: String, type: LoadPhotoOptionType) async throws -> ImageData<T> {
         let cgImage = try await self.libraryService.loadImage(id: id, type: type)
         return ImageData(cgImage: cgImage as? T)

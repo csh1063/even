@@ -83,4 +83,8 @@ public final class RepositoryFactory {
     public lazy var homeZoneRepository: HomeZoneRepository = {
         DefaultHomeZoneRepository(container: container)
     }()
+    
+    public lazy var similarRepository: SimilarPhotoClusterRepository = {
+        DefaultSimilarPhotoClusterRepository(container: container)
+    }()
 }

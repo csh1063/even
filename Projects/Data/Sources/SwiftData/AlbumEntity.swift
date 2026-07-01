@@ -18,7 +18,7 @@ public final class AlbumEntity {
     public var startDate: Date?
     public var endDate: Date?
     
-    public var isAuto: Bool              // 자동 생성 폴더 여부
+    public var isAuto: Bool              // 자동 생성 앨범 여부
     public var coverPhotoIdentifier: String?
     public var photoCount: Int = 0
     public var from: String

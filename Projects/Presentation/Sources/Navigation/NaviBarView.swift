@@ -82,6 +82,7 @@ final class NaviBarView: UIView {
     }
     
     public func addButtons(_ settings: [NaviButtonSetting]) {
+        self.clearButtons()
         self.buttons = settings.map { [weak self] setting in
             
             let button = NaviBarButton(type: setting.type)
@@ -191,5 +192,11 @@ final class NaviBarView: UIView {
                 }
             }
             .store(in: &cancellables)
+    }
+    
+    private func clearButtons() {
+        for subview in stackView.arrangedSubviews where subview is NaviBarButton {
+            subview.removeFromSuperview()
+        }
     }
 }

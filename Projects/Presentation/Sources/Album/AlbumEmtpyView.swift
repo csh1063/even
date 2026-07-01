@@ -72,7 +72,7 @@ final class AlbumEmtpyView: UIView {
     }()
     private var locationMessageLabel: UILabel = {
         let label = UILabel()
-        label.text = "사진에 저장된 좌표를 주소로 변환하고 관련 폴더를 생성해요"
+        label.text = "사진에 저장된 좌표를 주소로 변환하고 관련 앨범을 생성해요"
         label.font = .systemFont(ofSize: 13, weight: .regular)
         label.textColor = Theme.textSecondary
         label.numberOfLines = 2

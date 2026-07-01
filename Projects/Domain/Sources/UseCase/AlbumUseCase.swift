@@ -13,6 +13,7 @@ public protocol AlbumUseCase {
     var albumsPublisher: AnyPublisher<[Album], Never> {get}
     
     func fetchAll() async throws -> [Album]
+    func fetchAll(from: String) async throws -> [Album]
     func createDummy() async throws
 }
 
