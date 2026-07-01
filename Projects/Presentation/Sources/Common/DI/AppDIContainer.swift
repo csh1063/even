@@ -25,6 +25,7 @@ public protocol AppDIContainer {
     var travelRepository: TravelDetectionRepository {get}
     var homeZoneRepository: HomeZoneRepository {get}
     var faceClusterRepository: FaceClusterRepository {get}
+    var similarRepository: SimilarPhotoClusterRepository {get}
     
     func makeSplashViewModel() -> SplashViewModel
     func makeMainViewModel() -> MainViewModel

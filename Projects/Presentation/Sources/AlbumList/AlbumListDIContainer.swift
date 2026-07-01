@@ -43,12 +43,13 @@ public final class AlbumListDIContainer {
                                   albumUseCase: albumUseCase)
     }
     
-    func makeDetailDIContainer(album: Album) -> AlbumDetailDIContainer {
+    func makeDetailDIContainer(album: Album, isSelectMode: Bool) -> AlbumDetailDIContainer {
         AlbumDetailDIContainer(
             album: album,
             photoLibraryRepository: photoLibraryRepository,
             albumDataRepository: albumDataRepository,
-            labelRepository: photoLabelDataRepository
+            labelRepository: photoLabelDataRepository,
+            isSelectMode: isSelectMode
         )
     }
 }

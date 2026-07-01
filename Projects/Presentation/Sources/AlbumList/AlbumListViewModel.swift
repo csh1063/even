@@ -93,8 +93,8 @@ final class AlbumListViewModel: BaseViewModel {
     
     private func loadAlbumFrom() async {
         do {
-            print("load albums")
-            let albums = try await self.albumUseCase.fetchAll()
+            print("load albums", self.from)
+            let albums = try await self.albumUseCase.fetchAll(from: self.from)
 //            self.albums = albums
             self.buildSections(from: albums)
         } catch {
@@ -118,14 +118,20 @@ final class AlbumListViewModel: BaseViewModel {
         case "location":
             list = albums.filter { $0.from == "location" }
                 .sorted { $0.photoCount > $1.photoCount }
-                .map {
-                    print("displayName", $0.displayName)
-                    //                print("keyword:", $0.keywords.joined(separator: ", "))
-                    return $0
-                }
+//                .map {
+//                    print("displayName", $0.displayName)
+//                    //                print("keyword:", $0.keywords.joined(separator: ", "))
+//                    return $0
+//                }
                 .enumerated()
                 .map {
                     .location(LocationAlbumCellViewModel(album: $1, imageLoader: self, isMost: $0 == 0))
+                }
+        case "similar":
+            list = albums.filter { $0.from == "similar" }
+                .sorted { $0.photoCount > $1.photoCount }
+                .map {
+                    .similar(SimilarAlbumCellViewModel(album: $0, imageLoader: self))
                 }
         default: list = []
         }

@@ -17,15 +17,18 @@ public final class AlbumDetailDIContainer {
     private let labelRepository: PhotoLabelDataRepository
     
     private let album: Album
+    private let isSelectMode: Bool
 
     public init(album: Album,
                 photoLibraryRepository: PhotoLibraryRepository,
                 albumDataRepository: AlbumDataRepository,
-                labelRepository: PhotoLabelDataRepository) {
+                labelRepository: PhotoLabelDataRepository,
+                isSelectMode: Bool) {
         self.album = album
         self.photoLibraryRepository = photoLibraryRepository
         self.albumDataRepository = albumDataRepository
         self.labelRepository = labelRepository
+        self.isSelectMode = isSelectMode
     }
 
     func makeAlbumDetailViewModel() -> AlbumDetailViewModel {
@@ -35,15 +38,19 @@ public final class AlbumDetailDIContainer {
         )
         
         let albumDetailUseCase = DefaultAlbumDetailUseCase(
-            repository: albumDataRepository
+            repository: albumDataRepository,
+            libraryRepository: photoLibraryRepository
         )
         
         return AlbumDetailViewModel(album: album,
                                     imageUseCase: imageUseCase,
-                                    detailUseCase: albumDetailUseCase)
+                                    detailUseCase: albumDetailUseCase,
+                                    startInSelectionMode: isSelectMode)
     }
     
-    func makeImageViewerViewModel(photoDetails: [PhotoDetail], index: Int) -> ImageViewerViewModel {
+    func makeImageViewerViewModel(photoDetails: [PhotoDetail], index: Int,
+                                  isSelectionMode: Bool = false,
+                                  selectedIdentifiers: Set<String> = []) -> ImageViewerViewModel {
         
         let imageUseCase = DefaultImageViewerUseCase(
             repository: photoLibraryRepository,
@@ -52,6 +59,8 @@ public final class AlbumDetailDIContainer {
         
         return ImageViewerViewModel(photoDetails: photoDetails,
                                     initialIndex: index,
-                                    imageUseCase: imageUseCase)
+                                    imageUseCase: imageUseCase,
+                                    isSelectionMode: isSelectionMode,
+                                    selectedIdentifiers: selectedIdentifiers)
     }
 }

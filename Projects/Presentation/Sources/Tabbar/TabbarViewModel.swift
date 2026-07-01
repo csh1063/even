@@ -190,11 +190,11 @@ public final class TabbarViewModel: BaseViewModel {
             )
         case .reAutoAlbum:
             showAlert(
-                title: "자동 폴더 재생성",
-                message: "자동 생서된 앨범들을\n삭제 후 다시 생성합니다.\n다시 생성할까요?",
+                title: "앨범 재생성",
+                message: "앨범들을 삭제 후 다시 생성합니다.\n다시 생성할까요?",
                 buttons: [
                     AlertButtonConfig(title: "취소", style: .cancel, action: nil),
-                    AlertButtonConfig(title: "재분석하기", style: .default) { [weak self] in
+                    AlertButtonConfig(title: "자동 앨범", style: .default) { [weak self] in
                         Task {
                             guard let self else {return}
                             self.isLoading = true
@@ -217,6 +217,26 @@ public final class TabbarViewModel: BaseViewModel {
                             _ = await self.createdAutoAlbum(isPhoto: false) {
                                 self.locationAlbumProgressRatio = $0
                             }
+                        }
+                    },
+                    AlertButtonConfig(title: "여행 앨범", style: .default) { [weak self] in
+                        Task {
+                            guard let self else {return}
+//                            self.isLoading = true
+                            print("start date!!!:", Date())
+                            await self.createTravelAutoAlbum()
+//                            self.isLoading = false
+                            print("end date!!!:", Date())
+                        }
+                    },
+                    AlertButtonConfig(title: "비슷한 사진 앨범", style: .default) { [weak self] in
+                        Task {
+                            guard let self else {return}
+//                            self.isLoading = true
+                            print("start date!!!:", Date())
+                            await self.createSimilarAutoAlbum()
+//                            self.isLoading = false
+                            print("end date!!!:", Date())
                         }
                     }
                 ]
@@ -306,6 +326,21 @@ public final class TabbarViewModel: BaseViewModel {
                     }
                 }
             }
+        } catch {
+            self.isLoading = false
+            self.isComplete = true
+        }
+    }
+    
+    private func createSimilarAutoAlbum() async {
+        self.isComplete = false
+        do {
+            self.isLoading = true
+            
+            try await autoAlbumUseCase.createSimilarAlbum()
+            
+            self.isLoading = false
+            self.isComplete = true
         } catch {
             self.isLoading = false
             self.isComplete = true

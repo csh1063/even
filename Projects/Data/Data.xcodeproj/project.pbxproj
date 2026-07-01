@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 55;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -13,6 +13,8 @@
 		08AECF29330879460FAE72AE /* HomeZoneEntityMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4789F7EA343579B3C2EBD3E /* HomeZoneEntityMapper.swift */; };
 		0FF0E6DF64B0C4AB71FF5A9C /* AlbumKeywordEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 556D3CDB34B766589911C18B /* AlbumKeywordEntity.swift */; };
 		113EC0295E5F35367F42DFB8 /* ProviderFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF420FD928A623DCD3CA5C99 /* ProviderFactory.swift */; };
+		195CA84C2FEBA20B00B6FACF /* SimilarPhotoClusterService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 195CA84B2FEBA20B00B6FACF /* SimilarPhotoClusterService.swift */; };
+		195CA84E2FEBA21E00B6FACF /* DefaultSimilarPhotoClusterRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 195CA84D2FEBA21E00B6FACF /* DefaultSimilarPhotoClusterRepository.swift */; };
 		1989135D2D6A2C2BA17A6B60 /* PhotoAssetEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1818CB29A1914B6416E20D3E /* PhotoAssetEntity.swift */; };
 		1A9938F2B9F9AD2825A0FC20 /* DefaultPhotoLabelDataRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76713B0DD0063DA264DCB484 /* DefaultPhotoLabelDataRepository.swift */; };
 		1C669EDBEBF3A369F0F523F7 /* AdaFace_IR18.mlpackage in Resources */ = {isa = PBXBuildFile; fileRef = 0090F9017C86ABEBAB2BCDEE /* AdaFace_IR18.mlpackage */; };
@@ -88,13 +90,15 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		0090F9017C86ABEBAB2BCDEE /* AdaFace_IR18.mlpackage */ = {isa = PBXFileReference; path = AdaFace_IR18.mlpackage; sourceTree = "<group>"; };
+		0090F9017C86ABEBAB2BCDEE /* AdaFace_IR18.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = AdaFace_IR18.mlpackage; sourceTree = "<group>"; };
 		02AE428C933DAFD8543626EC /* DefaultHomeZoneRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultHomeZoneRepository.swift; sourceTree = "<group>"; };
 		033B57EACF093CA22F91EAB9 /* Data-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Data-Info.plist"; sourceTree = "<group>"; };
 		06FAA1459D11CCE724C34195 /* Domain.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Domain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		16740A9D26F7F47AE40CEDE9 /* AlbumEntityMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumEntityMapper.swift; sourceTree = "<group>"; };
 		1818CB29A1914B6416E20D3E /* PhotoAssetEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoAssetEntity.swift; sourceTree = "<group>"; };
-		1B5CDF57D65F9F18DBDB7878 /* AdaFace_IR50.mlpackage */ = {isa = PBXFileReference; path = AdaFace_IR50.mlpackage; sourceTree = "<group>"; };
+		195CA84B2FEBA20B00B6FACF /* SimilarPhotoClusterService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimilarPhotoClusterService.swift; sourceTree = "<group>"; };
+		195CA84D2FEBA21E00B6FACF /* DefaultSimilarPhotoClusterRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultSimilarPhotoClusterRepository.swift; sourceTree = "<group>"; };
+		1B5CDF57D65F9F18DBDB7878 /* AdaFace_IR50.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = AdaFace_IR50.mlpackage; sourceTree = "<group>"; };
 		1D6BD6C0BFFB08B0574D32AF /* PhotoCategoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCategoryService.swift; sourceTree = "<group>"; };
 		1E0A1E65D202F027E3B90C53 /* PhotoLabelEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLabelEntity.swift; sourceTree = "<group>"; };
 		22D00CECFC40ACA66E15A488 /* UserDefaultsKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsKey.swift; sourceTree = "<group>"; };
@@ -221,6 +225,7 @@
 		73F3ED55BFDC2EF15878F5B6 /* Repository */ = {
 			isa = PBXGroup;
 			children = (
+				195CA84D2FEBA21E00B6FACF /* DefaultSimilarPhotoClusterRepository.swift */,
 				A8D2808A0048080DF4464B0D /* DefaultAlbumDataRepository.swift */,
 				E1A31A4B6A99AA268BBD96B2 /* DefaultFaceClusterRepository.swift */,
 				50473B34690C858CBCC7B415 /* DefaultGeoRepository.swift */,
@@ -298,6 +303,7 @@
 		B119E31677D59F7802A67D11 /* Service */ = {
 			isa = PBXGroup;
 			children = (
+				195CA84B2FEBA20B00B6FACF /* SimilarPhotoClusterService.swift */,
 				6B5878ED03189279E50B0AC1 /* FaceClusterService.swift */,
 				D3A9CB6FBE22EC2BCAA1BE04 /* FaceEmbeddingService.swift */,
 				34FC610C922DCAAD54F6B871 /* GeocoderService.swift */,
@@ -475,6 +481,8 @@
 				C5E3901016A28982EE6D8EC0 /* PhotoLibararyService.swift in Sources */,
 				63D44D51A5150AE02FB8D98E /* ServiceFactory.swift in Sources */,
 				565C1DBED68ECA6870BD0038 /* UserDefaultsService.swift in Sources */,
+				195CA84C2FEBA20B00B6FACF /* SimilarPhotoClusterService.swift in Sources */,
+				195CA84E2FEBA21E00B6FACF /* DefaultSimilarPhotoClusterRepository.swift in Sources */,
 				E6236BC642F4816FB3AF2C80 /* AlbumEntity.swift in Sources */,
 				0FF0E6DF64B0C4AB71FF5A9C /* AlbumKeywordEntity.swift in Sources */,
 				D1EF8D8DDA5E3FD55D5EA822 /* FaceEmbeddingEntity.swift in Sources */,
@@ -513,10 +521,7 @@
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = (
-					"$(inherited)",
-					DEBUG,
-				);
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
 				SWIFT_COMPILATION_MODE = singlefile;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;

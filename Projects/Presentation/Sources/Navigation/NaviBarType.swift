@@ -76,7 +76,7 @@ enum NaviBarButtonType: Equatable {
     var backgroundColor: UIColor? {
         switch self {
         case .analysis: return Theme.primary
-        case .more, .reset: return Theme.surface.withAlphaComponent(0.95)
+        case .more, .reset, .cancel: return Theme.surface.withAlphaComponent(0.95)
         default: return nil
         }
     }

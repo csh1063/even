@@ -188,7 +188,7 @@ public final class DefaultTravelDetectionRepository: TravelDetectionRepository {
         let allCountries = countries + geocodedCountries
         let allCodes = isoCountryCodes + geocodedIsoCodes
         
-        // 3. 폴더명 결정
+        // 3. 앨범명 결정
         let subLocality = mostFrequent(allSubLocalities) ?? ""
         let locality = resolveAlbumLocality(localities: allLocalities, administrativeAreas: allAdministrativeAreas)
         let administrativeArea = mostFrequent(allAdministrativeAreas) ?? ""

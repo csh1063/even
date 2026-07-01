@@ -266,6 +266,23 @@ public final class DefaultAlbumDataRepository: AlbumDataRepository {
 //        try context.save()
     }
     
+    public func deletePhotos(albumId: UUID, photoIdentifiers: [String]) throws {
+        let context = ModelContext(container)
+        
+        let descriptor = FetchDescriptor<AlbumEntity>(
+            predicate: #Predicate { $0.id == albumId }
+        )
+        guard let album = try context.fetch(descriptor).first else { return }
+        
+        let targets = album.photos.filter { photoIdentifiers.contains($0.localIdentifier) }
+        
+        for photo in targets {
+            context.delete(photo)
+        }
+        
+        try context.save()
+    }
+    
     public func deleteAutoAlbums(by from: String) throws {
         
         let context = ModelContext(container)

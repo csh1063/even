@@ -101,6 +101,7 @@ final class AlbumListViewController: BaseViewController {
             case "location":  return self?.makeLocationSection(environment: environment)
             case "category": return self?.makeCategorySection()
             case "face":     return self?.makeFaceSection()
+            case "similar": return self?.makeSimilarSection()
             default: return self?.makeTravelSection()
             }
         }
@@ -121,7 +122,7 @@ final class AlbumListViewController: BaseViewController {
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
 
         let section = NSCollectionLayoutSection(group: group)
-        section.orthogonalScrollingBehavior = .continuous
+//        section.orthogonalScrollingBehavior = .continuous
         section.interGroupSpacing = 12
         section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 28, trailing: 20)
         return section
@@ -238,6 +239,31 @@ final class AlbumListViewController: BaseViewController {
         section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 28, trailing: 20)
         return section
     }
+    private func makeSimilarSection() -> NSCollectionLayoutSection {
+        
+        let screenWidth = UIScreen.main.bounds.width
+        let itemWidth = (screenWidth - 32) / 4  // leading+trailing inset 32, 아이템간 간격 24
+
+        let itemSize = NSCollectionLayoutSize(
+            widthDimension: .absolute(itemWidth),
+            heightDimension: .absolute(itemWidth)
+        )
+        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+        item.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 4)
+
+        let groupSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .absolute(itemWidth)
+        )
+        
+        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
+
+        let section = NSCollectionLayoutSection(group: group)
+//        section.orthogonalScrollingBehavior = .continuous
+        section.interGroupSpacing = 4
+        section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 16, bottom: 28, trailing: 16)
+        return section
+    }
 }
 
 extension AlbumListViewController {
@@ -256,8 +282,8 @@ extension AlbumListViewController {
             cell.configure(with: vm, style: .small)
         }
 
-        let categoryRegistration = UICollectionView.CellRegistration<CategoryAlbumCell, CategoryAlbumCellViewModel> { [weak self] cell, indexPath, vm in
-            guard let self else { return }
+        let categoryRegistration = UICollectionView.CellRegistration<CategoryAlbumCell, CategoryAlbumCellViewModel> {/* [weak self]*/ cell, indexPath, vm in
+//            guard let self else { return }
 //            let items = self.dataSource.snapshot().itemIdentifiers(inSection: .category)
 //            cell.isFirst = (indexPath.item == 0)
 //            cell.isLast  = (indexPath.item == items.count - 1)
@@ -266,6 +292,10 @@ extension AlbumListViewController {
 
         let faceRegistration = UICollectionView.CellRegistration<FaceAlbumCell, FaceCellViewModel> { cell, _, vm in
             cell.configure(with: vm)
+        }
+        
+        let similarRegistration = UICollectionView.CellRegistration<SimilarAlbumCell, SimilarAlbumCellViewModel> { cell, _, vm in
+            cell.configure(with: vm, hasCover: true)
         }
         
         dataSource = UICollectionViewDiffableDataSource<Int, AlbumType>(
@@ -298,6 +328,11 @@ extension AlbumListViewController {
                     using: faceRegistration,
                     for: indexPath,
                     item: vm)
+            case .similar(let vm):
+                return collectionView.dequeueConfiguredReusableCell(
+                    using: similarRegistration,
+                    for: indexPath,
+                    item: vm)
             }
         }
     }
@@ -306,15 +341,8 @@ extension AlbumListViewController {
         var snapshot = NSDiffableDataSourceSnapshot<Int, AlbumType>()
         
 //        snapshot.appendSections(data.sections)
-        switch data.type {
-        case "travel":
-            snapshot.appendSections([0])  // 섹션 먼저
-            snapshot.appendItems(data.albums)
-        case "location":
-            snapshot.appendSections([0])  // 섹션 먼저
-            snapshot.appendItems(data.albums)
-        default: break
-        }
+        snapshot.appendSections([0])  // 섹션 먼저
+        snapshot.appendItems(data.albums)
 
         dataSource.apply(snapshot, animatingDifferences: true) {
             // apply 완료 후 layout 갱신

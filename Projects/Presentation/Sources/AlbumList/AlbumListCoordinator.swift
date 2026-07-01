@@ -33,7 +33,7 @@ public final class AlbumListCoordinator: BaseCoordinator {
         viewModel.onAction = { [weak self] type in
             switch type {
             case .moveDetail(let album):
-                self?.moveDetail(album: album)
+                self?.moveDetail(album: album, isSelectMode: album.from == "similar")
             case .pop:
                 self?.pop()
             default: break
@@ -53,9 +53,9 @@ public final class AlbumListCoordinator: BaseCoordinator {
         self.remove(coordinator: self)
     }
     
-    func moveDetail(album: Album) {
+    func moveDetail(album: Album, isSelectMode: Bool) {
         print("move!")
-        let detailDI = diContainer.makeDetailDIContainer(album: album)
+        let detailDI = diContainer.makeDetailDIContainer(album: album, isSelectMode: isSelectMode)
         
         let detailCoordinator = AlbumDetailCoordinator(
             diContainer: detailDI,

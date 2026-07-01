@@ -60,4 +60,8 @@ public final class ServiceFactory {
     public lazy var faceClusterService: FaceClusterService = {
         FaceClusterService(libraryService: photoLibraryService)
     }()
+    
+    public lazy var similarService: SimilarPhotoClusterService = {
+        SimilarPhotoClusterService()
+    }()
 }

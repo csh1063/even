@@ -59,7 +59,7 @@ final class AlbumViewController: BaseViewController {
     
     private func setupView() {
         
-        naviView.setTitle("주제별 앨범",
+        naviView.setTitle("앨범",
                           color: Theme.textPrimary,
                           font: .systemFont(ofSize: 32, weight: .bold))
         naviView.setMessage("사진이 개 앨범으로 정리되었어요",
@@ -150,6 +150,7 @@ final class AlbumViewController: BaseViewController {
             case .location:  return self?.makeLocationSection(environment: environment)
             case .category: return self?.makeCategorySection()
             case .face:     return self?.makeFaceSection()
+            case .similar:  return self?.makeSimilarSection()
             }
         }
     }
@@ -289,6 +290,27 @@ final class AlbumViewController: BaseViewController {
         section.boundarySupplementaryItems = [makeHeader()]
         return section
     }
+    
+    private func makeSimilarSection() -> NSCollectionLayoutSection {
+        let itemSize = NSCollectionLayoutSize(
+            widthDimension: .absolute(88),
+            heightDimension: .absolute(88)
+        )
+        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+
+        let groupSize = NSCollectionLayoutSize(
+            widthDimension: .absolute(88),
+            heightDimension: .absolute(88)
+        )
+        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
+
+        let section = NSCollectionLayoutSection(group: group)
+        section.orthogonalScrollingBehavior = .continuous
+        section.interGroupSpacing = 12
+        section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 28, trailing: 20)
+        section.boundarySupplementaryItems = [makeHeader()]
+        return section
+    }
 
     private func makeHeader() -> NSCollectionLayoutBoundarySupplementaryItem {
         let headerSize = NSCollectionLayoutSize(
@@ -328,6 +350,10 @@ extension AlbumViewController {
         }
 
         let faceRegistration = UICollectionView.CellRegistration<FaceAlbumCell, FaceCellViewModel> { cell, _, vm in
+            cell.configure(with: vm)
+        }
+        
+        let similarRegistration = UICollectionView.CellRegistration<SimilarAlbumCell, SimilarAlbumCellViewModel> { cell, _, vm in
             cell.configure(with: vm)
         }
 
@@ -375,6 +401,11 @@ extension AlbumViewController {
             case .face(let vm):
                 return collectionView.dequeueConfiguredReusableCell(
                     using: faceRegistration,
+                    for: indexPath,
+                    item: vm)
+            case .similar(let vm):
+                return collectionView.dequeueConfiguredReusableCell(
+                    using: similarRegistration,
                     for: indexPath,
                     item: vm)
             }
