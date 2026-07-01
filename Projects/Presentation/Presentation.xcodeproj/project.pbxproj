@@ -68,7 +68,6 @@
 		6DFE320F438EC6EADEAB239B /* NaviBarType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C18C417DC62917A6F8651BD /* NaviBarType.swift */; };
 		7289EFA4AFBD4C70FB862366 /* MyCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B17589FEE05ACDB5C24C1C19 /* MyCell.swift */; };
 		729B91FE44EF04E9EE610439 /* PhotoTestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89F76F166FDFEB0A004CE633 /* PhotoTestViewController.swift */; };
-		73730347C9EB69CE4A8E585D /* test.xib in Resources */ = {isa = PBXBuildFile; fileRef = F6D99F67B6F8A867B9D6EAFA /* test.xib */; };
 		7632150ABEB9375FDDCCBF16 /* MyPageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3248007A1FE0B50132ED59EF /* MyPageCell.swift */; };
 		7763F0F5E130F3AA0217FC38 /* OnboardingPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F08E0812978BD2A3D1F61243 /* OnboardingPage.swift */; };
 		7B895DB10E84114CF303C8C5 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AE4EF10D324D138285AD48 /* LoadingView.swift */; };
@@ -304,7 +303,6 @@
 		F4970CC3CF7281FDEDF5A2E4 /* BaseViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseViewModel.swift; sourceTree = "<group>"; };
 		F687BDB1C5A5D939130A0D13 /* PhotoTestDIContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoTestDIContainer.swift; sourceTree = "<group>"; };
 		F69D66CC0A54128CFD01F1D1 /* WebDocuViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebDocuViewController.swift; sourceTree = "<group>"; };
-		F6D99F67B6F8A867B9D6EAFA /* test.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = test.xib; sourceTree = "<group>"; };
 		F8319D993605486422F54607 /* FaceAlbumCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceAlbumCell.swift; sourceTree = "<group>"; };
 		F9C2998FAD7DD5077BD097DB /* Extension_UITextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension_UITextView.swift; sourceTree = "<group>"; };
 		FA38711B6986E707C1A35C31 /* AlbumOptionsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumOptionsSheet.swift; sourceTree = "<group>"; };
@@ -736,7 +734,6 @@
 			isa = PBXGroup;
 			children = (
 				92D379FC79776FBC7A77423B /* Assets.xcassets */,
-				F6D99F67B6F8A867B9D6EAFA /* test.xib */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -866,7 +863,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				D99957B25A13351D2C1CDBC3 /* Assets.xcassets in Resources */,
-				73730347C9EB69CE4A8E585D /* test.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
