@@ -53,6 +53,8 @@ public final class PhotoLibraryService {
                 album.enumerateObjects { (collection, _, _) in
                     let opt = PHFetchOptions()
                     let assets = PHAsset.fetchAssets(in: collection, options: opt)
+                    // PHFetchResult에는 isEmpty가 없음 — swiftlint --fix가 !isEmpty로 잘못 고치지 않도록 disable
+                    // swiftlint:disable:next empty_count
                     if assets.count > 0 {
                         let fetchOptions = PHFetchOptions()
                         fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]

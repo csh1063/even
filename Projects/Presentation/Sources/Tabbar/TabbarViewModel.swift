@@ -12,14 +12,11 @@ import Domain
 
 enum TabbarViewModelAction {
     case progressSheet(AnalyzeProgress)
-    case locationProgressSheet(AnalyzeProgress)
 }
 
 struct AnalyzeProgress {
     let photoProgress: AnyPublisher<Double, Never>
     let albumProgress: AnyPublisher<Double, Never>
-    let locationProgress: AnyPublisher<Double, Never>
-    let locationAlbumProgress: AnyPublisher<Double, Never>
 }
 
 @MainActor
@@ -41,8 +38,6 @@ public final class TabbarViewModel: BaseViewModel {
     public struct Output {
         let photoProgress: AnyPublisher<Double, Never>
         let albumProgress: AnyPublisher<Double, Never>
-        let locationProgress: AnyPublisher<Double, Never>
-        let locationAlbumProgress: AnyPublisher<Double, Never>
         let onboarding: AnyPublisher<Bool?, Never>
         let consent: AnyPublisher<Bool?, Never>
         let permission: AnyPublisher<PhotoPermission, Never>
@@ -51,8 +46,6 @@ public final class TabbarViewModel: BaseViewModel {
 
     @Published private var progressRatio: Double = 0
     @Published private var autoAlbumProgressRatio: Double = 0
-    @Published private var locationProgressRatio: Double = 0
-    @Published private var locationAlbumProgressRatio: Double = 0
     @Published private var isAnalyzing: Bool = false
     @Published private var isComplete: Bool = false
     @Published private var onboarding: Bool?
@@ -79,16 +72,12 @@ public final class TabbarViewModel: BaseViewModel {
         super.init()
 
         self.bind()
-
-//        self.resetForTest()
     }
 
     public func transform() -> Output {
         return Output(
             photoProgress: $progressRatio.eraseToAnyPublisher(),
             albumProgress: $autoAlbumProgressRatio.eraseToAnyPublisher(),
-            locationProgress: $locationProgressRatio.eraseToAnyPublisher(),
-            locationAlbumProgress: $locationAlbumProgressRatio.eraseToAnyPublisher(),
             onboarding: $onboarding.eraseToAnyPublisher(),
             consent: $consent.eraseToAnyPublisher(),
             permission: $permission.eraseToAnyPublisher(),
@@ -97,7 +86,6 @@ public final class TabbarViewModel: BaseViewModel {
     }
 
     func send(_ input: Input) {
-        print("send", input)
         self.input.send(input)
     }
 
@@ -107,15 +95,6 @@ public final class TabbarViewModel: BaseViewModel {
             Task { @MainActor in await self.handle(input) }
         }
         .store(in: &cancellables)
-    }
-
-    private func resetForTest() {
-        Task {
-            do {
-                print("reset")
-                try await self.permissionUseCase.resetForTest()
-            }
-        }
     }
 
     private func handle(_ input: Input) async {
@@ -129,7 +108,6 @@ public final class TabbarViewModel: BaseViewModel {
         case .afterOnboarding:
             await onboardingComplete()
         case .analysis:
-            print("analysis 2")
             showAlert(
                 title: "사진 분석",
                 message: "분석하지 않은 사진을 분석합니다.\n분석할까요?",
@@ -140,37 +118,14 @@ public final class TabbarViewModel: BaseViewModel {
                             guard let self else {return}
                             self.onAction?(.progressSheet(AnalyzeProgress(
                                 photoProgress: self.$progressRatio.eraseToAnyPublisher(),
-                                albumProgress: self.$autoAlbumProgressRatio.eraseToAnyPublisher(),
-                                locationProgress: self.$locationProgressRatio.eraseToAnyPublisher(),
-                                locationAlbumProgress: self.$locationAlbumProgressRatio.eraseToAnyPublisher()
+                                albumProgress: self.$autoAlbumProgressRatio.eraseToAnyPublisher()
                             )))
-//                            self.isLoading = true
-                            print("start date!!!:", Date())
                             await self.analysis()
-//                            self.isLoading = false
-                            print("end date!!!:", Date())
-                        }
-                    },
-                    AlertButtonConfig(title: "좌표분석하기", style: .default) { [weak self] in
-                        Task {
-                            guard let self else {return}
-                            self.onAction?(.locationProgressSheet(AnalyzeProgress(
-                                photoProgress: self.$progressRatio.eraseToAnyPublisher(),
-                                albumProgress: self.$autoAlbumProgressRatio.eraseToAnyPublisher(),
-                                locationProgress: self.$locationProgressRatio.eraseToAnyPublisher(),
-                                locationAlbumProgress: self.$locationAlbumProgressRatio.eraseToAnyPublisher()
-                            )))
-//                            self.isLoading = true
-                            print("start date!!!:", Date())
-                            await self.locationAnalysis()
-//                            self.isLoading = false
-                            print("end date!!!:", Date())
                         }
                     }
                 ]
             )
         case .autoTravelAlbum:
-            print("autoTravelAlbum")
             showAlert(
                 title: "여행 사진",
                 message: "여행 앨범을 만들어 볼까요",
@@ -179,11 +134,7 @@ public final class TabbarViewModel: BaseViewModel {
                     AlertButtonConfig(title: "만들어줘", style: .default) { [weak self] in
                         Task {
                             guard let self else {return}
-//                            self.isLoading = true
-                            print("start date!!!:", Date())
                             await self.createTravelAutoAlbum()
-//                            self.isLoading = false
-                            print("end date!!!:", Date())
                         }
                     }
                 ]
@@ -203,40 +154,47 @@ public final class TabbarViewModel: BaseViewModel {
 
                             self.onAction?(.progressSheet(AnalyzeProgress(
                                 photoProgress: self.$progressRatio.eraseToAnyPublisher(),
-                                albumProgress: self.$autoAlbumProgressRatio.eraseToAnyPublisher(),
-                                locationProgress: self.$locationProgressRatio.eraseToAnyPublisher(),
-                                locationAlbumProgress: self.$locationAlbumProgressRatio.eraseToAnyPublisher()
+                                albumProgress: self.$autoAlbumProgressRatio.eraseToAnyPublisher()
                             )))
 
                             self.progressRatio = 1.0
-
-                            _ = await self.createdAutoAlbum(isPhoto: true) {
-                                self.autoAlbumProgressRatio = $0
-                            }
-                            self.locationProgressRatio = 1.0
-                            _ = await self.createdAutoAlbum(isPhoto: false) {
-                                self.locationAlbumProgressRatio = $0
-                            }
+                            await self.runAlbumGeneration()
+                        }
+                    },
+                    AlertButtonConfig(title: "날짜 앨범", style: .default) { [weak self] in
+                        Task {
+                            guard let self else {return}
+                            await self.createDateAutoAlbum()
+                        }
+                    },
+                    AlertButtonConfig(title: "주소 앨범", style: .default) { [weak self] in
+                        Task {
+                            guard let self else {return}
+                            await self.createLocationAutoAlbum()
+                        }
+                    },
+                    AlertButtonConfig(title: "카테고리 앨범", style: .default) { [weak self] in
+                        Task {
+                            guard let self else {return}
+                            await self.createCategoryAutoAlbum()
+                        }
+                    },
+                    AlertButtonConfig(title: "얼굴 앨범", style: .default) { [weak self] in
+                        Task {
+                            guard let self else {return}
+                            await self.createFaceAutoAlbum()
                         }
                     },
                     AlertButtonConfig(title: "여행 앨범", style: .default) { [weak self] in
                         Task {
                             guard let self else {return}
-//                            self.isLoading = true
-                            print("start date!!!:", Date())
                             await self.createTravelAutoAlbum()
-//                            self.isLoading = false
-                            print("end date!!!:", Date())
                         }
                     },
                     AlertButtonConfig(title: "비슷한 사진 앨범", style: .default) { [weak self] in
                         Task {
                             guard let self else {return}
-//                            self.isLoading = true
-                            print("start date!!!:", Date())
                             await self.createSimilarAutoAlbum()
-//                            self.isLoading = false
-                            print("end date!!!:", Date())
                         }
                     }
                 ]
@@ -256,9 +214,7 @@ public final class TabbarViewModel: BaseViewModel {
 
                             self.onAction?(.progressSheet(AnalyzeProgress(
                                 photoProgress: self.$progressRatio.eraseToAnyPublisher(),
-                                albumProgress: self.$autoAlbumProgressRatio.eraseToAnyPublisher(),
-                                locationProgress: self.$locationProgressRatio.eraseToAnyPublisher(),
-                                locationAlbumProgress: self.$locationAlbumProgressRatio.eraseToAnyPublisher()
+                                albumProgress: self.$autoAlbumProgressRatio.eraseToAnyPublisher()
                             )))
                             await self.analysis()
                         }
@@ -285,33 +241,49 @@ public final class TabbarViewModel: BaseViewModel {
         }
     }
 
+    // MARK: - 분석 + 앨범 생성 통합 플로우
+
     private func analysis() async {
         self.isAnalyzing = true
         do {
-            let success = try await analysisPhotoBase()
-            guard success else {
-                self.isAnalyzing = false
-                return
+            for try await progress in analysisUseCase.analysis() {
+                switch progress.state {
+                case .progress(let ratio):
+                    self.progressRatio = ratio
+                case .completed:
+                    self.progressRatio = 1.0
+                case .unavailable:
+                    break
+                }
             }
-
-            await locationAnalysis()
-        } catch {
-            print("error", error.localizedDescription)
             self.progressRatio = 1.0
-            self.isAnalyzing = false
+
+            await runAlbumGeneration()
+        } catch {
+            self.progressRatio = 1.0
+            self.autoAlbumProgressRatio = 1.0
+        }
+        self.isAnalyzing = false
+    }
+
+    private func runAlbumGeneration() async {
+        self.isComplete = false
+        do {
+            for try await progress in autoAlbumUseCase.generateAllAlbums() {
+                self.autoAlbumProgressRatio = progress.ratio
+                if case .completed = progress.step {
+                    self.autoAlbumProgressRatio = 1.0
+                    self.isComplete = true
+                    self.endAllProcess()
+                }
+            }
+        } catch {
+            self.autoAlbumProgressRatio = 1.0
+            self.isComplete = true
         }
     }
 
-    private func locationAnalysis() async {
-        self.isAnalyzing = true
-        Task.detached(priority: .background) { [weak self] in
-            guard let self else {return}
-            await self.analysisPhotoLocation()
-            await MainActor.run {
-                self.isAnalyzing = false
-            }
-        }
-    }
+    // MARK: - 개별 앨범 (재)생성
 
     private func createTravelAutoAlbum() async {
         self.isComplete = false
@@ -319,11 +291,9 @@ public final class TabbarViewModel: BaseViewModel {
             self.isLoading = true
 
             for try await progress in autoAlbumUseCase.createTravelAutoAlbum() {
-                await MainActor.run {
-                    if case .completed = progress.step {
-                        self.isLoading = false
-                        self.isComplete = true
-                    }
+                if case .completed = progress.step {
+                    self.isLoading = false
+                    self.isComplete = true
                 }
             }
         } catch {
@@ -336,9 +306,59 @@ public final class TabbarViewModel: BaseViewModel {
         self.isComplete = false
         do {
             self.isLoading = true
-
             try await autoAlbumUseCase.createSimilarAlbum()
+            self.isLoading = false
+            self.isComplete = true
+        } catch {
+            self.isLoading = false
+            self.isComplete = true
+        }
+    }
 
+    private func createDateAutoAlbum() async {
+        self.isComplete = false
+        do {
+            self.isLoading = true
+            try await autoAlbumUseCase.createDateAlbums()
+            self.isLoading = false
+            self.isComplete = true
+        } catch {
+            self.isLoading = false
+            self.isComplete = true
+        }
+    }
+
+    private func createLocationAutoAlbum() async {
+        self.isComplete = false
+        do {
+            self.isLoading = true
+            try await autoAlbumUseCase.createLocationAlbums()
+            self.isLoading = false
+            self.isComplete = true
+        } catch {
+            self.isLoading = false
+            self.isComplete = true
+        }
+    }
+
+    private func createCategoryAutoAlbum() async {
+        self.isComplete = false
+        do {
+            self.isLoading = true
+            try await autoAlbumUseCase.createCategoryAlbums()
+            self.isLoading = false
+            self.isComplete = true
+        } catch {
+            self.isLoading = false
+            self.isComplete = true
+        }
+    }
+
+    private func createFaceAutoAlbum() async {
+        self.isComplete = false
+        do {
+            self.isLoading = true
+            try await autoAlbumUseCase.createFaceAlbums()
             self.isLoading = false
             self.isComplete = true
         } catch {
@@ -360,83 +380,10 @@ public final class TabbarViewModel: BaseViewModel {
     private func albumClear() async {
         do {
             self.isComplete = false
-            print("delete all album")
             try await self.autoAlbumUseCase.deleteAutoAlbums()
-            print("deleted all album")
             self.isComplete = true
         } catch {
             print("error", error.localizedDescription)
-        }
-    }
-
-    private func createdAutoAlbum(isPhoto: Bool, updateProgress: @MainActor (Double) -> Void) async -> Bool {
-        self.isComplete = false
-        do {
-            for try await progress in autoAlbumUseCase.execute(isPhoto) {
-                await MainActor.run {
-                    updateProgress(progress.ratio)
-                    if case .completed = progress.step {
-                        updateProgress(1.0)
-                        self.endAllProcess()
-                    }
-                }
-            }
-
-            self.isComplete = true
-            return true
-        } catch {
-            self.isComplete = true
-            return false
-        }
-    }
-
-    private func analysisPhotoBase() async throws -> Bool {
-
-        for try await progress in analysisUseCase.analysis() {
-            switch progress.state {
-            case .progress(let ratio):
-                print("progress", ratio)
-                self.progressRatio = ratio
-            case .completed:
-                print("completed")
-                self.progressRatio = 1.0
-            case .unavailable(let reason):
-//                self.showUnavailableMessage(reason)
-                print("reason", reason)
-            }
-        }
-        self.progressRatio = 1.0
-
-        return await createdAutoAlbum(isPhoto: true) {
-            self.autoAlbumProgressRatio = $0
-        }
-
-    }
-
-    private func analysisPhotoLocation() async {
-        do {
-            for try await progress in self.analysisUseCase.locationAnalysis() {
-                await MainActor.run {
-                    switch progress.state {
-                    case .progress(let ratio):
-//                        print("progress", ratio)
-                        self.locationProgressRatio = ratio
-                    case .completed:
-                        print("completed")
-                        self.locationProgressRatio = 1.0
-                    case .unavailable(let reason):
-//                        self.showUnavailableMessage(reason)
-                        print("reason", reason)
-                    }
-                }
-            }
-        } catch {
-            print("error", error.localizedDescription)
-            self.locationProgressRatio = 1.0
-        }
-
-        _ = await self.createdAutoAlbum(isPhoto: false) {
-            self.locationAlbumProgressRatio = $0
         }
     }
 
@@ -482,8 +429,6 @@ public final class TabbarViewModel: BaseViewModel {
 
     private func endAllProcess() {
         self.progressRatio = 0.0
-        self.locationProgressRatio = 0.0
         self.autoAlbumProgressRatio = 0.0
-        self.locationAlbumProgressRatio = 0.0
     }
 }

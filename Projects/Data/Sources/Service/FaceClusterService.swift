@@ -25,10 +25,10 @@ public final class FaceClusterService {
     private let minimumClusterSize: Int = 3
 
     /// 개별 클러스터 품질 기준 — 이 미만이면 짜투리로 판단하여 버림
-    private let minimumClusterQuality: Float = 0.74
+    private let minimumClusterQuality: Float = 0.76
 
     /// 클러스터 병합 기준 — centroid 간 유사도 (낮게)
-    private let mergeThreshold: Float = 0.70
+    private let mergeThreshold: Float = 0.74
 
     /// 병합 후 내부 유사도 검증 기준 (중간)
     private let minimumInternalSimilarity: Float = 0.78

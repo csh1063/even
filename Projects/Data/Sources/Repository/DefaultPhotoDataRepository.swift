@@ -44,6 +44,44 @@ public final class DefaultPhotoDataRepository: PhotoDataRepository {
         try context.save()
     }
 
+    // 라이브러리 전체를 분석 전에 한 번에 저장할 때 사용 — 사진마다 context/save를 새로 만들지 않고
+    // 기존 id를 한 번에 조회한 뒤 하나의 context에 모아 insert, 일정 개수마다만 save 커밋한다.
+    public func saveAllPhotosBase(_ photos: [Photo]) throws {
+        guard !photos.isEmpty else { return }
+
+        let context = ModelContext(container)
+        let existingIds = Set(try context.fetch(FetchDescriptor<PhotoEntity>()).map { $0.localIdentifier })
+
+        let batchSize = 500
+        var pendingCount = 0
+
+        for photo in photos where !existingIds.contains(photo.localIdentifier) {
+            let entity = PhotoEntity(
+                id: photo.id,
+                localIdentifier: photo.localIdentifier,
+                createdAt: photo.createdAt,
+                latitude: photo.latitude,
+                longitude: photo.longitude,
+                isoCountryCode: photo.isoCountryCode,
+                address: photo.address,
+                addressEn: photo.addressEn,
+                year: photo.year,
+                month: photo.month
+            )
+            context.insert(entity)
+            pendingCount += 1
+
+            if pendingCount >= batchSize {
+                try context.save()
+                pendingCount = 0
+            }
+        }
+
+        if pendingCount > 0 {
+            try context.save()
+        }
+    }
+
     public func saveAndUpdateLabels(photo: Photo, labels: [PhotoLabel]) async throws {
         try await Task.detached(priority: .high) { [container] in
             let context = ModelContext(container)
@@ -180,8 +218,10 @@ public final class DefaultPhotoDataRepository: PhotoDataRepository {
 
     public func fetchLocationUnanalyzed() throws -> [Photo] {
         let context = ModelContext(container)
+        // 라벨/얼굴 분석(analyzedAt)과 주소 변환이 이제 동시에 진행되므로, 라벨 분석 완료 여부가 아니라
+        // 기본 정보 저장 단계(saveAllPhotosBase)에서 채워지는 latitude 유무로 대상 사진을 판단한다.
         let fetchDescriptor = FetchDescriptor<PhotoEntity>(
-            predicate: #Predicate { $0.analyzedAt != nil && $0.isoCountryCode == nil }
+            predicate: #Predicate { $0.latitude != nil && $0.isoCountryCode == nil }
         )
         return try context.fetch(fetchDescriptor).map { $0.toDomain() }
     }
@@ -219,6 +259,54 @@ public final class DefaultPhotoDataRepository: PhotoDataRepository {
             predicate: #Predicate { $0.analyzedAt == nil }
         )
         return try context.fetch(fetchDescriptor).map { $0.toDomain() }
+    }
+
+    // 날짜/주소/카테고리 앨범 분류를 아직 거치지 않은 사진만 limit개씩 반환.
+    // 반환된 사진은 markAlbumsGenerated로 표시해야 다음 호출에서 다시 나오지 않는다 (offset이 아니라 항상 "맨 앞 남은 것"을 가져옴).
+    public func fetchAlbumUnclassified(limit: Int) throws -> [Photo] {
+        let context = ModelContext(container)
+        var fetchDescriptor = FetchDescriptor<PhotoEntity>(
+            predicate: #Predicate { $0.albumsGeneratedAt == nil }
+        )
+        fetchDescriptor.fetchLimit = limit
+        return try context.fetch(fetchDescriptor).map { $0.toDomainAll() }
+    }
+
+    public func markAlbumsGenerated(identifiers: [String]) throws {
+        guard !identifiers.isEmpty else { return }
+        let context = ModelContext(container)
+        let idSet = Set(identifiers)
+        let fetchDescriptor = FetchDescriptor<PhotoEntity>(
+            predicate: #Predicate { idSet.contains($0.localIdentifier) }
+        )
+        let now = Date()
+        for entity in try context.fetch(fetchDescriptor) {
+            entity.albumsGeneratedAt = now
+        }
+        try context.save()
+    }
+
+    // 비슷한사진 비교를 아직 거치지 않은 "새 사진" 전체 (시간 윈도우 이웃을 찾으려면 전체 목록이 필요해서 페이지네이션하지 않음)
+    public func fetchSimilarUnchecked() throws -> [Photo] {
+        let context = ModelContext(container)
+        let fetchDescriptor = FetchDescriptor<PhotoEntity>(
+            predicate: #Predicate { $0.similarCheckedAt == nil }
+        )
+        return try context.fetch(fetchDescriptor).map { $0.toDomain() }
+    }
+
+    public func markSimilarChecked(identifiers: [String]) throws {
+        guard !identifiers.isEmpty else { return }
+        let context = ModelContext(container)
+        let idSet = Set(identifiers)
+        let fetchDescriptor = FetchDescriptor<PhotoEntity>(
+            predicate: #Predicate { idSet.contains($0.localIdentifier) }
+        )
+        let now = Date()
+        for entity in try context.fetch(fetchDescriptor) {
+            entity.similarCheckedAt = now
+        }
+        try context.save()
     }
 
     public func delete(identifier: String) throws {

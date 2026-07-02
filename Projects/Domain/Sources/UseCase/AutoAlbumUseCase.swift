@@ -10,7 +10,11 @@ import CoreLocation
 import Foundation
 
 public protocol AutoAlbumUseCase {
-    func execute(_ isPhoto: Bool) -> AsyncThrowingStream<ProgressAlbum, Error>
+    func generateAllAlbums() -> AsyncThrowingStream<ProgressAlbum, Error>
+    func createDateAlbums() async throws
+    func createLocationAlbums() async throws
+    func createCategoryAlbums() async throws
+    func createFaceAlbums() async throws
     func createTravelAutoAlbum() -> AsyncThrowingStream<ProgressAlbum, Error>
     func createSimilarAlbum() async throws
     func syncPhotoCount() async throws
@@ -33,9 +37,6 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
     private let gridSize: Double = 50                               // 10km
     private let maxHomeZones: Int = 5
 
-    // 앨범 생성 최소 비율
-    private let threshold: Double = 0.05
-
     private let administrativeAreaReplacements: [String: String] = [
         "전북특별자치도": "전라북도",
         "강원특별자치도": "강원도",
@@ -52,6 +53,9 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
     private let suffixesForOverseas = [
         "부", "SAR", "특별행정구", "현"
     ]
+
+    // 날짜/주소/카테고리 분류 시 페이지 단위로 끊어서 처리 (전체를 한 번에 메모리에 올리면 사진이 많을 때 오래 걸림)
+    private let classificationPageSize = 300
 
     public init(
         photoDataRepository: PhotoDataRepository,
@@ -73,179 +77,34 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
         self.similarRepository = similarRepository
     }
 
-    public func execute(_ isPhoto: Bool) -> AsyncThrowingStream<ProgressAlbum, Error> {
+    // MARK: - 통합 파이프라인
+
+    /// 새로 분석된 사진만 대상으로 (날짜+주소+카테고리) → 얼굴 → 여행 → 비슷한사진 순으로 앨범을 갱신한다.
+    /// 날짜/주소/카테고리는 아직 분류되지 않은 사진만, 비슷한사진은 시간 윈도우 안에서만 증분 처리한다.
+    public func generateAllAlbums() -> AsyncThrowingStream<ProgressAlbum, Error> {
         AsyncThrowingStream { continuation in
             Task {
                 do {
-                    let photoCount = try photoDataRepository.fetchPhotoCount()
-                    let countPerPage = 300
-                    var page = 0
+                    let totalSteps = 4.0
 
-                    let ruleCategories: [String: AlbumRule] = try await photoCategoryRepository.fetchRuleCategories()
+                    try await classifyNewPhotosCore()
+                    continuation.yield(ProgressAlbum(step: .creatingAlbums, ratio: 1 / totalSteps))
 
-                    var albums: [Album] = try albumDataRepository.fetchAutoAll()
-                    var albumPhotoMap: [UUID: [String]] = [:]
+                    try await createFaceAlbumsCore()
+                    continuation.yield(ProgressAlbum(step: .creatingAlbums, ratio: 2 / totalSteps))
 
-                    var allPhotos: [Photo] = []
+                    try await createTravelAlbumsCore()
+                    continuation.yield(ProgressAlbum(step: .creatingAlbums, ratio: 3 / totalSteps))
 
-                    while true {
-
-                        print("start load page: ", page)
-                        let photos = try photoDataRepository.fetchAll(page: page, pageSize: countPerPage)
-                        print("end load page: ", page)
-                        if photos.isEmpty { break }
-
-                        allPhotos.append(contentsOf: photos)
-
-                        var yearCount: [String: Int] = [:]
-                        var addressCount: [String: [String]] = [:]
-
-                        photos.map { ($0.year, $0.address) }.enumerated().forEach { [weak self] (_, item) in
-
-                            let (year, address) = item
-                            if let year, isPhoto {
-                                yearCount[year, default: 0] += 1
-                            }
-                            if let address, !isPhoto {
-                                if let (key, addressText) = self?.addressKeyValue(address) {
-
-                                    if !addressText.isEmpty && !addressCount[key, default: []].contains(addressText) {
-                                        addressCount[key, default: []].append(addressText)
-                                    }
-                                }
-                            }
-                        }
-                        print("yearCount: ", yearCount)
-                        print("addressCount: ", addressCount)
-
-                        if isPhoto {
-                            // MARK: - 라벨로 사진 분류
-                            print("라벨로 사진 분류")
-
-                            for (albumName, rule) in ruleCategories {
-                                let matchedPhotos = photos.filter { matchesRule($0, rule: rule) }
-                                guard !matchedPhotos.isEmpty else { continue }
-
-                                let album = Album(
-                                    name: albumName,
-                                    displayName: albumName,
-                                    isAuto: true,
-                                    photoCount: 0,
-                                    from: "category"
-                                )
-                                if let savedAlbum = try albumDataRepository.saveAlbum(album: album) {
-                                    albums.append(savedAlbum)
-                                }
-                            }
-
-                            // MARK: - 년도로 사진 분류
-                            print("년도로 사진 분류")
-                            for (year, _) in yearCount {
-                                let album = Album(
-                                    name: year,
-                                    displayName: "\(year)",
-                                    isAuto: true,
-                                    keywords: ["\(year)", "\(year)년"],
-                                    photoCount: 0,
-                                    from: "date"
-                                )
-                                if let savedAlbum = try albumDataRepository.saveAlbum(album: album) {
-                                    albums.append(savedAlbum)
-                                }
-                            }
-                        }
-
-                        if !isPhoto {
-                            // MARK: - 주소로 사진 분류
-                            print("주소로 사진 분류")
-                            for (address, areas) in addressCount {
-                                print("address: ", address, ", areas:", areas)
-                                let album = Album(
-                                    name: address,
-                                    displayName: address,
-                                    isAuto: true,
-                                    keywords: areas,
-                                    photoCount: 0,
-                                    from: "location"
-                                )
-                                if let savedAlbum = try albumDataRepository.saveAlbum(album: album) {
-                                    albums.append(savedAlbum)
-                                }
-                            }
-                        }
-
-                        // ============================================================================
-
-                        // 앨범 별로 한번에 추가
-                        for album in albums {
-                            let matchedIdentifiers: [String]
-
-                            switch album.from {
-                            case "category":
-                                guard let rule = ruleCategories[album.name] else { continue }
-                                matchedIdentifiers = photos
-                                    .filter { matchesRule($0, rule: rule) }
-                                    .map { $0.localIdentifier }
-
-                            case "date":
-                                matchedIdentifiers = photos
-                                    .filter { album.keywords.contains($0.year ?? "") }
-                                    .map { $0.localIdentifier }
-
-                            case "location":
-                                matchedIdentifiers = photos
-                                    .filter { [weak self] in
-                                        if let address = $0.address, let (_, addressText) = self?.addressKeyValue(address) {
-                                            return album.keywords.contains(addressText)
-                                        }
-                                        return false
-                                    }
-                                    .map { $0.localIdentifier }
-                            default:
-                                continue
-                            }
-
-                            albumPhotoMap[album.id, default: []].append(contentsOf: matchedIdentifiers)
-                        }
-
-                        let ratio = Double(page) / (Double(photoCount) / Double(countPerPage)) * 4.0 / 5.0
-                        print("analyzing ratio:", ratio)
-                        continuation.yield(ProgressAlbum(step: .analyzing, ratio: ratio))
-                        page += 1
+                    try await updateSimilarAlbumsIncrementalCore { ratio in
+                        continuation.yield(ProgressAlbum(step: .creatingAlbums, ratio: 3 / totalSteps + ratio * (1 / totalSteps)))
                     }
-
-                    for (index, (albumId, photos)) in albumPhotoMap.enumerated() {
-                        print("album: \(albumId), addPhoto count:", photos.count)
-                        try albumDataRepository.addPhotos(
-                            albumId: albumId,
-                            photoIdentifiers: photos
-                        )
-
-                        let ratio = (Double(index) / Double(albumPhotoMap.count)) * 1.0 / 5.0 + 0.8
-                        print("classifying ratio:", ratio)
-                        continuation.yield(ProgressAlbum(step: .classifying, ratio: ratio))
-                    }
-
-                    // MARK: - 얼굴 클러스터링으로 사람 앨범 생성
-//                    if isPhoto {
-//                        print("얼굴 클러스터링 시작")
-//                        try await faceClusterRepository.clusterAndSaveAlbums()
-//                    }
-
-                    // MARK: - 비슷한 사진 찾기
-                    if isPhoto {
-                        print("비슷한 사진 찾기")
-                        let similarAlbum = albums.filter { $0.from == "similar" }
-                        try await similarRepository.clusterAndSaveAlbums(photos: allPhotos, existingAlbums: similarAlbum)
-                    }
+                    continuation.yield(ProgressAlbum(step: .creatingAlbums, ratio: 1.0))
 
                     try albumDataRepository.syncAlbums()
+                    try await userDefaultRepository.saveAnalyzedDate()
+                    try await userDefaultRepository.saveLocationAnalyzedDate()
 
-                    if isPhoto {
-                        try await userDefaultRepository.saveAnalyzedDate()
-                    } else {
-                        try await userDefaultRepository.saveLocationAnalyzedDate()
-                    }
                     continuation.yield(ProgressAlbum(step: .completed, ratio: 1.0))
                     continuation.finish()
                 } catch {
@@ -255,87 +114,45 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
         }
     }
 
-    public func createSimilarAlbum() async throws {
+    // MARK: - 앨범 타입별 단독 재생성 (테스트/개별 재생성용)
 
-        try self.albumDataRepository.deleteAutoAlbums(by: "similar")
-
-        let allPhotos = try photoDataRepository.fetchPhotos()
-        let similarAlbum = try albumDataRepository.fetchAll(from: "similar")
-
-        print("비슷한 사진 찾기")
-//        let similarAlbum = albums.filter { $0.from == "similar" }
-        try await similarRepository.clusterAndSaveAlbums(photos: allPhotos, existingAlbums: similarAlbum)
-
+    public func createDateAlbums() async throws {
+        try createDateAlbumsCore()
         try albumDataRepository.syncAlbums()
     }
 
-    public func createTravelAutoAlbum() -> AsyncThrowingStream<ProgressAlbum, Error> {
+    public func createLocationAlbums() async throws {
+        try createLocationAlbumsCore()
+        try albumDataRepository.syncAlbums()
+    }
 
+    public func createCategoryAlbums() async throws {
+        try await createCategoryAlbumsCore()
+        try albumDataRepository.syncAlbums()
+    }
+
+    public func createFaceAlbums() async throws {
+        try await createFaceAlbumsCore()
+        try albumDataRepository.syncAlbums()
+    }
+
+    public func createSimilarAlbum() async throws {
+        let allPhotos = try photoDataRepository.fetchPhotos()
+        try await createSimilarAlbumsCore(from: allPhotos)
+    }
+
+    public func createTravelAutoAlbum() -> AsyncThrowingStream<ProgressAlbum, Error> {
         AsyncThrowingStream { continuation in
             Task {
                 do {
-                    try self.albumDataRepository.deleteAutoAlbums(by: "travel")
-
-                    let allPhotosForTravel = try photoDataRepository.fetchHasCoordinators()
-                        .map { PhotoLocationSnapshot(from: $0) }
-
-                    // 홈존 만들기
-                    try analyze(from: allPhotosForTravel)
-
-                    let homeZones = try fetchHomeZones()
-                    for home in homeZones {
-                        print("홈존", home.latitude, home.longitude)
-                    }
-
-                    print("여행 앨범 생성")
-                    let clusters = try await travelRepository.detect(from: allPhotosForTravel, homeZones: homeZones)
-
-                    print("clusters count", clusters.count)
-                    var placeCounts: [String: Int] = [:]
-
-                    for cluster in clusters {
-                        let place = cleanAreaName(cluster.address, isoCode: cluster.isoCountryCode)
-
-                        // 2. 해당 지역의 현재 카운트를 가져오고, 없으면 0부터 시작
-                        let currentCount = placeCounts[place, default: 0]
-                        let albumName = "\(place) \(currentCount)"
-
-                        // 3. 다음 카운트를 위해 1을 더해줌
-                        placeCounts[place] = currentCount + 1
-
-                        let displayName = "\(place) 여행"
-
-                        print("clusters \(albumName)/\(displayName), start:", cluster.startDate, ", end:", cluster.endDate)
-                        let album = Album(
-                            name: albumName,
-                            displayName: displayName,
-                            isAuto: true,
-                            coverPhotoIdentifier: cluster.photos.first?.localIdentifier,
-                            photoCount: cluster.photos.count,
-                            from: "travel"
-                        )
-                        if let saved = try albumDataRepository.saveAlbum(
-                            album: album,
-                            returnExist: true
-                        ) {
-                            let identifiers = cluster.photos.map { $0.localIdentifier }
-                            try albumDataRepository.addPhotos(
-                                albumId: saved.id,
-                                photoIdentifiers: identifiers
-                            )
-                        }
-                    }
-
-                    try albumDataRepository.syncAlbums()
-
-                    continuation.yield(ProgressAlbum(step: .completed, ratio: 1))
+                    try await createTravelAlbumsCore()
+                    continuation.yield(ProgressAlbum(step: .completed, ratio: 1.0))
                     continuation.finish()
                 } catch {
                     continuation.finish(throwing: error)
                 }
             }
         }
-
     }
 
     public func syncPhotoCount() async throws {
@@ -351,15 +168,324 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
         try self.albumDataRepository.deleteAutoAlbums()
     }
 
-    // MARK: - 여행 관련 함수
-    // 홈존 분석 필요 여부 체크 후 실행
-    private func analyzeIfNeeded(from photos: [PhotoLocationSnapshot]) throws {
-        let existing = try homeZoneRepository.fetchHomeZones()
-        if let last = existing.first, Date().timeIntervalSince(last.analyzedAt) < reanalyzePeriod {
-            return  // 3개월 이내면 스킵
+    // MARK: - 앨범 생성 코어 로직
+
+    // 라벨이 필요 없는 분류(날짜/주소)는 라벨을 실어오지 않는 가벼운 fetchPhotos로 페이지 단위 처리
+    private func createDateAlbumsCore() throws {
+        var albums = try albumDataRepository.fetchAll(from: "date")
+        var albumPhotoMap: [UUID: [String]] = [:]
+        var page = 0
+
+        while true {
+            let photos = try photoDataRepository.fetchPhotos(page: page, pageSize: classificationPageSize)
+            if photos.isEmpty { break }
+
+            let years = Set(photos.compactMap { $0.year })
+            for year in years {
+                let album = Album(
+                    name: year,
+                    displayName: "\(year)",
+                    isAuto: true,
+                    keywords: ["\(year)", "\(year)년"],
+                    photoCount: 0,
+                    from: "date"
+                )
+                if let saved = try albumDataRepository.saveAlbum(album: album) {
+                    albums.append(saved)
+                }
+            }
+
+            for album in albums {
+                let matchedIdentifiers = photos
+                    .filter { album.keywords.contains($0.year ?? "") }
+                    .map { $0.localIdentifier }
+                albumPhotoMap[album.id, default: []].append(contentsOf: matchedIdentifiers)
+            }
+
+            page += 1
         }
-        try analyze(from: photos)
+
+        for (albumId, photoIdentifiers) in albumPhotoMap {
+            try albumDataRepository.addPhotos(albumId: albumId, photoIdentifiers: photoIdentifiers)
+        }
     }
+
+    private func createLocationAlbumsCore() throws {
+        var albums = try albumDataRepository.fetchAll(from: "location")
+        var albumPhotoMap: [UUID: [String]] = [:]
+        var page = 0
+
+        while true {
+            let photos = try photoDataRepository.fetchPhotos(page: page, pageSize: classificationPageSize)
+            if photos.isEmpty { break }
+
+            var addressCount: [String: [String]] = [:]
+            for photo in photos {
+                guard let address = photo.address, let (key, addressText) = addressKeyValue(address) else { continue }
+                if !addressText.isEmpty && !addressCount[key, default: []].contains(addressText) {
+                    addressCount[key, default: []].append(addressText)
+                }
+            }
+
+            for (address, areas) in addressCount {
+                let album = Album(
+                    name: address,
+                    displayName: address,
+                    isAuto: true,
+                    keywords: areas,
+                    photoCount: 0,
+                    from: "location"
+                )
+                if let saved = try albumDataRepository.saveAlbum(album: album) {
+                    albums.append(saved)
+                }
+            }
+
+            for album in albums {
+                let matchedIdentifiers = photos
+                    .filter {
+                        if let address = $0.address, let (_, addressText) = addressKeyValue(address) {
+                            return album.keywords.contains(addressText)
+                        }
+                        return false
+                    }
+                    .map { $0.localIdentifier }
+                albumPhotoMap[album.id, default: []].append(contentsOf: matchedIdentifiers)
+            }
+
+            page += 1
+        }
+
+        for (albumId, photoIdentifiers) in albumPhotoMap {
+            try albumDataRepository.addPhotos(albumId: albumId, photoIdentifiers: photoIdentifiers)
+        }
+    }
+
+    // 카테고리는 라벨이 필요해서 fetchAll(라벨 포함)로 페이지 단위 처리
+    private func createCategoryAlbumsCore() async throws {
+        let ruleCategories: [String: AlbumRule] = try await photoCategoryRepository.fetchRuleCategories()
+        var albums = try albumDataRepository.fetchAll(from: "category")
+        var albumPhotoMap: [UUID: [String]] = [:]
+        var page = 0
+
+        while true {
+            let photos = try photoDataRepository.fetchAll(page: page, pageSize: classificationPageSize)
+            if photos.isEmpty { break }
+
+            for (albumName, rule) in ruleCategories {
+                let matchedPhotos = photos.filter { matchesRule($0, rule: rule) }
+                guard !matchedPhotos.isEmpty else { continue }
+
+                let album = Album(
+                    name: albumName,
+                    displayName: albumName,
+                    isAuto: true,
+                    photoCount: 0,
+                    from: "category"
+                )
+                if let saved = try albumDataRepository.saveAlbum(album: album) {
+                    albums.append(saved)
+                }
+            }
+
+            for album in albums {
+                guard let rule = ruleCategories[album.name] else { continue }
+                let matchedIdentifiers = photos
+                    .filter { matchesRule($0, rule: rule) }
+                    .map { $0.localIdentifier }
+                albumPhotoMap[album.id, default: []].append(contentsOf: matchedIdentifiers)
+            }
+
+            page += 1
+        }
+
+        for (albumId, photoIdentifiers) in albumPhotoMap {
+            try albumDataRepository.addPhotos(albumId: albumId, photoIdentifiers: photoIdentifiers)
+        }
+    }
+
+    // generateAllAlbums()에서만 쓰는 증분 버전 — 아직 date/category/location 분류를 거치지 않은 사진만
+    // fetchAlbumUnclassified로 가져와서 세 종류를 한 번에 처리하고, 처리한 사진은 markAlbumsGenerated로 표시한다.
+    // (재생성 테스트 버튼용 createDateAlbums 등은 이 메서드를 쓰지 않고 위의 전체 재계산 버전을 그대로 사용한다.)
+    private func classifyNewPhotosCore() async throws {
+        let ruleCategories: [String: AlbumRule] = try await photoCategoryRepository.fetchRuleCategories()
+
+        var dateAlbums = try albumDataRepository.fetchAll(from: "date")
+        var locationAlbums = try albumDataRepository.fetchAll(from: "location")
+        var categoryAlbums = try albumDataRepository.fetchAll(from: "category")
+
+        var dateAlbumPhotoMap: [UUID: [String]] = [:]
+        var locationAlbumPhotoMap: [UUID: [String]] = [:]
+        var categoryAlbumPhotoMap: [UUID: [String]] = [:]
+
+        while true {
+            let photos = try photoDataRepository.fetchAlbumUnclassified(limit: classificationPageSize)
+            if photos.isEmpty { break }
+
+            // 날짜
+            let years = Set(photos.compactMap { $0.year })
+            for year in years {
+                let album = Album(
+                    name: year,
+                    displayName: "\(year)",
+                    isAuto: true,
+                    keywords: ["\(year)", "\(year)년"],
+                    photoCount: 0,
+                    from: "date"
+                )
+                if let saved = try albumDataRepository.saveAlbum(album: album) {
+                    dateAlbums.append(saved)
+                }
+            }
+            for album in dateAlbums {
+                let matched = photos
+                    .filter { album.keywords.contains($0.year ?? "") }
+                    .map { $0.localIdentifier }
+                guard !matched.isEmpty else { continue }
+                dateAlbumPhotoMap[album.id, default: []].append(contentsOf: matched)
+            }
+
+            // 주소
+            var addressCount: [String: [String]] = [:]
+            for photo in photos {
+                guard let address = photo.address, let (key, addressText) = addressKeyValue(address) else { continue }
+                if !addressText.isEmpty && !addressCount[key, default: []].contains(addressText) {
+                    addressCount[key, default: []].append(addressText)
+                }
+            }
+            for (address, areas) in addressCount {
+                let album = Album(
+                    name: address,
+                    displayName: address,
+                    isAuto: true,
+                    keywords: areas,
+                    photoCount: 0,
+                    from: "location"
+                )
+                if let saved = try albumDataRepository.saveAlbum(album: album) {
+                    locationAlbums.append(saved)
+                }
+            }
+            for album in locationAlbums {
+                let matched = photos
+                    .filter {
+                        if let address = $0.address, let (_, addressText) = addressKeyValue(address) {
+                            return album.keywords.contains(addressText)
+                        }
+                        return false
+                    }
+                    .map { $0.localIdentifier }
+                guard !matched.isEmpty else { continue }
+                locationAlbumPhotoMap[album.id, default: []].append(contentsOf: matched)
+            }
+
+            // 카테고리
+            for (albumName, rule) in ruleCategories {
+                let matchedPhotos = photos.filter { matchesRule($0, rule: rule) }
+                guard !matchedPhotos.isEmpty else { continue }
+
+                let album = Album(
+                    name: albumName,
+                    displayName: albumName,
+                    isAuto: true,
+                    photoCount: 0,
+                    from: "category"
+                )
+                if let saved = try albumDataRepository.saveAlbum(album: album) {
+                    categoryAlbums.append(saved)
+                }
+            }
+            for album in categoryAlbums {
+                guard let rule = ruleCategories[album.name] else { continue }
+                let matched = photos
+                    .filter { matchesRule($0, rule: rule) }
+                    .map { $0.localIdentifier }
+                guard !matched.isEmpty else { continue }
+                categoryAlbumPhotoMap[album.id, default: []].append(contentsOf: matched)
+            }
+
+            try photoDataRepository.markAlbumsGenerated(identifiers: photos.map { $0.localIdentifier })
+        }
+
+        for (albumId, photoIdentifiers) in dateAlbumPhotoMap {
+            try albumDataRepository.addPhotos(albumId: albumId, photoIdentifiers: photoIdentifiers)
+        }
+        for (albumId, photoIdentifiers) in locationAlbumPhotoMap {
+            try albumDataRepository.addPhotos(albumId: albumId, photoIdentifiers: photoIdentifiers)
+        }
+        for (albumId, photoIdentifiers) in categoryAlbumPhotoMap {
+            try albumDataRepository.addPhotos(albumId: albumId, photoIdentifiers: photoIdentifiers)
+        }
+    }
+
+    private func createFaceAlbumsCore() async throws {
+        try await faceClusterRepository.clusterAndSaveAlbums()
+    }
+
+    private func createTravelAlbumsCore() async throws {
+        try self.albumDataRepository.deleteAutoAlbums(by: "travel")
+
+        let allPhotosForTravel = try photoDataRepository.fetchHasCoordinators()
+            .map { PhotoLocationSnapshot(from: $0) }
+
+        // 홈존 만들기
+        try analyze(from: allPhotosForTravel)
+
+        let homeZones = try fetchHomeZones()
+        let clusters = try await travelRepository.detect(from: allPhotosForTravel, homeZones: homeZones)
+
+        var placeCounts: [String: Int] = [:]
+
+        for cluster in clusters {
+            let place = cleanAreaName(cluster.address, isoCode: cluster.isoCountryCode)
+
+            let currentCount = placeCounts[place, default: 0]
+            let albumName = "\(place) \(currentCount)"
+            placeCounts[place] = currentCount + 1
+
+            let displayName = "\(place) 여행"
+
+            let album = Album(
+                name: albumName,
+                displayName: displayName,
+                isAuto: true,
+                coverPhotoIdentifier: cluster.photos.first?.localIdentifier,
+                photoCount: cluster.photos.count,
+                from: "travel"
+            )
+            if let saved = try albumDataRepository.saveAlbum(album: album, returnExist: true) {
+                let identifiers = cluster.photos.map { $0.localIdentifier }
+                try albumDataRepository.addPhotos(albumId: saved.id, photoIdentifiers: identifiers)
+            }
+        }
+
+        try albumDataRepository.syncAlbums()
+    }
+
+    private func createSimilarAlbumsCore(
+        from photos: [Photo],
+        onProgress: @escaping @Sendable (Double) -> Void = { _ in }
+    ) async throws {
+        try self.albumDataRepository.deleteAutoAlbums(by: "similar")
+        let similarAlbum = try albumDataRepository.fetchAll(from: "similar")
+        try await similarRepository.clusterAndSaveAlbums(photos: photos, existingAlbums: similarAlbum, onProgress: onProgress)
+        try albumDataRepository.syncAlbums()
+    }
+
+    // generateAllAlbums()에서만 쓰는 증분 버전 — 아직 비교하지 않은 새 사진만 시간 윈도우 기준으로 처리하고,
+    // 기존 비슷한사진 앨범은 삭제하지 않는다 (createSimilarAlbum()은 재생성 테스트 버튼용으로 위 전체 재계산 버전을 그대로 씀).
+    private func updateSimilarAlbumsIncrementalCore(
+        onProgress: @escaping @Sendable (Double) -> Void = { _ in }
+    ) async throws {
+        let newPhotos = try photoDataRepository.fetchSimilarUnchecked()
+        guard !newPhotos.isEmpty else { return }
+
+        let allPhotos = try photoDataRepository.fetchPhotos()
+        try await similarRepository.clusterNewPhotos(newPhotos: newPhotos, allPhotos: allPhotos, onProgress: onProgress)
+        try photoDataRepository.markSimilarChecked(identifiers: newPhotos.map { $0.localIdentifier })
+    }
+
+    // MARK: - 여행 관련 함수
 
     // 강제 재분석
     private func analyze(from photos: [PhotoLocationSnapshot]) throws {
@@ -374,10 +500,7 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
             return "\(latKey),\(lngKey)"
         }
 
-//        let average = Double(recent.count) / Double(grid.count)
-
         let zones = grid
-//            .filter { Double($0.value.count) >= average }
             .filter { $0.value.count >= 5 }
             .filter { _, photos in
                 let uniqueWeeks = Set(photos.map {
@@ -405,12 +528,12 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
     }
 
     // MARK: - 장소 관련 함수
+
     private func matchesRule(_ photo: Photo, rule: AlbumRule) -> Bool {
         // 1. 전체 태그 맵 생성 (이름 검색 속도 최적화 및 원본 점수 보존)
         let labelMap = Dictionary(uniqueKeysWithValues: photo.labels.map { ($0.name, $0.confidence) })
 
         // [검증 1] exclude_tags (최소한의 유의미한 점수 이상일 때만 제외 처리를 하는 것이 안전함, 여기선 0.3 기준)
-        // 만약 점수 무관하게 무조건 제외가 기획 의도라면 `labelMap.keys`로 비교하세요.
         let validExcludeTags = photo.labels
             .filter { $0.confidence >= 0.3 } // 노이즈 태그로 인한 억울한 탈락 방지
             .map { $0.name }
@@ -440,11 +563,9 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
 
         // [검증 4] 타입별 매칭 (AND_OR_COMBINED vs OR)
         if rule.type == "AND_OR_COMBINED", let mustHaveList = rule.mustHaveOneOf {
-            // must_have_one_of 중 하나 이상 존재 'AND' match_tags 중 하나 이상 존재
             return !validLabels.isDisjoint(with: Set(mustHaveList))
                 && !validLabels.isDisjoint(with: Set(rule.matchTags))
         } else {
-            // OR 타입: match_tags 중 하나만 있으면 패스
             return !validLabels.isDisjoint(with: Set(rule.matchTags))
         }
     }
@@ -492,12 +613,5 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
             return (key, addressText)
         }
         return nil
-    }
-
-    private func dateFormatter(form: String = "yyyy년 M월 d일") -> DateFormatter {
-        let formatter = DateFormatter()
-        formatter.dateFormat = form
-        formatter.locale = Locale(identifier: "ko_KR")
-        return formatter
     }
 }

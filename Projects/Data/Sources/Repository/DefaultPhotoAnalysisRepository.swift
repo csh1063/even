@@ -70,15 +70,15 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
 
                                         labels = try await self.analysisService.analyze(image: image)
 
-//                                        if labels.contains(where: { $0.name == "people" }) {
-//                                            if labels.contains(where: { /*$0.name == "eyeglasses" ||*/ $0.name ==  "sunglasses" || $0.name == "goggles" }) {
-//                                                embedding = await self.faceEmbeddingService.extractEmbeddings(from: image, hasGlass: true)
-//                                            } else {
-//                                                embedding = await self.faceEmbeddingService.extractEmbeddings(from: image)
-//                                            }
-//                                        } else {
+                                        if labels.contains(where: { $0.name == "people" }) {
+                                            if labels.contains(where: { $0.name ==  "sunglasses" || $0.name == "goggles" }) {
+                                                embedding = await self.faceEmbeddingService.extractEmbeddings(from: image, hasGlass: true)
+                                            } else {
+                                                embedding = await self.faceEmbeddingService.extractEmbeddings(from: image)
+                                            }
+                                        } else {
                                             embedding = []
-//                                        }
+                                        }
                                     } else {
                                         labels = []
                                         embedding = []

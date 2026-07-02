@@ -33,11 +33,6 @@ final class TabbarCoordinator: BaseCoordinator {
             switch type {
             case .progressSheet(let progress):
                 self?.showAnalysisSheet(progress: progress)
-            case .locationProgressSheet(let progress):
-                AnalysisProgressManager.shared.show(
-                    locationProgress: progress.locationProgress,
-                    albumProgress: progress.locationAlbumProgress
-                )
             }
         }
 
@@ -96,12 +91,6 @@ final class TabbarCoordinator: BaseCoordinator {
         if let presentation = sheet.sheetPresentationController {
             presentation.detents = [.medium()]
             presentation.preferredCornerRadius = 28
-        }
-        sheet.onEnd = {
-            AnalysisProgressManager.shared.show(
-                locationProgress: progress.locationProgress,
-                albumProgress: progress.locationAlbumProgress
-            )
         }
 
         tabbarViewController?.present(sheet, animated: true)

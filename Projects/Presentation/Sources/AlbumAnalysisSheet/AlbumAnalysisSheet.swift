@@ -13,7 +13,6 @@ import Combine
 final class AlbumAnalysisSheet: UIViewController {
 
     var progress: AnalyzeProgress
-    var onEnd: (() -> Void)?
 
     private let grabberView: UIView = {
         let view = UIView()
@@ -48,7 +47,7 @@ final class AlbumAnalysisSheet: UIViewController {
 
     private let subtitleLabel: UILabel = {
         let label = UILabel()
-        label.text = "사진을 분석하고 관련 사진끼리 앨범을 만들고 있어요"
+        label.text = "사진과 얼굴, 위치를 분석하고 관련 사진끼리 앨범을 만들고 있어요\n완료될 때까지 조금만 기다려주세요"
         label.font = .systemFont(ofSize: 14, weight: .regular)
         label.textColor = Theme.textSecondary
         label.textAlignment = .center
@@ -58,29 +57,6 @@ final class AlbumAnalysisSheet: UIViewController {
 
     private let photoRow = ProgressRow(icon: "photo.badge.plus", title: "사진 분석 중")
     private let albumRow = ProgressRow(icon: "square.stack.3d.up.fill", title: "앨범 생성 중")
-
-    private let locationNoteView: UIView = {
-        let view = UIView()
-        view.backgroundColor = Theme.surfaceCool
-        view.layer.cornerRadius = 14
-        return view
-    }()
-
-    private let locationIcon: UIImageView = {
-        let imageView = UIImageView(image: UIImage(systemName: "location.fill.viewfinder"))
-        imageView.tintColor = Theme.secondary
-        imageView.contentMode = .scaleAspectFit
-        return imageView
-    }()
-
-    private let locationLabel: UILabel = {
-        let label = UILabel()
-        label.text = "이후 사진의 좌표 분석은 백그라운드에서 계속 진행돼요"
-        label.font = .systemFont(ofSize: 13, weight: .medium)
-        label.textColor = Theme.textSecondary
-        label.numberOfLines = 0
-        return label
-    }()
 
     private let progressPublisher: AnyPublisher<Double, Never>
     private let albumProgressPublisher: AnyPublisher<Double, Never>
@@ -122,22 +98,6 @@ final class AlbumAnalysisSheet: UIViewController {
             make.center.equalTo(circleBackground)
         }
 
-        // Location note
-        locationNoteView.addSubview(locationIcon)
-        locationNoteView.addSubview(locationLabel)
-
-        locationIcon.snp.makeConstraints { make in
-            make.leading.equalTo(locationNoteView).offset(14)
-            make.centerY.equalTo(locationNoteView)
-            make.width.height.equalTo(18)
-        }
-
-        locationLabel.snp.makeConstraints { make in
-            make.leading.equalTo(locationIcon.snp.trailing).offset(8)
-            make.trailing.equalTo(locationNoteView).offset(-14)
-            make.top.bottom.equalTo(locationNoteView).inset(10)
-        }
-
         // Text stack
         let textStack = UIStackView(arrangedSubviews: [titleLabel, subtitleLabel])
         textStack.axis = .vertical
@@ -152,8 +112,7 @@ final class AlbumAnalysisSheet: UIViewController {
         let mainStack = UIStackView(arrangedSubviews: [
             circleBackground,
             textStack,
-            rowStack,
-            locationNoteView
+            rowStack
         ])
         mainStack.axis = .vertical
         mainStack.spacing = 18
@@ -179,10 +138,6 @@ final class AlbumAnalysisSheet: UIViewController {
             make.leading.trailing.equalTo(view).inset(20)
         }
 
-        locationNoteView.snp.makeConstraints { make in
-            make.leading.trailing.equalTo(mainStack)
-        }
-
         rowStack.snp.makeConstraints { make in
             make.leading.trailing.equalTo(mainStack)
         }
@@ -196,7 +151,6 @@ final class AlbumAnalysisSheet: UIViewController {
         progressPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] progress in
-                print("progressPublisher \(progress)")
                 self?.photoRow.updateProgress(progress)
             }
             .store(in: &cancellables)
@@ -204,7 +158,6 @@ final class AlbumAnalysisSheet: UIViewController {
         albumProgressPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] progress in
-                print("albumProgressPublisher \(progress)")
                 self?.albumRow.updateProgress(progress)
                 if progress >= 1.0 {
                     self?.endPage()
@@ -214,7 +167,6 @@ final class AlbumAnalysisSheet: UIViewController {
     }
 
     private func endPage() {
-        self.onEnd?()
         self.dismiss(animated: true)
     }
 }
