@@ -420,6 +420,7 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
 
     private func createFaceAlbumsCore() async throws {
         try await faceClusterRepository.clusterAndSaveAlbums()
+        try albumDataRepository.syncAlbums()
     }
 
     private func createTravelAlbumsCore() async throws {

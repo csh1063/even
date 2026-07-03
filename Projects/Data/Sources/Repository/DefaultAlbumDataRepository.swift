@@ -113,6 +113,29 @@ public final class DefaultAlbumDataRepository: AlbumDataRepository {
         return photos.map { $0.toDomain() }
     }
 
+    /// 얼굴 앨범 디버깅용: 이 클러스터에 묶인 얼굴들의 사진별 boundingBox (정규화 좌표, Vision 기준 원점 좌하단)
+    public func fetchFaceBoundingBoxes(clusterId: String) throws -> [String: CGRect] {
+
+        let context = ModelContext(container)
+        let fetchDescriptor = FetchDescriptor<FaceEmbeddingEntity>(
+            predicate: #Predicate { $0.clusterId == clusterId }
+        )
+
+        let entities = try context.fetch(fetchDescriptor)
+
+        var result: [String: CGRect] = [:]
+        for entity in entities {
+            guard let localIdentifier = entity.photo?.localIdentifier else { continue }
+            result[localIdentifier] = CGRect(
+                x: entity.boundingBoxX,
+                y: entity.boundingBoxY,
+                width: entity.boundingBoxWidth,
+                height: entity.boundingBoxHeight
+            )
+        }
+        return result
+    }
+
     public func updateAlbum(album: Album) throws {
 
         let context = ModelContext(container)

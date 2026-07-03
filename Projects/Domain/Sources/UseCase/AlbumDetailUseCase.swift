@@ -10,6 +10,7 @@ import Foundation
 
 public protocol AlbumDetailUseCase {
     func fetchPhotos(by albumId: UUID) async throws -> [Photo]
+    func fetchFaceBoundingBoxes(clusterId: String) async throws -> [String: CGRect]
     func editAlbumName(new name: String, id: UUID) async throws
     func deleteAlbum(_ id: UUID) async throws
     func deletePhotos(_ photoIds: [String], albumId: UUID, deleteInLibrary: Bool) async throws
@@ -28,6 +29,10 @@ public final class DefaultAlbumDetailUseCase: AlbumDetailUseCase {
 
     public func fetchPhotos(by albumId: UUID) async throws -> [Photo] {
         try repository.fetchPhotos(by: albumId)
+    }
+
+    public func fetchFaceBoundingBoxes(clusterId: String) async throws -> [String: CGRect] {
+        try repository.fetchFaceBoundingBoxes(clusterId: clusterId)
     }
 
     public func editAlbumName(new name: String, id: UUID) async throws {

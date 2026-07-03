@@ -16,7 +16,7 @@ public final class FaceClusterService {
     // MARK: - Parameters
 
     /// DBSCAN 이웃 판단 기준
-    private let similarityThreshold: Float = 0.80
+    private let similarityThreshold: Float = 0.90
 
     /// 코어 포인트 최소 이웃 수
     private let minPts: Int = 3
@@ -25,13 +25,13 @@ public final class FaceClusterService {
     private let minimumClusterSize: Int = 3
 
     /// 개별 클러스터 품질 기준 — 이 미만이면 짜투리로 판단하여 버림
-    private let minimumClusterQuality: Float = 0.76
+    private let minimumClusterQuality: Float = 0.88
 
-    /// 클러스터 병합 기준 — centroid 간 유사도 (낮게)
-    private let mergeThreshold: Float = 0.74
+    /// 클러스터 병합 기준 — centroid 간 유사도 (DBSCAN 기준보다 낮으면 다른 사람을 다시 합쳐버리는 역효과가 남)
+    private let mergeThreshold: Float = 0.88
 
-    /// 병합 후 내부 유사도 검증 기준 (중간)
-    private let minimumInternalSimilarity: Float = 0.78
+    /// 병합 후 내부 유사도 검증 기준
+    private let minimumInternalSimilarity: Float = 0.88
 
     private let libraryService: PhotoLibraryService
     public init(libraryService: PhotoLibraryService) {
@@ -222,7 +222,9 @@ public final class FaceClusterService {
         similarityMatrix: [Float]
     ) -> [[Int]] {
         let m = clusterIndices.count
-        guard m > 1 else { return clusterIndices }
+        guard m > 1 else {
+            return clusterIndices.map { removeOutliers(indices: $0, n: n, similarityMatrix: similarityMatrix) }
+        }
 
         let dim = embeddings[0].embedding.count
 
@@ -297,13 +299,13 @@ public final class FaceClusterService {
             print("🔀 클러스터 병합 (centroid 유사도: \(String(format: "%.4f", pair.sim)))")
         }
 
-        // 4. 결과 그룹핑
+        // 4. 결과 그룹핑 — 병합 중 걸러진 이상치를 최종 결과에도 실제로 반영
         var merged: [Int: [Int]] = [:]
         for i in 0..<m {
             merged[find(i), default: []].append(contentsOf: clusterIndices[i])
         }
 
-        return Array(merged.values)
+        return merged.values.map { removeOutliers(indices: $0, n: n, similarityMatrix: similarityMatrix) }
     }
 
     // MARK: - 품질 검증

@@ -154,7 +154,9 @@ final class AlbumDetailViewController: BaseViewController {
             .receive(on: DispatchQueue.main)
             .map { [weak self] photos -> [PhotoCellItemViewModel] in
                 guard let self else { return [] }
-                return photos.map { PhotoCellItemViewModel(localIdentifier: $0.localIdentifier, imageLoader: self.viewModel) }
+                // 얼굴 크롭 디버깅용 로더는 FaceAlbumImageLoader(viewModel: self.viewModel)로 잠깐 바꿔서 테스트 가능
+                let imageLoader: any ImageLoadable = self.viewModel
+                return photos.map { PhotoCellItemViewModel(localIdentifier: $0.localIdentifier, imageLoader: imageLoader) }
             }
             .sink { [weak self] photos in self?.applySnapshot(with: photos) }
             .store(in: &cancellables)

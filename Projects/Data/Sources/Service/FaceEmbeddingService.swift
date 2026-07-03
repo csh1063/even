@@ -91,6 +91,11 @@ public actor FaceEmbeddingService {
             return nil
         }
 
+        if isBabyFace(in: cropped) {
+            print("👶 아기 얼굴 감지 → 클러스터링 제외")
+            return nil
+        }
+
         let hasGlasses = hasGlasses(in: cropped)
         if hasGlasses {
             print("🕶️ 안경 감지 → 클러스터링 제외")
@@ -114,6 +119,11 @@ public actor FaceEmbeddingService {
 
     func extractEmbeddingWithGlass(from image: CGImage, observation: VNFaceObservation) -> FaceEmbedding? {
         guard let cropped = cropFace(from: image, boundingBox: observation.boundingBox) else {
+            return nil
+        }
+
+        if isBabyFace(in: cropped) {
+            print("👶 아기 얼굴 감지 → 클러스터링 제외")
             return nil
         }
 
@@ -305,6 +315,23 @@ public actor FaceEmbeddingService {
 
         return request.results?.contains {
             glassesIdentifiers.contains($0.identifier) && $0.confidence >= 0.25
+        } ?? false
+    }
+
+    private func isBabyFace(in image: CGImage) -> Bool {
+        let request = VNClassifyImageRequest()
+        let handler = VNImageRequestHandler(cgImage: image, options: [:])
+
+        do {
+            try handler.perform([request])
+        } catch {
+            return false
+        }
+
+        let babyIdentifiers: Set<String> = ["baby"]
+
+        return request.results?.contains {
+            babyIdentifiers.contains($0.identifier) && $0.confidence >= 0.25
         } ?? false
     }
 

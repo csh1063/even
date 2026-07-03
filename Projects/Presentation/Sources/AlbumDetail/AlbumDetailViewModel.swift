@@ -58,6 +58,10 @@ public final class AlbumDetailViewModel: BaseViewModel {
     private let detailUseCase: AlbumDetailUseCase
     private var cancellables = Set<AnyCancellable>()
 
+    /// 얼굴 앨범 디버깅용: 사진 id별 이 앨범에 묶이게 한 얼굴의 boundingBox
+    private var faceBoundingBoxes: [String: CGRect] = [:]
+    var isFaceAlbum: Bool { album.from == "face" }
+
     public init(album: Album,
                 imageUseCase: PhotoImageUseCase,
                 detailUseCase: AlbumDetailUseCase,
@@ -92,6 +96,45 @@ public final class AlbumDetailViewModel: BaseViewModel {
         } catch {
             return nil
         }
+    }
+
+    /// 얼굴 앨범 디버깅용: 전체 사진이 아니라 이 앨범에 묶이게 한 얼굴 부분만 크롭해서 반환
+    func loadFaceImage(id: String, size: CGSize) async -> UIImage? {
+        guard let boundingBox = faceBoundingBoxes[id] else {
+            return await loadImage(id: id, size: size)
+        }
+        do {
+            guard let cgImage: CGImage = try await imageUseCase.loadImage(id: id, type: .specialSize(size)).cgImage,
+                  let cropped = crop(cgImage, to: boundingBox) else { return nil }
+            return UIImage(cgImage: cropped)
+        } catch {
+            return nil
+        }
+    }
+
+    /// boundingBox는 Vision 정규화 좌표(원점 좌하단, 0~1) 기준
+    private func crop(_ image: CGImage, to boundingBox: CGRect) -> CGImage? {
+        let width = CGFloat(image.width)
+        let height = CGFloat(image.height)
+
+        let scale: CGFloat = 1.1
+        let expandedWidth = boundingBox.width * scale
+        let expandedHeight = boundingBox.height * scale
+        let expandedX = boundingBox.minX - (expandedWidth - boundingBox.width) / 2
+        let expandedY = boundingBox.minY - (expandedHeight - boundingBox.height) / 2
+
+        let clampedX = max(0, expandedX)
+        let clampedY = max(0, expandedY)
+        let clampedWidth = min(expandedWidth, 1.0 - clampedX)
+        let clampedHeight = min(expandedHeight, 1.0 - clampedY)
+
+        let rect = CGRect(
+            x: clampedX * width,
+            y: (1.0 - clampedY - clampedHeight) * height,
+            width: clampedWidth * width,
+            height: clampedHeight * height
+        )
+        return image.cropping(to: rect)
     }
 
     private func bind() {
@@ -154,6 +197,11 @@ public final class AlbumDetailViewModel: BaseViewModel {
         do {
             isLoading = true
             let photos = try await detailUseCase.fetchPhotos(by: album.id)
+            // photos를 publish하면 셀이 바로 loadFaceImage를 호출하므로,
+            // faceBoundingBoxes는 그보다 먼저 채워둬야 첫 진입에서도 크롭이 뜬다
+            if isFaceAlbum {
+                faceBoundingBoxes = try await detailUseCase.fetchFaceBoundingBoxes(clusterId: album.name)
+            }
             self.photos = photos
             self.photoDetails = photos.map {
                 PhotoDetail(id: $0.localIdentifier, createdDate: $0.createdAt, photo: $0)
@@ -197,6 +245,19 @@ public final class AlbumDetailViewModel: BaseViewModel {
 }
 
 extension AlbumDetailViewModel: ImageLoadable {}
+
+/// 얼굴 앨범 디버깅용: 전체 사진 대신 얼굴 크롭 이미지를 반환하는 로더
+struct FaceAlbumImageLoader: ImageLoadable {
+    private let viewModel: AlbumDetailViewModel
+
+    init(viewModel: AlbumDetailViewModel) {
+        self.viewModel = viewModel
+    }
+
+    func loadImage(id: String, size: CGSize) async -> UIImage? {
+        await viewModel.loadFaceImage(id: id, size: size)
+    }
+}
 
 extension AlbumDetailViewModel: AlbumDetailViewModelDelegate {
     func save(name: String) {
