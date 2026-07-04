@@ -34,6 +34,9 @@ public final class DefaultTravelDetectionRepository: TravelDetectionRepository {
 
         guard !located.isEmpty else { return [] }
 
+        // 홈존별 대표 주소를 미리 한 번만 계산해서, 제거 로그 찍을 때 매번 다시 찾지 않도록 함
+        let homeZoneAddresses = homeZones.map { zoneAddress($0, allPhotos: photos) }
+
         var rawClusters: [[(PhotoLocationSnapshot, CLLocation)]] = []
         var current: [(PhotoLocationSnapshot, CLLocation)] = [located[0]]
 
@@ -41,7 +44,7 @@ public final class DefaultTravelDetectionRepository: TravelDetectionRepository {
             let (prevSnapshot, prevLocation) = located[i - 1]
             let (currSnapshot, currLocation) = located[i]
 
-            if isInHomeZone(currSnapshot, homeZones: homeZones) {
+            if let zoneIdx = homeZoneIndex(currSnapshot, homeZones: homeZones) {
                 let components = [currSnapshot.country, currSnapshot.administrativeArea, currSnapshot.locality, currSnapshot.subLocality]
                     .compactMap { $0 }
                     .filter { !$0.isEmpty }
@@ -50,14 +53,14 @@ public final class DefaultTravelDetectionRepository: TravelDetectionRepository {
                             result.append(value)
                         }
                     }.joined(separator: ", ")
-                print("홈존으로 제거", components)
+                print("홈존 \(homeZoneAddresses[zoneIdx]) / 홈존으로제거 \(components)")
                 rawClusters.append(current)
                 current = []
                 continue
             }
 
             // prev가 홈존이었으면 gap/distance 계산 스킵하고 그냥 추가
-            if isInHomeZone(prevSnapshot, homeZones: homeZones) {
+            if homeZoneIndex(prevSnapshot, homeZones: homeZones) != nil {
 //                current.append(located[i])
                 current = [located[i]]
                 continue
@@ -139,12 +142,35 @@ public final class DefaultTravelDetectionRepository: TravelDetectionRepository {
 //        return result
     }
 
-    private func isInHomeZone(_ photo: PhotoLocationSnapshot, homeZones: [HomeZone]) -> Bool {
+    private func homeZoneIndex(_ photo: PhotoLocationSnapshot, homeZones: [HomeZone]) -> Int? {
         let location = CLLocation(latitude: photo.latitude, longitude: photo.longitude)
-        return homeZones.contains { zone in
+        return homeZones.firstIndex { zone in
             let zoneLocation = CLLocation(latitude: zone.latitude, longitude: zone.longitude)
             return location.distance(from: zoneLocation) < homeZoneRadius
         }
+    }
+
+    // 홈존 위경도 기준으로 가장 가까운 사진의 주소를 찾아 사람이 알아볼 수 있는 문자열로 변환
+    private func zoneAddress(_ zone: HomeZone, allPhotos: [PhotoLocationSnapshot]) -> String {
+        let zoneLocation = CLLocation(latitude: zone.latitude, longitude: zone.longitude)
+        guard let nearest = allPhotos
+            .filter({ $0.latitude != 0 || $0.longitude != 0 })
+            .min(by: {
+                CLLocation(latitude: $0.latitude, longitude: $0.longitude).distance(from: zoneLocation)
+                < CLLocation(latitude: $1.latitude, longitude: $1.longitude).distance(from: zoneLocation)
+            })
+        else {
+            return "주소 확인 불가 (lat: \(zone.latitude), lng: \(zone.longitude))"
+        }
+
+        let components = [nearest.country, nearest.administrativeArea, nearest.locality, nearest.subLocality]
+            .compactMap { $0 }
+            .filter { !$0.isEmpty }
+            .reduce(into: [String]()) { result, value in
+                if !result.contains(value) { result.append(value) }
+            }
+
+        return components.isEmpty ? "주소 확인 불가 (lat: \(zone.latitude), lng: \(zone.longitude))" : components.joined(separator: ", ")
     }
 
     private func makeTravelCluster(from photos: [PhotoLocationSnapshot]) async throws -> TravelCluster? {

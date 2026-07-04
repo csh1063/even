@@ -430,9 +430,14 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
             .map { PhotoLocationSnapshot(from: $0) }
 
         // 홈존 만들기
-        try analyze(from: allPhotosForTravel)
+        try analyzeIfNeeded(from: allPhotosForTravel)
 
         let homeZones = try fetchHomeZones()
+        print("🏠 이번 여행 판정에 사용되는 홈존 \(homeZones.count)개")
+        for zone in homeZones {
+            print("   - \(addressDescription(for: zone, in: allPhotosForTravel)) (분석일: \(zone.analyzedAt))")
+        }
+
         let clusters = try await travelRepository.detect(from: allPhotosForTravel, homeZones: homeZones)
 
         var placeCounts: [String: Int] = [:]
@@ -488,6 +493,16 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
 
     // MARK: - 여행 관련 함수
 
+    // 홈존 분석 필요 여부 체크 후 실행
+    private func analyzeIfNeeded(from photos: [PhotoLocationSnapshot]) throws {
+        let existing = try homeZoneRepository.fetchHomeZones()
+        if let last = existing.first, Date().timeIntervalSince(last.analyzedAt) < reanalyzePeriod {
+            print("🏠 홈존 재분석 스킵 (마지막 분석: \(last.analyzedAt), 아직 3개월 안 지남)")
+            return
+        }
+        try analyze(from: photos)
+    }
+
     // 강제 재분석
     private func analyze(from photos: [PhotoLocationSnapshot]) throws {
         let threeMonthsAgo = Date().addingTimeInterval(-reanalyzePeriod)
@@ -520,7 +535,35 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
                 )
             }
 
+        print("🏠 홈존 분석 결과 → \(zones.count)개")
+        for zone in zones {
+            print("   - \(addressDescription(for: zone, in: recent))")
+        }
+
         try homeZoneRepository.saveHomeZones(zones)
+    }
+
+    // 홈존 위경도 기준으로 가장 가까운 사진의 주소를 찾아 사람이 알아볼 수 있는 문자열로 변환
+    private func addressDescription(for zone: HomeZone, in photos: [PhotoLocationSnapshot]) -> String {
+        let zoneLocation = CLLocation(latitude: zone.latitude, longitude: zone.longitude)
+        guard let nearest = photos
+            .filter({ $0.latitude != 0 || $0.longitude != 0 })
+            .min(by: {
+                CLLocation(latitude: $0.latitude, longitude: $0.longitude).distance(from: zoneLocation)
+                < CLLocation(latitude: $1.latitude, longitude: $1.longitude).distance(from: zoneLocation)
+            })
+        else {
+            return "주소 확인 불가 (lat: \(zone.latitude), lng: \(zone.longitude))"
+        }
+
+        let components = [nearest.country, nearest.administrativeArea, nearest.locality, nearest.subLocality]
+            .compactMap { $0 }
+            .filter { !$0.isEmpty }
+            .reduce(into: [String]()) { result, value in
+                if !result.contains(value) { result.append(value) }
+            }
+
+        return components.isEmpty ? "주소 확인 불가 (lat: \(zone.latitude), lng: \(zone.longitude))" : components.joined(separator: ", ")
     }
 
     // 홈존 목록 반환 (여행 필터링용)

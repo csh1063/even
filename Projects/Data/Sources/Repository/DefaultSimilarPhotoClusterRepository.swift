@@ -71,6 +71,8 @@ public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepo
         var cache: [String: [Float]] = [:]
         var allVectors: [String: [Float]] = [:]
 
+        print("🔎 [SimilarPhoto] 특징 추출 시작 (\(sorted.count)장)")
+
         // 특징 벡터 추출 + 쌍대 비교가 대부분의 시간을 차지하는 구간 — 1%p 단위로만 진행률 보고 (과도한 호출 방지)
         var lastReportedPercent = -1
         for i in 0..<sorted.count {
@@ -79,6 +81,9 @@ public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepo
                 if percent != lastReportedPercent {
                     lastReportedPercent = percent
                     onProgress(Double(i + 1) / Double(sorted.count))
+                    if percent % 10 == 0 {
+                        print("⏳ [SimilarPhoto] 특징 추출 진행 \(percent)% (\(i + 1)/\(sorted.count))")
+                    }
                 }
             }
             let iPhoto = sorted[i]
@@ -295,6 +300,9 @@ public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepo
                 if percent != lastReportedPercent {
                     lastReportedPercent = percent
                     onProgress(Double(i + 1) / Double(scoped.count))
+                    if percent % 10 == 0 {
+                        print("⏳ [SimilarPhoto] 증분 특징 추출 진행 \(percent)% (\(i + 1)/\(scoped.count))")
+                    }
                 }
             }
             let iPhoto = scoped[i]

@@ -21,6 +21,9 @@ public final class PhotoAnalysisService { // : @unchecked Sendable {
         return array
     }()
 
+    /// 얼굴로 인식은 됐지만 확신도가 낮은(그림/조각상/뒤통수 등 애매한) 감지를 걸러내는 기준
+//    private let faceConfidenceThreshold: Float = 0.5
+
     private let classifyQueue = DispatchQueue(label: "com.app.analysis.classify")
     private let faceQueue = DispatchQueue(label: "com.app.analysis.face")
     private let textQueue = DispatchQueue(label: "com.app.analysis.text")
@@ -78,6 +81,7 @@ public final class PhotoAnalysisService { // : @unchecked Sendable {
 
     /// 얼굴 감지
     private func detectFace(_ image: CGImage) async throws -> [PhotoLabel] {
+//        let faceConfidenceThreshold = self.faceConfidenceThreshold
         return try await withCheckedThrowingContinuation { continuation in
             faceQueue.async {
                 let request = VNDetectFaceRectanglesRequest()
@@ -85,17 +89,22 @@ public final class PhotoAnalysisService { // : @unchecked Sendable {
 
                 do {
                     try handler.perform([request])
+                    
+                    var labels: [PhotoLabel] = []
 
                     let validFaces = request.results?.filter {
                         $0.boundingBox.width >= 0.05 && $0.boundingBox.height >= 0.05
+                        && $0.confidence >= 0.6
                     } ?? []
 
                     guard !validFaces.isEmpty else {
                         continuation.resume(returning: [])
                         return
                     }
-
-                    var labels: [PhotoLabel] = []
+                    
+                    for (index, face) in validFaces.enumerated() {
+                        labels.append(PhotoLabel(name: "people_\(index)", confidence: face.confidence))
+                    }
 
                     // 사람 존재 여부 (binary)
                     labels.append(PhotoLabel(name: "people", confidence: 1.0))

@@ -72,17 +72,49 @@ public actor FaceEmbeddingService {
         let handler = VNImageRequestHandler(cgImage: image, options: [:])
         do {
             try handler.perform([request])
+            // VNDetectFaceCaptureQualityRequest도 자체적으로 이미지 전체에서 얼굴을 찾아주므로,
+            // 얼굴 후보마다 따로 돌리지 않고 이미지당 한 번만 실행해서 boundingBox로 매칭한다.
+            let qualityObservations = faceCaptureQualityObservations(in: image)
             return request.results?.filter {
                 $0.boundingBox.width >= 0.05 && $0.boundingBox.height >= 0.05
+                && $0.confidence >= 0.6
                 && abs($0.yaw?.floatValue ?? 1.0) < 0.9
                 && $0.boundingBox.width * CGFloat(image.width) >= 100.0
                 && !isFaceTruncated($0.boundingBox)
                 && hasCompleteLandmarks($0)
+                && (matchedFaceCaptureQuality(for: $0.boundingBox, in: qualityObservations) ?? 0) >= 0.2
             }
         } catch {
             print("FaceEmbeddingService detectFacesWithLandmarks 에러:", error)
             return nil
         }
+    }
+
+    // VNDetectFaceLandmarksRequest의 confidence는 사실상 항상 1.0이라 쓸모없어서,
+    // Apple이 얼굴 품질 평가용으로 따로 제공하는 VNDetectFaceCaptureQualityRequest를 이미지당 한 번만 돌려서 대신 쓴다.
+    // (regionOfInterest 없이 돌리면 이 요청도 이미지 전체에서 자체적으로 얼굴을 찾아준다)
+    private func faceCaptureQualityObservations(in image: CGImage) -> [VNFaceObservation] {
+        let request = VNDetectFaceCaptureQualityRequest()
+        let handler = VNImageRequestHandler(cgImage: image, options: [:])
+        do {
+            try handler.perform([request])
+            return request.results ?? []
+        } catch {
+            return []
+        }
+    }
+
+    // landmarks 검출기와 quality 검출기는 서로 다른 모델이라 결과가 어긋날 수 있으므로,
+    // 실제로 boundingBox가 겹치는 후보 중 가장 많이 겹치는 것만 매칭한다 (엉뚱한 옆 얼굴과 매칭되는 것 방지)
+    private func matchedFaceCaptureQuality(for boundingBox: CGRect, in qualityObservations: [VNFaceObservation]) -> Float? {
+        qualityObservations
+            .filter { $0.boundingBox.intersects(boundingBox) }
+            .max(by: {
+                let areaA = $0.boundingBox.intersection(boundingBox).width * $0.boundingBox.intersection(boundingBox).height
+                let areaB = $1.boundingBox.intersection(boundingBox).width * $1.boundingBox.intersection(boundingBox).height
+                return areaA < areaB
+            })
+            .flatMap { $0.faceCaptureQuality }
     }
 
     // MARK: - Private: Embedding
@@ -91,10 +123,10 @@ public actor FaceEmbeddingService {
             return nil
         }
 
-        if isBabyFace(in: cropped) {
-            print("👶 아기 얼굴 감지 → 클러스터링 제외")
-            return nil
-        }
+//        if isBabyFace(in: cropped) {
+//            print("👶 아기 얼굴 감지 → 클러스터링 제외")
+//            return nil
+//        }
 
         let hasGlasses = hasGlasses(in: cropped)
         if hasGlasses {
@@ -122,10 +154,10 @@ public actor FaceEmbeddingService {
             return nil
         }
 
-        if isBabyFace(in: cropped) {
-            print("👶 아기 얼굴 감지 → 클러스터링 제외")
-            return nil
-        }
+//        if isBabyFace(in: cropped) {
+//            print("👶 아기 얼굴 감지 → 클러스터링 제외")
+//            return nil
+//        }
 
         // 크롭 단계에서 안경 체크 (aligned 전)
         let hasGlasses = hasGlasses(in: cropped)
