@@ -13,14 +13,14 @@ public struct Photo: Hashable {
     public let localIdentifier: String
     public let createdAt: Date
     public var analyzedAt: Date?
-    
+
     // address
     public var latitude: Double?
     public var longitude: Double?
     public var isoCountryCode: String?
     public var address: PhotoLocation?
     public var addressEn: PhotoLocation?
-    
+
 //    public var country: String? {
 //        return address?.country
 //    }
@@ -30,14 +30,14 @@ public struct Photo: Hashable {
 //    public var administrativeArea: String? {
 //        return address?.administrativeArea
 //    }
-    
+
     // date
     public var year: String?
     public var month: String?
-    
+
     public var labels: [PhotoLabel]
     public var faceEmbedding: [FaceEmbedding]
-    
+
     public init(
         id: UUID = UUID(),
         localIdentifier: String,
@@ -67,7 +67,7 @@ public struct Photo: Hashable {
         self.labels = labels
         self.faceEmbedding = faceEmbedding
     }
-    
+
     public static func == (lhs: Photo, rhs: Photo) -> Bool {
         lhs.localIdentifier == rhs.localIdentifier
     }

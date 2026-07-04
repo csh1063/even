@@ -11,11 +11,11 @@ import UIKit
 import Combine
 
 final class AlbumListViewController: BaseViewController {
- 
-    private let naviView: NaviBarView = NaviBarView()
-    
+
+    private let naviView = NaviBarView()
+
     private var collectionView: UICollectionView = {
-        
+
         let layout = UICollectionViewFlowLayout()
         let collectionView = UICollectionView(frame: CGRect.zero, collectionViewLayout: layout)
         collectionView.isScrollEnabled = true
@@ -24,64 +24,64 @@ final class AlbumListViewController: BaseViewController {
 
         return collectionView
     }()
-    
+
     private var dataSource: UICollectionViewDiffableDataSource<Int, AlbumType>!
-    
+
     private let viewModel: AlbumListViewModel
-    
+
     private var cancellables = Set<AnyCancellable>()
-    
+
     init(viewModel: AlbumListViewModel) {
         self.viewModel = viewModel
-        
+
         super.init(nibName: nil, bundle: nil)
     }
-    
+
     required init(coder: NSCoder) {
         fatalError(Self.fatalMessage)
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         self.setupView()
         self.binding()
-        
+
         self.viewModel.send(.appear)
     }
-    
+
     private func setupView() {
-        
+
         self.naviView.setTitle("여행")
         self.naviView.addButtons([LeftButton(type: .back)])
-        
+
         collectionView.contentInset = UIEdgeInsets(top: 20, left: 0, bottom: 80, right: 0)
         collectionView.delegate = self
-        
+
         self.view.addSubview(naviView)
         self.view.addSubview(collectionView)
-        
+
         self.configureDataSource()
-        
+
         naviView.snp.makeConstraints { make in
             make.leading.trailing.equalToSuperview()
             make.top.equalToSuperview()
         }
-        
+
         collectionView.snp.makeConstraints { make in
             make.leading.trailing.equalToSuperview()
             make.top.equalTo(self.naviView.snp.bottom)
             make.bottom.equalToSuperview()
         }
     }
-    
+
     private func binding() {
         let output = viewModel.transform()
         output.albumData.sink { data in
             self.applySnapshot(data: data)
         }
         .store(in: &cancellables)
-        
+
         naviView.publisher.sink { type in
             switch type {
             case .back:
@@ -91,10 +91,10 @@ final class AlbumListViewController: BaseViewController {
         }
         .store(in: &cancellables)
     }
-    
+
     // MARK: - Compositional Layout
     private func makeLayout(type: String) -> UICollectionViewLayout {
-        UICollectionViewCompositionalLayout { [weak self] sectionIndex, environment in
+        UICollectionViewCompositionalLayout { [weak self] _, environment in
             switch type {
             case "date":     return self?.makeDateSection()
             case "travel":     return self?.makeTravelSection()
@@ -240,7 +240,7 @@ final class AlbumListViewController: BaseViewController {
         return section
     }
     private func makeSimilarSection() -> NSCollectionLayoutSection {
-        
+
         let screenWidth = UIScreen.main.bounds.width
         let itemWidth = (screenWidth - 32) / 4  // leading+trailing inset 32, 아이템간 간격 24
 
@@ -255,7 +255,7 @@ final class AlbumListViewController: BaseViewController {
             widthDimension: .fractionalWidth(1.0),
             heightDimension: .absolute(itemWidth)
         )
-        
+
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
 
         let section = NSCollectionLayoutSection(group: group)
@@ -268,7 +268,7 @@ final class AlbumListViewController: BaseViewController {
 
 extension AlbumListViewController {
     private func configureDataSource() {
-    
+
         let dateRegistration = UICollectionView.CellRegistration<DateAlbumCell, DateAlbumCellViewModel> { cell, _, vm in
             cell.configure(with: vm)
         }
@@ -277,12 +277,12 @@ extension AlbumListViewController {
             cell.configure(with: vm)
         }
 
-        let locationRegistration = UICollectionView.CellRegistration<LocationAlbumCell, LocationAlbumCellViewModel> { cell, indexPath, vm in
+        let locationRegistration = UICollectionView.CellRegistration<LocationAlbumCell, LocationAlbumCellViewModel> { cell, _, vm in
 //            let style: AddressCellStyle = (indexPath.item == 0) ? .large : .small
             cell.configure(with: vm, style: .small)
         }
 
-        let categoryRegistration = UICollectionView.CellRegistration<CategoryAlbumCell, CategoryAlbumCellViewModel> {/* [weak self]*/ cell, indexPath, vm in
+        let categoryRegistration = UICollectionView.CellRegistration<CategoryAlbumCell, CategoryAlbumCellViewModel> {/* [weak self]*/ cell, _, vm in
 //            guard let self else { return }
 //            let items = self.dataSource.snapshot().itemIdentifiers(inSection: .category)
 //            cell.isFirst = (indexPath.item == 0)
@@ -293,11 +293,11 @@ extension AlbumListViewController {
         let faceRegistration = UICollectionView.CellRegistration<FaceAlbumCell, FaceCellViewModel> { cell, _, vm in
             cell.configure(with: vm)
         }
-        
+
         let similarRegistration = UICollectionView.CellRegistration<SimilarAlbumCell, SimilarAlbumCellViewModel> { cell, _, vm in
             cell.configure(with: vm, hasCover: true)
         }
-        
+
         dataSource = UICollectionViewDiffableDataSource<Int, AlbumType>(
             collectionView: collectionView
         ) { /*[weak self]*/ collectionView, indexPath, item in
@@ -336,10 +336,10 @@ extension AlbumListViewController {
             }
         }
     }
-    
+
     private func applySnapshot(data: AlbumListData) {
         var snapshot = NSDiffableDataSourceSnapshot<Int, AlbumType>()
-        
+
 //        snapshot.appendSections(data.sections)
         snapshot.appendSections([0])  // 섹션 먼저
         snapshot.appendItems(data.albums)
@@ -352,7 +352,7 @@ extension AlbumListViewController {
 }
 
 extension AlbumListViewController: UICollectionViewDelegate {
-    
+
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard let albumType = dataSource.itemIdentifier(for: indexPath) else { return }
         viewModel.send(.selectItem(albumType.album))

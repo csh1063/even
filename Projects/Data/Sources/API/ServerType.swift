@@ -6,8 +6,6 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
-
-
 import Foundation
 
 enum ServerType {
@@ -22,7 +20,7 @@ struct Server {
 //    #else
 //    static var type: ServerType = .prod
 //    #endif
-    
+
     static var url: String {
 //        switch self.type {
 ////        case .dev:

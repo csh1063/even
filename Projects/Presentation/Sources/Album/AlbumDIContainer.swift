@@ -13,21 +13,21 @@ import Domain
 public final class AlbumDIContainer {
 
     let appDIContainer: AppDIContainer
-    
+
     public init(appDIContainer: AppDIContainer) {
         self.appDIContainer = appDIContainer
     }
-    
+
     func makeAlbumViewModel(tabbarViewModel: TabbarViewModel) -> AlbumViewModel {
-        
+
         let imageUseCase = DefaultPhotoImageUseCase(
             repository: appDIContainer.photoLibraryRepository
         )
-        
+
         let albumUseCase = DefaultAlbumUseCase(
             albumRepository: appDIContainer.albumDataRepository
         )
-        
+
         return AlbumViewModel(tabbarViewModel: tabbarViewModel,
                               imageUseCase: imageUseCase,
                               albumUseCase: albumUseCase)
@@ -42,7 +42,7 @@ public final class AlbumDIContainer {
             isSelectMode: isSelectMode
         )
     }
-    
+
     func makeListDIContainer(from: String) -> AlbumListDIContainer {
         AlbumListDIContainer(
             from: from,

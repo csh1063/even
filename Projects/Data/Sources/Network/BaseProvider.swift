@@ -10,7 +10,7 @@ import Foundation
 import Domain
 
 public final class BaseProvider<U: TargetType>: MoyaProvider<U> {
-    
+
     public init(
         endpointClosure: @escaping EndpointClosure = MoyaProvider.defaultEndpointMapping,
         stubClosure: @escaping StubClosure = MoyaProvider.neverStub,
@@ -34,16 +34,16 @@ public final class BaseProvider<U: TargetType>: MoyaProvider<U> {
             }
         }
     }
-    
+
     func request<T: Decodable>(_ target: U) async throws -> T {
         do {
             let response = try await self.asyncRequest(target)
             let decoded = try JSONDecoder().decode(BaseDTO<T>.self, from: response.data)
-            
+
             guard let data = decoded.data else {
                 throw NetworkError.invalidResponse
             }
-            
+
             return data
         } catch let error as DecodingError {
             throw NetworkError.decodingFailed(error)

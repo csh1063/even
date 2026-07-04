@@ -15,22 +15,22 @@ protocol AlbumCellViewModel: Hashable {
     var displayName: String { get }
     var formattedDate: String { get }
     var photoCount: Int { get }
-    
+
     var album: Album { get }
-    
+
     var imageLoader: any ImageLoadable {get}
 }
 
 extension AlbumCellViewModel {
-    
+
     func loadImage(size: CGSize) async -> UIImage? {
         await imageLoader.loadImage(id: localIdentifier, size: size)
     }
-    
+
     static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.id == rhs.id && lhs.displayName == rhs.displayName
     }
-    
+
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }

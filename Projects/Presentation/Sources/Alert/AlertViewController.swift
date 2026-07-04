@@ -6,7 +6,6 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
-
 import UIKit
 import SnapKit
 
@@ -49,7 +48,7 @@ final class AlertViewController: BaseViewController {
         messageLabel.numberOfLines = 0
         return messageLabel
     }()
-    
+
     private let textStack: UIStackView = {
         let textStack = UIStackView()
         textStack.axis    = .vertical
@@ -70,12 +69,12 @@ final class AlertViewController: BaseViewController {
     }()
 
     init(viewModel: AlertViewModel, onDismiss: @escaping () -> Void) {
-        
+
         self.viewModel = viewModel
         self.onDismiss = onDismiss
-        
+
         super.init(nibName: nil, bundle: nil)
-        
+
         modalPresentationStyle = .overFullScreen
         modalTransitionStyle   = .crossDissolve
     }
@@ -89,7 +88,7 @@ final class AlertViewController: BaseViewController {
         setupView()
         configure()
         addDimTapGestureIfNeeded()
-        
+
         self.view.backgroundColor = .clear
     }
 
@@ -110,7 +109,7 @@ final class AlertViewController: BaseViewController {
             make.center.equalToSuperview()
             make.leading.trailing.equalToSuperview().inset(40)
         }
-        
+
         containerView.addSubview(textStack)
         textStack.addArrangedSubview(titleLabel)
         textStack.addArrangedSubview(messageLabel)
@@ -139,7 +138,7 @@ final class AlertViewController: BaseViewController {
         titleLabel.text   = viewModel.title
         messageLabel.text = viewModel.message
         messageLabel.isHidden = viewModel.message == nil
-        
+
         if viewModel.buttons.count != 2 {
             buttonStack.axis = .vertical
             viewModel.buttons.enumerated().forEach { index, config in
@@ -182,7 +181,7 @@ final class AlertViewController: BaseViewController {
     private func makeSeparator(_ axis: NSLayoutConstraint.Axis, height: CGFloat = 0.5, inset: CGFloat = 12) -> UIView {
         let backView = UIView()
         let view = UIView()
-        view.backgroundColor = Theme.strokeSoft//.withAlphaComponent(0.5)
+        view.backgroundColor = Theme.strokeSoft// .withAlphaComponent(0.5)
         backView.addSubview(view)
         switch axis {
         case .horizontal:

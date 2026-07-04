@@ -12,17 +12,17 @@ import Domain
 
 @MainActor
 public final class AlbumDetailCoordinator: BaseCoordinator {
-    
+
     private let diContainer: AlbumDetailDIContainer
     private let navigationController: UINavigationController
-    
+
     weak var delegate: AlbumDetailViewModelDelegate?
-    
+
     init(diContainer: AlbumDetailDIContainer,
          navigationController: UINavigationController) {
         self.diContainer = diContainer
         self.navigationController = navigationController
-        
+
         super.init()
     }
 
@@ -40,20 +40,20 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
                 self?.showDetail(photoDetails, index: index, inSelectionMode: inSelectionMode)
             }
         }
-        
+
         bindAlert(from: viewModel)
-        
+
         let vc = AlbumDetailViewController(viewModel: viewModel)
 
         navigationController.pushViewController(vc, animated: true)
         self.viewController = vc
     }
-    
+
     private func pop() {
         navigationController.popViewController(animated: true)
         self.remove(coordinator: self)
     }
-    
+
     func showAlbumRenameSheet(album: Album) {
         let sheet = AlbumRenameSheet(albumName: album.displayName)
         sheet.onSave = { [weak self] newName in
@@ -68,7 +68,7 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
 
         navigationController.present(sheet, animated: true)
     }
-    
+
     func showAlbumOptions(album: Album) {
         let sheet = SelectionSheet(
             title: album.displayName,
@@ -92,7 +92,7 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
 
         navigationController.present(sheet, animated: true)
     }
-    
+
 //    func showDetail(_ photoDetails: [PhotoDetail], index: Int) {
 //        print("showDetail")
 //        let vm = diContainer.makeImageViewerViewModel(photoDetails: photoDetails, index: index)
@@ -106,17 +106,17 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
 //        
 //        navigationController.present(vc, animated: true)
 //    }
-    
+
     func showDetail(_ photoDetails: [PhotoDetail], index: Int, inSelectionMode: Bool) {
         let albumDetailVC = viewController as? AlbumDetailViewController
-     
+
         let vm = diContainer.makeImageViewerViewModel(
             photoDetails: photoDetails,
             index: index,
             isSelectionMode: inSelectionMode,
             selectedIdentifiers: albumDetailVC?.selectedIdentifiers ?? []
         )
-     
+
         vm.onAction = { [weak albumDetailVC] action in
             switch action {
             case .pageChanged(let id):
@@ -125,9 +125,9 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
                 albumDetailVC?.syncSelection(identifiers)
             }
         }
-     
+
         let vc = ImageViewerViewController(viewModel: vm)
         navigationController.present(vc, animated: true)
     }
-     
+
 }

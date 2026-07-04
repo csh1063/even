@@ -14,9 +14,9 @@ public final class PhotoLabelEntity {
     @Attribute(.unique) public var id: UUID
     public var name: String
     public var confidence: Float
-    
+
     public var photo: PhotoEntity?
-    
+
     public init(
         id: UUID = UUID(),
         name: String,

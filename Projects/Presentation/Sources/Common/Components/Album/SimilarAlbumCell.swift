@@ -9,9 +9,6 @@
 import UIKit
 import SnapKit
 import Domain
-import UIKit
-import SnapKit
-
 final class SimilarAlbumCell: UICollectionViewCell {
 
     // MARK: - UI
@@ -87,7 +84,7 @@ final class SimilarAlbumCell: UICollectionViewCell {
             make.top.equalToSuperview()
             make.centerX.equalToSuperview()
             make.width.height.equalTo(72)
-            
+
             make.bottom.equalToSuperview()
         }
 
@@ -128,7 +125,7 @@ final class SimilarAlbumCell: UICollectionViewCell {
 
         let isTwoPhotos = viewModel.photoCount == 2
         backImageView.isHidden = isTwoPhotos
-        
+
 //        if hasCover {
 //            contentView.addShadow(color: .black, opacity: 0.3, offset: CGSize(width: 4, height: 4), radius: 8)
 //        }

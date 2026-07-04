@@ -18,7 +18,7 @@ public enum PhotoPermission {
     case limitedAccess // limited
     case denied        // denied, restricted
     case notDetermined
-    
+
     public var access: Bool {
         return self == .fullAccess || self == .limitedAccess
     }
@@ -29,7 +29,7 @@ public struct PhotoList {
     public let photos: [PhotoInAlbum]
     public let hasNext: Bool
     public let totalCount: Int
-    
+
     public init(title: String, photos: [PhotoInAlbum], hasNext: Bool, totalCount: Int) {
         self.title = title
         self.photos = photos
@@ -42,14 +42,18 @@ public struct PhotoInAlbum: Hashable {
 
     public let localIdentifier: String
     public let createdDate: Date?
-    public var photo: Photo? = nil
+    public let latitude: Double?
+    public let longitude: Double?
+    public var photo: Photo?
     public var isUnanalysis: Bool = false
-    
-    public init(id: String, createdDate: Date? = nil) {
+
+    public init(id: String, createdDate: Date? = nil, latitude: Double? = nil, longitude: Double? = nil) {
         self.localIdentifier = id
         self.createdDate = createdDate
+        self.latitude = latitude
+        self.longitude = longitude
     }
-    
+
     public static func == (lhs: PhotoInAlbum, rhs: PhotoInAlbum) -> Bool {
         lhs.localIdentifier == rhs.localIdentifier
     }
@@ -58,7 +62,7 @@ public struct PhotoInAlbum: Hashable {
 public class CropInfo: NSObject {
     let pos: CGPoint
     let scale: CGFloat
-    
+
     init(pos: CGPoint, scale: CGFloat) {
         self.pos = pos
         self.scale = scale

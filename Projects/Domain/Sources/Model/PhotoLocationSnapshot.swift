@@ -18,7 +18,7 @@ public struct PhotoLocationSnapshot {
     public var subLocality: String?
     public let latitude: Double
     public let longitude: Double
-    
+
     public init(from photo: Photo) {
         self.localIdentifier = photo.localIdentifier
         self.createdAt = photo.createdAt

@@ -6,7 +6,6 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
-
 import UIKit
 import SnapKit
 
@@ -59,10 +58,10 @@ final class AlbumSectionHeaderView: UICollectionReusableView {
     @objc private func moreTapped() {
         onMoreTapped?()
     }
-    
+
     func configure(_ section: AlbumSection, itemCount: Int) {
         titleLabel.text = section.title
-        
+
         switch section {
         case .travel:
             self.moreButton.isHidden = itemCount < 8

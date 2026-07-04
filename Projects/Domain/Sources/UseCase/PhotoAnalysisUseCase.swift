@@ -14,12 +14,16 @@ public protocol PhotoAnalysisUseCase {
 }
 
 public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
-    
+
     private let libraryRepository: PhotoLibraryRepository
     private let analysisRepository: PhotoAnalysisRepository
     private let dataRepository: PhotoDataRepository
     private let geoRepository: GeoRepository
-    
+
+    // 라벨+얼굴 분석과 주소 변환을 동시에 진행할 때의 진행률 가중치
+    private let labelWeight: Double = 4.0 / 5.0
+    private let addressWeight: Double = 1.0 / 5.0
+
     public init(
         libraryRepository: PhotoLibraryRepository,
         analysisRepository: PhotoAnalysisRepository,
@@ -31,26 +35,102 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
         self.dataRepository = dataRepository
         self.geoRepository = geoRepository
     }
-    
-    // 이미지 분석
+
+    // 사진 기본 정보 저장 → 라벨+얼굴 분석과 주소 변환 동시 진행 (4:1 가중 진행률)
     public func analysis() -> AsyncThrowingStream<ProgressAnalysis, Error> {
+        AsyncThrowingStream { continuation in
+            Task {
+                do {
+                    try await saveAllPhotosBase()
+
+                    let combiner = ProgressCombiner(labelWeight: labelWeight, addressWeight: addressWeight)
+
+                    try await withThrowingTaskGroup(of: Void.self) { group in
+                        group.addTask { [weak self] in
+                            guard let self else { return }
+                            for try await progress in self.labelAndFaceStream() {
+                                switch progress.state {
+                                case .progress(let ratio):
+                                    let combined = await combiner.updateLabel(ratio)
+                                    continuation.yield(ProgressAnalysis(photo: progress.photo, state: .progress(combined)))
+                                case .completed:
+                                    let combined = await combiner.updateLabel(1.0)
+                                    continuation.yield(ProgressAnalysis(photo: progress.photo, state: .progress(combined)))
+                                case .unavailable(let reason):
+                                    continuation.yield(ProgressAnalysis(photo: progress.photo, state: .unavailable(reason: reason)))
+                                }
+                            }
+                        }
+                        group.addTask { [weak self] in
+                            guard let self else { return }
+                            for try await progress in self.addressStream() {
+                                switch progress.state {
+                                case .progress(let ratio):
+                                    let combined = await combiner.updateAddress(ratio)
+                                    continuation.yield(ProgressAnalysis(photo: progress.photo, state: .progress(combined)))
+                                case .completed:
+                                    let combined = await combiner.updateAddress(1.0)
+                                    continuation.yield(ProgressAnalysis(photo: progress.photo, state: .progress(combined)))
+                                case .unavailable(let reason):
+                                    continuation.yield(ProgressAnalysis(photo: progress.photo, state: .unavailable(reason: reason)))
+                                }
+                            }
+                        }
+                        try await group.waitForAll()
+                    }
+
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+        }
+    }
+
+    // 주소 변환만 단독으로 (외부 단독 트리거용으로 프로토콜에 유지)
+    public func locationAnalysis() -> AsyncThrowingStream<ProgressAnalysis, Error> {
+        addressStream()
+    }
+
+    // MARK: - Private
+
+    /// 라이브러리 전체 사진의 기본 메타데이터(id/createdAt/lat/lng/year/month)를 분석 전에 미리 저장
+    private func saveAllPhotosBase() async throws {
+        let allPhotos = try await libraryRepository.fetchPhotos()
+        let photos = allPhotos.photos.map { item -> Photo in
+            let createdAt = item.createdDate ?? Date()
+            let components = Calendar.current.dateComponents([.year, .month], from: createdAt)
+            return Photo(
+                localIdentifier: item.localIdentifier,
+                createdAt: createdAt,
+                latitude: item.latitude,
+                longitude: item.longitude,
+                year: components.year.map { String($0) },
+                month: components.month.map { String($0) }
+            )
+        }
+        try dataRepository.saveAllPhotosBase(photos)
+    }
+
+    // 라벨 + 얼굴 임베딩 분석
+    private func labelAndFaceStream() -> AsyncThrowingStream<ProgressAnalysis, Error> {
         execute { [weak self] in
-            guard let self else {throw PhotoRepositoryError.photoNotFound}
+            guard let self else { throw PhotoRepositoryError.photoNotFound }
             let analyzedIds: [String] = try self.dataRepository.fetchAnalyzed()
             return self.analysisRepository.analyze(excludingIds: analyzedIds)
         }
     }
-    
-    // 위치 분석
-    public func locationAnalysis() -> AsyncThrowingStream<ProgressAnalysis, Error> {
+
+    // 주소 변환
+    private func addressStream() -> AsyncThrowingStream<ProgressAnalysis, Error> {
         execute { [weak self] in
             AsyncThrowingStream { continuation in
-                Task.detached(priority: .userInitiated)  {
+                Task.detached(priority: .userInitiated) {
                     do {
                         guard let self else { throw PhotoRepositoryError.photoNotFound }
-                        
+
                         let unanalyzedPhotos = try self.dataRepository.fetchLocationUnanalyzed()
-                        
+
                         var koreaPhotos: [Photo] = []
                         var etcPhotos: [Photo] = []
                         var noCodePhotos: [Photo] = []
@@ -64,19 +144,16 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                                 }
                             }
                         }
-                        
+
                         let total = koreaPhotos.count + etcPhotos.count
-                        print("koreaPhotos", koreaPhotos.count)
-                        print("etcPhotos", etcPhotos.count)
-                        print("total", total)
-                        
+
                         // 한국 주소
                         let koreaAddress = try await self.geoRepository.locationToaddress(koreaPhotos)
-                        
+
                         var index: Double = 0
                         for koreaPhoto in koreaPhotos {
                             if let address = koreaAddress[koreaPhoto.localIdentifier] {
-                                
+
                                 index += 1
                                 continuation.yield(
                                     ProgressAnalysis(
@@ -87,29 +164,23 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                                             longitude: koreaPhoto.longitude,
                                             isoCountryCode: address.isoCountryCode,
                                             address: address),
-//                                        labels: [],
                                         state: .progress(index/Double(total))
                                     )
                                 )
-                                
+
                             } else {
                                 etcPhotos.append(koreaPhoto)
                             }
                         }
-                        
+
                         // 외국 주소
-                        print("etcPhotos before", etcPhotos.count)
                         let unique = Dictionary(grouping: etcPhotos) {
                             if let lat = $0.latitude, let lng = $0.longitude {
                                 return "\((lat * 10000).rounded() / 10000),\((lng * 10000).rounded() / 10000)"
                             }
                             return ""
                         }
-                        print("etcPhotos after", unique.count)
-                        
-//                        var totalSec = Double(unique.count) * 1.2
-//                        print("totalSec", totalSec)
-                        
+
                         let batchSize = 50
                         let uniqueArray = Array(unique)
                         let batches = stride(from: 0, to: uniqueArray.count, by: batchSize).map {
@@ -117,23 +188,17 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                         }
 
                         var overseasAddress: [String: PhotoLocation] = [:]
-                        for (i, batch) in batches.enumerated() {
+                        for batch in batches {
                             let batchDict = Dictionary(uniqueKeysWithValues: batch)
-                            print("etcPhotos batch \(i+1)/\(batches.count) start - \(batch.count)개")
                             let batchResult = try await self.geoRepository.locationOverseas(batchDict)
-                            print("etcPhotos batch \(i+1) done - 결과 \(batchResult.count)개")
                             overseasAddress.merge(batchResult) { _, new in new }
                         }
 
-                        print("etcPhotos result:", overseasAddress.count)
-//                        let overseasAddress = try await self.geoRepository.locationOverseas(unique)
-                        
-//                        index = 0
                         for etcPhoto in etcPhotos {
                             if let address = overseasAddress[etcPhoto.localIdentifier],
                                let isoCountryCode = address.isoCountryCode,
                                address.isoCountryCode != "none" {
-                                
+
                                 index += 1
                                 continuation.yield(
                                     ProgressAnalysis(
@@ -144,25 +209,23 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                                             longitude: etcPhoto.longitude,
                                             isoCountryCode: isoCountryCode,
                                             address: address),
-//                                        labels: [],
                                         state: .progress(index/Double(total))
                                     )
                                 )
                             } else {
-                                print("etcPhotos 매핑 실패", etcPhoto.localIdentifier)
                                 noCodePhotos.append(etcPhoto)
                             }
                         }
-                        
+
                         for photo in noCodePhotos {
-                            
+
                             guard let latitude = photo.latitude,
                                   let longitude = photo.longitude,
                                   let address = try await self.analysisRepository.geocoderAnalyze(
                                     latitude: latitude, longitude: longitude) else {
                                 continue
                             }
-                            
+
                             index += 1
                             continuation.yield(
                                 ProgressAnalysis(
@@ -173,14 +236,13 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                                         longitude: photo.longitude,
                                         isoCountryCode: address.isoCountryCode == "" ? "NO":address.isoCountryCode ?? "NO",
                                         address: address),
-                                    //                                        labels: [],
                                     state: .progress(index / Double(total))
                                 )
                             )
-                            
+
                             try await Task.sleep(nanoseconds: 1_500_000_000)
                         }
-                        
+
                         continuation.finish()
                     } catch {
                         continuation.finish(throwing: error)
@@ -189,10 +251,9 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
             }
         }
     }
-    
-    // MARK: - Private
+
     private func execute(
-        stream: @escaping () async throws  -> AsyncThrowingStream<ProgressAnalysis, Error>?
+        stream: @escaping () async throws -> AsyncThrowingStream<ProgressAnalysis, Error>?
     ) -> AsyncThrowingStream<ProgressAnalysis, Error> {
         AsyncThrowingStream { continuation in
             Task {
@@ -201,7 +262,7 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                         continuation.finish()
                         return
                     }
-                    
+
                     for try await progress in analysisStream {
                         try await dataRepository.saveAndUpdateLabels(
                             photo: progress.photo,
@@ -216,27 +277,38 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
             }
         }
     }
-    
+
     private func isKorea(latitude: Double, longitude: Double) -> Bool {
         // 한국 바운딩 박스로 1차 필터 — 폴리곤 순회보다 훨씬 빠름
         return (32.0...39.5).contains(latitude) &&
                (123.5...132.5).contains(longitude)
     }
-    
-    private func timeLog(sec: Double) {
-        
-        let hour = Int(sec / 3600)
-        let min = Int(sec.truncatingRemainder(dividingBy: 3600) / 60)
-        let sec = Int(sec.truncatingRemainder(dividingBy: 60))
-        
-        if hour != 0 {
-            print(hour, "시간")
-        }
-        if min != 0 {
-            print(min, "분")
-        }
-        if sec != 0 {
-            print(sec, "초")
-        }
+}
+
+/// 라벨+얼굴 분석과 주소 변환이 동시에 진행될 때 각각의 최신 진행률을 가중합해서 하나의 진행률로 합친다.
+private actor ProgressCombiner {
+    private let labelWeight: Double
+    private let addressWeight: Double
+
+    private var labelRatio: Double = 0
+    private var addressRatio: Double = 0
+
+    init(labelWeight: Double, addressWeight: Double) {
+        self.labelWeight = labelWeight
+        self.addressWeight = addressWeight
+    }
+
+    private var combined: Double {
+        labelRatio * labelWeight + addressRatio * addressWeight
+    }
+
+    func updateLabel(_ ratio: Double) -> Double {
+        labelRatio = ratio
+        return combined
+    }
+
+    func updateAddress(_ ratio: Double) -> Double {
+        addressRatio = ratio
+        return combined
     }
 }

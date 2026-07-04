@@ -26,7 +26,7 @@ extension AlbumEntity {
             from: from
         )
     }
-    
+
     func toDomainWithKey() -> Album {
         Album(
             id: id,
@@ -43,7 +43,7 @@ extension AlbumEntity {
             from: from
         )
     }
-    
+
     func toDomainWithPhoto() -> Album {
         Album(
             id: id,
@@ -60,7 +60,7 @@ extension AlbumEntity {
             from: from
         )
     }
-    
+
     func toDomainAll() -> Album {
         Album(
             id: id,

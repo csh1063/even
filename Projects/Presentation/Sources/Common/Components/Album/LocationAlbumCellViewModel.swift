@@ -10,16 +10,16 @@ import UIKit
 import Domain
 
 struct LocationAlbumCellViewModel: AlbumCellViewModel {
-    
+
     var id: UUID
     var localIdentifier: String
     var displayName: String
     var formattedDate: String
     var photoCount: Int
-    
+
     var album: Album
     var imageLoader: any ImageLoadable
-    
+
     let subText: String           // 구/군 ex) "마포구 · 성동구"
     let isMost: Bool
     let pinColor: UIColor
@@ -32,12 +32,12 @@ struct LocationAlbumCellViewModel: AlbumCellViewModel {
         self.photoCount = album.photoCount
         self.album = album
         self.imageLoader = imageLoader
-        
+
         self.isMost               = isMost
         self.pinColor             = isMost ? Theme.primary : Theme.secondary
 
         self.subText = album.keywords.joined(separator: ", ")
-        
+
         print("album.displayName:", album.displayName, ", subText:", subText)
     }
 
@@ -50,7 +50,7 @@ struct LocationAlbumCellViewModel: AlbumCellViewModel {
         self.photoCount           = vm.photoCount
         self.album = vm.album
         self.imageLoader = vm.imageLoader
-        
+
         self.subText              = vm.subText
         self.isMost               = isMost
         self.pinColor             = isMost ? Theme.primary : Theme.secondary

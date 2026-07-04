@@ -12,9 +12,9 @@ import Combine
 
 @MainActor
 public final class MainCoordinator: BaseCoordinator {
-    
+
     public var logout = PassthroughSubject<Bool, Never>()
-    
+
     private let mainDIConatiner: MainDIContainer
     private let window: UIWindow
     private var rootVC: UIViewController?
@@ -22,7 +22,7 @@ public final class MainCoordinator: BaseCoordinator {
     public init(container: MainDIContainer, window: UIWindow) {
         self.mainDIConatiner = container
         self.window = window
-        
+
         super.init()
     }
 

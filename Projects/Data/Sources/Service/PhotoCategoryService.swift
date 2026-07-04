@@ -10,7 +10,7 @@ import Foundation
 import Domain
 
 public final class PhotoCategoryService {
-    
+
     // MARK: - 단어 목록 로드
     private var photoCategories: [String: [String]] = {
         let bundle = Bundle.module
@@ -20,7 +20,7 @@ public final class PhotoCategoryService {
         else { return [:] }
         return array
     }()
-    
+
     private var photoCategoriesRule: [String: AlbumRule] = {
         let bundle = Bundle.module
         guard let url = bundle.url(forResource: "PhotoCategoriesRule", withExtension: "json"),
@@ -29,14 +29,14 @@ public final class PhotoCategoryService {
         else { return [:] }
         return array
     }()
-    
+
     public init() {
     }
-    
-    public func fetchCategories() async throws-> [String: [String]] {
+
+    public func fetchCategories() async throws -> [String: [String]] {
         return photoCategories
     }
-    
+
     public func fetchRuleCategories() async throws -> [String: AlbumRule] {
         return photoCategoriesRule
     }

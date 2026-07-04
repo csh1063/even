@@ -1,10 +1,10 @@
 import ProjectDescription
 
 extension Project {
-    
-    static let bundleId = "com.sanghyeon.moa"
+
+    static let bundleId = "com.baci.moa"
     static let iosVersion = "17.0"
-    
+
     /// Helper function to create the Project for this ExampleApp
     public static func app(
         module: Module,
@@ -20,7 +20,7 @@ extension Project {
             resources: resources,
             coreDataModels: coreDataModels)
     }
-    
+
     public static func framework(module: Module,
                                  dependencies: [TargetDependency] = [],
                                  resources: ProjectDescription.ResourceFileElements? = nil,
@@ -61,7 +61,7 @@ extension Project {
                         resources: resources,
                         dependencies: dependencies,
                         coreDataModels: coreDataModels
-                    ),
+                    )
 //                    makeTarget(
 //                        name: "\(name)Tests",
 //                        product: .unitTests,
@@ -75,7 +75,7 @@ extension Project {
                 ],
                 schemes: schemes)
         }
-    
+
     private static func makeTarget(
         module: Module,
         product: Product,
@@ -84,7 +84,7 @@ extension Project {
         resources: ProjectDescription.ResourceFileElements? = nil,
         dependencies: [TargetDependency] = [],
         coreDataModels: [CoreDataModel] = []) -> Target {
-            
+
             return .target(
                 name: module.name,
                 destinations: .iOS,
@@ -115,7 +115,7 @@ public extension TargetDependency {
 //    "GTMSessionFetcher": .framework,
 //    "nanopb": .framework,
 //    "FirebaseSharedSwift": .framework,
-    
+
 //    static let kingfisher: TargetDependency      = .external(name: "Kingfisher")
 //    static let lottie: TargetDependency          = .external(name: "Lottie")
 }

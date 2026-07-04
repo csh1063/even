@@ -12,7 +12,7 @@ public struct ImageData<T> {
     public let cgImage: T?
 //    let width: CGFloat
 //    let height: CGFloat
-    
+
     public init(cgImage: T?) {
         self.cgImage = cgImage
     }

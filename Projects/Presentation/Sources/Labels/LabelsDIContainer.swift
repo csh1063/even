@@ -15,7 +15,7 @@ public final class LabelsDIContainer {
     private let photoDataRepository: PhotoDataRepository
     private let photoLabelDataRepository: PhotoLabelDataRepository
     private let isLabel: Bool
-    
+
     public init(isLabel: Bool,
                 photoDataRepository: PhotoDataRepository,
                 photoLabelDataRepository: PhotoLabelDataRepository) {
@@ -23,14 +23,14 @@ public final class LabelsDIContainer {
         self.photoDataRepository = photoDataRepository
         self.photoLabelDataRepository = photoLabelDataRepository
     }
-    
+
     func makeLabelsViewModel(pop: @escaping () -> Void) -> LabelsViewModel {
-        
+
         let useCase = DefaultPhotoLabelUseCase(
             photoRepository: photoDataRepository,
             labelRepository: photoLabelDataRepository
         )
-        
+
         return LabelsViewModel(isLabel: isLabel, useCase: useCase, pop: pop)
     }
 }

@@ -1,5 +1,5 @@
 import UIKit
-//import Instabug
+// import Instabug
 
 extension UIViewController {
     enum SignCloseType {

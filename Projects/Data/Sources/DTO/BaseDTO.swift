@@ -6,7 +6,6 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
-
 import Foundation
 
 struct BaseDTO<T: Decodable>: Decodable {
@@ -16,4 +15,3 @@ struct BaseDTO<T: Decodable>: Decodable {
 
 struct BaseNil: Decodable {
 }
-

@@ -6,10 +6,10 @@
 ////  Copyright © 2026 sanghyeon. All rights reserved.
 ////
 //
-//import Foundation
+// import Foundation
 //
-//@MainActor
-//final class HomeDIContainer {
+// @MainActor
+// final class HomeDIContainer {
 //
 //    let appDIContainer: AppDIContainer
 //
@@ -37,4 +37,4 @@
 ////        id: String
 ////    ) -> HomeDetailViewModel {
 ////    }
-//}
+// }

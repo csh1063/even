@@ -10,67 +10,67 @@ import Foundation
 import Domain
 
 public final class DefaultUserDefaultRepository: UserDefaultRepository {
-    
+
     private let service: UserDefaultsService
-    
+
     private var now: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         return formatter.string(from: Date())
     }
-    
+
     init(service: UserDefaultsService) {
         self.service = service
     }
-    
+
     public func saveAnalyzedDate() async throws {
         service.set(now, forK: UserDefaultsKey.lastAnalyzedDate)
     }
-    
+
     public func fetchAnalyzedDate() async throws -> String {
         service.string(UserDefaultsKey.lastAnalyzedDate)
     }
-    
+
     public func resetAnalyzedDate() async throws {
         service.set("", forK: UserDefaultsKey.lastAnalyzedDate)
     }
-    
+
     public func saveLocationAnalyzedDate() async throws {
         service.set(now, forK: UserDefaultsKey.lastLocationAnalyzedDate)
     }
-    
+
     public func fetchLocationAnalyzedDate() async throws -> String {
         service.string(UserDefaultsKey.lastLocationAnalyzedDate)
     }
-    
+
     public func saveDisplayMode(_ mode: String) async throws {
         service.set(mode, forK: UserDefaultsKey.displayMode)
     }
-    
+
     public func fetchDisplayMode() async throws -> String {
         service.string(UserDefaultsKey.displayMode)
     }
-    
+
     public func saveAutoNewAnalysis(isOn: Bool) async throws {
         service.set(isOn, forK: UserDefaultsKey.autoNewAnalysis)
     }
-    
+
     public func fetchAutoNewAnalysis() async throws -> Bool? {
         service.bool(UserDefaultsKey.autoNewAnalysis)
     }
-    
+
     public func saveOnboarding(isShown: Bool) async throws {
         service.set(isShown, forK: UserDefaultsKey.showOnboarding)
     }
-    
+
     public func showOnboarding() async throws -> Bool {
         service.bool(UserDefaultsKey.showOnboarding) ?? false
     }
-    
+
     public func saveConsent(isShown: Bool) async throws {
         service.set(isShown, forK: UserDefaultsKey.showConsent)
     }
-    
+
     public func showConsent() async throws -> Bool {
         service.bool(UserDefaultsKey.showConsent) ?? false
     }

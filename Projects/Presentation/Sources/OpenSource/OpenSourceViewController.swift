@@ -15,12 +15,12 @@ final class OpenSourceViewController: UIViewController {
     // MARK: - Properties
     private let viewModel = OpenSourceViewModel()
     private var expandedIndexes: Set<Int> = []
-    
+
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - UI
-    private var naviView: NaviBarView = NaviBarView()
-    
+    private var naviView = NaviBarView()
+
     private lazy var tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .plain)
         tableView.delegate = self
@@ -43,26 +43,26 @@ final class OpenSourceViewController: UIViewController {
     private func setupUI() {
         title = "오픈소스 라이선스"
         view.backgroundColor = Theme.background
-        
+
         naviView.setTitle("오픈소스 라이선스")
         naviView.addButtons([LeftButton(type: .back)])
 
         view.addSubview(tableView)
         view.addSubview(naviView)
-        
+
         naviView.snp.makeConstraints { make in
             make.top.leading.trailing.equalToSuperview()
         }
-        
+
         tableView.snp.makeConstraints { make in
             make.top.equalTo(naviView.snp.bottom)
             make.leading.trailing.bottom.equalToSuperview()
         }
     }
-    
+
     private func binding() {
         naviView.publisher
-            .sink { type in
+            .sink { _ in
                 self.navigationController?.popViewController(animated: true)
             }
             .store(in: &cancellables)

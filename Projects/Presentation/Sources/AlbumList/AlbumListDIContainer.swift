@@ -15,7 +15,7 @@ public final class AlbumListDIContainer {
     private let photoLibraryRepository: PhotoLibraryRepository
     private let albumDataRepository: AlbumDataRepository
     private let photoLabelDataRepository: PhotoLabelDataRepository
-    
+
     private let from: String
 
     public init(from: String,
@@ -29,20 +29,20 @@ public final class AlbumListDIContainer {
     }
 
     func makeAlbumListViewModel() -> AlbumListViewModel {
-        
+
         let imageUseCase = DefaultPhotoImageUseCase(
             repository: photoLibraryRepository
         )
-        
+
         let albumUseCase = DefaultAlbumUseCase(
             albumRepository: albumDataRepository
         )
-        
+
         return AlbumListViewModel(from: from,
                                   imageUseCase: imageUseCase,
                                   albumUseCase: albumUseCase)
     }
-    
+
     func makeDetailDIContainer(album: Album, isSelectMode: Bool) -> AlbumDetailDIContainer {
         AlbumDetailDIContainer(
             album: album,

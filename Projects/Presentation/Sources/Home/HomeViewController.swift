@@ -6,12 +6,12 @@
 ////  Copyright © 2025 sanghyeon. All rights reserved.
 ////
 //
-//import Foundation
-//import UIKit
-//import Combine
-//import Domain
+// import Foundation
+// import UIKit
+// import Combine
+// import Domain
 //
-//final class HomeViewController: BaseViewController {
+// final class HomeViewController: BaseViewController {
 //    
 //    private var naviView: UIView = UIView()
 //    private var mainLabel: UILabel = UILabel()
@@ -119,9 +119,9 @@
 //            make.leading.trailing.bottom.equalTo(self.view)
 //        }
 //    }
-//}
+// }
 //
-//extension HomeViewController {
+// extension HomeViewController {
 //    
 //    // DataSource 설정
 ////    private func configureDataSource() {
@@ -164,4 +164,4 @@
 ////        // 데이터가 바뀌면 Diff알고리즘이 알아서 계산해서 업데이트합니다.
 ////        dataSource.apply(snapshot, animatingDifferences: true)
 ////    }
-//}
+// }

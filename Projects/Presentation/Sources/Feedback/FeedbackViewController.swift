@@ -26,7 +26,7 @@ final class FeedbackViewController: UIViewController {
         ])
         return naviView
     }()
-    
+
     private let scrollView = UIScrollView()
     private let contentView = UIView()
 
@@ -141,10 +141,10 @@ final class FeedbackViewController: UIViewController {
         binding()
         setupKeyboardObserver()
     }
-    
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
+
         self.textView.becomeFirstResponder()
     }
 
@@ -169,11 +169,11 @@ final class FeedbackViewController: UIViewController {
     }
 
     private func setupConstraints() {
-        
+
         naviView.snp.makeConstraints { make in
             make.top.leading.trailing.equalToSuperview()
         }
-        
+
         submitButton.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview().inset(20)
             $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(16)
@@ -236,11 +236,11 @@ final class FeedbackViewController: UIViewController {
 //            $0.bottom.equalToSuperview().inset(20)
 //        }
     }
-    
+
     private func binding() {
-        
+
         let output = viewModel.transForm()
-        
+
         output.isSubmitEnabled
             .receive(on: DispatchQueue.main)
             .sink { [weak self] enabled in
@@ -277,7 +277,7 @@ final class FeedbackViewController: UIViewController {
                 }
             }
             .store(in: &cancellables)
-        
+
         naviView.publisher
             .sink { type in
                 switch type {
@@ -287,7 +287,7 @@ final class FeedbackViewController: UIViewController {
                 }
             }
             .store(in: &cancellables)
-        
+
 //        typeSegmentControl.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
         typeSegmentControl.selectedPublisher
             .receive(on: DispatchQueue.main)
@@ -298,11 +298,11 @@ final class FeedbackViewController: UIViewController {
                 case .feature: self?.placeholderLabel.text = "제안하실 기능을 입력해주세요"
                 case .bug:     self?.placeholderLabel.text = "발생한 문제를 자세히 설명해주세요"
                 }
-                
+
                 self?.viewModel.send(.changeSegment(type))
             }
             .store(in: &cancellables)
-        
+
         submitButton.addTarget(self, action: #selector(submitTapped), for: .touchUpInside)
 //        reviewButton.addTarget(self, action: #selector(reviewTapped), for: .touchUpInside)
 

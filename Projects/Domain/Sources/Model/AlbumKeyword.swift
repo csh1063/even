@@ -11,7 +11,7 @@ import Foundation
 public struct AlbumKeyword {
     public let keyword: String
     public let weight: Float
-    
+
     public init(keyword: String, weight: Float = 1.0) {
         self.keyword = keyword
         self.weight = weight

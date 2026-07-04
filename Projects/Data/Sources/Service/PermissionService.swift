@@ -11,11 +11,11 @@ import Domain
 import Photos
 
 public final class PermissionService {
-    
+
     public init() {}
-    
+
     public func checkPermission() async throws -> PhotoPermission {
-        
+
         let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
         switch status {
         case .authorized: return .fullAccess
@@ -31,5 +31,5 @@ public final class PermissionService {
         default: return .denied
         }
     }
-    
+
 }

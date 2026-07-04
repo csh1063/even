@@ -10,13 +10,13 @@ import Foundation
 import Domain
 
 public final class DefaultPermissionRepository: PermissionRepository {
-    
+
     private let service: PermissionService
-    
+
     init(service: PermissionService) {
         self.service = service
     }
-    
+
     public func checkPermission() async throws -> PhotoPermission {
         try await service.checkPermission()
     }
