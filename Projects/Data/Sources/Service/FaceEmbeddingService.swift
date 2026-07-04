@@ -18,7 +18,7 @@ public actor FaceEmbeddingService {
     private let inputSize = CGSize(width: 112, height: 112)
 
     private lazy var model: MLModel? = {
-        guard let url = Bundle.module.url(forResource: "AdaFace_IR50", withExtension: "mlmodelc") else {
+        guard let url = Bundle.module.url(forResource: "AdaFace_IR18", withExtension: "mlmodelc") else {
             print("FaceEmbeddingService: AdaFace_IR18.mlmodelc를 찾을 수 없음")
             return nil
         }

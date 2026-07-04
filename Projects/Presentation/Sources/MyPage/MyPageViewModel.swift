@@ -183,7 +183,7 @@ final class MyPageViewModel: BaseViewModel {
 
     private func cells() {
 
-        let analyzedItems = if analyzedDate == "-" {
+        var analyzedItems = if analyzedDate == "-" {
             [
                 MyCellData(type: .analyzedDate, value: analyzedDate),
                 MyCellData(type: .analysis)
@@ -193,10 +193,14 @@ final class MyPageViewModel: BaseViewModel {
                 MyCellData(type: .analyzedDate, value: analyzedDate),
                 MyCellData(type: .analysis),
                 MyCellData(type: .travelAlbum),
-                MyCellData(type: .reAutoAlbum),
-//                MyCellData(type: .reAnalysis),
-                MyCellData(type: .reset)
+                MyCellData(type: .reAutoAlbum)
+//                MyCellData(type: .reAnalysis)
             ]
+        }
+
+        // 분석이 중간에 끊겨 analyzedDate가 아직 "-"여도, 조금이라도 분석된 사진이 있으면 reset은 보여준다
+        if photoCount > unanalysisCount {
+            analyzedItems.append(MyCellData(type: .reset))
         }
 
         self.cellTypes = [
