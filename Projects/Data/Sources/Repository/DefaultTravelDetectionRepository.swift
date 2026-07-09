@@ -11,21 +11,21 @@ import Foundation
 import CoreLocation
 
 public final class DefaultTravelDetectionRepository: TravelDetectionRepository {
-    
+
     private let timeGapThreshold: TimeInterval = 2 * 24 * 60 * 60
-    private let moveDistanceThreshold: Double = 55_000
+    private let moveDistanceThreshold: Double = 50_000
     private let stayDistanceThreshold: Double = 20_000
     private let minimumClusterSize: Int = 10
     private let localityDominanceThreshold: Double = 0.7
     private let geocodingSampleGridSize: Double = 100  // 1km = 0.01도 → 100 = 1/100 = 0.01
-    private let homeZoneRadius: Double = 20_000     
-    
+    private let homeZoneRadius: Double = 20_000
+
     private let geocoderService: GeocoderService
-    
+
     public init(geocoderService: GeocoderService) {
         self.geocoderService = geocoderService
     }
-    
+
     public func detect(from photos: [PhotoLocationSnapshot], homeZones: [HomeZone]) async throws -> [TravelCluster] {
         let located = photos
             .filter { $0.latitude != 0 || $0.longitude != 0 }
@@ -33,32 +33,43 @@ public final class DefaultTravelDetectionRepository: TravelDetectionRepository {
             .map { ($0, CLLocation(latitude: $0.latitude, longitude: $0.longitude)) }
 
         guard !located.isEmpty else { return [] }
-        
+
+        // 홈존별 대표 주소를 미리 한 번만 계산해서, 제거 로그 찍을 때 매번 다시 찾지 않도록 함
+        let homeZoneAddresses = homeZones.map { zoneAddress($0, allPhotos: photos) }
+
         var rawClusters: [[(PhotoLocationSnapshot, CLLocation)]] = []
         var current: [(PhotoLocationSnapshot, CLLocation)] = [located[0]]
-        
+
         for i in 1..<located.count {
             let (prevSnapshot, prevLocation) = located[i - 1]
             let (currSnapshot, currLocation) = located[i]
-            
-            if isInHomeZone(currSnapshot, homeZones: homeZones) {
-                print("홈존으로 제거", currSnapshot.country, currSnapshot.administrativeArea, currSnapshot.locality)
+
+            if let zoneIdx = homeZoneIndex(currSnapshot, homeZones: homeZones) {
+                let components = [currSnapshot.country, currSnapshot.administrativeArea, currSnapshot.locality, currSnapshot.subLocality]
+                    .compactMap { $0 }
+                    .filter { !$0.isEmpty }
+                    .reduce(into: [String]()) { result, value in
+                        if !result.contains(value) {
+                            result.append(value)
+                        }
+                    }.joined(separator: ", ")
+//                print("홈존 \(homeZoneAddresses[zoneIdx]) / 홈존으로제거 \(components)")
                 rawClusters.append(current)
                 current = []
                 continue
             }
-            
+
             // prev가 홈존이었으면 gap/distance 계산 스킵하고 그냥 추가
-            if isInHomeZone(prevSnapshot, homeZones: homeZones) {
+            if homeZoneIndex(prevSnapshot, homeZones: homeZones) != nil {
 //                current.append(located[i])
                 current = [located[i]]
                 continue
             }
-            
+
             let gap = currSnapshot.createdAt.timeIntervalSince(prevSnapshot.createdAt)
             let distance = currLocation.distance(from: prevLocation)
             let isNormalStepping = gap < timeGapThreshold && distance < moveDistanceThreshold
-            
+
 //            if gap / 86400 > 5 && isNormalStepping {
 //                print("⚠️ 6일 이상 gap인데 묶임: \(gap / 86400)일, distance: \(distance)")
 //                print("prev: \(prevSnapshot.createdAt), \(prevSnapshot.locality)")
@@ -67,7 +78,7 @@ public final class DefaultTravelDetectionRepository: TravelDetectionRepository {
 //            print("gap days: \(gap / 86400), distance: \(distance), isNormalStepping: \(isNormalStepping)")
 //            print("prev: \(prevSnapshot.createdAt), \(prevSnapshot.locality)")
 //            print("curr: \(currSnapshot.createdAt), \(currSnapshot.locality)")
-            
+
             if isNormalStepping {
                 current.append(located[i])
             } else {
@@ -75,53 +86,120 @@ public final class DefaultTravelDetectionRepository: TravelDetectionRepository {
                 current = [located[i]]
             }
         }
-        
+
         rawClusters.append(current)
-        
+
         let filteredClusters = rawClusters.filter { $0.count >= minimumClusterSize }
-        
-        var result: [TravelCluster] = []
+
+        var initialClusters: [TravelCluster] = []
         for raw in filteredClusters {
             let snapshots = raw.map { $0.0 }
             if let cluster = try await makeTravelCluster(from: snapshots) {
-                result.append(cluster)
+                initialClusters.append(cluster)
             }
         }
-        return result
+        // ⭐️ [여기서 합치기] 주소와 날짜가 겹치거나 이어지는 앨범 병합 로직 ⭐️
+        guard !initialClusters.isEmpty else { return [] }
+
+        var mergedClusters: [TravelCluster] = []
+        // 날짜 순서대로 정렬되어 있다고 보장되지만 확정성을 위해 재정렬
+        let sortedClusters = initialClusters.sorted { $0.startDate < $1.startDate }
+
+        var currentCluster = sortedClusters[0]
+
+        for nextCluster in sortedClusters.dropFirst() {
+            // 같은 도(administrativeArea) 이거나 같은 시/군/구(locality)인지 체크 (둘 다 비어있지 않아야 함)
+            let isSameRegion = (!(currentCluster.locality ?? "").isEmpty && currentCluster.locality == nextCluster.locality) ||
+            (!currentCluster.administrativeArea.isEmpty && currentCluster.administrativeArea == nextCluster.administrativeArea)
+
+            // 두 여행 사이의 시간 간격이 2일(timeGapThreshold) 이하로 연속되는지 체크
+            let isTimeConnected = nextCluster.startDate.timeIntervalSince(currentCluster.endDate) <= timeGapThreshold
+
+            if isSameRegion && isTimeConnected {
+                // 하나로 합치기: 사진 배열을 합치고 날짜 범위를 업데이트
+                let combinedPhotos = (currentCluster.photos + nextCluster.photos).sorted { $0.createdAt < $1.createdAt }
+
+                // 두 클러스터의 주소 데이터 병합 처리 (더 빈도가 높거나 대표성 있는 값 유지)
+                currentCluster = TravelCluster(
+                    photos: combinedPhotos,
+                    country: currentCluster.country.isEmpty ? nextCluster.country : currentCluster.country,
+                    administrativeArea: currentCluster.administrativeArea.isEmpty ? nextCluster.administrativeArea : currentCluster.administrativeArea,
+                    locality: (currentCluster.locality ?? "").isEmpty ? nextCluster.locality : currentCluster.locality,
+                    subLocality: (currentCluster.subLocality ?? "").isEmpty ? nextCluster.subLocality : currentCluster.subLocality,
+                    isoCountryCode: currentCluster.isoCountryCode.isEmpty ? nextCluster.isoCountryCode : currentCluster.isoCountryCode,
+                    startDate: min(currentCluster.startDate, nextCluster.startDate),
+                    endDate: max(currentCluster.endDate, nextCluster.endDate)
+                )
+            } else {
+                // 조건이 안 맞으면 지금까지 모은 걸 저장하고 새 기준으로 전환
+                mergedClusters.append(currentCluster)
+                currentCluster = nextCluster
+            }
+        }
+        mergedClusters.append(currentCluster) // 마지막 남은 앨범 추가
+
+        return mergedClusters
+//        return result
     }
-    
-    private func isInHomeZone(_ photo: PhotoLocationSnapshot, homeZones: [HomeZone]) -> Bool {
+
+    private func homeZoneIndex(_ photo: PhotoLocationSnapshot, homeZones: [HomeZone]) -> Int? {
         let location = CLLocation(latitude: photo.latitude, longitude: photo.longitude)
-        return homeZones.contains { zone in
+        return homeZones.firstIndex { zone in
             let zoneLocation = CLLocation(latitude: zone.latitude, longitude: zone.longitude)
             return location.distance(from: zoneLocation) < homeZoneRadius
         }
     }
-    
+
+    // 홈존 위경도 기준으로 가장 가까운 사진의 주소를 찾아 사람이 알아볼 수 있는 문자열로 변환
+    private func zoneAddress(_ zone: HomeZone, allPhotos: [PhotoLocationSnapshot]) -> String {
+        let zoneLocation = CLLocation(latitude: zone.latitude, longitude: zone.longitude)
+        guard let nearest = allPhotos
+            .filter({ $0.latitude != 0 || $0.longitude != 0 })
+            .min(by: {
+                CLLocation(latitude: $0.latitude, longitude: $0.longitude).distance(from: zoneLocation)
+                < CLLocation(latitude: $1.latitude, longitude: $1.longitude).distance(from: zoneLocation)
+            })
+        else {
+            return "주소 확인 불가 (lat: \(zone.latitude), lng: \(zone.longitude))"
+        }
+
+        let components = [nearest.country, nearest.administrativeArea, nearest.locality, nearest.subLocality]
+            .compactMap { $0 }
+            .filter { !$0.isEmpty }
+            .reduce(into: [String]()) { result, value in
+                if !result.contains(value) { result.append(value) }
+            }
+
+        return components.isEmpty ? "주소 확인 불가 (lat: \(zone.latitude), lng: \(zone.longitude))" : components.joined(separator: ", ")
+    }
+
     private func makeTravelCluster(from photos: [PhotoLocationSnapshot]) async throws -> TravelCluster? {
         guard !photos.isEmpty else { return nil }
-        
+
         let dates = photos.map { $0.createdAt }
         guard let startDate = dates.min(), let endDate = dates.max() else { return nil }
-        
+
         // 1. 주소 있는 사진에서 먼저 수집
+        let subLocalities = photos.compactMap { $0.subLocality }.filter { !$0.isEmpty}
         let localities = photos.compactMap { $0.locality }.filter { !$0.isEmpty }
         let administrativeAreas = photos.compactMap { $0.administrativeArea }.filter { !$0.isEmpty }
         let countries = photos.compactMap { $0.country }.filter { !$0.isEmpty }
         let isoCountryCodes = photos.compactMap { $0.isoCountryCode }.filter { !$0.isEmpty }
-        
+
         // 2. 주소 없는 사진이 많으면 geocoding으로 보충
-        let withoutAddress = photos.filter { $0.locality == nil && $0.administrativeArea == nil }
+        let withoutAddress = photos.filter { $0.isoCountryCode == nil }
+        var geocodedSubLocalities: [String] = []
         var geocodedLocalities: [String] = []
         var geocodedAdministrativeAreas: [String] = []
         var geocodedCountries: [String] = []
         var geocodedIsoCodes: [String] = []
-        
+
         if !withoutAddress.isEmpty {
             let samples = sampleByGrid(withoutAddress)
             for snapshot in samples {
                 let location = CLLocation(latitude: snapshot.latitude, longitude: snapshot.longitude)
                 if let photoLocation = try? await geocoderService.fetchAddress(from: location, locale: Locale(identifier: "ko")) {
+                    if let s = photoLocation.subLocality { geocodedSubLocalities.append(s) }
                     if let l = photoLocation.locality { geocodedLocalities.append(l) }
                     if let a = photoLocation.administrativeArea { geocodedAdministrativeAreas.append(a) }
                     if let c = photoLocation.country { geocodedCountries.append(c) }
@@ -129,29 +207,32 @@ public final class DefaultTravelDetectionRepository: TravelDetectionRepository {
                 }
             }
         }
-        
+
+        let allSubLocalities = subLocalities + geocodedSubLocalities
         let allLocalities = localities + geocodedLocalities
         let allAdministrativeAreas = administrativeAreas + geocodedAdministrativeAreas
         let allCountries = countries + geocodedCountries
         let allCodes = isoCountryCodes + geocodedIsoCodes
-        
-        // 3. 폴더명 결정
+
+        // 3. 앨범명 결정
+        let subLocality = mostFrequent(allSubLocalities) ?? ""
         let locality = resolveAlbumLocality(localities: allLocalities, administrativeAreas: allAdministrativeAreas)
         let administrativeArea = mostFrequent(allAdministrativeAreas) ?? ""
         let country = mostFrequent(allCountries) ?? ""
         let isoCode = mostFrequent(allCodes) ?? ""
-        
+
         return TravelCluster(
             photos: photos,
             country: country,
             administrativeArea: administrativeArea,
             locality: locality,
+            subLocality: subLocality,
             isoCountryCode: isoCode,
             startDate: startDate,
             endDate: endDate
         )
     }
-    
+
     // 1km 그리드로 대표 좌표 샘플링
     private func sampleByGrid(_ photos: [PhotoLocationSnapshot]) -> [PhotoLocationSnapshot] {
         let grouped = Dictionary(grouping: photos) { snapshot -> String in
@@ -161,29 +242,42 @@ public final class DefaultTravelDetectionRepository: TravelDetectionRepository {
         }
         return grouped.values.compactMap { $0.first }
     }
-    
+
     // locality 분포 보고 시/도 결정
     private func resolveAlbumLocality(localities: [String], administrativeAreas: [String]) -> String? {
         guard !localities.isEmpty else {
             return administrativeAreas.isEmpty ? nil : mostFrequent(administrativeAreas)
         }
-        
+
         let counts = localities.reduce(into: [:]) { $0[$1, default: 0] += 1 }
         let total = localities.count
-        
+
         if let top = counts.max(by: { $0.value < $1.value }) {
             let dominance = Double(top.value) / Double(total)
             if counts.keys.count == 1 || dominance >= localityDominanceThreshold {
                 return top.key  // 시 단위
             }
         }
-        
+
         return mostFrequent(administrativeAreas)  // 도 단위
     }
-    
+
     private func mostFrequent(_ values: [String]) -> String? {
-        guard !values.isEmpty else { return nil }
+//        guard !values.isEmpty else { return nil }
+//        let counts = values.reduce(into: [:]) { $0[$1, default: 0] += 1 }
+//        return counts.max(by: { $0.value < $1.value })?.key
+        guard !values.isEmpty else {
+//            print("🚨 디버깅: values 배열이 완전히 비어있음!")
+            return nil
+        }
+//        print("디버깅 - values 목록: \(values)")
+
         let counts = values.reduce(into: [:]) { $0[$1, default: 0] += 1 }
-        return counts.max(by: { $0.value < $1.value })?.key
+//        print("📊 디버깅: 카운트 결과 딕셔너리 -> \(counts)")
+
+        let maxTuple = counts.max(by: { $0.value < $1.value })
+//        print("🏆 디버깅: max가 찾은 결과 -> \(String(describing: maxTuple))")
+
+        return maxTuple?.key
     }
 }

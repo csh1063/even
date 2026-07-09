@@ -9,7 +9,7 @@
 import SwiftData
 
 public enum MoaSchemaV0: VersionedSchema {
-    public static let versionIdentifier = Schema.Version(0, 0, 3)
+    public static let versionIdentifier = Schema.Version(0, 0, 4)
     public static let models: [any PersistentModel.Type] = [
         PhotoEntity.self,
         AlbumEntity.self,

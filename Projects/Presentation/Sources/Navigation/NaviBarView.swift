@@ -15,26 +15,26 @@ import Combine
 final class NaviBarView: UIView {
 
     private let type: NaviBarType
-    
+
     private let blurView = UIView()
     private let coverView = UIView()
     private let stackView: UIStackView = {
         let stackView = UIStackView()
-        
+
         stackView.axis = .horizontal
         stackView.distribution = .fillProportionally
         stackView.spacing = 4
-        
+
         return stackView
     }()
-    
+
     private var buttons: [NaviBarButton] = []
-    
+
     private lazy var logoImageView = UIImageView()
-    
-    private lazy var titleLabel: UILabel = UILabel()
-    private lazy var messageLabel: UILabel = UILabel()
-    
+
+    private lazy var titleLabel = UILabel()
+    private lazy var messageLabel = UILabel()
+
     var publisher: AnyPublisher<NaviBarButtonType, Never> {
         let publishers = buttons.map { $0.publisher }
         return Publishers.MergeMany(publishers).eraseToAnyPublisher()
@@ -57,7 +57,7 @@ final class NaviBarView: UIView {
     required init?(coder: NSCoder) {
         fatalError("NaviBarView does not support NSCoding.")
     }
-    
+
     public func setTitle(_ title: String,
                          color: UIColor = Theme.textPrimary,
                          font: UIFont = .systemFont(ofSize: 20)) {
@@ -65,7 +65,7 @@ final class NaviBarView: UIView {
         self.titleLabel.textColor = color
         self.titleLabel.font = font
     }
-    
+
     public func setMessage(_ message: String,
                            color: UIColor = Theme.textPrimary,
                            font: UIFont = .systemFont(ofSize: 20)) {
@@ -73,21 +73,22 @@ final class NaviBarView: UIView {
         self.messageLabel.textColor = color
         self.messageLabel.font = font
     }
-    
+
     public func setHeight(_ height: CGFloat) {
 
         stackView.snp.updateConstraints { make in
             make.height.equalTo(height)
         }
     }
-    
+
     public func addButtons(_ settings: [NaviButtonSetting]) {
+        self.clearButtons()
         self.buttons = settings.map { [weak self] setting in
-            
+
             let button = NaviBarButton(type: setting.type)
             button.tintAdjustmentMode = .normal
 //            button.buttonTintColor = setting.color
-            
+
             if setting.isLeft {
                 self?.stackView.insertArrangedSubview(button, at: 0)
 //                button.snp.makeConstraints { make in
@@ -109,7 +110,7 @@ final class NaviBarView: UIView {
             }
         }
     }
-    
+
     // MARK: - Setup
     private func setupAppearance(isBlur: Bool) {
         if isBlur {
@@ -128,7 +129,7 @@ final class NaviBarView: UIView {
         blurView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
-        
+
         coverView.snp.makeConstraints { make in
             make.leading.equalToSuperview().offset(16)
             make.trailing.equalToSuperview().offset(-16)
@@ -136,11 +137,11 @@ final class NaviBarView: UIView {
             make.bottom.lessThanOrEqualToSuperview()
             make.height.equalTo(44)
         }
-        
+
         stackView.snp.makeConstraints { make in
             make.edges.equalTo(coverView)
         }
-        
+
         switch self.type {
         case .logo:
             logoImageView.contentMode = .scaleAspectFit
@@ -152,7 +153,7 @@ final class NaviBarView: UIView {
             switch titleAlign {
             case .center:
                 titleLabel.textAlignment = .center
-                
+
                 self.addSubview(titleLabel)
                 titleLabel.snp.makeConstraints { make in
                     make.center.equalTo(stackView)
@@ -165,13 +166,13 @@ final class NaviBarView: UIView {
                 coverView.addSubview(messageLabel)
                 messageLabel.snp.makeConstraints { make in
                     make.top.equalTo(coverView.snp.bottom).offset(6)
-                    make.bottom.equalTo(self)
+                    make.bottom.equalTo(self).offset(-8)
                     make.leading.equalTo(titleLabel)
                 }
             }
         }
     }
-    
+
     /// 팬 제스처를 뷰에 붙이고 began/ended 상태에 따라 버튼 하이라이트를 제어
     private func bindPanGesture(to targetView: UIView, button: UIButton) {
         let panGesture = UIPanGestureRecognizer()
@@ -191,5 +192,11 @@ final class NaviBarView: UIView {
                 }
             }
             .store(in: &cancellables)
+    }
+
+    private func clearButtons() {
+        for subview in stackView.arrangedSubviews where subview is NaviBarButton {
+            subview.removeFromSuperview()
+        }
     }
 }

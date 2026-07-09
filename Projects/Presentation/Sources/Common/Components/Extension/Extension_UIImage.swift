@@ -1,7 +1,7 @@
 import UIKit
 
 extension UIImage {
-    
+
     class func createImage(color: UIColor, rect: CGRect = CGRect(x: 0, y: 0, width: 1, height: 1)) -> UIImage {
         UIGraphicsBeginImageContext(rect.size)
         color.setFill()
@@ -15,7 +15,7 @@ extension UIImage {
 
         return image
     }
-    
+
     /// Image Aspect Ratio(width / height)
     var aspectRatio: CGFloat {
         return size.width / size.height
@@ -180,7 +180,7 @@ extension UIImage {
     func cropToBounds(posX: CGFloat, posY: CGFloat,
                       width: CGFloat, height: CGFloat, scale: CGFloat) -> UIImage {
         if let cgImage = self.cgImage {
-            let contextImage: UIImage = UIImage(cgImage: cgImage)
+            let contextImage = UIImage(cgImage: cgImage)
             let contextSize: CGSize = contextImage.size
             var imageScale: CGFloat
             var cgPosX: CGFloat = posX
@@ -267,7 +267,6 @@ extension UIImage {
 
         return newImage ?? self
     }
-
 
     /**
      Apply blur effect to images

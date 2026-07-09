@@ -15,17 +15,17 @@ public protocol PhotoTestUseCase {
 }
 
 final public class DefaultPhotoTestUseCase: PhotoTestUseCase {
-    
+
     private let repository: PhotoDataRepository
     private let geoRepository: GeoRepository
-    
+
     public init(repository: PhotoDataRepository, geoRepository: GeoRepository) {
         self.repository = repository
         self.geoRepository = geoRepository
     }
-    
+
     public func countByPsition() async throws {
-        
+
         let photos = try repository.fetchPhotos()
         let unique = Dictionary(grouping: photos) {
             if let latitude = $0.latitude, let longitude = $0.longitude {
@@ -36,16 +36,16 @@ final public class DefaultPhotoTestUseCase: PhotoTestUseCase {
                 return ""
             }
         }
-        
+
         for (key, value) in unique {
             print("photo", key, ":", value.count)
         }
         print("unique total", unique.count)
     }
-    
+
     public func countIsKorea() async throws {
         let photos = try repository.fetchPhotos()
-        
+
         let unique = Dictionary(grouping: photos) {
             if let latitude = $0.latitude, let longitude = $0.longitude {
                 if isKorea(latitude: latitude, longitude: longitude) {
@@ -61,7 +61,7 @@ final public class DefaultPhotoTestUseCase: PhotoTestUseCase {
             print("photo", key, ":", value.count)
         }
     }
-    
+
     public func getAddressByCoordinate() async throws {
         let photos = try repository.fetchPhotos()
         let koreaPhotos = photos.filter {
@@ -70,9 +70,9 @@ final public class DefaultPhotoTestUseCase: PhotoTestUseCase {
             }
             return false
         }
-        
+
         let address = try await self.geoRepository.locationToaddress(koreaPhotos)
-        
+
         for (id, value) in address {
             print("id:", id,
                   ", value:", value.administrativeArea ?? "??",
@@ -81,7 +81,7 @@ final public class DefaultPhotoTestUseCase: PhotoTestUseCase {
                   ", ", value.thoroughfare ?? "??")
         }
     }
-    
+
     private func isKorea(latitude: Double, longitude: Double) -> Bool {
         // 한국 바운딩 박스로 1차 필터 — 폴리곤 순회보다 훨씬 빠름
         return (32.0...39.5).contains(latitude) &&

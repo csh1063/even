@@ -6,12 +6,6 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
-
-//
-//  ImageViewerCell.swift
-//  Presentation
-//
-
 import UIKit
 import SnapKit
 
@@ -43,7 +37,7 @@ final class ImageViewerCell: UICollectionViewCell, UIScrollViewDelegate {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        
+
         self.setupViews()
     }
 
@@ -61,9 +55,9 @@ final class ImageViewerCell: UICollectionViewCell, UIScrollViewDelegate {
     }
 
     // MARK: - Configure
-    
+
     private func setupViews() {
-        
+
         scrollView.delegate = self
         contentView.addSubview(scrollView)
         scrollView.addSubview(imageView)

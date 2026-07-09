@@ -12,30 +12,30 @@ import Combine
 
 @MainActor
 open class BaseCoordinator: NSObject {
-    
+
     var viewController: UIViewController?
     var hideTabBar: (() -> Void)?
     var showTabBar: (() -> Void)?
-    
+
     private var childCoordinators: [BaseCoordinator] = []
-    
+
     private let alertManager: AlertManageable
     private var cancellables = Set<AnyCancellable>()
-    
+
 //    public override init() {}
-    
+
     public init(alertManager: AlertManageable = AlertManager.shared) {
         self.alertManager = alertManager
     }
-    
+
     open func start() { }
-    
+
     public func start(coordinator: BaseCoordinator) {
         print("==== \(coordinator.self) start        ====================")
         childCoordinators.append(coordinator)
         coordinator.start()
     }
-    
+
     func remove(coordinator: BaseCoordinator) {
         print("==== \(coordinator.self) start        ====================")
         childCoordinators.removeAll { $0 === coordinator }
@@ -61,17 +61,17 @@ extension BaseCoordinator: UINavigationControllerDelegate {
         didShow viewController: UIViewController,
         animated: Bool
     ) {
-        
+
         guard let fromViewController = navigationController.transitionCoordinator?
             .viewController(forKey: .from) else { return }
-        
+
         if navigationController.viewControllers.contains(fromViewController) { return }
-        
+
         print("vc count:", navigationController.viewControllers.count)
         if navigationController.viewControllers.count == 1 {
             showTabBar?()
         }
-        
+
         childCoordinators.forEach { coordinator in
             if coordinator.viewController === fromViewController {
                 remove(coordinator: coordinator)

@@ -10,13 +10,13 @@ import Foundation
 
 @MainActor
 public final class MainDIContainer {
-    
+
     private let appDiContainer: AppDIContainer
-    
+
     public init(appDiContainer: AppDIContainer) {
         self.appDiContainer = appDiContainer
     }
-    
+
     func makeTabBarDIContainer() -> TabbarDIContainer {
         TabbarDIContainer(appDiContainer: appDiContainer)
     }

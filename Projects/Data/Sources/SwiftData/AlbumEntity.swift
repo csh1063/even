@@ -15,10 +15,10 @@ public final class AlbumEntity {
     public var name: String
     public var displayName: String
     public var createdAt: Date
-    public var startDate: Date = Date()
-    public var endDate: Date = Date()
+    public var startDate: Date?
+    public var endDate: Date?
 
-    public var isAuto: Bool
+    public var isAuto: Bool              // 자동 생성 앨범 여부
     public var coverPhotoIdentifier: String?
     public var photoCount: Int = 0
     public var from: String
@@ -47,14 +47,13 @@ public final class AlbumEntity {
 
     @Relationship(deleteRule: .cascade)
     public var clusters: [ClusterEntity] = []
-
     public init(
         id: UUID = UUID(),
         name: String,
         displayName: String,
         createdAt: Date = Date(),
-        startDate: Date = Date(),
-        endDate: Date = Date(),
+        startDate: Date? = nil,
+        endDate: Date? = nil,
         isAuto: Bool = false,
         coverPhotoIdentifier: String? = nil,
         from: String

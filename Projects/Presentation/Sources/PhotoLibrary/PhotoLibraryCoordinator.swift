@@ -13,16 +13,16 @@ import Domain
 
 @MainActor
 final class PhotoLibraryCoordinator: BaseCoordinator {
-    
+
     private let diContainer: PhotoLibraryDIContainer
     private let tabbarViewModel: TabbarViewModel
-    
+
     private let navigationController = UINavigationController()
-    
+
     init(diContainer: PhotoLibraryDIContainer, tabbarViewModel: TabbarViewModel) {
         self.diContainer = diContainer
         self.tabbarViewModel = tabbarViewModel
-        
+
         super.init()
     }
 
@@ -56,10 +56,11 @@ final class PhotoLibraryCoordinator: BaseCoordinator {
             switch action {
             case .pageChanged(let id):
                 (self?.viewController as? PhotoLibraryViewController)?.scrollToItem(id: id)
+            case .selectionChanged: break
             }
         }
         let vc = ImageViewerViewController(viewModel: vm)
-        
+
         navigationController.present(vc, animated: true)
     }
 }

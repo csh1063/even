@@ -6,7 +6,6 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
-
 import UIKit
 import SnapKit
 
@@ -15,7 +14,7 @@ final class AlbumSectionHeaderView: UICollectionReusableView {
     // MARK: - UI
 
     private let titleLabel = UILabel()
-    let moreButton = UIButton(type: .system)
+    private let moreButton = UIButton(type: .system)
 
     var onMoreTapped: (() -> Void)?
 
@@ -60,15 +59,12 @@ final class AlbumSectionHeaderView: UICollectionReusableView {
         onMoreTapped?()
     }
 
-//    func configure(title: String) {
-//        titleLabel.text = title
-//    }
-    func configure(_ section: AlbumSection) {
+    func configure(_ section: AlbumSection, itemCount: Int) {
         titleLabel.text = section.title
-        
+
         switch section {
         case .travel:
-            self.moreButton.isHidden = false
+            self.moreButton.isHidden = itemCount < 8
         case .location:
             self.moreButton.isHidden = false
         case .date:
@@ -77,6 +73,8 @@ final class AlbumSectionHeaderView: UICollectionReusableView {
             self.moreButton.isHidden = true
         case .face:
             self.moreButton.isHidden = true
+        case .similar:
+            self.moreButton.isHidden = false
         }
     }
 }

@@ -12,49 +12,49 @@ import Domain
 
 @MainActor
 public final class SplashViewModel: BaseViewModel {
-    
+
     enum Input {
         case appear
         case endAnim
     }
-    
+
     struct Output {
         let finished: AnyPublisher<Bool, Never>
     }
-    
+
     private let input = PassthroughSubject<Input, Never>()
-    
+
     @Published private var finished: Bool = false
     private let appearSubject = PassthroughSubject<Void, Never>()
     private let animDoneSubject = PassthroughSubject<Void, Never>()
-    
+
     private let useCase: PhotoCheckUseCase
-    
+
     private var cancellables = Set<AnyCancellable>()
-    
+
     public init(useCase: PhotoCheckUseCase) {
         self.useCase = useCase
-        
+
         super.init()
-        
+
         self.bind()
     }
-    
+
     func transform() -> Output {
         Output(finished: $finished.eraseToAnyPublisher())
     }
-    
+
     func send(_ input: Input) {
         self.input.send(input)
     }
-    
+
     private func bind() {
         input.sink { [weak self] input in
             guard let self else { return }
             Task { @MainActor in await self.handle(input) }
         }
         .store(in: &cancellables)
-        
+
         appearSubject.zip(animDoneSubject)
             .first()
             .sink { [weak self] _ in
@@ -66,7 +66,7 @@ public final class SplashViewModel: BaseViewModel {
             }
             .store(in: &cancellables)
     }
-    
+
     private func handle(_ input: Input) async {
         switch input {
         case .appear:
@@ -75,7 +75,7 @@ public final class SplashViewModel: BaseViewModel {
             self.animDoneSubject.send()
         }
     }
-    
+
     private func checkDeletedPhoto() async {
         do {
             print("checkDeletedPhoto")
@@ -90,12 +90,12 @@ public final class SplashViewModel: BaseViewModel {
                     print("check reason:", reason)
                 }
             }
-            
+
         } catch {
-            print("error:",error.localizedDescription)
+            print("error:", error.localizedDescription)
         }
     }
-    
+
     private func syncData() async {
         do {
             print("syncData")
@@ -112,7 +112,7 @@ public final class SplashViewModel: BaseViewModel {
                 }
             }
         } catch {
-            print("error:",error.localizedDescription)
+            print("error:", error.localizedDescription)
         }
     }
 

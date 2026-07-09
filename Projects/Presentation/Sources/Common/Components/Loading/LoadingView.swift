@@ -25,7 +25,7 @@ final class CardStackLoadingView: UIView {
     private let configs: [CardConfig] = [
         CardConfig(color: Theme.accent, x: 10, baseY: 14, delay: 0.0),
         CardConfig(color: Theme.secondary, x: 16, baseY: 18, delay: 0.3),
-        CardConfig(color: Theme.primary, x: 22, baseY: 22, delay: 0.6),
+        CardConfig(color: Theme.primary, x: 22, baseY: 22, delay: 0.6)
     ]
 
     private let dismissButton: UIButton = {

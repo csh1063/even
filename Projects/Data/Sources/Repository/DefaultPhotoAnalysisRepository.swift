@@ -12,18 +12,18 @@ import CoreGraphics
 
 // Data 모듈
 public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
-    
+
     // MARK: - Properties
-    
+
     private let analysisService: PhotoAnalysisService
     private let libraryService: PhotoLibraryService  // 이미지 로드용
     private let geocoderService: GeocoderService
     private let networkService: NetworkService
     private let faceEmbeddingService: FaceEmbeddingService
     private let batchSize: Int
-    
+
     // MARK: - Init
-    
+
     public init(
         analysisService: PhotoAnalysisService,
         libraryService: PhotoLibraryService,
@@ -39,7 +39,7 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
         self.faceEmbeddingService = faceEmbeddingService
         self.batchSize = batchSize
     }
-    
+
     // MARK: - Public
     /// 여러 사진 배치 분석 → 진행률 스트림 반환
     public func analyze(excludingIds: [String]) -> AsyncThrowingStream<ProgressAnalysis, Error> {
@@ -48,11 +48,11 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                 do {
                     let allAssets = try await libraryService.getPhotoList().photos
                     let photos = allAssets.filter { !excludingIds.contains($0.asset.localIdentifier) }
-                    
+
                     let total = photos.count
                     var completed = 0
                     let batches = photos.chunked(into: batchSize)
-                    
+
                     for batch in batches {
                         try await withThrowingTaskGroup(of: (Photo, [PhotoLabel]).self) { group in
                             for photo in batch {
@@ -63,15 +63,15 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                                         let components = Calendar.current.dateComponents([.year, .month], from: date)
                                         return (components.year.map { String($0) }, components.month.map { String($0) })
                                     }()
-                                    
+
                                     let labels: [PhotoLabel]
                                     let embedding: [FaceEmbedding]
                                     if let image = try? await self.loadImage(photoId: photoId) {
-                                        
+
                                         labels = try await self.analysisService.analyze(image: image)
-                                        
+
                                         if labels.contains(where: { $0.name == "people" }) {
-                                            if labels.contains(where: { /*$0.name == "eyeglasses" ||*/ $0.name ==  "sunglasses" || $0.name == "goggles" }) {
+                                            if labels.contains(where: { $0.name ==  "sunglasses" || $0.name == "goggles" }) {
                                                 embedding = await self.faceEmbeddingService.extractEmbeddings(from: image, hasGlass: true)
                                             } else {
                                                 embedding = await self.faceEmbeddingService.extractEmbeddings(from: image)
@@ -83,9 +83,9 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                                         labels = []
                                         embedding = []
                                     }
-                                    
-                                    print("id: ", photo.asset.localIdentifier, "/ year: ", year ?? "?", ", month:",month ?? "?")
-                                    print("labels: ", (labels).map{ $0.name }.joined(separator: ", "))
+
+                                    print("id: ", photo.asset.localIdentifier, "/ year: ", year ?? "?", ", month:", month ?? "?")
+                                    print("labels: ", (labels).map { $0.name }.joined(separator: ", "))
 //                                    print("location: ", photo.asset.location?.coordinate ?? "")
                                     let newPhoto = Photo(
                                         localIdentifier: photo.asset.localIdentifier,
@@ -97,11 +97,11 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                                         labels: labels,
                                         faceEmbedding: embedding
                                     )
-                                    
+
                                     return (newPhoto, labels)
                                 }
                             }
-                            
+
                             for try await (photo, _) in group {
                                 completed += 1
                                 let progress = Double(Double(completed)/Double(total))
@@ -121,28 +121,28 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
             }
         }
     }
-    
+
     public func geocoderAnalyze(latitude: Double, longitude: Double) async throws -> PhotoLocation? {
-            
+
         let address = try await self.geocoderService.fetchAddress(
             latitude: latitude, longitude: longitude,
             locale: Locale(identifier: "ko"))
-        
+
         try await Task.sleep(nanoseconds: 1_500_000_000)
-        
+
         return address
     }
-    
+
     public func locationAnalyze(_ unanalyzedIds: [String]) -> AsyncThrowingStream<ProgressAnalysis, Error> {
-        
+
         return AsyncThrowingStream { continuation in
             Task.detached(priority: .userInitiated) {
                 do {
                     var completed = 0
-                    
+
                     let assets = try await self.libraryService.getLocationPhoto(ids: unanalyzedIds)
                     let total = assets.count
-                    
+
                     for (_, asset) in assets.enumerated() {
 
                         let latitude: Double?
@@ -153,7 +153,7 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                         if let location = asset.location {
                             latitude = location.coordinate.latitude
                             longitude = location.coordinate.longitude
-                            
+
                             address = try await self.geocoderService.fetchAddress(
                                 from: location,
                                 locale: Locale(identifier: "ko"))
@@ -170,7 +170,7 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                             address = nil
                         }
                         addressEn = nil
-                        
+
                         completed += 1
                         let progress = Double(Double(completed)/Double(total))
                         continuation.yield(
@@ -189,7 +189,7 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                         )
                         try await Task.sleep(nanoseconds: 1_200_000_000)
                     }
-                    
+
                     continuation.finish()
                 } catch {
                     continuation.finish(throwing: error)
@@ -197,7 +197,7 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
             }
         }
     }
-    
+
     /// 단일 사진 분석
     public func analyzeSingle(photoId: String) async throws -> [PhotoLabel] {
         guard let cgImage = try? await loadImage(photoId: photoId, size: 224) else {
@@ -205,22 +205,22 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
         }
         return try await self.analysisService.analyze(image: cgImage)
     }
-    
+
     public func analyzeFaceEmbedding(photoId: String) async throws -> [FaceEmbedding] {
-        guard let cgImage = try? await loadImage(photoId: photoId, size: 1024) else {
+        guard let cgImage = try? await loadImage(photoId: photoId, size: 2048) else {
             return []
         }
         return await self.faceEmbeddingService.extractEmbeddings(from: cgImage)
     }
-    
+
     // MARK: - Private
-    private func loadImage(photoId: String, size: CGFloat = 1024) async throws -> CGImage? {
+    private func loadImage(photoId: String, size: CGFloat = 2048) async throws -> CGImage? {
         try await libraryService.loadImage(
             id: photoId,
             type: .specialSize(CGSize(width: size, height: size))
         )
     }
-    
+
 }
 
 // MARK: - Array Extension

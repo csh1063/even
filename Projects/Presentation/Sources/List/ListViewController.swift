@@ -6,10 +6,10 @@
 ////  Copyright © 2025 sanghyeon. All rights reserved.
 ////
 //
-//import Foundation
-//import UIKit
+// import Foundation
+// import UIKit
 //
-//final class ListViewController: BaseViewController {
+// final class ListViewController: BaseViewController {
 //    
 //    private let mainLabel: UILabel = UILabel()
 //    
@@ -46,4 +46,4 @@
 //        
 //
 //    }
-//}
+// }

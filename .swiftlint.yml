@@ -1,0 +1,50 @@
+excluded:
+  - Tuist/.build
+  - Tuist/Templates
+  - DerivedData
+  - "**/Derived"
+  - "**/*.xcodeproj"
+
+disabled_rules:
+  - todo
+
+opt_in_rules:
+  - empty_count
+  - unused_import
+  - redundant_type_annotation
+
+# 기존 코드베이스 실측 기준으로 완화된 임계값 (점진적으로 강화 예정)
+line_length:
+  warning: 150
+  error: 200
+
+function_body_length:
+  warning: 80
+  error: 150
+
+type_body_length:
+  warning: 400
+  error: 600
+
+file_length:
+  warning: 500
+  error: 800
+
+cyclomatic_complexity:
+  warning: 15
+  error: 25
+
+identifier_name:
+  min_length: 2
+  excluded:
+    - id
+    - i
+    - x
+    - y
+
+custom_rules:
+  no_print_statements:
+    included: ".*\\.swift"
+    regex: "\\bprint\\("
+    message: "print() 대신 os.Logger 사용을 권장합니다."
+    severity: warning

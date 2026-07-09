@@ -12,23 +12,23 @@ import Photos
 import PhotosUI
 
 public final class PhotoLibraryService {
-    
+
     private let imageManager = PHCachingImageManager()
-    
+
     private var pHResultMap: [PHCollection: PHFetchResult<PHAsset>] = [:]
     private var allPhotos: PHFetchResult<PHAsset>?
-    
+
 //    private var assetCache: [String: PHAsset] = [:]
     private let assetCache = AssetCache()
-    
+
     public init() {}
-    
+
     public func getAlbumList() async throws -> [AlbumAssetEntity] {
-        
+
         return await Task.detached(priority: .userInitiated) {
-            
-            var albumModelList: [AlbumAssetEntity] = [AlbumAssetEntity]()
-            
+
+            var albumModelList = [AlbumAssetEntity]()
+
             let favoriteAlbums = PHAssetCollection.fetchAssetCollections(with: .smartAlbum,
                                                                          subtype: .smartAlbumFavorites, options: nil)
             let allAlbum = PHAssetCollection.fetchAssetCollections(with: .smartAlbum,
@@ -50,32 +50,34 @@ public final class PhotoLibraryService {
             let albums = [allAlbum, favoriteAlbums, selfiesAlbum,
                           panoramaAlbum, burstAlbum, screenShotAlbum, userAlbums]
             for album in albums {
-                album.enumerateObjects { (collection, _, _) -> Void in
+                album.enumerateObjects { (collection, _, _) in
                     let opt = PHFetchOptions()
                     let assets = PHAsset.fetchAssets(in: collection, options: opt)
+                    // PHFetchResult에는 isEmpty가 없음 — swiftlint --fix가 !isEmpty로 잘못 고치지 않도록 disable
+                    // swiftlint:disable:next empty_count
                     if assets.count > 0 {
                         let fetchOptions = PHFetchOptions()
                         fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
                         fetchOptions.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.image.rawValue)
-                        
+
                         let newAlbum = AlbumAssetEntity(
                             name: collection.localizedTitle ?? "",
                             count: assets.count,
                             collection: collection)
-                        
+
                         albumModelList.append(newAlbum)
                     }
                 }
             }
-            
+
             return albumModelList
         }.value
     }
 
     public func getPhotoList(from collection: PHAssetCollection? = nil, page: Int = -1, pageCount: Int = 300, reload: Bool = false) async throws -> PhotoAssetListEntity {
-        
+
         let result: PHFetchResult<PHAsset>
-        
+
         if let collection {
             if let savedResult = self.pHResultMap[collection], !reload {
                 result = savedResult
@@ -90,11 +92,11 @@ public final class PhotoLibraryService {
                 result = PHAsset.fetchAssets(with: .image, options: .defaultOptions)
             }
         }
-        
+
         let totalCount = result.count
         let rangeStart: Int
         let rangeEnd: Int
-        
+
         if page < 0 {
             rangeStart = 0
             rangeEnd = totalCount
@@ -105,21 +107,21 @@ public final class PhotoLibraryService {
             rangeStart = min(start, totalCount)
             rangeEnd = min(end, totalCount)
         }
-        
+
         let photos = (rangeStart..<rangeEnd).map { index -> PhotoAssetEntity in
             let asset = result.object(at: index)
-            
+
 //            self.assetCache[asset.localIdentifier] = asset
             Task {
                 await self.assetCache.set(asset.localIdentifier, asset: asset)
             }
             return PhotoAssetEntity(asset: asset)
         }
-        
+
         let sortedPhotos = photos.sorted {
             let created0 = $0.asset.creationDate ?? Date.distantPast
             let created1 = $1.asset.creationDate ?? Date.distantPast
-            
+
             if created0 == created1 {
                 return $0.asset.modificationDate ?? Date.distantPast
                     > $1.asset.modificationDate ?? Date.distantPast
@@ -127,7 +129,7 @@ public final class PhotoLibraryService {
                 return created0 > created1
             }
         }
-        
+
         return PhotoAssetListEntity(
             title: collection?.localizedTitle ?? "",
             photos: sortedPhotos,
@@ -135,11 +137,11 @@ public final class PhotoLibraryService {
             totalCount: totalCount
         )
     }
-    
+
     public func getPhotoCount(from collection: PHAssetCollection? = nil) async throws -> Int {
-        
+
         let result: PHFetchResult<PHAsset>
-        
+
         if let collection {
             if let savedResult = self.pHResultMap[collection] {
                 result = savedResult
@@ -154,29 +156,29 @@ public final class PhotoLibraryService {
                 result = PHAsset.fetchAssets(with: .image, options: .defaultOptions)
             }
         }
-        
+
         return result.count
     }
-    
+
     public func getPhotoIds() async throws -> [String] {
-        
+
         let result: PHFetchResult<PHAsset>
         if let savedAll = self.allPhotos {
             result = savedAll
         } else {
             result = PHAsset.fetchAssets(with: .image, options: .defaultOptions)
         }
-        
+
         let totalCount = result.count
-        
+
         return (0..<totalCount).map { index -> String in
             return result.object(at: index).localIdentifier
         }
     }
-    
+
     public func loadImage(id: String, type: LoadPhotoOptionType) async throws -> CGImage? {
         guard let asset = await getAsset(id: id) else { return nil }
-        
+
         let options = PHImageRequestOptions()
         let size: CGSize
         let contentMode: PHImageContentMode
@@ -196,7 +198,7 @@ public final class PhotoLibraryService {
             size = specialSize
             contentMode = .aspectFit
         }
-        
+
         return try await withCheckedThrowingContinuation { continuation in
             imageManager.requestImage(
                 for: asset,
@@ -221,7 +223,7 @@ public final class PhotoLibraryService {
             withLocalIdentifiers: ids,
             options: nil
         )
-        
+
         var photosWithLocation: [PHAsset] = []
         assets.enumerateObjects { asset, _, _ in
             if asset.location != nil {
@@ -230,12 +232,21 @@ public final class PhotoLibraryService {
         }
         return photosWithLocation
     }
-    
+
+    public func deletePhotos(localIdentifiers: [String]) async throws {
+        let assets = PHAsset.fetchAssets(withLocalIdentifiers: localIdentifiers, options: nil)
+        let assetsArray = assets.objects(at: IndexSet(0..<assets.count)) as NSArray
+
+        try await PHPhotoLibrary.shared().performChanges {
+            PHAssetChangeRequest.deleteAssets(assetsArray)
+        }
+    }
+
     private func getAsset(id: String) async -> PHAsset? {
-        
+
 //        if let cached = assetCache[id] { return cached }
         if let cached = await assetCache.get(id) { return cached }
-        
+
         let fetched = PHAsset.fetchAssets(withLocalIdentifiers: [id], options: nil).firstObject
         if let asset = fetched {
             await assetCache.set(id, asset: asset)
@@ -245,11 +256,11 @@ public final class PhotoLibraryService {
 //        }
         return fetched
     }
-    
+
     func startCaching(for assets: [PHAsset], targetSize: CGSize) {
         imageManager.startCachingImages(for: assets, targetSize: targetSize, contentMode: .aspectFill, options: nil)
     }
-    
+
     func stopCaching(for assets: [PHAsset], targetSize: CGSize) {
         imageManager.stopCachingImages(for: assets, targetSize: targetSize, contentMode: .aspectFill, options: nil)
     }
@@ -269,7 +280,7 @@ extension PHFetchOptions {
 
 actor AssetCache {
     private var cache: [String: PHAsset] = [:]
-    
+
     func get(_ id: String) -> PHAsset? { cache[id] }
     func set(_ id: String, asset: PHAsset) { cache[id] = asset }
 }

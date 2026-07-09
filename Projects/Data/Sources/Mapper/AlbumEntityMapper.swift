@@ -26,7 +26,7 @@ extension AlbumEntity {
             photoCount: photoCount,
             from: from,
             representativeBoundingBox: representativeBoundingBox,
-            clusterId: clusters.map {$0.createdAt}
+            clusterId: clusters.map { $0.id.uuidString }
         )
     }
 

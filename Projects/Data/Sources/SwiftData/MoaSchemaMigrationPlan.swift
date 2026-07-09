@@ -16,7 +16,7 @@ public enum MoaSchemaMigrationPlan: SchemaMigrationPlan {
 }
 
 // 마이그레이션 예시
-//enum MoaSchemaMigrationPlan: SchemaMigrationPlan {
+// enum MoaSchemaMigrationPlan: SchemaMigrationPlan {
 //    static let schemas: [any VersionedSchema.Type] = [
 //        MoaSchemaV1.self,
 //        MoaSchemaV2.self
@@ -35,4 +35,4 @@ public enum MoaSchemaMigrationPlan: SchemaMigrationPlan {
 //            try context.save()
 //        }
 //    )
-//}
+// }

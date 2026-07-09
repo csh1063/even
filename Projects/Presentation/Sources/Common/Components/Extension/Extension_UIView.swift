@@ -149,7 +149,7 @@ extension UIView {
     }
 
     func applyGradient(_ color: [UIColor], locations: [NSNumber]?, radius: CGFloat = 0.0) {
-        let gradient: CAGradientLayer = CAGradientLayer()
+        let gradient = CAGradientLayer()
         gradient.cornerRadius = radius
         gradient.frame = self.bounds
         gradient.colors = color.map { $0.cgColor }
@@ -299,7 +299,7 @@ enum Edge {
 }
 
 // gradient 설정 객체
-fileprivate final class EdgeShadowLayer: CAGradientLayer {
+private final class EdgeShadowLayer: CAGradientLayer {
 
     init(forView view: UIView, edge: Edge, shadowRadius radius: CGFloat = 5.0,
          toColor: UIColor = Theme.background,

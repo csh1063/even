@@ -36,7 +36,7 @@ enum Theme {
 }
 
 extension UIColor {
-    
+
     static func named(_ name: String) -> UIColor {
         UIColor(named: name, in: .module, compatibleWith: nil) ?? .clear
     }

@@ -6,7 +6,6 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
-
 public protocol HomeZoneRepository {
     func fetchHomeZones() throws -> [HomeZone]
     func saveHomeZones(_ zones: [HomeZone]) throws

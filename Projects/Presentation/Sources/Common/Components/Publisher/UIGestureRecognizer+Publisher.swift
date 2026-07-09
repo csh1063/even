@@ -51,7 +51,10 @@ extension UIGestureRecognizer {
     }
 
     fileprivate func makePublisher<G: UIGestureRecognizer>() -> AnyPublisher<G, Never> {
-        GesturePublisher(gesture: self as! G)
+        guard let gesture = self as? G else {
+            return Empty<G, Never>().eraseToAnyPublisher()
+        }
+        return GesturePublisher(gesture: gesture)
             .eraseToAnyPublisher()
     }
 }

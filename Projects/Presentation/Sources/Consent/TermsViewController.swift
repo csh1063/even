@@ -121,7 +121,7 @@ final class TermsViewController: UIViewController {
         button.alpha = 0.4
         return button
     }()
-    
+
     var onConsented: (() -> Void)?
 
     // MARK: - Lifecycle

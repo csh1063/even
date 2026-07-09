@@ -12,15 +12,15 @@ import Domain
 
 @MainActor
 public class LabelsCoordinator: BaseCoordinator {
-    
+
     private let diContainer: LabelsDIContainer
     private let navigationController: UINavigationController
-    
+
     init(diContainer: LabelsDIContainer,
          navigationController: UINavigationController) {
         self.diContainer = diContainer
         self.navigationController = navigationController
-        
+
         super.init()
     }
 
@@ -34,7 +34,7 @@ public class LabelsCoordinator: BaseCoordinator {
         navigationController.pushViewController(vc, animated: true)
         self.viewController = vc
     }
-    
+
     private func pop() {
         navigationController.popViewController(animated: true)
         self.remove(coordinator: self)

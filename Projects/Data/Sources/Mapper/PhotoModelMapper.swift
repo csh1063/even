@@ -22,7 +22,9 @@ extension PhotoAssetEntity {
     func toDomain() -> PhotoInAlbum {
         return PhotoInAlbum(
             id: self.asset.localIdentifier,
-            createdDate: self.asset.creationDate
+            createdDate: self.asset.creationDate,
+            latitude: self.asset.location?.coordinate.latitude,
+            longitude: self.asset.location?.coordinate.longitude
         )
     }
 }

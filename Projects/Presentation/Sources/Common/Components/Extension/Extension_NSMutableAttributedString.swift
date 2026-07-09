@@ -28,7 +28,7 @@ extension NSMutableAttributedString {
 
 extension NSAttributedString {
     convenience init(htmlString html: String, font: UIFont? = nil, useDocumentFontSize: Bool = true) throws {
-        
+
         let options: [NSAttributedString.DocumentReadingOptionKey: Any] = [
             .documentType: NSAttributedString.DocumentType.html,
             .characterEncoding: String.Encoding.utf8.rawValue

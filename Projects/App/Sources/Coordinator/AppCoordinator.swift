@@ -13,16 +13,16 @@ import UIKit
 
 @MainActor
 final class AppCoordinator: BaseCoordinator {
-    
+
     private let container: AppDIContainer
     private let window: UIWindow
-    
+
     private var cancellables = Set<AnyCancellable>()
 
     init(container: AppDIContainer, window: UIWindow) {
         self.container = container
         self.window = window
-        
+
         super.init()
     }
 
@@ -42,7 +42,7 @@ final class AppCoordinator: BaseCoordinator {
             .store(in: &cancellables)
         start(coordinator: splashCoordinator)
     }
-    
+
     private func showMain() {
         print("showMain!!")
         let mainDIContainer = MainDIContainer(appDiContainer: container)

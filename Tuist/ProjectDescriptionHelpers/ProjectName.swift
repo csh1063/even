@@ -2,13 +2,13 @@ import ProjectDescription
 
 public enum Module {
     case app
-    
+
     // Repository|DataStore
     case data
-    
+
     // Domain
     case domain
-    
+
     // Design|UI|View
     case presentation
 }
@@ -26,11 +26,11 @@ extension Module {
             return "Presentation"
         }
     }
-    
+
     public var path: ProjectDescription.Path {
         return .relativeToRoot("Projects/" + self.name)
     }
-    
+
     public var project: TargetDependency {
         return .project(target: self.name, path: self.path)
     }
