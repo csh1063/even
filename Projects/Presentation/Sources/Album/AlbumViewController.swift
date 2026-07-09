@@ -343,7 +343,7 @@ extension AlbumViewController {
             cell.configure(with: vm)
         }
 
-        let faceRegistration = UICollectionView.CellRegistration<FaceAlbumCell, FaceCellViewModel> { cell, _, vm in
+        let faceRegistration = UICollectionView.CellRegistration<FaceAlbumCell, FaceAlbumCellViewModel> { cell, _, vm in
             cell.configure(with: vm)
         }
 

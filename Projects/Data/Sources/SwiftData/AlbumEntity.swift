@@ -24,21 +24,6 @@ public final class AlbumEntity {
     public var from: String
     public var isEdited: Bool = false
 
-    // 대표 얼굴 boundingBox
-    public var representativeBoundingBoxX: Double = 0
-    public var representativeBoundingBoxY: Double = 0
-    public var representativeBoundingBoxWidth: Double = 0
-    public var representativeBoundingBoxHeight: Double = 0
-
-    public var representativeBoundingBox: CGRect {
-        CGRect(
-            x: representativeBoundingBoxX,
-            y: representativeBoundingBoxY,
-            width: representativeBoundingBoxWidth,
-            height: representativeBoundingBoxHeight
-        )
-    }
-
     @Relationship(deleteRule: .nullify)
     public var photos: [PhotoEntity] = []
 

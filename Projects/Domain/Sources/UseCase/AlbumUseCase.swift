@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import CoreGraphics
 import Combine
 
 public protocol AlbumUseCase {
@@ -15,6 +16,7 @@ public protocol AlbumUseCase {
     func fetchAll() async throws -> [Album]
     func fetchAll(from: String) async throws -> [Album]
     func createDummy() async throws
+    func fetchCoverFaceBoundingBox(albumId: UUID) async throws -> CGRect?
 }
 
 public final class DefaultAlbumUseCase: AlbumUseCase {
@@ -35,6 +37,10 @@ public final class DefaultAlbumUseCase: AlbumUseCase {
 
     public func fetchAll(from: String) async throws -> [Album] {
         try self.albumRepository.fetchAll(from: from)
+    }
+
+    public func fetchCoverFaceBoundingBox(albumId: UUID) async throws -> CGRect? {
+        try self.albumRepository.fetchCoverFaceBoundingBox(albumId: albumId)
     }
 
     public func createDummy() async throws {

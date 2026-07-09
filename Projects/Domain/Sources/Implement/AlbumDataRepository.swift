@@ -19,6 +19,7 @@ public protocol AlbumDataRepository {
     func fetchAutoAll() throws -> [Album]
     func fetchPhotos(by albumId: UUID) throws -> [Photo]
     func fetchFaceBoundingBoxes(clusterId: String) throws -> [String: CGRect]
+    func fetchCoverFaceBoundingBox(albumId: UUID) throws -> CGRect?
     func updateAlbum(album: Album) throws
     func updateAlbumName(new name: String, id: UUID) throws
     func delete(id: UUID) throws

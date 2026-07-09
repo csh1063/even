@@ -44,7 +44,7 @@ enum AlbumType: Hashable {
     case travel(TravelAlbumCellViewModel)
     case location(LocationAlbumCellViewModel)
     case category(CategoryAlbumCellViewModel)
-    case face(FaceCellViewModel)
+    case face(FaceAlbumCellViewModel)
     case similar(SimilarAlbumCellViewModel)
 
     var album: Album {

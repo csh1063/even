@@ -137,6 +137,29 @@ public final class DefaultAlbumDataRepository: AlbumDataRepository {
         return result
     }
 
+    /// 앨범 커버로 쓸 사진(coverPhotoIdentifier) 안에서, 이 앨범 소속 클러스터의 얼굴 boundingBox를 찾는다.
+    /// 별도로 저장해두지 않고 커버 사진과 클러스터 관계로 그때그때 찾는 이유는, 저장해두면 커버 사진이
+    /// 바뀔 때마다 boundingBox도 같이 갱신해줘야 하는데 그 동기화가 깨지기 쉽기 때문 (실제로 한 번 깨졌었음)
+    public func fetchCoverFaceBoundingBox(albumId: UUID) throws -> CGRect? {
+        let context = ModelContext(container)
+        let fetchDescriptor = FetchDescriptor<AlbumEntity>(predicate: #Predicate { $0.id == albumId })
+
+        guard let album = try context.fetch(fetchDescriptor).first,
+              let coverPhotoIdentifier = album.coverPhotoIdentifier else { return nil }
+
+        for cluster in album.clusters {
+            if let entity = cluster.faceEmbeddings.first(where: { $0.photo?.localIdentifier == coverPhotoIdentifier }) {
+                return CGRect(
+                    x: entity.boundingBoxX,
+                    y: entity.boundingBoxY,
+                    width: entity.boundingBoxWidth,
+                    height: entity.boundingBoxHeight
+                )
+            }
+        }
+        return nil
+    }
+
     public func updateAlbum(album: Album) throws {
 
         let context = ModelContext(container)

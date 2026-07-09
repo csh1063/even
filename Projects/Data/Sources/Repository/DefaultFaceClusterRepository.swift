@@ -27,10 +27,14 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
         let context = ModelContext(container)
 
         // 1. DB에서 모든 FaceEmbeddingEntity 로드
+        // SwiftData의 fetch 순서 자체가 실행마다 안정적으로 보장되지 않아서, id(UUID) 문자열 기준으로
+        // 직접 정렬해 순서를 고정한다 — 안 그러면 Chinese Whispers 내부 순회를 고정해봤자
+        // 입력 순서 자체가 매번 달라져서 같은 사진으로 재분석해도 결과가 달라질 수 있다.
         let embeddingDescriptor = FetchDescriptor<FaceEmbeddingEntity>(
             predicate: #Predicate { $0.hasGlasses == false }
         )
         let allEntities = try context.fetch(embeddingDescriptor)
+            .sorted { $0.id.uuidString < $1.id.uuidString }
 
         print("📦 [Repository] 총 \(allEntities.count)개 임베딩 로드")
 
@@ -103,7 +107,6 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
             }
 
             var currentPhotoIds = Set(album.photos.map { $0.localIdentifier })
-            var representativeEntity: FaceEmbeddingEntity?
 
             for embedding in result.embeddings {
                 guard let entity = entityById[embedding.id] else { continue }
@@ -117,21 +120,21 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
                     album.photos.append(photo)
                     currentPhotoIds.insert(photo.localIdentifier)
                 }
-                if representativeEntity == nil { representativeEntity = entity }
             }
 
             // 재사용된 클러스터는 새로 합쳐진 멤버 기준으로 centroid 갱신
             updateCentroid(cluster: cluster, dim: dim)
 
-            if let rep = representativeEntity {
-                album.representativeBoundingBoxX = rep.boundingBoxX
-                album.representativeBoundingBoxY = rep.boundingBoxY
-                album.representativeBoundingBoxWidth = rep.boundingBoxWidth
-                album.representativeBoundingBoxHeight = rep.boundingBoxHeight
-            }
-
             album.photoCount = album.photos.count
-            album.coverPhotoIdentifier = album.photos.sorted { $0.createdAt > $1.createdAt }.first?.localIdentifier
+
+            // 커버는 최신순이 아니라, 이 앨범(병합된 경우 모든 클러스터 포함) 안에서 얼굴 boundingBox가
+            // 가장 큰(=화면에 가장 크게 잡힌, 화질이 나을 가능성이 높은) 사진으로 고른다.
+            if let bestEntity = album.clusters
+                .flatMap({ $0.faceEmbeddings })
+                .max(by: { $0.boundingBoxWidth * $0.boundingBoxHeight < $1.boundingBoxWidth * $1.boundingBoxHeight }),
+               let bestPhotoId = bestEntity.photo?.localIdentifier {
+                album.coverPhotoIdentifier = bestPhotoId
+            }
             print("✅ [\(album.name)] \(album.photoCount)장")
         }
 

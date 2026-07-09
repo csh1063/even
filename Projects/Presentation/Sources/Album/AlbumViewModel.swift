@@ -186,7 +186,7 @@ public final class AlbumViewModel: BaseViewModel {
         data.items[.face] = albums.filter { $0.from == "face" }
             .sorted { $0.photoCount > $1.photoCount }
             .map {
-                .face(FaceCellViewModel(album: $0, imageLoader: self))
+                .face(FaceAlbumCellViewModel(album: $0, imageLoader: self, imageUseCase: imageUseCase, albumUseCase: albumUseCase))
             }
 
         data.items[.similar] = albums.filter { $0.from == "similar" }

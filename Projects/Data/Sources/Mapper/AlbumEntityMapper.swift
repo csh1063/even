@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import CoreGraphics
 import Domain
 
 extension AlbumEntity {
@@ -25,7 +24,6 @@ extension AlbumEntity {
             photos: [],
             photoCount: photoCount,
             from: from,
-            representativeBoundingBox: representativeBoundingBox,
             clusterId: clusters.map { $0.id.uuidString }
         )
     }
@@ -43,8 +41,7 @@ extension AlbumEntity {
             keywords: keywords.map { $0.keyword },
             photos: [],
             photoCount: photoCount,
-            from: from,
-            representativeBoundingBox: representativeBoundingBox
+            from: from
         )
     }
 
@@ -61,8 +58,7 @@ extension AlbumEntity {
             keywords: [],
             photos: photos.sorted { $0.createdAt > $1.createdAt }.prefix(4).map { $0.toDomain() },
             photoCount: photoCount,
-            from: from,
-            representativeBoundingBox: representativeBoundingBox
+            from: from
         )
     }
 
@@ -79,8 +75,7 @@ extension AlbumEntity {
             keywords: keywords.map { $0.keyword },
             photos: photos.sorted { $0.createdAt > $1.createdAt }.prefix(4).map { $0.toDomain() },
             photoCount: photoCount,
-            from: from,
-            representativeBoundingBox: representativeBoundingBox
+            from: from
         )
     }
 }

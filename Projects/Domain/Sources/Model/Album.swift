@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import CoreGraphics
 
 public struct Album {
     public let id: UUID
@@ -24,7 +23,6 @@ public struct Album {
     public var photoCount: Int
     public var from: String
     public var isEdited: Bool = false
-    public var representativeBoundingBox: CGRect
 
     public var clusterId: [String] = []
 
@@ -41,7 +39,6 @@ public struct Album {
         photos: [Photo] = [],
         photoCount: Int,
         from: String,
-        representativeBoundingBox: CGRect = .zero,
         clusterId: [String] = []
     ) {
         self.id = id
@@ -56,7 +53,6 @@ public struct Album {
         self.photos = photos
         self.photoCount = photoCount
         self.from = from
-        self.representativeBoundingBox = representativeBoundingBox
         self.clusterId = clusterId
     }
 }
