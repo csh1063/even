@@ -24,7 +24,8 @@ extension FaceEmbeddingEntity {
                 height: boundingBoxHeight
             ),
             hasGlasses: hasGlasses,
-            photoId: photo?.localIdentifier ?? ""
+            photoId: photo?.localIdentifier ?? "",
+            captureQuality: Float(captureQuality)
         )
     }
 
@@ -38,6 +39,7 @@ extension FaceEmbeddingEntity {
             boundingBoxWidth: domain.boundingBox.width,
             boundingBoxHeight: domain.boundingBox.height,
             hasGlasses: domain.hasGlasses,
+            captureQuality: Double(domain.captureQuality),
             photo: photo
         )
     }

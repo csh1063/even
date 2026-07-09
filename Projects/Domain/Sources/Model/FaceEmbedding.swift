@@ -15,19 +15,24 @@ public struct FaceEmbedding: Hashable {
     public let boundingBox: CGRect
     public let hasGlasses: Bool
     public let photoId: String
+    /// Apple Vision의 VNDetectFaceCaptureQualityRequest 점수 (흐림/노출/각도 등을 종합한 화질 지표, 0~1).
+    /// 앨범 대표 사진을 boundingBox 크기가 아니라 실제 화질로 고르기 위해 저장한다.
+    public let captureQuality: Float
 
     public init(
         id: UUID = UUID(),
         embedding: [Float],
         boundingBox: CGRect,
         hasGlasses: Bool,
-        photoId: String = ""
+        photoId: String = "",
+        captureQuality: Float = 0
     ) {
         self.id = id
         self.embedding = embedding
         self.boundingBox = boundingBox
         self.hasGlasses = hasGlasses
         self.photoId = photoId
+        self.captureQuality = captureQuality
     }
 
     public static func == (lhs: FaceEmbedding, rhs: FaceEmbedding) -> Bool {

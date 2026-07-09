@@ -16,12 +16,16 @@ struct FaceCellViewModel {
     let imageUseCase: PhotoImageUseCase
     let albumUseCase: AlbumUseCase
 
-    func loadFaceImage(size: CGSize) async -> UIImage? {
+    /// 얼굴 박스는 사진 전체의 일부라, 화면 표시 크기(size)로 원본을 불러오면 크롭 후 해상도가 너무 낮아진다.
+    /// 그래서 원본은 항상 넉넉한 고정 크기로 불러오고, 크롭된 결과만 화면에 축소해서 보여준다.
+    private let sourceLoadSize = CGSize(width: 1024, height: 1024)
+
+    func loadFaceImage() async -> UIImage? {
         guard !photoId.isEmpty else { return nil }
         do {
             guard let cgImage: CGImage = try await imageUseCase.loadImage(
                 id: photoId,
-                type: .specialSize(size)
+                type: .specialSize(sourceLoadSize)
             ).cgImage else {
                 return nil
             }
@@ -41,7 +45,7 @@ struct FaceCellViewModel {
         let width = CGFloat(image.width)
         let height = CGFloat(image.height)
 
-        let scale: CGFloat = 1.1
+        let scale: CGFloat = 1.3
         let expandedWidth = boundingBox.width * scale
         let expandedHeight = boundingBox.height * scale
         let expandedX = boundingBox.minX - (expandedWidth - boundingBox.width) / 2

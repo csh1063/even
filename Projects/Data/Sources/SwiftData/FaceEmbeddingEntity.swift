@@ -18,6 +18,8 @@ public final class FaceEmbeddingEntity {
     public var boundingBoxWidth: Double
     public var boundingBoxHeight: Double
     public var hasGlasses: Bool = false
+    /// VNDetectFaceCaptureQualityRequest 점수 (0~1) — 앨범 대표 사진 선정에 boundingBox 크기 대신 사용
+    public var captureQuality: Double = 0
 
     public var photo: PhotoEntity?
 
@@ -32,6 +34,7 @@ public final class FaceEmbeddingEntity {
         boundingBoxWidth: Double,
         boundingBoxHeight: Double,
         hasGlasses: Bool,
+        captureQuality: Double = 0,
         photo: PhotoEntity? = nil,
         cluster: ClusterEntity? = nil
     ) {
@@ -42,6 +45,7 @@ public final class FaceEmbeddingEntity {
         self.boundingBoxWidth = boundingBoxWidth
         self.boundingBoxHeight = boundingBoxHeight
         self.hasGlasses = hasGlasses
+        self.captureQuality = captureQuality
         self.photo = photo
         self.cluster = cluster
     }

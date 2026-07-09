@@ -127,11 +127,12 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
 
             album.photoCount = album.photos.count
 
-            // 커버는 최신순이 아니라, 이 앨범(병합된 경우 모든 클러스터 포함) 안에서 얼굴 boundingBox가
-            // 가장 큰(=화면에 가장 크게 잡힌, 화질이 나을 가능성이 높은) 사진으로 고른다.
+            // 커버는 최신순이 아니라, 이 앨범(병합된 경우 모든 클러스터 포함) 안에서 얼굴 화질(captureQuality)이
+            // 가장 좋은 사진으로 고른다. boundingBox 크기(정규화 비율)로 고르면 저해상도 사진 속 얼굴이
+            // 고해상도 사진 속 더 작지만 실제로는 더 선명한 얼굴을 이기는 경우가 있어서 화질 점수로 바꿨다.
             if let bestEntity = album.clusters
                 .flatMap({ $0.faceEmbeddings })
-                .max(by: { $0.boundingBoxWidth * $0.boundingBoxHeight < $1.boundingBoxWidth * $1.boundingBoxHeight }),
+                .max(by: { $0.captureQuality < $1.captureQuality }),
                let bestPhotoId = bestEntity.photo?.localIdentifier {
                 album.coverPhotoIdentifier = bestPhotoId
             }

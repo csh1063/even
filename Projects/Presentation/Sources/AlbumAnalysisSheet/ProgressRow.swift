@@ -34,7 +34,6 @@ final class ProgressRow: UIView {
     private let spinner: UIActivityIndicatorView = {
         let view = UIActivityIndicatorView(style: .medium)
         view.color = Theme.primary
-        view.startAnimating()
         return view
     }()
 
@@ -67,6 +66,19 @@ final class ProgressRow: UIView {
     func updateBorderColor() {
         layer.borderWidth = 1
         layer.borderColor = Theme.strokeSoft.cgColor
+    }
+
+    func setTitle(_ title: String) {
+        titleLabel.text = title
+        fillLabel.text = title
+    }
+
+    func startSpinner() {
+        spinner.startAnimating()
+    }
+
+    func stopSpinner() {
+        spinner.stopAnimating()
     }
 
     func updateProgress(_ progress: Double) {

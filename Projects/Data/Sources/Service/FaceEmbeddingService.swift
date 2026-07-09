@@ -57,8 +57,8 @@ public actor FaceEmbeddingService {
         }
 
         var embeddings: [FaceEmbedding] = []
-        for observation in observations {
-            if let embedding = extractEmbedding(from: image, observation: observation) {
+        for (observation, captureQuality) in observations {
+            if let embedding = extractEmbedding(from: image, observation: observation, captureQuality: captureQuality) {
                 embeddings.append(embedding)
             }
         }
@@ -77,7 +77,7 @@ public actor FaceEmbeddingService {
 
     // MARK: - Private: Detection
 
-    private func detectFacesWithLandmarks(in image: CGImage) -> [VNFaceObservation]? {
+    private func detectFacesWithLandmarks(in image: CGImage) -> [(observation: VNFaceObservation, captureQuality: Float)]? {
         let request = VNDetectFaceLandmarksRequest()
         let handler = VNImageRequestHandler(cgImage: image, options: [:])
         do {
@@ -85,14 +85,17 @@ public actor FaceEmbeddingService {
             // VNDetectFaceCaptureQualityRequest도 자체적으로 이미지 전체에서 얼굴을 찾아주므로,
             // 얼굴 후보마다 따로 돌리지 않고 이미지당 한 번만 실행해서 boundingBox로 매칭한다.
             let qualityObservations = faceCaptureQualityObservations(in: image)
-            return request.results?.filter {
-                $0.boundingBox.width >= 0.05 && $0.boundingBox.height >= 0.05
-                && $0.confidence >= 0.6
-                && abs($0.yaw?.floatValue ?? 1.0) < 0.9
-                && $0.boundingBox.width * CGFloat(image.width) >= 100.0
-                && !isFaceTruncated($0.boundingBox)
-                && hasCompleteLandmarks($0)
-                && (matchedFaceCaptureQuality(for: $0.boundingBox, in: qualityObservations) ?? 0) >= 0.2
+            return request.results?.compactMap { observation -> (VNFaceObservation, Float)? in
+                let quality = matchedFaceCaptureQuality(for: observation.boundingBox, in: qualityObservations) ?? 0
+                guard observation.boundingBox.width >= 0.05 && observation.boundingBox.height >= 0.05
+                    && observation.confidence >= 0.6
+                    && abs(observation.yaw?.floatValue ?? 1.0) < 0.9
+                    && observation.boundingBox.width * CGFloat(image.width) >= 100.0
+                    && !isFaceTruncated(observation.boundingBox)
+                    && hasCompleteLandmarks(observation)
+                    && quality >= 0.2
+                else { return nil }
+                return (observation, quality)
             }
         } catch {
             print("FaceEmbeddingService detectFacesWithLandmarks 에러:", error)
@@ -129,7 +132,7 @@ public actor FaceEmbeddingService {
 
     // MARK: - Private: Embedding
     
-    private func extractEmbedding(from image: CGImage, observation: VNFaceObservation) -> FaceEmbedding? {
+    private func extractEmbedding(from image: CGImage, observation: VNFaceObservation, captureQuality: Float) -> FaceEmbedding? {
         // 안경 판별용 크롭은 정렬 전 원본 기준으로 — 해상도가 더 높아서 판별에 유리하고, 정렬 방식과 무관하게 일정하게 유지
         guard let cropped = cropFace(from: image, boundingBox: observation.boundingBox) else {
             return nil
@@ -169,7 +172,7 @@ public actor FaceEmbeddingService {
             return nil
         }
 
-        return FaceEmbedding(embedding: embedding, boundingBox: observation.boundingBox, hasGlasses: hasGlasses)
+        return FaceEmbedding(embedding: embedding, boundingBox: observation.boundingBox, hasGlasses: hasGlasses, captureQuality: captureQuality)
     }
 
     // MARK: - Private: Alignment (구조 개편)

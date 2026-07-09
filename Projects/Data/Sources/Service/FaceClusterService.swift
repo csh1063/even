@@ -35,17 +35,18 @@ public final class FaceClusterService {
     /// 개별 클러스터 품질 기준 — 이 미만이면 짜투리로 버림
     private let minimumClusterQuality: Float = 0.78
 
-    /// Chinese Whispers 반복 횟수
-    private let maxIterations: Int = 50
+    /// Chinese Whispers 반복 횟수 — 동기(synchronous) 업데이트로 바꾸면서 수렴에 필요한 반복 수가
+    /// 늘어나서 50번으로는 다 정착하기 전에 잘리는 경우가 많았음 (매 iteration마다 changed: true였음)
+    private let maxIterations: Int = 300
 
     /// 클러스터 병합 기준 — centroid 간 유사도
-    private let mergeThreshold: Float = 0.80
+    private let mergeThreshold: Float = 0.70
 
     /// 병합 후 내부 유사도 검증 기준 (평균 기준 — 한 쌍만 유독 낮아도 다른 멤버들과 평균이 높으면 통과될 수 있음)
-    private let minimumInternalSimilarity: Float = 0.80
+    private let minimumInternalSimilarity: Float = 0.60
 
     /// 평균이 기준을 넘어도, 다른 멤버 중 단 한 명과의 유사도라도 이 값 미만이면 그 얼굴을 아웃라이어로 판단
-    private let minimumPairwiseSimilarity: Float = 0.76
+    private let minimumPairwiseSimilarity: Float = 0.50
 
     private let libraryService: PhotoLibraryService
 
@@ -260,11 +261,14 @@ public final class FaceClusterService {
             nodeEdges[edge.j].append((edge.i, edge.sim))
         }
 
-        // 반복 — 같은 입력이면 항상 같은 결과가 나오도록 순회 순서와 동점 처리를 모두 고정한다.
-        // (기존엔 .shuffled()로 매번 순서가 달랐고, 가중치 동점일 때 Dictionary.max(by:)가
-        // 프로세스마다 랜덤한 해시 순서에 의존해서 실행할 때마다 결과가 미묘하게 달라졌었다)
+        // 반복 — 비동기(asynchronous) 업데이트로 복귀: 노드를 순서대로 훑으며 방금 바뀐 라벨을
+        // 바로 다음 노드 계산에 반영한다. (동기 업데이트로 바꿨다가 큰 그래프에서 진동(oscillation)에
+        // 빠져서 절대 수렴하지 않는 걸 확인함 — changedCount가 965에서 그대로 고정된 채 300번을 돌아도
+        // 안 줄어들었음. Chinese Whispers 원논문도 이 문제 때문에 애초에 비동기 방식을 쓴다.
+        // 순서 자체는 0..<n으로 고정, 동점 처리도 고정이라 "같은 입력이면 항상 같은 결과"는 보장된다.
+        // "어떤 입력 순서든 항상 같은 결과"까지는 보장 못 하지만, 실제로 얼마나 순서에 민감한지는 검증 예정)
         for iteration in 0..<maxIterations {
-            var changed = false
+            var changedCount = 0
 
             for i in 0..<n {
                 guard !nodeEdges[i].isEmpty else { continue }
@@ -281,13 +285,13 @@ public final class FaceClusterService {
                 })?.key {
                     if labels[i] != bestLabel {
                         labels[i] = bestLabel
-                        changed = true
+                        changedCount += 1
                     }
                 }
             }
 
-            print("🔄 iteration \(iteration + 1) — changed: \(changed)")
-            if !changed { break }
+            print("🔄 iteration \(iteration + 1) — changed: \(changedCount)개")
+            if changedCount == 0 { break }
         }
 
         return labels
@@ -395,14 +399,19 @@ public final class FaceClusterService {
             }
 
             // 5. 최종 그룹별로 실제 사진 인덱스 수집
+            // Dictionary 순회 순서는 프로세스마다 랜덤한 해시 시드로 결정되어 실행할 때마다 달라질 수 있다 —
+            // 키(root) 기준으로 정렬해서 순회해야 최종 클러스터 배열의 순서가 재실행해도 항상 동일하다.
+            // (이 순서가 Repository의 "기존 앨범 재사용" 매칭 순서에 그대로 이어지기 때문에 중요함)
             var merged: [Int: [Int]] = [:]
-            for (root, members) in groups {
+            for root in groups.keys.sorted() {
+                let members = groups[root]!
                 merged[root] = members.flatMap { clusterIndices[$0] }
             }
 
             // 6. 최종 그룹 내부의 아웃라이어(엉뚱한 사람) 제거 및 최소 크기 검증
             var finalClusters: [[Int]] = []
-            for indices in merged.values {
+            for root in merged.keys.sorted() {
+                let indices = merged[root]!
                 let cleaned = removeOutliers(indices: indices, n: n, similarityMatrix: similarityMatrix, photoIds: photoIds)
                 if cleaned.count >= minimumClusterSize {
                     finalClusters.append(cleaned)

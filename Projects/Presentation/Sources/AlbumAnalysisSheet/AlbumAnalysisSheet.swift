@@ -61,6 +61,7 @@ final class AlbumAnalysisSheet: UIViewController {
     private let progressPublisher: AnyPublisher<Double, Never>
     private let albumProgressPublisher: AnyPublisher<Double, Never>
     private var cancellables = Set<AnyCancellable>()
+    private var didStartAlbumGeneration = false
 
     init(progress: AnalyzeProgress) {
         self.progress = progress
@@ -148,22 +149,48 @@ final class AlbumAnalysisSheet: UIViewController {
     }
 
     private func setupBindings() {
+        // 사진 분석이 끝나기 전까지는 앨범 생성은 아직 시작 전이니 "대기" 상태로 보여준다
+        photoRow.startSpinner()
+        albumRow.setTitle("앨범 생성 대기")
+        albumRow.stopSpinner()
+
         progressPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] progress in
-                self?.photoRow.updateProgress(progress)
+                guard let self else { return }
+                self.photoRow.updateProgress(progress)
+                if progress >= 1.0 {
+                    self.startAlbumGenerationIfNeeded()
+                }
             }
             .store(in: &cancellables)
 
         albumProgressPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] progress in
-                self?.albumRow.updateProgress(progress)
+                guard let self else { return }
+                // 앨범 생성 진행률 자체가 올라온다는 건 이미 시작됐다는 뜻이므로, 혹시 사진 분석 완료 신호를
+                // 놓친 경우에도 여기서 한 번 더 확실히 "진행 중" 상태로 전환해준다
+                self.startAlbumGenerationIfNeeded()
+                self.albumRow.updateProgress(progress)
                 if progress >= 1.0 {
-                    self?.endPage()
+                    self.albumRow.setTitle("앨범 생성 완료")
+                    self.albumRow.stopSpinner()
+                    self.endPage()
                 }
             }
             .store(in: &cancellables)
+    }
+
+    private func startAlbumGenerationIfNeeded() {
+        guard !didStartAlbumGeneration else { return }
+        didStartAlbumGeneration = true
+
+        photoRow.setTitle("사진 분석 완료")
+        photoRow.stopSpinner()
+
+        albumRow.setTitle("앨범 생성 중")
+        albumRow.startSpinner()
     }
 
     private func endPage() {

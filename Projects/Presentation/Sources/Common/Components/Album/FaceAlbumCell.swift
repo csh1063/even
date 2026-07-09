@@ -124,7 +124,7 @@ final class FaceAlbumCell: UICollectionViewCell {
             ? Theme.primary.cgColor
             : Theme.strokeSoft.cgColor
 
-        faceCellView.configure(with: viewModel.faceCellViewModel, size: CGSize(width: 136, height: 136)) { [weak self] loaded in
+        faceCellView.configure(with: viewModel.faceCellViewModel) { [weak self] loaded in
             guard let self, self.currentIdentifier == viewModel.localIdentifier else { return }
             self.placeholderIcon.isHidden = loaded
         }

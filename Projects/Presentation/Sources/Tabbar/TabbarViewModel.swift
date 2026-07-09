@@ -246,6 +246,10 @@ public final class TabbarViewModel: BaseViewModel {
     private func analysis() async {
         guard !isAnalyzing else { return }
         self.isAnalyzing = true
+
+        let startedAt = Date()
+        print("⏱️ [분석] 시작: \(startedAt)")
+
         do {
             for try await progress in analysisUseCase.analysis() {
                 switch progress.state {
@@ -265,6 +269,10 @@ public final class TabbarViewModel: BaseViewModel {
             self.autoAlbumProgressRatio = 1.0
         }
         self.isAnalyzing = false
+
+        let finishedAt = Date()
+        let elapsedMinutes = finishedAt.timeIntervalSince(startedAt) / 60
+        print("⏱️ [분석] 종료: \(finishedAt) — 총 \(String(format: "%.1f", elapsedMinutes))분 소요")
     }
 
     private func runAlbumGeneration() async {

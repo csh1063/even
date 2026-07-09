@@ -44,10 +44,10 @@ final class FaceCellView: UIView {
         currentPhotoId = nil
     }
 
-    func configure(with viewModel: FaceCellViewModel, size: CGSize, onImageLoaded: ((Bool) -> Void)? = nil) {
+    func configure(with viewModel: FaceCellViewModel, onImageLoaded: ((Bool) -> Void)? = nil) {
         currentPhotoId = viewModel.photoId
         task = Task {
-            let image = await viewModel.loadFaceImage(size: size)
+            let image = await viewModel.loadFaceImage()
             guard !Task.isCancelled, currentPhotoId == viewModel.photoId else { return }
             imageView.image = image
             onImageLoaded?(image != nil)
