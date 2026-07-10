@@ -53,6 +53,7 @@
 		495DB8F6655FCA0D6274214F /* AlertButtonConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58C970CD41B6B5F29F411FAB /* AlertButtonConfig.swift */; };
 		4BCF8BA89CF38E87649D89F7 /* OnboardingPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F818E97932F5F10B0B88546 /* OnboardingPageViewController.swift */; };
 		4CBB27F7B63BE0497C778288 /* SplashCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DFADB91C9C20B195DC6FDC /* SplashCoordinator.swift */; };
+		4CBD1BC66996F7627C8219C7 /* AlbumMergeSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C555B671EBDF7E57F822C3D /* AlbumMergeSheet.swift */; };
 		4F95FE8B7007302DEEECFC6E /* PhotoLibraryCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39ED3BC2474DC0F432EAFB85 /* PhotoLibraryCoordinator.swift */; };
 		503294F3FE598FB11A6F11EC /* CustomTabBarItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABC1E533AB4C8AAA8B48F1F3 /* CustomTabBarItem.swift */; };
 		51A80C8D542492F4A2AAC3F0 /* NaviBarButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10F1A991453FF9438018AFD /* NaviBarButton.swift */; };
@@ -105,6 +106,7 @@
 		ABF65EFD3C72BE46280F5CA2 /* AlertItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 125FEEE52CEDA2092E747AB0 /* AlertItem.swift */; };
 		AD90B623AC1F4BE0A892F9C4 /* BaseCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E474256CB4A9464026CD7F10 /* BaseCoordinator.swift */; };
 		AE6AF37C1DE9A545D89A9E99 /* PhotoHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA704CC81D0F97A19AA5B775 /* PhotoHeader.swift */; };
+		B04ACDE152B6714853F8B1DB /* ClusterSplitSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ACB0B32E319CD1A37C52D93 /* ClusterSplitSheet.swift */; };
 		B39A2D52E240C875E277CACA /* MyPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 976797041FBCEDED9606E242 /* MyPageViewController.swift */; };
 		B4915AA2A18C462535704AFB /* LabelsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE52F8DB3B238CB39E197897 /* LabelsViewModel.swift */; };
 		B5927CDFED1395628EA83E48 /* ImageViewerCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1152274F01C03475C1D2962 /* ImageViewerCell.swift */; };
@@ -177,6 +179,7 @@
 		08C83D56DC7FB169A90CDCE2 /* ImageViewerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageViewerViewController.swift; sourceTree = "<group>"; };
 		0B9667B9CB038CFF99E822A7 /* PhotoTestViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoTestViewModel.swift; sourceTree = "<group>"; };
 		0BBA3F3365AD93BF4DC9BE96 /* SimilarAlbumCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimilarAlbumCell.swift; sourceTree = "<group>"; };
+		0C555B671EBDF7E57F822C3D /* AlbumMergeSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumMergeSheet.swift; sourceTree = "<group>"; };
 		0CE527805A0FFC681F30F295 /* HomeCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeCoordinator.swift; sourceTree = "<group>"; };
 		0D27F91A14AEB240D0A2E7D8 /* NibLoadable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NibLoadable.swift; sourceTree = "<group>"; };
 		0E9B7F8500571EFB5D78EF9C /* AlertViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertViewModel.swift; sourceTree = "<group>"; };
@@ -185,6 +188,7 @@
 		134AEE009D928C7E39EAF4CD /* Presentation-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Presentation-Info.plist"; sourceTree = "<group>"; };
 		1451D4616306E5CB3DC38D05 /* OpenSourceViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenSourceViewController.swift; sourceTree = "<group>"; };
 		145AC80643E8EF1235C8168F /* SimilarAlbumCellViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimilarAlbumCellViewModel.swift; sourceTree = "<group>"; };
+		1ACB0B32E319CD1A37C52D93 /* ClusterSplitSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusterSplitSheet.swift; sourceTree = "<group>"; };
 		1B18F8EDBD5425ACC9D7811D /* MyPageCellType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPageCellType.swift; sourceTree = "<group>"; };
 		1B74B54DBDDE8F00F62C6A60 /* ListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListViewModel.swift; sourceTree = "<group>"; };
 		1BBF3D39CC49B71F014AE289 /* LocationAlbumCellViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationAlbumCellViewModel.swift; sourceTree = "<group>"; };
@@ -734,8 +738,10 @@
 		CEB62B5D9E5D6907FA9C54D4 /* Sheet */ = {
 			isa = PBXGroup;
 			children = (
+				0C555B671EBDF7E57F822C3D /* AlbumMergeSheet.swift */,
 				FA38711B6986E707C1A35C31 /* AlbumOptionsSheet.swift */,
 				EC405535E2284D67AE0A1735 /* AlbumRenameSheet.swift */,
+				1ACB0B32E319CD1A37C52D93 /* ClusterSplitSheet.swift */,
 			);
 			path = Sheet;
 			sourceTree = "<group>";
@@ -905,8 +911,10 @@
 				47532F25612067B672BDF8F2 /* AlbumDetailDIContainer.swift in Sources */,
 				8F411F69699B691647FC02A2 /* AlbumDetailViewController.swift in Sources */,
 				68F7B92E595CE29E2B5D931A /* AlbumDetailViewModel.swift in Sources */,
+				4CBD1BC66996F7627C8219C7 /* AlbumMergeSheet.swift in Sources */,
 				E8CB75FD011E60632A6FE334 /* AlbumOptionsSheet.swift in Sources */,
 				31BFBC37D45BBDA8212B1AC9 /* AlbumRenameSheet.swift in Sources */,
+				B04ACDE152B6714853F8B1DB /* ClusterSplitSheet.swift in Sources */,
 				59A50E712EE67BD7E93271EF /* AlbumListCoordinator.swift in Sources */,
 				11FD13A94151C1E00EFBFD22 /* AlbumListDIContainer.swift in Sources */,
 				633196953593398A7090354A /* AlbumListViewController.swift in Sources */,

@@ -63,6 +63,18 @@ final class AlbumDetailViewController: BaseViewController {
         return btn
     }()
 
+    /// 얼굴 앨범에서만 노출 — 선택한 사진을 이 인물 앨범에서 분리(블랙리스트 처리)
+    private let excludeButton: UIButton = {
+        var config = UIButton.Configuration.filled()
+        config.image = UIImage(systemName: "person.fill.xmark")
+        config.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(pointSize: 12, weight: .medium)
+        config.baseForegroundColor = .white
+        config.baseBackgroundColor = Theme.primary
+        config.cornerStyle = .medium
+        let btn = UIButton(configuration: config)
+        return btn
+    }()
+
     private let selectedCountLabel: UILabel = {
         let lb = UILabel()
         lb.textColor = Theme.textSecondary
@@ -114,6 +126,7 @@ final class AlbumDetailViewController: BaseViewController {
         view.addSubview(collectionView)
         view.addSubview(bottomBar)
         bottomBar.addSubview(selectedCountLabel)
+        bottomBar.addSubview(excludeButton)
         bottomBar.addSubview(deleteButton)
 
         naviView.snp.makeConstraints { make in
@@ -137,9 +150,17 @@ final class AlbumDetailViewController: BaseViewController {
             make.height.equalTo(44)
             make.width.equalTo(44)
         }
+        excludeButton.snp.makeConstraints { make in
+            make.trailing.equalTo(deleteButton.snp.leading).offset(-12)
+            make.centerY.equalTo(deleteButton)
+            make.height.equalTo(44)
+            make.width.equalTo(44)
+        }
 
         bottomBar.isHidden = true
+        excludeButton.isHidden = !viewModel.isFaceAlbum
         deleteButton.addTarget(self, action: #selector(deleteButtonTapped), for: .touchUpInside)
+        excludeButton.addTarget(self, action: #selector(excludeButtonTapped), for: .touchUpInside)
     }
 
     private func setupBindings() {
@@ -247,6 +268,8 @@ final class AlbumDetailViewController: BaseViewController {
         selectedCountLabel.text = "\(count)개 선택"
         deleteButton.isEnabled = count > 0
         deleteButton.alpha = count > 0 ? 1.0 : 0.4
+        excludeButton.isEnabled = count > 0
+        excludeButton.alpha = count > 0 ? 1.0 : 0.4
     }
 
     // MARK: - Actions
@@ -254,6 +277,11 @@ final class AlbumDetailViewController: BaseViewController {
     @objc private func deleteButtonTapped() {
         guard !selectedIdentifiers.isEmpty else { return }
         viewModel.send(.deleteSelected(ids: Array(selectedIdentifiers)))
+    }
+
+    @objc private func excludeButtonTapped() {
+        guard !selectedIdentifiers.isEmpty else { return }
+        viewModel.send(.excludeSelected(ids: Array(selectedIdentifiers)))
     }
 
     // MARK: - Scroll

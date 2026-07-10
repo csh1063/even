@@ -39,9 +39,9 @@ public final class FaceClusterService {
     /// 개별 클러스터 품질 기준 — 이 미만이면 짜투리로 버림
     private let minimumClusterQuality: Float = 0.50
 
-    /// Chinese Whispers 반복 횟수 — 동기(synchronous) 업데이트로 바꾸면서 수렴에 필요한 반복 수가
-    /// 늘어나서 50번으로는 다 정착하기 전에 잘리는 경우가 많았음 (매 iteration마다 changed: true였음)
-    private let maxIterations: Int = 300
+    /// Chinese Whispers 반복 횟수 — 비동기 업데이트로 복귀한 뒤로는 보통 5~9번이면 수렴해서,
+    /// 300은 사실상 죽은 안전장치였음. 여유를 조금만 남기고 10으로 낮춤
+    private let maxIterations: Int = 10
 
     /// 클러스터 병합 기준 — centroid 간 유사도
     private let mergeThreshold: Float = 0.60

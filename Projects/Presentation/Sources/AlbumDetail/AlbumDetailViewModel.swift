@@ -14,6 +14,8 @@ enum AlbumDetailViewModelAction {
     case options(album: Album)
     case pop
     case selectPhoto(_ photoDetails: [PhotoDetail], index: Int, inSelectionMode: Bool)
+    case pickMergeTarget(candidates: [AlbumMergeCandidate])
+    case pickSplitClusters(clusters: [FaceClusterSummary])
 }
 
 @MainActor
@@ -21,6 +23,10 @@ protocol AlbumDetailViewModelDelegate: AnyObject {
     func save(name: String)
     func deleteAlert()
     func changeMode(_ mode: AlbumDetailPageMode)
+    func mergeTapped()
+    func mergeInto(albumIds: [UUID])
+    func splitTapped()
+    func splitInto(clusterIds: [UUID])
 }
 
 @MainActor
@@ -33,6 +39,7 @@ public final class AlbumDetailViewModel: BaseViewModel {
         case dismiss
         case selectItem(id: String, inSelectionMode: Bool)
         case deleteSelected(ids: [String])
+        case excludeSelected(ids: [String])
     }
 
     public struct Output {
@@ -190,6 +197,18 @@ public final class AlbumDetailViewModel: BaseViewModel {
                     AlertButtonConfig(title: "취소", style: .cancel, action: nil)
                 ]
             )
+
+        case .excludeSelected(let ids):
+            showAlert(
+                title: "다른 사람 인가요?",
+                message: "선택한 사진을 앨범에서 제외하고, 다시 묶이지 않게 할게요",
+                buttons: [
+                    AlertButtonConfig(title: "취소", style: .cancel, action: nil),
+                    AlertButtonConfig(title: "제외", style: .destructive) { [weak self] in
+                        Task { await self?.excludeSelected(ids: ids) }
+                    }
+                ]
+            )
         }
     }
 
@@ -242,6 +261,43 @@ public final class AlbumDetailViewModel: BaseViewModel {
             onAction?(.pop)
         }
     }
+
+    private func excludeSelected(ids: [String]) async {
+        do {
+            isLoading = true
+            for id in ids {
+                try await detailUseCase.excludePhoto(id, fromAlbumId: album.id)
+            }
+            await loadPhotos()
+            isLoading = false
+        } catch {
+            isLoading = false
+        }
+    }
+
+    private func mergeAlbums(targetAlbumIds: [UUID]) async {
+        do {
+            isLoading = true
+            for targetId in targetAlbumIds {
+                try await detailUseCase.mergeAlbums(sourceId: album.id, targetId: targetId)
+            }
+            await loadPhotos()
+            isLoading = false
+        } catch {
+            isLoading = false
+        }
+    }
+
+    private func splitAlbum(clusterIds: [UUID]) async {
+        do {
+            isLoading = true
+            try await detailUseCase.splitAlbum(albumId: album.id, clusterIds: clusterIds)
+            await loadPhotos()
+            isLoading = false
+        } catch {
+            isLoading = false
+        }
+    }
 }
 
 extension AlbumDetailViewModel: ImageLoadable {}
@@ -267,7 +323,7 @@ extension AlbumDetailViewModel: AlbumDetailViewModelDelegate {
     func deleteAlert() {
         showAlert(
             title: "앨범 삭제",
-            message: "앨범을 삭제 할까요?\n실제 사진은 삭제되지 않아요",
+            message: "앨범을 삭제 할까요?\n사진은 삭제되지 않아요",
             buttons: [
                 AlertButtonConfig(title: "취소", style: .default, action: {}),
                 AlertButtonConfig(title: "삭제", style: .destructive, action: { self.deleteAlbum() })
@@ -277,5 +333,33 @@ extension AlbumDetailViewModel: AlbumDetailViewModelDelegate {
 
     func changeMode(_ mode: AlbumDetailPageMode) {
         self.selectionMode = mode
+    }
+
+    func mergeTapped() {
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                let candidates = try await detailUseCase.fetchOtherFaceAlbums(excluding: album.id)
+                onAction?(.pickMergeTarget(candidates: candidates))
+            } catch {}
+        }
+    }
+
+    func mergeInto(albumIds: [UUID]) {
+        Task { await mergeAlbums(targetAlbumIds: albumIds) }
+    }
+
+    func splitTapped() {
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                let clusters = try await detailUseCase.fetchClusters(albumId: album.id)
+                onAction?(.pickSplitClusters(clusters: clusters))
+            } catch {}
+        }
+    }
+
+    func splitInto(clusterIds: [UUID]) {
+        Task { await splitAlbum(clusterIds: clusterIds) }
     }
 }

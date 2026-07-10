@@ -10,9 +10,9 @@ import Domain
 
 enum AlbumSection: Int, CaseIterable {
     case travel
+    case face
     case similar
     case category
-    case face
     case location
     case date
 

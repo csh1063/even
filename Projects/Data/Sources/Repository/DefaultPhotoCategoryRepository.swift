@@ -17,10 +17,6 @@ public class DefaultPhotoCategoryRepository: PhotoCategoryRepository {
         self.service = service
     }
 
-    public func fetchCategories() async throws -> [String: [String]] {
-        try await service.fetchCategories()
-    }
-
     public func fetchRuleCategories() async throws -> [String: AlbumRule] {
         try await service.fetchRuleCategories()
     }

@@ -115,7 +115,7 @@ final class FaceAlbumCell: UICollectionViewCell {
             nameLabel.textColor = Theme.textSecondary
             nameLabel.font      = .systemFont(ofSize: 12, weight: .regular)
         } else {
-            nameLabel.text      = "미확인"
+            nameLabel.text      = ""
             nameLabel.textColor = Theme.textTertiary
             nameLabel.font      = .italicSystemFont(ofSize: 12)
         }

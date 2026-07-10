@@ -236,8 +236,14 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
 
         for cluster in target.clusters {
             cluster.album = source
-            source.clusters.append(cluster)
+            if !source.clusters.contains(where: { $0.id == cluster.id }) {
+                source.clusters.append(cluster)
+            }
         }
+        // target.clusters를 비워둬야 한다 — AlbumEntity.clusters는 .cascade 삭제 규칙이라,
+        // 방금 source로 옮긴 클러스터가 여전히 target.clusters에 남아있으면 아래 context.delete(target)에서
+        // 그 클러스터까지 통째로 같이 삭제돼버린다 (병합했는데 분리할 클러스터가 사라지는 버그의 원인이었음)
+        target.clusters.removeAll()
 
         let existingPhotoIds = Set(source.photos.map { $0.localIdentifier })
         for photo in target.photos where !existingPhotoIds.contains(photo.localIdentifier) {
@@ -296,6 +302,137 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
         context.delete(album)
         try context.save()
         print("✅ [Repository] 앨범 삭제 완료\n")
+    }
+
+    // MARK: - 합칠 앨범 후보 (centroid 유사도 순 정렬)
+
+    /// 이미 계산되어 저장된 클러스터 centroid끼리 내적만 하면 되므로, 앨범 수가 많아도 사실상 즉시 끝난다
+    public func fetchOtherFaceAlbumsSortedBySimilarity(excluding albumId: UUID) async throws -> [AlbumMergeCandidate] {
+        let context = ModelContext(container)
+
+        let albums = try context.fetch(FetchDescriptor<AlbumEntity>(
+            predicate: #Predicate { $0.from == "face" }
+        ))
+        let others = albums.filter { $0.id != albumId }
+
+        guard let current = albums.first(where: { $0.id == albumId }) else {
+            return others.map { AlbumMergeCandidate(album: $0.toDomain(), similarity: -1) }
+        }
+
+        let dim = 512
+        let currentCentroids: [[Float]] = current.clusters.map { cluster in
+            cluster.centroidData.withUnsafeBytes { ptr in Array(ptr.bindMemory(to: Float.self).prefix(dim)) }
+        }
+        guard !currentCentroids.isEmpty else {
+            return others.map { AlbumMergeCandidate(album: $0.toDomain(), similarity: -1) }
+        }
+
+        func maxSimilarity(to album: AlbumEntity) -> Float {
+            var best: Float = -1
+            for cluster in album.clusters {
+                let centroid = cluster.centroidData.withUnsafeBytes { ptr -> [Float] in
+                    Array(ptr.bindMemory(to: Float.self).prefix(dim))
+                }
+                for candidate in currentCentroids {
+                    var dot: Float = 0
+                    vDSP_dotpr(candidate, 1, centroid, 1, &dot, vDSP_Length(dim))
+                    best = max(best, dot)
+                }
+            }
+            return best
+        }
+
+        let ranked = others
+            .map { ($0, maxSimilarity(to: $0)) }
+            .sorted { $0.1 > $1.1 }
+
+        print("\n=== 🔎 [Repository] '\(current.name)'과 합칠 앨범 후보 유사도 순위 ===")
+        for (album, sim) in ranked {
+            print("   \(String(format: "%.4f", sim)) — \(album.name) (\(album.photoCount)장)")
+        }
+        print("--------------------------------------------------------------\n")
+
+        return ranked.map { AlbumMergeCandidate(album: $0.0.toDomain(), similarity: $0.1) }
+    }
+
+    // MARK: - 앨범 분리 (병합 되돌리기)
+
+    public func fetchClusters(albumId: UUID) async throws -> [FaceClusterSummary] {
+        let context = ModelContext(container)
+
+        let albums = try context.fetch(FetchDescriptor<AlbumEntity>())
+        guard let album = albums.first(where: { $0.id == albumId }) else { return [] }
+
+        return album.clusters.map { cluster in
+            let cover = cluster.faceEmbeddings.max(by: { $0.captureQuality < $1.captureQuality })
+            let photoCount = Set(cluster.faceEmbeddings.compactMap { $0.photo?.localIdentifier }).count
+            return FaceClusterSummary(id: cluster.id, photoCount: photoCount, coverPhotoId: cover?.photo?.localIdentifier)
+        }
+    }
+
+    public func splitAlbum(albumId: UUID, clusterIds: [UUID]) async throws {
+        let context = ModelContext(container)
+
+        let albums = try context.fetch(FetchDescriptor<AlbumEntity>())
+        guard let album = albums.first(where: { $0.id == albumId }) else { return }
+
+        let clustersToSplit = album.clusters.filter { clusterIds.contains($0.id) }
+        // 전부 떼어내면 원본 앨범이 텅 비므로, 최소 1개 클러스터는 남아있어야 분리가 성립한다
+        guard !clustersToSplit.isEmpty, clustersToSplit.count < album.clusters.count else { return }
+
+        print("\n=== ✂️ [Repository] 앨범 분리: \(album.name)에서 \(clustersToSplit.count)개 클러스터 분리 ===")
+
+        let existingAlbumCount = try context.fetchCount(FetchDescriptor<AlbumEntity>(
+            predicate: #Predicate { $0.from == "face" }
+        ))
+        let newAlbumName = "인물 \(existingAlbumCount + 1)"
+        let newAlbum = AlbumEntity(
+            id: UUID(),
+            name: newAlbumName,
+            displayName: newAlbumName,
+            isAuto: true,
+            coverPhotoIdentifier: nil,
+            from: "face"
+        )
+        context.insert(newAlbum)
+
+        let movingPhotoIds = Set(clustersToSplit.flatMap { $0.faceEmbeddings.compactMap { $0.photo?.localIdentifier } })
+
+        for cluster in clustersToSplit {
+            cluster.album = newAlbum
+            newAlbum.clusters.append(cluster)
+            album.clusters.removeAll { $0.id == cluster.id }
+        }
+
+        // 남은 클러스터에도 걸쳐있는 사진(한 사진에 두 사람 얼굴)은 원본 앨범에도 계속 남겨둔다
+        let remainingPhotoIds = Set(album.clusters.flatMap { $0.faceEmbeddings.compactMap { $0.photo?.localIdentifier } })
+        let photoEntities = Dictionary(uniqueKeysWithValues: album.photos.map { ($0.localIdentifier, $0) })
+
+        for photoId in movingPhotoIds {
+            guard let photo = photoEntities[photoId] else { continue }
+            if !newAlbum.photos.contains(where: { $0.localIdentifier == photoId }) {
+                newAlbum.photos.append(photo)
+            }
+            if !remainingPhotoIds.contains(photoId) {
+                album.photos.removeAll { $0.localIdentifier == photoId }
+            }
+        }
+
+        album.photoCount = album.photos.count
+        newAlbum.photoCount = newAlbum.photos.count
+        album.isEdited = true
+
+        if let bestEntity = album.clusters.flatMap({ $0.faceEmbeddings }).max(by: { $0.captureQuality < $1.captureQuality }),
+           let bestPhotoId = bestEntity.photo?.localIdentifier {
+            album.coverPhotoIdentifier = bestPhotoId
+        }
+        if let bestEntity = newAlbum.clusters.flatMap({ $0.faceEmbeddings }).max(by: { $0.captureQuality < $1.captureQuality }),
+           let bestPhotoId = bestEntity.photo?.localIdentifier {
+            newAlbum.coverPhotoIdentifier = bestPhotoId
+        }
+
+        try context.save()
+        print("✅ [Repository] 분리 완료 — \(album.name): \(album.photoCount)장 / \(newAlbum.name): \(newAlbum.photoCount)장\n")
     }
 
     // MARK: - Private Helpers

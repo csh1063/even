@@ -16,7 +16,9 @@ enum TabbarViewModelAction {
 
 struct AnalyzeProgress {
     let photoProgress: AnyPublisher<Double, Never>
+    let photoCompleted: AnyPublisher<Void, Never>
     let albumProgress: AnyPublisher<Double, Never>
+    let albumCompleted: AnyPublisher<Void, Never>
 }
 
 @MainActor
@@ -46,6 +48,11 @@ public final class TabbarViewModel: BaseViewModel {
 
     @Published private var progressRatio: Double = 0
     @Published private var autoAlbumProgressRatio: Double = 0
+    // progressRatio/autoAlbumProgressRatio는 진행률 바(0~1) 표시용이고, @Published라 구독 시점의
+    // 현재값을 항상 리플레이한다 — "완료"라는 확정적 신호는 그거와 별개로 한 번만 쏘는 이벤트로 관리한다
+    // (PassthroughSubject는 과거 값을 리플레이하지 않아서, 뒤늦게 구독해도 엉뚱한 값에 걸릴 일이 없다)
+    private let photoCompletedSubject = PassthroughSubject<Void, Never>()
+    private let albumCompletedSubject = PassthroughSubject<Void, Never>()
     @Published private var isAnalyzing: Bool = false
     @Published private var isComplete: Bool = false
     @Published private var onboarding: Bool?
@@ -97,6 +104,15 @@ public final class TabbarViewModel: BaseViewModel {
         .store(in: &cancellables)
     }
 
+    private func makeAnalyzeProgress() -> AnalyzeProgress {
+        AnalyzeProgress(
+            photoProgress: $progressRatio.eraseToAnyPublisher(),
+            photoCompleted: photoCompletedSubject.eraseToAnyPublisher(),
+            albumProgress: $autoAlbumProgressRatio.eraseToAnyPublisher(),
+            albumCompleted: albumCompletedSubject.eraseToAnyPublisher()
+        )
+    }
+
     private func handle(_ input: Input) async {
         switch input {
         case .showConsent:
@@ -116,10 +132,12 @@ public final class TabbarViewModel: BaseViewModel {
                     AlertButtonConfig(title: "분석하기", style: .default) { [weak self] in
                         Task {
                             guard let self else {return}
-                            self.onAction?(.progressSheet(AnalyzeProgress(
-                                photoProgress: self.$progressRatio.eraseToAnyPublisher(),
-                                albumProgress: self.$autoAlbumProgressRatio.eraseToAnyPublisher()
-                            )))
+                            // 이전 분석/생성이 에러로 끝난 경우 progressRatio가 1.0에 멈춰있을 수 있어서,
+                            // 새 시트가 구독하자마자 (@Published는 구독 시점 현재값을 바로 흘려보냄) "완료"로 보일 수 있다 —
+                            // 새로 시작하기 전에 항상 0으로 리셋해서 이 시트는 항상 진짜 0부터 시작하게 한다
+                            self.progressRatio = 0
+                            self.autoAlbumProgressRatio = 0
+                            self.onAction?(.progressSheet(self.makeAnalyzeProgress()))
                             await self.analysis()
                         }
                     }
@@ -152,12 +170,12 @@ public final class TabbarViewModel: BaseViewModel {
                             await self.albumClear()
                             self.isLoading = false
 
-                            self.onAction?(.progressSheet(AnalyzeProgress(
-                                photoProgress: self.$progressRatio.eraseToAnyPublisher(),
-                                albumProgress: self.$autoAlbumProgressRatio.eraseToAnyPublisher()
-                            )))
+                            self.autoAlbumProgressRatio = 0
+                            self.onAction?(.progressSheet(self.makeAnalyzeProgress()))
 
+                            // 이 플로우는 사진 분석 없이 앨범 생성만 다시 하므로, 사진 분석 단계는 곧바로 완료 처리한다
                             self.progressRatio = 1.0
+                            self.photoCompletedSubject.send(())
                             await self.runAlbumGeneration()
                         }
                     },
@@ -212,10 +230,9 @@ public final class TabbarViewModel: BaseViewModel {
                             await self.clear()
                             self.isLoading = false
 
-                            self.onAction?(.progressSheet(AnalyzeProgress(
-                                photoProgress: self.$progressRatio.eraseToAnyPublisher(),
-                                albumProgress: self.$autoAlbumProgressRatio.eraseToAnyPublisher()
-                            )))
+                            self.progressRatio = 0
+                            self.autoAlbumProgressRatio = 0
+                            self.onAction?(.progressSheet(self.makeAnalyzeProgress()))
                             await self.analysis()
                         }
                     }
@@ -262,11 +279,14 @@ public final class TabbarViewModel: BaseViewModel {
                 }
             }
             self.progressRatio = 1.0
+            self.photoCompletedSubject.send(())
 
             await runAlbumGeneration()
         } catch {
             self.progressRatio = 1.0
             self.autoAlbumProgressRatio = 1.0
+            self.photoCompletedSubject.send(())
+            self.albumCompletedSubject.send(())
         }
         self.isAnalyzing = false
 
@@ -283,12 +303,14 @@ public final class TabbarViewModel: BaseViewModel {
                 if case .completed = progress.step {
                     self.autoAlbumProgressRatio = 1.0
                     self.isComplete = true
+                    self.albumCompletedSubject.send(())
                     self.endAllProcess()
                 }
             }
         } catch {
             self.autoAlbumProgressRatio = 1.0
             self.isComplete = true
+            self.albumCompletedSubject.send(())
         }
     }
 

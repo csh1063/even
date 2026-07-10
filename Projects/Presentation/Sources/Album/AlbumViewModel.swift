@@ -76,10 +76,14 @@ public final class AlbumViewModel: BaseViewModel {
 
         albumUseCase.albumsPublisher
             .receive(on: DispatchQueue.main)
-            .handleEvents(receiveOutput: { albums in
+            .sink { [weak self] albums in
                 print("📂 albumsPublisher received: \(albums.count)")
-            })
-            .assign(to: &$albums)
+                // albums만 갱신하고 끝내면, 실제 화면을 그리는 sections는 그대로라 화면이 안 바뀐다 —
+                // 병합/분리처럼 다른 화면에서 syncAlbums()로 밀어준 변경사항이 여기 반영되려면 같이 재빌드해야 한다
+                self?.albums = albums
+                self?.buildSections(from: albums)
+            }
+            .store(in: &cancellables)
     }
 
     public func transform() -> Output {

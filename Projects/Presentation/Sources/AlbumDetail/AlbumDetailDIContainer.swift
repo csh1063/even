@@ -15,6 +15,7 @@ public final class AlbumDetailDIContainer {
     private let photoLibraryRepository: PhotoLibraryRepository
     private let albumDataRepository: AlbumDataRepository
     private let labelRepository: PhotoLabelDataRepository
+    private let faceClusterRepository: FaceClusterRepository
 
     private let album: Album
     private let isSelectMode: Bool
@@ -23,11 +24,13 @@ public final class AlbumDetailDIContainer {
                 photoLibraryRepository: PhotoLibraryRepository,
                 albumDataRepository: AlbumDataRepository,
                 labelRepository: PhotoLabelDataRepository,
+                faceClusterRepository: FaceClusterRepository,
                 isSelectMode: Bool) {
         self.album = album
         self.photoLibraryRepository = photoLibraryRepository
         self.albumDataRepository = albumDataRepository
         self.labelRepository = labelRepository
+        self.faceClusterRepository = faceClusterRepository
         self.isSelectMode = isSelectMode
     }
 
@@ -39,13 +42,22 @@ public final class AlbumDetailDIContainer {
 
         let albumDetailUseCase = DefaultAlbumDetailUseCase(
             repository: albumDataRepository,
-            libraryRepository: photoLibraryRepository
+            libraryRepository: photoLibraryRepository,
+            faceClusterRepository: faceClusterRepository
         )
 
         return AlbumDetailViewModel(album: album,
                                     imageUseCase: imageUseCase,
                                     detailUseCase: albumDetailUseCase,
                                     startInSelectionMode: isSelectMode)
+    }
+
+    func makeImageUseCase() -> PhotoImageUseCase {
+        DefaultPhotoImageUseCase(repository: photoLibraryRepository)
+    }
+
+    func makeAlbumUseCase() -> AlbumUseCase {
+        DefaultAlbumUseCase(albumRepository: albumDataRepository)
     }
 
     func makeImageViewerViewModel(photoDetails: [PhotoDetail], index: Int,

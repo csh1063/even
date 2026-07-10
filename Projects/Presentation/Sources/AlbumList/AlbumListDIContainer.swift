@@ -15,17 +15,20 @@ public final class AlbumListDIContainer {
     private let photoLibraryRepository: PhotoLibraryRepository
     private let albumDataRepository: AlbumDataRepository
     private let photoLabelDataRepository: PhotoLabelDataRepository
+    private let faceClusterRepository: FaceClusterRepository
 
     private let from: String
 
     public init(from: String,
                 photoLibraryRepository: PhotoLibraryRepository,
                 albumDataRepository: AlbumDataRepository,
-                photoLabelDataRepository: PhotoLabelDataRepository) {
+                photoLabelDataRepository: PhotoLabelDataRepository,
+                faceClusterRepository: FaceClusterRepository) {
         self.from = from
         self.photoLibraryRepository = photoLibraryRepository
         self.albumDataRepository = albumDataRepository
         self.photoLabelDataRepository = photoLabelDataRepository
+        self.faceClusterRepository = faceClusterRepository
     }
 
     func makeAlbumListViewModel() -> AlbumListViewModel {
@@ -49,6 +52,7 @@ public final class AlbumListDIContainer {
             photoLibraryRepository: photoLibraryRepository,
             albumDataRepository: albumDataRepository,
             labelRepository: photoLabelDataRepository,
+            faceClusterRepository: faceClusterRepository,
             isSelectMode: isSelectMode
         )
     }

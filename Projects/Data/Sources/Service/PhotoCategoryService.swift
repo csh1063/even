@@ -12,15 +12,6 @@ import Domain
 public final class PhotoCategoryService {
 
     // MARK: - 단어 목록 로드
-    private var photoCategories: [String: [String]] = {
-        let bundle = Bundle.module
-        guard let url = bundle.url(forResource: "PhotoCategories", withExtension: "json"),
-              let data = try? Data(contentsOf: url),
-              let array = try? JSONDecoder().decode([String: [String]].self, from: data)
-        else { return [:] }
-        return array
-    }()
-
     private var photoCategoriesRule: [String: AlbumRule] = {
         let bundle = Bundle.module
         guard let url = bundle.url(forResource: "PhotoCategoriesRule", withExtension: "json"),
@@ -31,10 +22,6 @@ public final class PhotoCategoryService {
     }()
 
     public init() {
-    }
-
-    public func fetchCategories() async throws -> [String: [String]] {
-        return photoCategories
     }
 
     public func fetchRuleCategories() async throws -> [String: AlbumRule] {

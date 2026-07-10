@@ -28,12 +28,10 @@ final class AlbumAnalysisSheet: UIViewController {
         return view
     }()
 
-    private let progressIndicator: UIActivityIndicatorView = {
-        let view = UIActivityIndicatorView(style: .medium)
-        view.color = Theme.primary
-        view.transform = CGAffineTransform(scaleX: 1.3, y: 1.3)
-        view.startAnimating()
-        return view
+    private let logoImageView: UIImageView = {
+        let imageView = UIImageView(image: UIImage(named: "icon", in: .module, with: nil))
+        imageView.contentMode = .scaleAspectFit
+        return imageView
     }()
 
     private let titleLabel: UILabel = {
@@ -47,7 +45,7 @@ final class AlbumAnalysisSheet: UIViewController {
 
     private let subtitleLabel: UILabel = {
         let label = UILabel()
-        label.text = "사진과 얼굴, 위치를 분석하고 관련 사진끼리 앨범을 만들고 있어요\n완료될 때까지 조금만 기다려주세요"
+        label.text = "사진과 얼굴, 위치를 분석하고\n관련 앨범을 만들고 있어요\n완료될 때까지 조금만 기다려주세요"
         label.font = .systemFont(ofSize: 14, weight: .regular)
         label.textColor = Theme.textSecondary
         label.textAlignment = .center
@@ -59,7 +57,9 @@ final class AlbumAnalysisSheet: UIViewController {
     private let albumRow = ProgressRow(icon: "square.stack.3d.up.fill", title: "앨범 생성 중")
 
     private let progressPublisher: AnyPublisher<Double, Never>
+    private let photoCompletedPublisher: AnyPublisher<Void, Never>
     private let albumProgressPublisher: AnyPublisher<Double, Never>
+    private let albumCompletedPublisher: AnyPublisher<Void, Never>
     private var cancellables = Set<AnyCancellable>()
     private var didStartAlbumGeneration = false
 
@@ -67,7 +67,9 @@ final class AlbumAnalysisSheet: UIViewController {
         self.progress = progress
 
         self.progressPublisher = progress.photoProgress
+        self.photoCompletedPublisher = progress.photoCompleted
         self.albumProgressPublisher = progress.albumProgress
+        self.albumCompletedPublisher = progress.albumCompleted
 
         super.init(nibName: nil, bundle: nil)
     }
@@ -93,10 +95,10 @@ final class AlbumAnalysisSheet: UIViewController {
 
     private func setupLayout() {
         // Circle
-        circleBackground.addSubview(progressIndicator)
-        progressIndicator.translatesAutoresizingMaskIntoConstraints = false
-        progressIndicator.snp.makeConstraints { make in
+        circleBackground.addSubview(logoImageView)
+        logoImageView.snp.makeConstraints { make in
             make.center.equalTo(circleBackground)
+            make.width.height.equalTo(48)
         }
 
         // Text stack
@@ -154,30 +156,39 @@ final class AlbumAnalysisSheet: UIViewController {
         albumRow.setTitle("앨범 생성 대기")
         albumRow.stopSpinner()
 
+        // progress 값(0~1)은 오직 진행률 바 표시용 — @Published라 구독 시점 현재값을 리플레이하기 때문에
+        // "완료"라는 확정적인 상태 전환은 이 값으로 추론하지 않고, 아래 photoCompleted/albumCompleted
+        // 이벤트(PassthroughSubject라 리플레이 없음)로만 판단한다
         progressPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] progress in
-                guard let self else { return }
-                self.photoRow.updateProgress(progress)
-                if progress >= 1.0 {
-                    self.startAlbumGenerationIfNeeded()
-                }
+                self?.photoRow.updateProgress(progress)
             }
             .store(in: &cancellables)
 
         albumProgressPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] progress in
+                self?.albumRow.updateProgress(progress)
+            }
+            .store(in: &cancellables)
+
+        photoCompletedPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+                self?.startAlbumGenerationIfNeeded()
+            }
+            .store(in: &cancellables)
+
+        albumCompletedPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
                 guard let self else { return }
-                // 앨범 생성 진행률 자체가 올라온다는 건 이미 시작됐다는 뜻이므로, 혹시 사진 분석 완료 신호를
-                // 놓친 경우에도 여기서 한 번 더 확실히 "진행 중" 상태로 전환해준다
                 self.startAlbumGenerationIfNeeded()
-                self.albumRow.updateProgress(progress)
-                if progress >= 1.0 {
-                    self.albumRow.setTitle("앨범 생성 완료")
-                    self.albumRow.stopSpinner()
-                    self.endPage()
-                }
+                self.albumRow.updateProgress(1.0)
+                self.albumRow.setTitle("앨범 생성 완료")
+                self.albumRow.stopSpinner()
+                self.endPage()
             }
             .store(in: &cancellables)
     }

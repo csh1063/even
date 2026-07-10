@@ -38,6 +38,10 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
                 self?.pop()
             case .selectPhoto(let photoDetails, let index, let inSelectionMode):
                 self?.showDetail(photoDetails, index: index, inSelectionMode: inSelectionMode)
+            case .pickMergeTarget(let candidates):
+                self?.showMergeTargetPicker(candidates: candidates)
+            case .pickSplitClusters(let clusters):
+                self?.showClusterSplitPicker(clusters: clusters)
             }
         }
 
@@ -70,23 +74,90 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
     }
 
     func showAlbumOptions(album: Album) {
-        let sheet = SelectionSheet(
-            title: album.displayName,
-            options: [
-                OptionRowConfig(icon: "pencil.line", title: "앨범명 변경", style: .normal) { [weak self] in
-                    self?.showAlbumRenameSheet(album: album)
-                },
-                OptionRowConfig(icon: "checkmark.circle", title: "선택 모드", style: .normal) { [weak self] in
-                    self?.delegate?.changeMode(.select)
-                },
-                OptionRowConfig(icon: "trash", title: "앨범 삭제", style: .destructive) { [weak self] in
-                    self?.delegate?.deleteAlert()
+        var options: [OptionRowConfig] = [
+            OptionRowConfig(icon: "pencil.line", title: "앨범명 변경", style: .normal) { [weak self] in
+                self?.showAlbumRenameSheet(album: album)
+            },
+            OptionRowConfig(icon: "checkmark.circle", title: "선택 모드", style: .normal) { [weak self] in
+                self?.delegate?.changeMode(.select)
+            }
+        ]
+
+        if album.from == "face" {
+            options.append(
+                OptionRowConfig(icon: "person.2.crop.square.stack", title: "앨범 합치기", style: .normal) { [weak self] in
+                    self?.delegate?.mergeTapped()
                 }
-            ]
+            )
+            options.append(
+                OptionRowConfig(icon: "square.on.square.dashed", title: "앨범 분리", style: .normal) { [weak self] in
+                    self?.delegate?.splitTapped()
+                }
+            )
+        }
+
+        options.append(
+            OptionRowConfig(icon: "trash", title: "앨범 삭제", style: .destructive) { [weak self] in
+                self?.delegate?.deleteAlert()
+            }
         )
 
+        let sheet = SelectionSheet(title: album.displayName, options: options)
+
         if let presentation = sheet.sheetPresentationController {
-            presentation.detents = [.custom { _ in 260 }]
+            presentation.detents = [.custom { _ in sheet.preferredDetentHeight }]
+            presentation.preferredCornerRadius = 28
+        }
+
+        navigationController.present(sheet, animated: true)
+    }
+
+    func showMergeTargetPicker(candidates: [AlbumMergeCandidate]) {
+        guard !candidates.isEmpty else {
+            let alert = UIAlertController(
+                title: "합칠 앨범 없음",
+                message: "합칠 수 있는 다른 인물 앨범이 없어요",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "확인", style: .default))
+            navigationController.present(alert, animated: true)
+            return
+        }
+
+        let sheet = AlbumMergeSheet(candidates: candidates, imageUseCase: diContainer.makeImageUseCase(), albumUseCase: diContainer.makeAlbumUseCase())
+        sheet.onConfirm = { [weak self] selectedIds in
+            guard !selectedIds.isEmpty else { return }
+            self?.delegate?.mergeInto(albumIds: selectedIds)
+        }
+
+        if let presentation = sheet.sheetPresentationController {
+            presentation.detents = [.medium(), .large()]
+            presentation.preferredCornerRadius = 28
+        }
+
+        navigationController.present(sheet, animated: true)
+    }
+
+    func showClusterSplitPicker(clusters: [FaceClusterSummary]) {
+        guard clusters.count > 1 else {
+            let alert = UIAlertController(
+                title: "분리할 그룹 없음",
+                message: "이 앨범은 병합된 적이 없어서 분리할 그룹이 없어요",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "확인", style: .default))
+            navigationController.present(alert, animated: true)
+            return
+        }
+
+        let sheet = ClusterSplitSheet(clusters: clusters, imageUseCase: diContainer.makeImageUseCase())
+        sheet.onConfirm = { [weak self] selectedIds in
+            guard !selectedIds.isEmpty else { return }
+            self?.delegate?.splitInto(clusterIds: selectedIds)
+        }
+
+        if let presentation = sheet.sheetPresentationController {
+            presentation.detents = [.custom { _ in sheet.preferredDetentHeight }]
             presentation.preferredCornerRadius = 28
         }
 

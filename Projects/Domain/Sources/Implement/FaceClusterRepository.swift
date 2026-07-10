@@ -23,4 +23,13 @@ public protocol FaceClusterRepository {
 
     /// 앨범 삭제 + 블랙리스트 등록
     func deleteAlbum(albumId: UUID) async throws
+
+    /// 이 앨범을 구성하는 클러스터 목록 조회 — 앨범 분리 화면에서 사용
+    func fetchClusters(albumId: UUID) async throws -> [FaceClusterSummary]
+
+    /// 지정한 클러스터들을 앨범에서 떼어내 새 앨범으로 분리 (병합을 되돌릴 때 사용)
+    func splitAlbum(albumId: UUID, clusterIds: [UUID]) async throws
+
+    /// 다른 얼굴 앨범들을 이 앨범과의 centroid 유사도가 높은 순으로 정렬해 반환 — 합치기 후보 추천용
+    func fetchOtherFaceAlbumsSortedBySimilarity(excluding albumId: UUID) async throws -> [AlbumMergeCandidate]
 }

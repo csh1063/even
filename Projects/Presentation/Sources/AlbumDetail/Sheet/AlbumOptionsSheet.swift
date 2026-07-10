@@ -252,6 +252,12 @@ final class SelectionSheet: UIViewController {
         return lb
     }()
 
+    private let scrollView: UIScrollView = {
+        let sv = UIScrollView()
+        sv.showsVerticalScrollIndicator = false
+        return sv
+    }()
+
     private lazy var rowStack: UIStackView = {
         let sv = UIStackView()
         sv.axis = .vertical
@@ -270,6 +276,21 @@ final class SelectionSheet: UIViewController {
 
     required init?(coder: NSCoder) {
         fatalError("SelectionSheet does not support NSCoding.")
+    }
+
+    // MARK: - Detent
+
+    /// 옵션 개수에 맞춰 시트가 딱 맞게 늘어나도록 계산한 높이 — 항목이 많아지면 화면의 80%에서 멈추고
+    /// 그 이상은 scrollView가 스크롤로 처리한다.
+    var preferredDetentHeight: CGFloat {
+        let rowHeight: CGFloat = 58
+        let rowSpacing: CGFloat = 12
+        let rowsTotal = options.isEmpty ? 0 : CGFloat(options.count) * rowHeight + CGFloat(options.count - 1) * rowSpacing
+        let headerHeight: CGFloat = sheetSubtitle != nil ? 45 : 24
+        // grabber(10+5) + gap(16) + header + gap(20) + rows + bottom(32)
+        let contentHeight = 10 + 5 + 16 + headerHeight + 20 + rowsTotal + 32
+        let maxHeight = UIScreen.main.bounds.height * 0.8
+        return min(contentHeight, maxHeight)
     }
 
     // MARK: - Lifecycle
@@ -295,7 +316,8 @@ final class SelectionSheet: UIViewController {
 
         view.addSubview(grabberView)
         view.addSubview(headerStack)
-        view.addSubview(rowStack)
+        view.addSubview(scrollView)
+        scrollView.addSubview(rowStack)
 
         grabberView.snp.makeConstraints { make in
             make.top.equalToSuperview().offset(10)
@@ -307,10 +329,13 @@ final class SelectionSheet: UIViewController {
             make.top.equalTo(grabberView.snp.bottom).offset(16)
             make.leading.trailing.equalToSuperview().inset(20)
         }
-        rowStack.snp.makeConstraints { make in
+        scrollView.snp.makeConstraints { make in
             make.top.equalTo(headerStack.snp.bottom).offset(20)
-            make.leading.trailing.equalToSuperview().inset(20)
-            make.bottom.lessThanOrEqualToSuperview().inset(32)
+            make.leading.trailing.bottom.equalToSuperview()
+        }
+        rowStack.snp.makeConstraints { make in
+            make.edges.equalTo(scrollView.contentLayoutGuide).inset(UIEdgeInsets(top: 0, left: 20, bottom: 32, right: 20))
+            make.width.equalTo(scrollView.frameLayoutGuide).offset(-40)
         }
     }
 
