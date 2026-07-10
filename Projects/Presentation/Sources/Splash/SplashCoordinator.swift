@@ -12,22 +12,22 @@ import Combine
 
 @MainActor
 public final class SplashCoordinator: BaseCoordinator {
-    
+
     private let container: AppDIContainer
     private let window: UIWindow
     public var finished = PassthroughSubject<Bool, Never>()
-    
+
     private var cancellables = Set<AnyCancellable>()
-    
+
     public init(container: AppDIContainer, window: UIWindow) {
         self.container = container
         self.window = window
-        
+
         super.init()
     }
 
     public override func start() {
-        
+
         let viewModel = container.makeSplashViewModel()
         viewModel.transform().finished
             .sink { [weak self] isFinished in
@@ -37,9 +37,9 @@ public final class SplashCoordinator: BaseCoordinator {
                 }
             }
             .store(in: &cancellables)
-        
+
         bindAlert(from: viewModel)
-        
+
         let viewController = SplashViewController(viewModel: viewModel)
 
         window.rootViewController = viewController

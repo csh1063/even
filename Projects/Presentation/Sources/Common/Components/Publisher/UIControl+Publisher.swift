@@ -9,9 +9,6 @@
 import UIKit
 import Combine
 import Foundation
-import UIKit
-import Combine
-
 extension UIControl {
 
     fileprivate struct EventPublisher<Control: UIControl>: Publisher {
@@ -56,7 +53,10 @@ extension UIControl {
     }
 
     fileprivate func makePublisher<Control: UIControl>(for events: UIControl.Event) -> AnyPublisher<Control, Never> {
-        EventPublisher(control: self as! Control, events: events)
+        guard let control = self as? Control else {
+            return Empty<Control, Never>().eraseToAnyPublisher()
+        }
+        return EventPublisher(control: control, events: events)
             .eraseToAnyPublisher()
     }
 }

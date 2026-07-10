@@ -11,11 +11,11 @@ import UIKit
 import Combine
 
 final class AlbumViewController: BaseViewController {
-    
-    private let naviView: NaviBarView = NaviBarView(type: .title(.leading))
-    
+
+    private let naviView = NaviBarView(type: .title(.leading))
+
     private var collectionView: UICollectionView = {
-        
+
         let layout = UICollectionViewFlowLayout()
         let collectionView = UICollectionView(frame: CGRect.zero, collectionViewLayout: layout)
         collectionView.isScrollEnabled = true
@@ -24,76 +24,70 @@ final class AlbumViewController: BaseViewController {
 
         return collectionView
     }()
-    
-    private var emptyView: AlbumEmtpyView = AlbumEmtpyView()
-    
+
+    private var emptyView = AlbumEmtpyView()
+
     private var dataSource: UICollectionViewDiffableDataSource<AlbumSection, AlbumType>!
-    
+
     private let viewModel: AlbumViewModel
-    
+
     private var cancellables = Set<AnyCancellable>()
-    
+
     init(viewModel: AlbumViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError(Self.fatalMessage)
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         self.setupView()
         self.setupBindings()
-        
+
         self.viewModel.send(.appear)
     }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-//        self.viewModel.send(.appear)
-    }
-    
+
     private func setupView() {
-        
-        naviView.setTitle("주제별 앨범",
+
+        naviView.setTitle("앨범",
                           color: Theme.textPrimary,
                           font: .systemFont(ofSize: 32, weight: .bold))
         naviView.setMessage("사진이 개 앨범으로 정리되었어요",
                             color: Theme.textPrimary,
                             font: .systemFont(ofSize: 14, weight: .regular))
-        
+
         collectionView.setCollectionViewLayout(makeLayout(), animated: false)
         collectionView.contentInset = UIEdgeInsets(top: 20, left: 0, bottom: 80, right: 0)
         collectionView.delegate = self
-        
+
         view.addSubview(collectionView)
         view.addSubview(naviView)
         view.addSubview(emptyView)
-        
+
         self.configureDataSource()
-        
+
         emptyView.snp.makeConstraints { make in
             make.top.equalTo(self.view.safeAreaLayoutGuide)
             make.leading.trailing.equalTo(self.view)
         }
-        
+
         naviView.snp.makeConstraints { make in
             make.top.equalToSuperview()
             make.leading.trailing.equalTo(self.view)
         }
-        
+
         collectionView.snp.makeConstraints { make in
             make.top.equalTo(naviView.snp.bottom)
             make.bottom.leading.trailing.equalTo(self.view)
         }
     }
-    
+
     private func setupBindings() {
-        
+
         naviView.publisher
             .sink { [weak self] type in
                 guard let self else {return}
@@ -106,18 +100,18 @@ final class AlbumViewController: BaseViewController {
                 }
             }
             .store(in: &cancellables)
-        
+
         emptyView.publisher
             .sink { [weak self] _ in
                 self?.viewModel.send(.analysis)
             }
             .store(in: &cancellables)
-        
+
         let output = self.viewModel.transform()
         output.sections
             .sink { [weak self] data in
                 guard let self else { return }
-                
+
                 if data.isEmpty {
                     self.emptyView.isHidden = false
                     self.naviView.isHidden = true
@@ -132,14 +126,14 @@ final class AlbumViewController: BaseViewController {
                 self.applySnapshot(data: data)
             }
             .store(in: &cancellables)
-        
+
         output.permission
             .sink { permission in
                 print("!!", permission)
             }
             .store(in: &cancellables)
     }
-    
+
     // MARK: - Compositional Layout
     private func makeLayout() -> UICollectionViewLayout {
         UICollectionViewCompositionalLayout { [weak self] sectionIndex, environment in
@@ -150,6 +144,7 @@ final class AlbumViewController: BaseViewController {
             case .location:  return self?.makeLocationSection(environment: environment)
             case .category: return self?.makeCategorySection()
             case .face:     return self?.makeFaceSection()
+            case .similar:  return self?.makeSimilarSection()
             }
         }
     }
@@ -290,6 +285,27 @@ final class AlbumViewController: BaseViewController {
         return section
     }
 
+    private func makeSimilarSection() -> NSCollectionLayoutSection {
+        let itemSize = NSCollectionLayoutSize(
+            widthDimension: .absolute(88),
+            heightDimension: .absolute(88)
+        )
+        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+
+        let groupSize = NSCollectionLayoutSize(
+            widthDimension: .absolute(88),
+            heightDimension: .absolute(88)
+        )
+        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
+
+        let section = NSCollectionLayoutSection(group: group)
+        section.orthogonalScrollingBehavior = .continuous
+        section.interGroupSpacing = 12
+        section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 28, trailing: 20)
+        section.boundarySupplementaryItems = [makeHeader()]
+        return section
+    }
+
     private func makeHeader() -> NSCollectionLayoutBoundarySupplementaryItem {
         let headerSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
@@ -305,7 +321,7 @@ final class AlbumViewController: BaseViewController {
 
 extension AlbumViewController {
     private func configureDataSource() {
-    
+
         let timeRegistration = UICollectionView.CellRegistration<DateAlbumCell, DateAlbumCellViewModel> { cell, _, vm in
             cell.configure(with: vm)
         }
@@ -327,20 +343,30 @@ extension AlbumViewController {
             cell.configure(with: vm)
         }
 
-        let faceRegistration = UICollectionView.CellRegistration<FaceAlbumCell, FaceCellViewModel> { cell, _, vm in
+        let faceRegistration = UICollectionView.CellRegistration<FaceAlbumCell, FaceAlbumCellViewModel> { cell, _, vm in
+            cell.configure(with: vm)
+        }
+
+        let similarRegistration = UICollectionView.CellRegistration<SimilarAlbumCell, SimilarAlbumCellViewModel> { cell, _, vm in
             cell.configure(with: vm)
         }
 
         let headerRegistration = UICollectionView.SupplementaryRegistration<AlbumSectionHeaderView>(
             elementKind: UICollectionView.elementKindSectionHeader
-        ) { header, _, indexPath in //[weak self] header, _, indexPath in
+        ) { [weak self] header, _, indexPath in
 //            guard let section = AlbumSection(rawValue: indexPath.section) else { return }
 //            header.configure(title: section.title)
-            let section = self.dataSource.snapshot().sectionIdentifiers[indexPath.section]
-            header.configure(section)
-//            header.onMoreTapped = { self?.navigateToAll(section: section) }
+            guard let self = self else { return }
+
+            let snapshot = self.dataSource.snapshot()
+            let section = snapshot.sectionIdentifiers[indexPath.section]
+            let itemCount = snapshot.numberOfItems(inSection: section)
+
+//            let section = self.dataSource.snapshot().sectionIdentifiers[indexPath.section]
+            header.configure(section, itemCount: itemCount)
+            header.onMoreTapped = { self.viewModel.send(.more(section.type)) }
         }
-        
+
         dataSource = UICollectionViewDiffableDataSource<AlbumSection, AlbumType>(
             collectionView: collectionView
         ) { /*[weak self]*/ collectionView, indexPath, item in
@@ -371,21 +397,26 @@ extension AlbumViewController {
                     using: faceRegistration,
                     for: indexPath,
                     item: vm)
+            case .similar(let vm):
+                return collectionView.dequeueConfiguredReusableCell(
+                    using: similarRegistration,
+                    for: indexPath,
+                    item: vm)
             }
         }
-        
-        dataSource.supplementaryViewProvider = { collectionView, kind, indexPath in
+
+        dataSource.supplementaryViewProvider = { collectionView, _, indexPath in
             return collectionView.dequeueConfiguredReusableSupplementary(using: headerRegistration, for: indexPath)
         }
     }
-    
+
     private func applySnapshot(data: AlbumSectionsData) {
         var snapshot = NSDiffableDataSourceSnapshot<AlbumSection, AlbumType>()
-        
+
         snapshot.appendSections(data.sections)
         data.sections.forEach { snapshot.appendItems(data.items[$0] ?? [], toSection: $0) }
 
-        dataSource.apply(snapshot, animatingDifferences: true){
+        dataSource.apply(snapshot, animatingDifferences: true) {
             // apply 완료 후 layout 갱신
             self.collectionView.setCollectionViewLayout(self.makeLayout(), animated: false)
         }
@@ -393,7 +424,7 @@ extension AlbumViewController {
 }
 
 extension AlbumViewController: UICollectionViewDelegate {
-    
+
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard let albumType = dataSource.itemIdentifier(for: indexPath) else { return }
         viewModel.send(.selectItem(albumType.album))
@@ -403,6 +434,6 @@ extension AlbumViewController: UICollectionViewDelegate {
 
 extension AlbumViewController: UIScrollViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        
+
     }
 }

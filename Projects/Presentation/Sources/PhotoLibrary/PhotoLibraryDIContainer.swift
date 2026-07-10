@@ -11,11 +11,11 @@ import Domain
 
 @MainActor
 public final class PhotoLibraryDIContainer {
-    
+
     private let photoLibraryRepository: PhotoLibraryRepository
     private let photoDataRepository: PhotoDataRepository
     private let labelDataRepository: PhotoLabelDataRepository
-    
+
     public init(photoLibraryRepository: PhotoLibraryRepository,
                 photoDataRepository: PhotoDataRepository,
                 labelDataRepository: PhotoLabelDataRepository) {
@@ -32,19 +32,19 @@ public final class PhotoLibraryDIContainer {
         let imageUseCase = DefaultPhotoImageUseCase(
             repository: photoLibraryRepository
         )
-        
+
         return PhotoLibraryViewModel(tabbarViewModel: tabbarViewModel,
                                      useCase: useCase,
                                      imageUseCase: imageUseCase)
     }
 
     func makeImageViewerViewModel(photoDetails: [PhotoDetail], index: Int) -> ImageViewerViewModel {
-        
+
         let imageUseCase = DefaultImageViewerUseCase(
             repository: photoLibraryRepository,
             labelRepository: labelDataRepository
         )
-        
+
         return ImageViewerViewModel(photoDetails: photoDetails,
                                     initialIndex: index,
                                     imageUseCase: imageUseCase)

@@ -13,7 +13,7 @@ public final class DefaultPhotoLibraryRepository: PhotoLibraryRepository {
 
     private let libraryService: PhotoLibraryService
     private let permissionService: PermissionService
-    
+
     public init(
         libraryService: PhotoLibraryService,
         permissionService: PermissionService
@@ -21,7 +21,7 @@ public final class DefaultPhotoLibraryRepository: PhotoLibraryRepository {
         self.libraryService = libraryService
         self.permissionService = permissionService
     }
-    
+
     public func fetchPhotoCount() async throws -> Int {
         return try await self.libraryService.getPhotoCount()
     }
@@ -29,18 +29,21 @@ public final class DefaultPhotoLibraryRepository: PhotoLibraryRepository {
     public func fetchPhotos(page: Int, pageCount: Int) async throws -> PhotoList {
         return try await self.libraryService.getPhotoList(page: page, pageCount: pageCount).toDomain()
     }
-    
+
     public func fetchPhotoIds() async throws -> [String] {
         return try await self.libraryService.getPhotoIds()
     }
-    
+
     public func checkPermission() async throws -> PhotoPermission {
         try await self.permissionService.checkPermission()
     }
-    
+
+    public func deletePhotos(by ids: [String]) async throws {
+        try await self.libraryService.deletePhotos(localIdentifiers: ids)
+    }
+
     public func loadImage<T>(id: String, type: LoadPhotoOptionType) async throws -> ImageData<T> {
         let cgImage = try await self.libraryService.loadImage(id: id, type: type)
         return ImageData(cgImage: cgImage as? T)
     }
 }
-

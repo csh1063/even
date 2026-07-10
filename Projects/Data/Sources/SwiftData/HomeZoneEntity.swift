@@ -6,7 +6,6 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
-
 import SwiftData
 import Foundation
 
@@ -15,7 +14,7 @@ public final class HomeZoneEntity {
     public var latitude: Double
     public var longitude: Double
     public var analyzedAt: Date
-    
+
     public init(latitude: Double, longitude: Double, analyzedAt: Date) {
         self.latitude = latitude
         self.longitude = longitude

@@ -12,44 +12,44 @@ import Combine
 import Domain
 
 final class PhotoLibraryViewController: BaseViewController {
-    
-    private var naviView: NaviBarView = NaviBarView(type: .title(.leading))
-    
+
+    private var naviView = NaviBarView(type: .title(.leading))
+
     private var collectionView: UICollectionView!
     private var dataSource: UICollectionViewDiffableDataSource<PhotoHeader, PhotoCellItemViewModel>!
     private let refreshControl = UIRefreshControl()
 
     private var columnCount: Int = 3
     private var pinchBeginScale: CGFloat = 1.0
-    
+
     private let viewModel: PhotoLibraryViewModel
-    
+
     private var cancellables = Set<AnyCancellable>()
-    
+
     init(viewModel: PhotoLibraryViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
-    
+
     required public init?(coder: NSCoder) {
         fatalError(Self.fatalMessage)
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         self.setupView()
         self.bindings()
 //        self.checkPhotoPermission()
         self.setupPinchGesture()
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
+
         self.viewModel.send(.permission)
     }
-    
+
 //    private func checkPhotoPermission() {
 //        
 //        Task {
@@ -61,9 +61,9 @@ final class PhotoLibraryViewController: BaseViewController {
 //            }
 //        }
 //    }
-    
+
     private func setupView() {
-        
+
         collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: createDynamicLayout(columns: columnCount))
         collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         collectionView.backgroundColor = Theme.background
@@ -71,39 +71,39 @@ final class PhotoLibraryViewController: BaseViewController {
 
         collectionView.refreshControl = refreshControl
         refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
-        
+
         naviView.setTitle("전체 사진첩",
                           color: Theme.textPrimary,
                           font: .systemFont(ofSize: 32, weight: .bold))
         naviView.setMessage("최근 사진부터 빠르게 확인할 수 있어요",
                             color: Theme.textSecondary,
                             font: .systemFont(ofSize: 14, weight: .regular))
-        
+
         configureDataSource()
-        
+
         view.addSubview(naviView)
-        
+
         view.addSubview(collectionView)
-        
+
         naviView.snp.makeConstraints { make in
             make.top.equalToSuperview()
             make.leading.trailing.equalTo(self.view)
         }
-        
+
         collectionView.snp.makeConstraints { make in
             make.top.equalTo(self.naviView.snp.bottom)
             make.leading.trailing.bottom.equalTo(self.view)
         }
     }
-    
+
     @objc private func handleRefresh() {
         viewModel.send(.refresh)
         refreshControl.endRefreshing()
     }
-    
+
     private func bindings() {
         let output = self.viewModel.transform()
-        
+
         output.photos
             .receive(on: DispatchQueue.main)
             .sink { [weak self] photos in
@@ -111,17 +111,17 @@ final class PhotoLibraryViewController: BaseViewController {
                 self?.applySnapshot(with: photos)
             }
             .store(in: &cancellables)
-        
+
         output.totalCount
             .receive(on: DispatchQueue.main)
             .sink { [weak self] totalCount in
-                
+
                 self?.naviView.setMessage("사진 \(totalCount.formatted())장이 정렬되었습니다.",
                                           color: Theme.textSecondary,
                       font: .systemFont(ofSize: 14, weight: .regular))
             }
             .store(in: &cancellables)
-        
+
         output.photoPermission
             .sink { [weak self] permission in
                 if permission.access {
@@ -132,7 +132,7 @@ final class PhotoLibraryViewController: BaseViewController {
             }
             .store(in: &cancellables)
     }
-    
+
     private func setupPinchGesture() {
         let pinch = UIPinchGestureRecognizer(target: self, action: #selector(handlePinch(_:)))
         collectionView.addGestureRecognizer(pinch)
@@ -162,7 +162,7 @@ final class PhotoLibraryViewController: BaseViewController {
 //            collectionView.setCollectionViewLayout(createLayout(columns: columnCount), animated: false)
             let scale = gesture.scale / pinchBeginScale
             let isZoomingIn = scale > 1.0
-            
+
             // 방향별로 다르게
             collectionView.setCollectionViewLayout(
                 createDynamicLayout(columns: columnCount),
@@ -176,20 +176,20 @@ final class PhotoLibraryViewController: BaseViewController {
     private func createDynamicLayout(columns: Int, scale: CGFloat = 1.0) -> UICollectionViewLayout {
         UICollectionViewCompositionalLayout { _, env in
             let spacing = 4.0
-            let sectionInset = 4.0//20.0
+            let sectionInset = 4.0// 20.0
             let baseCount = CGFloat(columns)
             let isZoomingIn = scale >= 1.0
 
             let progress = isZoomingIn
                 ? min((scale - 1.0) / 0.6, 1.0)
                 : min((1.0 - scale) / 0.6, 1.0)
-            
+
             let dynamicColumnCount = isZoomingIn
                 ? baseCount
                 : baseCount + (progress * 2.0)
-            
+
             let contentWidth = env.container.contentSize.width - (sectionInset * 2) - (spacing * (dynamicColumnCount - 1))
-            
+
             let groupHeight: CGFloat
             let sideItemWidth: CGFloat
             let normalItemWidth: CGFloat
@@ -233,7 +233,7 @@ final class PhotoLibraryViewController: BaseViewController {
                 }
                 return items
             }
-            
+
             let headerSize = NSCollectionLayoutSize(
                 widthDimension: .fractionalWidth(1.0),
                 heightDimension: .estimated(50)
@@ -247,11 +247,11 @@ final class PhotoLibraryViewController: BaseViewController {
             let section = NSCollectionLayoutSection(group: group)
             section.boundarySupplementaryItems = [header]
             section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0)
-            
+
             return section
         }
     }
-    
+
     func scrollToItem(id: String) {
         print("scrollToItem", id)
         let snapshot = dataSource.snapshot()
@@ -271,31 +271,31 @@ extension PhotoLibraryViewController {
         let cellRegistration = UICollectionView.CellRegistration<PhotoCell, PhotoCellItemViewModel> { cell, indexPath, cellViewModel in
             cell.configure(with: cellViewModel, index: indexPath.row)   // weak self도 필요 없어짐
         }
-        
+
         let headerRegistration = UICollectionView.SupplementaryRegistration<PhotoSectionHeaderView>(
             elementKind: UICollectionView.elementKindSectionHeader
         ) { headerView, _, indexPath in
             let sections = Array(self.dataSource.snapshot().sectionIdentifiers)
             headerView.configure(with: sections[indexPath.section])
         }
-        
+
         dataSource = UICollectionViewDiffableDataSource<PhotoHeader, PhotoCellItemViewModel>(collectionView: collectionView) {
             collectionView, indexPath, cellViewModel in
             return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: cellViewModel)
         }
-        
-        dataSource.supplementaryViewProvider = { collectionView, kind, indexPath in
+
+        dataSource.supplementaryViewProvider = { collectionView, _, indexPath in
             return collectionView.dequeueConfiguredReusableSupplementary(using: headerRegistration, for: indexPath)
         }
     }
-    
+
     private func applySnapshot(with photos: [PhotoHeader: [PhotoCellItemViewModel]]) {
         var snapshot = NSDiffableDataSourceSnapshot<PhotoHeader, PhotoCellItemViewModel>()
 
         let sections: [PhotoHeader] = Array(photos.keys).sorted { $0.title > $1.title}
-        
+
         snapshot.appendSections(sections)
-        
+
         sections.forEach { section in
             snapshot.appendItems(photos[section] ?? [], toSection: section)
         }
@@ -305,7 +305,7 @@ extension PhotoLibraryViewController {
 }
 
 extension PhotoLibraryViewController: UICollectionViewDelegate {
-    
+
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard let cellViewModel = dataSource.itemIdentifier(for: indexPath) else { return }
         viewModel.send(.selectItem(id: cellViewModel.localIdentifier))

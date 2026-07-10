@@ -10,18 +10,17 @@ import Foundation
 import UIKit
 import SafariServices
 
-
 @MainActor
 public final class MyPageCoordinator: BaseCoordinator {
-    
+
     private let diContainer: MyPageDIContainer
     private let tabbarViewModel: TabbarViewModel
     private let navigationController = UINavigationController()
-    
+
     init(diContainer: MyPageDIContainer, tabbarViewModel: TabbarViewModel) {
         self.diContainer = diContainer
         self.tabbarViewModel = tabbarViewModel
-        
+
         super.init()
     }
 
@@ -71,11 +70,11 @@ public final class MyPageCoordinator: BaseCoordinator {
                 }
             }
         }
-        
+
         let vc = MyPageViewController(viewModel: viewModel)
 
         bindAlert(from: viewModel)
-        
+
         navigationController.delegate = self
         navigationController.viewControllers = [vc]
         self.viewController = vc
@@ -85,7 +84,7 @@ public final class MyPageCoordinator: BaseCoordinator {
         start(coordinator: self)
         return navigationController
     }
-    
+
     func moveFeedback() {
         let viewModel = diContainer.makeFeedbackViewModel()
         bindAlert(from: viewModel)
@@ -93,11 +92,11 @@ public final class MyPageCoordinator: BaseCoordinator {
         self.hideTabBar?()
         self.navigationController.pushViewController(vc, animated: true)
     }
-    
+
     func moveLabels(isLabel: Bool) {
         print("move!")
         let detailDI = diContainer.makeLabelsDIContainer(isLabel: isLabel)
-        
+
         let detailCoordinator = LabelsCoordinator(
             diContainer: detailDI,
             navigationController: self.navigationController
@@ -105,11 +104,11 @@ public final class MyPageCoordinator: BaseCoordinator {
         self.hideTabBar?()
         self.start(coordinator: detailCoordinator)
     }
-    
+
     func moveTest() {
         print("test!")
         let detailDI = diContainer.makePhotoTestDIContainer()
-        
+
         let detailCoordinator = PhotoTestCoordinator(
             diContainer: detailDI,
             navigationController: self.navigationController

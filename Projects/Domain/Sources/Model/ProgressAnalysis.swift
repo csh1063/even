@@ -10,7 +10,7 @@ public struct ProgressAnalysis {
     public let photo: Photo
 //    public let labels: [PhotoLabel]
     public let state: ProgressState
-    
+
     public init(
         photo: Photo,
 //        labels: [PhotoLabel],

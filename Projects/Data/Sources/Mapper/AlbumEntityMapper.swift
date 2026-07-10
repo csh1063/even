@@ -23,10 +23,11 @@ extension AlbumEntity {
             keywords: [],
             photos: [],
             photoCount: photoCount,
-            from: from
+            from: from,
+            clusterId: clusters.map { $0.id.uuidString }
         )
     }
-    
+
     func toDomainWithKey() -> Album {
         Album(
             id: id,
@@ -43,7 +44,7 @@ extension AlbumEntity {
             from: from
         )
     }
-    
+
     func toDomainWithPhoto() -> Album {
         Album(
             id: id,
@@ -55,12 +56,12 @@ extension AlbumEntity {
             isAuto: isAuto,
             coverPhotoIdentifier: coverPhotoIdentifier,
             keywords: [],
-            photos: photos.sorted { $0.createdAt > $1.createdAt} .prefix(4).map {$0.toDomain()},
+            photos: photos.sorted { $0.createdAt > $1.createdAt }.prefix(4).map { $0.toDomain() },
             photoCount: photoCount,
             from: from
         )
     }
-    
+
     func toDomainAll() -> Album {
         Album(
             id: id,
@@ -72,7 +73,7 @@ extension AlbumEntity {
             isAuto: isAuto,
             coverPhotoIdentifier: coverPhotoIdentifier,
             keywords: keywords.map { $0.keyword },
-            photos: photos.sorted { $0.createdAt > $1.createdAt} .prefix(4).map {$0.toDomain()},
+            photos: photos.sorted { $0.createdAt > $1.createdAt }.prefix(4).map { $0.toDomain() },
             photoCount: photoCount,
             from: from
         )

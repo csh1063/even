@@ -6,7 +6,6 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
-
 import Foundation
 import Moya
 
@@ -25,9 +24,9 @@ public final class ProviderFactory {
 //            plugins: [authPlugin]
 //        )
 //    }
-    
+
     public init() {}
-    
+
     public func makeProvider<T: TargetType>(for api: T.Type) -> BaseProvider<T> {
         return BaseProvider<T>()
     }

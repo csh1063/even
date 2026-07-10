@@ -39,7 +39,7 @@ enum NaviBarButtonType: Equatable {
     case more
     case edit
     case delete
-    
+
     var imageName: String {
         switch self {
         case .none: return ""
@@ -64,7 +64,7 @@ enum NaviBarButtonType: Equatable {
         case .delete: return "trash"
         }
     }
-    
+
     var text: String? {
         switch self {
         case .analysis: return "분석"
@@ -72,22 +72,22 @@ enum NaviBarButtonType: Equatable {
         default: return nil
         }
     }
-    
+
     var backgroundColor: UIColor? {
         switch self {
         case .analysis: return Theme.primary
-        case .more, .reset: return Theme.surface.withAlphaComponent(0.95)
+        case .more, .reset, .cancel: return Theme.surface.withAlphaComponent(0.95)
         default: return nil
         }
     }
-    
+
     var foregroundColor: UIColor {
         switch self {
         case .analysis: return .white
         default: return Theme.textPrimary
         }
     }
-    
+
     var font: UIFont? {
         switch self {
         case .analysis: return .systemFont(ofSize: 15, weight: .semibold)

@@ -10,10 +10,11 @@ import Domain
 
 enum AlbumSection: Int, CaseIterable {
     case travel
+    case face
+    case similar
+    case category
     case location
     case date
-    case category
-    case face
 
     var title: String {
         switch self {
@@ -22,6 +23,18 @@ enum AlbumSection: Int, CaseIterable {
         case .location:  return "장소"
         case .category: return "분류"
         case .face:     return "인물"
+        case .similar: return "중복"
+        }
+    }
+
+    var type: String {
+        switch self {
+        case .date:     return "date"
+        case .travel:     return "travel"
+        case .location:  return "location"
+        case .category: return "category"
+        case .face:     return "face"
+        case .similar: return "similar"
         }
     }
 }
@@ -31,8 +44,9 @@ enum AlbumType: Hashable {
     case travel(TravelAlbumCellViewModel)
     case location(LocationAlbumCellViewModel)
     case category(CategoryAlbumCellViewModel)
-    case face(FaceCellViewModel)
-    
+    case face(FaceAlbumCellViewModel)
+    case similar(SimilarAlbumCellViewModel)
+
     var album: Album {
         switch self {
         case .date(let vm):     return vm.album
@@ -40,6 +54,7 @@ enum AlbumType: Hashable {
         case .location(let vm): return vm.album
         case .category(let vm): return vm.album
         case .face(let vm):     return vm.album
+        case .similar(let vm):  return vm.album
         }
     }
 }

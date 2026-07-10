@@ -14,6 +14,7 @@ public protocol PhotoLibraryRepository {
     func fetchPhotoIds() async throws -> [String]
     func checkPermission() async throws -> PhotoPermission
     func loadImage<T>(id: String, type: LoadPhotoOptionType) async throws -> ImageData<T>
+    func deletePhotos(by ids: [String]) async throws
 }
 
 extension PhotoLibraryRepository {

@@ -10,17 +10,13 @@ import Foundation
 import Domain
 
 public class DefaultPhotoCategoryRepository: PhotoCategoryRepository {
-    
+
     private let service: PhotoCategoryService
-    
+
     public init(service: PhotoCategoryService) {
         self.service = service
     }
-    
-    public func fetchCategories() async throws -> [String : [String]] {
-        try await service.fetchCategories()
-    }
-    
+
     public func fetchRuleCategories() async throws -> [String: AlbumRule] {
         try await service.fetchRuleCategories()
     }

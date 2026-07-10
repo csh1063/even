@@ -14,7 +14,7 @@ public struct PhotoLocation: Codable, Equatable, Hashable {
 //    public var thoroughfare: String?          // 테헤란로
 //    public var ocean: String?                 // nil 바다 이름
 //    public var isoCountryCode: String?
-    
+
     public var name: String?
     public var thoroughfare: String?
     public var subThoroughfare: String?
@@ -27,7 +27,7 @@ public struct PhotoLocation: Codable, Equatable, Hashable {
     public var country: String?
     public var inlandWater: String?
     public var ocean: String?
-    
+
     public init(
         name: String? = nil,
         thoroughfare: String? = nil,
@@ -54,7 +54,7 @@ public struct PhotoLocation: Codable, Equatable, Hashable {
               "country:", country ?? "nil",
               "inlandWater:", inlandWater ?? "nil",
               "ocean:", ocean ?? "nil")
-        
+
         self.name = name
         self.thoroughfare = thoroughfare
         self.subThoroughfare = subThoroughfare
@@ -68,7 +68,7 @@ public struct PhotoLocation: Codable, Equatable, Hashable {
         self.inlandWater = inlandWater
         self.ocean = ocean
     }
-    
+
     public static func == (lhs: Self, rhs: Self) -> Bool {
         return lhs.country == rhs.country
         && lhs.administrativeArea == rhs.administrativeArea

@@ -9,7 +9,7 @@
 import UIKit
 
 final class OnboardingViewController: UIViewController {
-    
+
     var onClose: (() -> Void)?
 
     private let pages: [OnboardingPage] = [
@@ -200,7 +200,7 @@ extension OnboardingViewController: UIPageViewControllerDelegate {
 extension OnboardingViewController: UIScrollViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
 //        print(scrollView.bounces, scrollView.contentOffset)
-        
+
         let isFirstable = currentIndex == 0
         let isLastable = currentIndex == self.pages.count - 1
         let shouldDisableBounces = isFirstable || isLastable

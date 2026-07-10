@@ -27,7 +27,7 @@ final class ConsentViewController: UIViewController {
     private var isAllAgreed: Bool {
         isTermsAgreed && isPrivacyAgreed
     }
-    
+
     // MARK: - UI
     private let scrollView = UIScrollView()
     private let contentView = UIView()
@@ -397,4 +397,3 @@ final class ConsentViewController: UIViewController {
         self.dismiss(animated: true)
     }
 }
-

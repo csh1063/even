@@ -17,28 +17,32 @@ public final class PhotoEntity {
     public var createdAt: Date
     public var analyzedAt: Date?
     public var locationAnalyzedAt: Date?
-    
+
+    // 앨범 증분 생성용 마커 — nil이면 아직 해당 분류를 거치지 않은 "새 사진"
+    public var albumsGeneratedAt: Date?   // 날짜/주소/카테고리 분류 완료 여부
+    public var similarCheckedAt: Date?    // 비슷한사진 비교 완료 여부
+
     public var latitude: Double?
     public var longitude: Double?
-    
+
     // address
     public var isoCountryCode: String?
     public var address: PhotoLocation?
     public var addressEn: PhotoLocation?
-    
+
     // date
     public var year: String?
     public var month: String?
-    
+
     @Relationship(deleteRule: .cascade)
     public var labels: [PhotoLabelEntity] = []
-    
+
     @Relationship(deleteRule: .cascade)
     public var faceEmbeddings: [FaceEmbeddingEntity] = []
-    
+
     @Relationship(deleteRule: .nullify, inverse: \AlbumEntity.photos)
     public var albums: [AlbumEntity] = []
-    
+
     public init(
         id: UUID = UUID(),
         localIdentifier: String,

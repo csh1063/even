@@ -28,12 +28,12 @@ public final class MyPageDIContainer {
 
         return MyPageViewModel(tabbarViewModel: tabbarViewModel, myPageUseCase: useCase)
     }
-    
+
     func makeFeedbackViewModel() -> FeedbackViewModel {
         let useCase = DefaultFeedbackUseCase(
             repository: appDIContainer.settingsRepository
         )
-        
+
         return FeedbackViewModel(useCase: useCase)
     }
 
@@ -44,7 +44,7 @@ public final class MyPageDIContainer {
             photoLabelDataRepository: appDIContainer.photoLabelDataRepository
         )
     }
-    
+
     func makePhotoTestDIContainer() -> PhotoTestDIContainer {
         PhotoTestDIContainer(
             photoDataRepository: appDIContainer.photoDataRepository,

@@ -67,7 +67,7 @@ final class OpenSourceCell: UITableViewCell {
         sv.spacing = 4
         return sv
     }()
-    
+
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Init
@@ -103,12 +103,12 @@ final class OpenSourceCell: UITableViewCell {
             $0.bottom.equalToSuperview().offset(-14)
             $0.leading.trailing.equalToSuperview().inset(16)
         }
-        
+
         urlButton.snp.makeConstraints { make in
             make.top.bottom.leading.equalTo(urlButtonCoverView)
         }
     }
-    
+
     private func bind() {
         urlButton.publisher(for: .touchUpInside)
             .sink { button in

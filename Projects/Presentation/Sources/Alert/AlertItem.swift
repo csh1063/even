@@ -6,7 +6,6 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
-
 struct AlertItem {
     let title: String?
     let message: String?

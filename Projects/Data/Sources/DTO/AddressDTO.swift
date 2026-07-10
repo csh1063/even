@@ -15,7 +15,7 @@ struct AddressDTO: Decodable {
     let locality: String?
     let subLocality: String?
     let thoroughfare: String?
-    
+
     let isoCountryCode: String?
     let country: String?
 }

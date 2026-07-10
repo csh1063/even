@@ -13,31 +13,33 @@ public struct Album {
     public let name: String
     public let displayName: String
     public let createdAt: Date
-    public var startDate: Date
-    public var endDate: Date
-    
+    public var startDate: Date?
+    public var endDate: Date?
+
     public var isAuto: Bool
     public var coverPhotoIdentifier: String?
     public var keywords: [String]
     public var photos: [Photo]
     public var photoCount: Int
     public var from: String
-    
     public var isEdited: Bool = false
-    
+
+    public var clusterId: [String] = []
+
     public init(
         id: UUID = UUID(),
         name: String,
         displayName: String,
         createdAt: Date = Date(),
-        startDate: Date = Date(),
-        endDate: Date = Date(),
+        startDate: Date? = nil,
+        endDate: Date? = nil,
         isAuto: Bool = false,
         coverPhotoIdentifier: String? = nil,
         keywords: [String] = [],
         photos: [Photo] = [],
         photoCount: Int,
-        from: String
+        from: String,
+        clusterId: [String] = []
     ) {
         self.id = id
         self.name = name
@@ -51,5 +53,6 @@ public struct Album {
         self.photos = photos
         self.photoCount = photoCount
         self.from = from
+        self.clusterId = clusterId
     }
 }

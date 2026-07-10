@@ -29,11 +29,11 @@ public final class LoadingManager {
         let view = CardStackLoadingView()
         window.addSubview(dimView)
         window.addSubview(view)
-        
+
         dimView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
-        
+
         view.snp.makeConstraints { make in
             make.center.equalTo(dimView)
             make.width.height.equalTo(60)

@@ -6,7 +6,6 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
-
 import Foundation
 import UIKit
 import Combine
@@ -27,12 +26,12 @@ enum FeedbackType: String, CaseIterable {
 }
 
 final class FeedbackViewModel: BaseViewModel {
-    
-    enum Input{
+
+    enum Input {
         case changeSegment(FeedbackType)
         case changeText(String)
     }
-    
+
     struct Output {
         let isSubmitEnabled: AnyPublisher<Bool, Never>
         let submitResult: AnyPublisher<Result<Void, Error>?, Never>
@@ -41,10 +40,10 @@ final class FeedbackViewModel: BaseViewModel {
 
     private var selectedType: FeedbackType = .contact
     private var content: String = ""
-    
+
     @Published private var isSubmitEnabled: Bool = false
-    @Published private var submitResult: Result<Void, Error>? = nil
-    
+    @Published private var submitResult: Result<Void, Error>?
+
     private let input = PassthroughSubject<Input, Never>()
 
     private let useCase: FeedbackUseCase
@@ -52,16 +51,16 @@ final class FeedbackViewModel: BaseViewModel {
 
     init(useCase: FeedbackUseCase) {
         self.useCase = useCase
-        
+
         super.init()
         self.bind()
     }
-    
+
     func send(_ input: Input) {
         print("send", input)
         self.input.send(input)
     }
-    
+
     func transForm() -> Output {
         Output(
             isSubmitEnabled: $isSubmitEnabled.eraseToAnyPublisher(),
@@ -69,7 +68,7 @@ final class FeedbackViewModel: BaseViewModel {
             isLoading: $isLoading.eraseToAnyPublisher()
         )
     }
-    
+
     private func bind() {
         self.input.sink { [weak self] input in
             guard let self else { return }
@@ -77,7 +76,7 @@ final class FeedbackViewModel: BaseViewModel {
         }
         .store(in: &cancellables)
     }
-    
+
     private func handle(_ input: Input) async {
         switch input {
         case .changeSegment(let type):

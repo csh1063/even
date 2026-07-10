@@ -10,19 +10,19 @@ import UIKit
 import Domain
 
 struct CategoryAlbumCellViewModel: AlbumCellViewModel {
-    
+
     var id: UUID
     var localIdentifier: String
     var displayName: String
     var formattedDate: String
     var photoCount: Int
-    
+
     var album: Album
     var imageLoader: any ImageLoadable
-    
+
     let systemIconName: String
     let iconColor: UIColor
-    
+
     init(album: Album, imageLoader: any ImageLoadable) {
         self.id = album.id
         self.localIdentifier = album.coverPhotoIdentifier ?? ""
@@ -55,7 +55,7 @@ struct CategoryAlbumCellViewModel: AlbumCellViewModel {
         case "sports":
             systemIconName = "figure.run"
             iconColor = Theme.warning
-        case "vehicle":       
+        case "vehicle":
             systemIconName = "car.fill"
             iconColor = UIColor("#6B7AFF")
         default:

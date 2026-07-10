@@ -26,23 +26,23 @@ public final class GeocoderService {
         }
         return dict
     }()
-    
+
     public init() {
-        
+
     }
 
     // MARK: - Public
     func fetchAddress(from location: CLLocation, locale: Locale = .current) async throws -> PhotoLocation? {
-        
+
         let geocoder = CLGeocoder()
         do {
             let placemarks = try await geocoder.reverseGeocodeLocation(
                 location,
                 preferredLocale: locale
             )
-            
+
             guard let data = placemarks.first else { return PhotoLocation() }
-            
+
             let location = mapping(of: data)
             return location
         } catch {
@@ -50,18 +50,18 @@ public final class GeocoderService {
             return nil
         }
     }
-    
+
     func fetchAddress(latitude: Double, longitude: Double, locale: Locale = .current) async throws -> PhotoLocation? {
-        
+
         let geocoder = CLGeocoder()
         do {
             let placemarks = try await geocoder.reverseGeocodeLocation(
                 CLLocation(latitude: latitude, longitude: longitude),
                 preferredLocale: locale
             )
-            
+
             guard let data = placemarks.first else { return PhotoLocation() }
-            
+
             let location = mapping(of: data)
             return location
         } catch {
@@ -73,7 +73,7 @@ public final class GeocoderService {
     // MARK: - Private
     private func replaceAddress(_ string: String?) -> String {
         guard let string else { return "" }
-        
+
         for (key, value) in self.replaceTerms where key == string {
             return value
         }
@@ -94,7 +94,7 @@ public final class GeocoderService {
             country: replaceAddress(placemark.country),
             inlandWater: replaceAddress(placemark.inlandWater),
             ocean: replaceAddress(placemark.ocean)
-            
+
 //            country: replaceAddress(placemark.country),
 //            administrativeArea: replaceAddress(placemark.administrativeArea),
 //            locality: replaceAddress(placemark.locality),

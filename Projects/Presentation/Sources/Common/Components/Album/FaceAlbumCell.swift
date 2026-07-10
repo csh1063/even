@@ -16,13 +16,7 @@ final class FaceAlbumCell: UICollectionViewCell {
 
     private let avatarContainer = UIView()
 
-    private let avatarImageView: UIImageView = {
-        let iv = UIImageView()
-        iv.contentMode = .scaleAspectFill
-        iv.clipsToBounds = true
-        iv.backgroundColor = Theme.strokeSoft
-        return iv
-    }()
+    private let faceCellView = FaceCellView()
 
     private let placeholderIcon: UIImageView = {
         let iv = UIImageView()
@@ -35,7 +29,6 @@ final class FaceAlbumCell: UICollectionViewCell {
     private let countBadge = UILabel()
     private let nameLabel  = UILabel()
 
-    private var task: Task<Void, Never>?
     private var currentIdentifier: String?
 
     // MARK: - Init
@@ -51,8 +44,7 @@ final class FaceAlbumCell: UICollectionViewCell {
 
     override func prepareForReuse() {
         super.prepareForReuse()
-        task?.cancel()
-        avatarImageView.image = nil
+        faceCellView.prepareForReuse()
         placeholderIcon.isHidden = false
         avatarContainer.layer.borderColor = Theme.strokeSoft.cgColor
         avatarContainer.layer.borderWidth = 2.5
@@ -68,10 +60,10 @@ final class FaceAlbumCell: UICollectionViewCell {
         avatarContainer.layer.masksToBounds = true
         avatarContainer.layer.borderWidth = 2.5
         avatarContainer.layer.borderColor = Theme.strokeSoft.cgColor
+        avatarContainer.backgroundColor = Theme.strokeSoft
         contentView.addSubview(avatarContainer)
 
-        avatarImageView.layer.cornerRadius = 34
-        avatarContainer.addSubview(avatarImageView)
+        avatarContainer.addSubview(faceCellView)
         avatarContainer.addSubview(placeholderIcon)
 
         countBadge.backgroundColor = Theme.primary
@@ -93,9 +85,8 @@ final class FaceAlbumCell: UICollectionViewCell {
             make.centerX.equalToSuperview()
             make.width.height.equalTo(68)
         }
-        avatarImageView.snp.makeConstraints { make in
+        faceCellView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
-            make.width.height.equalTo(68)
         }
         placeholderIcon.snp.makeConstraints { make in
             make.center.equalToSuperview()
@@ -115,7 +106,7 @@ final class FaceAlbumCell: UICollectionViewCell {
 
     // MARK: - Configure
 
-    func configure(with viewModel: FaceCellViewModel) {
+    func configure(with viewModel: FaceAlbumCellViewModel) {
         currentIdentifier = viewModel.localIdentifier
         countBadge.text   = "\(viewModel.photoCount)"
 
@@ -124,7 +115,7 @@ final class FaceAlbumCell: UICollectionViewCell {
             nameLabel.textColor = Theme.textSecondary
             nameLabel.font      = .systemFont(ofSize: 12, weight: .regular)
         } else {
-            nameLabel.text      = "미확인"
+            nameLabel.text      = ""
             nameLabel.textColor = Theme.textTertiary
             nameLabel.font      = .italicSystemFont(ofSize: 12)
         }
@@ -133,11 +124,9 @@ final class FaceAlbumCell: UICollectionViewCell {
             ? Theme.primary.cgColor
             : Theme.strokeSoft.cgColor
 
-        task = Task {
-            let image = await viewModel.loadImage(size: CGSize(width: 136, height: 136))
-            guard !Task.isCancelled, currentIdentifier == viewModel.localIdentifier else { return }
-            avatarImageView.image = image
-            placeholderIcon.isHidden = image != nil
+        faceCellView.configure(with: viewModel.faceCellViewModel) { [weak self] loaded in
+            guard let self, self.currentIdentifier == viewModel.localIdentifier else { return }
+            self.placeholderIcon.isHidden = loaded
         }
     }
 }

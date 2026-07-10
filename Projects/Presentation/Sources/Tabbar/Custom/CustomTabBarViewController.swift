@@ -10,58 +10,58 @@ import UIKit
 import SnapKit
 
 open class CustomTabBarController: UIViewController {
-    
+
     public struct Margin {
         let leading: CGFloat
         let trailing: CGFloat
         let bottom: CGFloat
-        
+
         static var zero: Margin {
             return Margin(leading: 0, trailing: 0, bottom: 0)
         }
     }
-    
+
     public struct Padding {
         let leading: CGFloat
         let trailing: CGFloat
-        
+
         static var zero: Padding {
             return Padding(leading: 0, trailing: 0)
         }
     }
-    
-    private var tabBarView: UIView = UIView()
+
+    private var tabBarView = UIView()
     private var tabBarLeading: NSLayoutConstraint!
     private var tabBarTrailing: NSLayoutConstraint!
     private var tabBarBottom: NSLayoutConstraint!
     private var tabBarHeight: NSLayoutConstraint!
     private var tabBarPaddingLeading: NSLayoutConstraint!
     private var tabBarPaddingTrailing: NSLayoutConstraint!
-    
-    private var tabBarCoverView: UIView = UIView()
-    private var tabBarShadowView: UIView = UIView()
-    
-    private var tabBarStackView: UIStackView = UIStackView()
-    
+
+    private var tabBarCoverView = UIView()
+    private var tabBarShadowView = UIView()
+
+    private var tabBarStackView = UIStackView()
+
     private var selectedBox: UIView?
     private var selectedBoxCenter: Constraint?
     private var isFirst: Bool = true
-    
+
     private var viewControllers: [UIViewController] = []
     private var items: [CustomTabBarItem] = []
     private var previewsIndex = 0
-    
+
     private var margin: Margin = .zero
     private var padding: Padding = .zero
     private var height: CGFloat = 50
     private var cornerRadius: CGFloat?
-    
+
     private var color: UIColor = .black
     private var alpha: Float = 0
     private var x: CGFloat = 0
     private var y: CGFloat = 0
     private var blur: CGFloat = 0
-    
+
     public var selectedIndex = 0 {
         willSet {
             previewsIndex = selectedIndex
@@ -70,10 +70,10 @@ open class CustomTabBarController: UIViewController {
             updateView()
         }
     }
-    
+
     private var titleColor: UIColor = .gray
     private var selectedTitleColor: UIColor = .black
-    
+
     private var tabbarBackgroundColor: UIColor = .systemBackground {
         didSet {
             self.tabBarView.backgroundColor = tabbarBackgroundColor
@@ -81,19 +81,19 @@ open class CustomTabBarController: UIViewController {
             self.tabBarShadowView.backgroundColor = tabbarBackgroundColor
         }
     }
-    
+
     weak var delegate: CustomTabBarDelegate?
-    
+
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         //        super.init(nibName: "CustomTabBarViewController", bundle: nil)
         super.init(nibName: nil, bundle: nil)
-        
+
     }
-    
+
     public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     open override func viewDidLoad() {
         super.viewDidLoad()
         self.initView()
@@ -101,18 +101,18 @@ open class CustomTabBarController: UIViewController {
         self.setMargin()
         print("==== \(Self.self) viewDidLoad        ====================")
     }
-    
+
     open override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         print("==== \(Self.self) viewWillAppear     ====================")
-        
+
 //        self.updateView()
     }
-    
+
     open override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         print("==== \(Self.self) viewDidAppear      ====================")
-        
+
         self.tabBarShadowView.layer.masksToBounds = false
         self.tabBarShadowView.layer.shadowColor = color.cgColor
         self.tabBarShadowView.layer.shadowOpacity = alpha
@@ -120,56 +120,55 @@ open class CustomTabBarController: UIViewController {
         self.tabBarShadowView.layer.shadowRadius = blur / UIScreen.main.scale
         self.tabBarShadowView.layer.shadowPath = nil
     }
-    
+
     open override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         print("==== \(Self.self) viewWillDisappear  ====================")
     }
-    
+
     open override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         print("==== \(Self.self) viewDidDisappear   ====================")
     }
-    
+
     @objc private func tabButtonTapped(_ sender: UIButton) {
         self.selectedIndex = sender.tag
     }
-    
+
     private func initView() {
-        
+
         self.tabBarCoverView.isHidden = true
         self.tabBarCoverView.backgroundColor = self.tabbarBackgroundColor.withAlphaComponent(1.0)
         self.tabBarCoverView.translatesAutoresizingMaskIntoConstraints = false
         self.tabBarView.backgroundColor = self.tabbarBackgroundColor
         self.tabBarView.translatesAutoresizingMaskIntoConstraints = false
-        
+
         self.tabBarShadowView.backgroundColor = self.tabbarBackgroundColor
         self.tabBarShadowView.translatesAutoresizingMaskIntoConstraints = false
-        
+
         self.tabBarStackView.distribution = .fillEqually
         self.tabBarStackView.axis = .horizontal
         self.tabBarStackView.alignment = .center
         self.tabBarStackView.spacing = 0
         self.tabBarStackView.translatesAutoresizingMaskIntoConstraints = false
-        
+
         self.view.addSubview(tabBarShadowView)
         self.view.addSubview(tabBarCoverView)
         self.view.addSubview(tabBarView)
         self.tabBarView.addSubview(tabBarStackView)
-        
+
         self.tabBarLeading = self.tabBarView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: margin.leading)
         self.tabBarTrailing = self.tabBarView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: margin.trailing)
         self.tabBarBottom = self.tabBarView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: margin.bottom)
         self.tabBarHeight = self.tabBarView.heightAnchor.constraint(equalToConstant: height)
-        
+
         self.tabBarPaddingLeading = self.tabBarStackView.leadingAnchor.constraint(
             equalTo: self.tabBarView.leadingAnchor,
             constant: padding.leading)
         self.tabBarPaddingTrailing = self.tabBarStackView.trailingAnchor.constraint(
             equalTo: self.tabBarView.trailingAnchor,
             constant: -padding.trailing)
-        
-        
+
         NSLayoutConstraint.activate([
             self.tabBarLeading,
             self.tabBarTrailing,
@@ -189,54 +188,54 @@ open class CustomTabBarController: UIViewController {
             self.tabBarShadowView.trailingAnchor.constraint(equalTo: self.tabBarView.trailingAnchor)
         ])
     }
-    
+
     private func setupButtons() {
-        
-        guard self.tabBarStackView.arrangedSubviews.count == 0 else {
+
+        guard self.tabBarStackView.arrangedSubviews.isEmpty else {
             return
         }
-        
+
         for (index, viewController) in viewControllers.enumerated() {
-            
+
             let item = CustomTabBarItem()
             item.titleColor = self.titleColor
             item.selectedTitleColor = self.selectedTitleColor
             item.setTag(index)
             item.setItem(viewController.tabBarItem)
             item.addTarget(self, action: #selector(tabButtonTapped(_:)), for: .touchUpInside)
-            
+
             self.tabBarStackView.addArrangedSubview(item)
             items.append(item)
         }
     }
-    
+
     private func updateView() {
-        
+
         guard viewControllers.count > previewsIndex else {return}
-        
+
         let previousVC = viewControllers[previewsIndex]
-        
+
         if delegate == nil || delegate?.tabBarController(self, shouldSelect: previousVC) == true {
             previousVC.willMove(toParent: nil)
             previousVC.view.removeFromSuperview()
             previousVC.removeFromParent()
-            
+
             let selectedVC = viewControllers[selectedIndex]
             self.addChild(selectedVC)
             view.insertSubview(selectedVC.view, at: 0)
-            
+
             selectedVC.view.frame = view.bounds
             selectedVC.view.layoutIfNeeded()
             selectedVC.didMove(toParent: self)
-            
+
             self.delegate?.tabBarController(self, didSelect: selectedVC)
-            
+
             self.items.forEach { $0.isSelected = ($0.tag == selectedIndex) }
-            
+
             if let box = self.selectedBox {
                 if self.items.count > selectedIndex {
                     let item = self.items[selectedIndex]
-                    
+
                     selectedBoxCenter?.deactivate()
                     box.snp.makeConstraints { make in
                         selectedBoxCenter = make.leading.trailing.equalTo(item).inset(8).constraint
@@ -253,43 +252,43 @@ open class CustomTabBarController: UIViewController {
             }
         }
     }
-    
+
     private func setMargin() {
-        
+
         self.tabBarHeight.constant = self.height
         self.tabBarBottom.constant = -self.margin.bottom
         self.tabBarLeading.constant = self.margin.leading
         self.tabBarTrailing.constant = -self.margin.trailing
-        
+
         self.tabBarPaddingLeading.constant = self.padding.leading
         self.tabBarPaddingTrailing.constant = -self.padding.trailing
-        
+
         if let cornerRadius = self.cornerRadius {
             self.tabBarView.layer.cornerRadius = cornerRadius
             self.tabBarView.layer.masksToBounds = true
-            
+
             self.tabBarShadowView.layer.cornerRadius = cornerRadius
         }
-        
+
         self.view.layoutIfNeeded()
     }
-    
+
     // MARK: Public
     public func setViewControllers(_ viewControllers: [UIViewController]) {
         self.viewControllers = viewControllers
     }
-    
+
     public func setBackgroundColor(_ color: UIColor) {
         self.tabbarBackgroundColor = color
     }
-    
+
     public func setItemColors(normal titleColor: UIColor? = nil,
                               selected selectedTitleColor: UIColor? = nil) {
-        
+
         if let titleColor = titleColor {
             self.titleColor = titleColor
             self.selectedTitleColor = selectedTitleColor ?? titleColor
-            
+
             for subview in self.tabBarStackView.arrangedSubviews {
                 if let view = subview as? CustomTabBarItem {
                     view.titleColor = titleColor
@@ -298,7 +297,7 @@ open class CustomTabBarController: UIViewController {
             }
         }
     }
-    
+
     public func setLayoutMargin(height: CGFloat,
                                 margin: Margin,
                                 padding: Padding,
@@ -307,33 +306,33 @@ open class CustomTabBarController: UIViewController {
         self.height = height
         self.margin = margin
         self.padding = padding
-        
+
         if margin.bottom == 0 {
             self.tabBarCoverView.isHidden = false
         } else {
             self.tabBarCoverView.isHidden = true
         }
-        
+
         if let cornerRadius = cornerRadius {
             self.cornerRadius = cornerRadius
         }
-        
+
         self.setMargin()
     }
-    
+
     public func setShadow(color: UIColor,
                           alpha: Float,
                           x: CGFloat,
                           y: CGFloat,
                           blur: CGFloat) {
-        
+
         self.color = color
         self.alpha = alpha
         self.x = x
         self.y = y
         self.blur = blur
     }
-    
+
     public func setTabBarItem(_ image: String, selectedImage: String = "", vc: UIViewController, title: String? = nil) {
         let item = UITabBarItem()
         item.image = UIImage(systemName: image)
@@ -341,14 +340,14 @@ open class CustomTabBarController: UIViewController {
         item.title = title
         vc.tabBarItem = item
     }
-    
+
     public func animateBottom(isShow: Bool) {
         UIView.animate(withDuration: 0.2) {
             self.tabBarBottom.constant = isShow ? self.margin.bottom:100
             self.view.layoutIfNeeded()
         }
     }
-    
+
     public func animateFade(isShow: Bool) {
         UIView.animate(withDuration: 0.2) {
             self.tabBarShadowView.alpha = isShow ? 1.0:0.0
@@ -357,19 +356,19 @@ open class CustomTabBarController: UIViewController {
             self.view.layoutIfNeeded()
         }
     }
-    
+
     public func setSelectedBox(radius: CGFloat, color: UIColor) {
         let box = UIView()
         box.backgroundColor = color
         box.layer.cornerRadius = radius
-        
+
         self.tabBarView.insertSubview(box, belowSubview: tabBarStackView)
-        
+
         box.snp.makeConstraints { make in
 //            make.width.equalTo(60)
             make.top.bottom.equalTo(self.tabBarView).inset(8)
         }
-        
+
         self.selectedBox = box
     }
 }

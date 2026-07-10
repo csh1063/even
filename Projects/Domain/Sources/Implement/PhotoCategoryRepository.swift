@@ -9,6 +9,5 @@
 import Foundation
 
 public protocol PhotoCategoryRepository {
-    func fetchCategories() async throws -> [String: [String]]
     func fetchRuleCategories() async throws -> [String: AlbumRule]
 }

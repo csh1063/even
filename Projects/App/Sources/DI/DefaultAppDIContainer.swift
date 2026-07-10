@@ -14,72 +14,76 @@ import SwiftData
 
 @MainActor
 final class DefaultAppDIContainer: AppDIContainer {
-    
+
     let container: ModelContainer
 
-    var photoLibraryRepository: PhotoLibraryRepository{
+    var photoLibraryRepository: PhotoLibraryRepository {
         repositoryFactory.photoLibraryRepository
     }
-    
-    var photoAnalysisRepository: PhotoAnalysisRepository{
+
+    var photoAnalysisRepository: PhotoAnalysisRepository {
         repositoryFactory.photoAnalysisRepository
     }
-    
-    var photoDataRepository: PhotoDataRepository{
+
+    var photoDataRepository: PhotoDataRepository {
         repositoryFactory.photoDataRepository
     }
-    
-    var albumDataRepository: AlbumDataRepository{
+
+    var albumDataRepository: AlbumDataRepository {
         repositoryFactory.albumDataRepository
     }
-    
+
     var photoLabelDataRepository: PhotoLabelDataRepository {
         repositoryFactory.photoLabelDataRepository
     }
-    
-    var photoCategoryRepository: PhotoCategoryRepository{
+
+    var photoCategoryRepository: PhotoCategoryRepository {
         repositoryFactory.photoCategoryRepository
     }
-    
+
     var geoRepository: GeoRepository {
         repositoryFactory.geoRepository
     }
-    
+
     var userDefaultRepository: UserDefaultRepository {
         repositoryFactory.userDefaultRepository
     }
-    
+
     var permissionRepository: PermissionRepository {
         repositoryFactory.permissionRepository
     }
-    
+
     var settingsRepository: SettingsRepository {
         repositoryFactory.settingsRepository
     }
-    
+
     var travelRepository: TravelDetectionRepository {
         repositoryFactory.travelRepository
     }
-    
+
     var homeZoneRepository: HomeZoneRepository {
         repositoryFactory.homeZoneRepository
     }
-    
+
     var faceClusterRepository: FaceClusterRepository {
         repositoryFactory.faceClusterRepository
     }
-    
+
+    var similarRepository: SimilarPhotoClusterRepository {
+        repositoryFactory.similarRepository
+    }
+
     private let providerFactory: ProviderFactory
     private lazy var executor: DefaultNetworkExecutor = {
         DefaultNetworkExecutor(providerFactory: providerFactory)
     }()
-    
+
     private lazy var serviceFactory = ServiceFactory(executor: executor)
     private lazy var repositoryFactory = RepositoryFactory(
         container: container,
         serviceFactory: serviceFactory
     )
-    
+
     init() {
         do {
             container = try ModelContainer(
@@ -91,22 +95,22 @@ final class DefaultAppDIContainer: AppDIContainer {
         }
         self.providerFactory = ProviderFactory()
     }
-    
+
     func makePhotoCheckUseCase() -> PhotoCheckUseCase {
         DefaultPhotoCheckUseCase(photoLibraryRepository: photoLibraryRepository,
                                  photoDataRepository: photoDataRepository,
                                  albumDataRepository: albumDataRepository
         )
     }
-    
+
     func makeSplashViewModel() -> SplashViewModel {
         SplashViewModel(useCase: makePhotoCheckUseCase())
     }
-    
+
     func makeMainUseCase() {
-        
+
     }
-    
+
     func makeMainViewModel() -> MainViewModel {
         MainViewModel()
     }

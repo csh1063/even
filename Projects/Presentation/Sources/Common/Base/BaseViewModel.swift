@@ -6,14 +6,13 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
-
 import Combine
 
 @MainActor
 open class BaseViewModel {
-    
+
     private let loadingView = LoadingManager.shared
-    
+
     @Published var isLoading: Bool = false {
         didSet {
             if isLoading {
@@ -23,7 +22,7 @@ open class BaseViewModel {
             }
         }
     }
-    
+
     let alertPublisher = PassthroughSubject<AlertItem, Never>()
 
     func showAlert(title: String?, message: String? = nil, buttons: [AlertButtonConfig]) {

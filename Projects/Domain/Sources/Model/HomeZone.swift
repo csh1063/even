@@ -13,7 +13,7 @@ public struct HomeZone {
     public let latitude: Double
     public let longitude: Double
     public let analyzedAt: Date
-    
+
     public init(latitude: Double, longitude: Double, analyzedAt: Date) {
         self.latitude = latitude
         self.longitude = longitude

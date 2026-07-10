@@ -11,7 +11,7 @@ import Domain
 
 @MainActor
 public protocol AppDIContainer {
-    
+
     var photoLibraryRepository: PhotoLibraryRepository {get}
     var photoAnalysisRepository: PhotoAnalysisRepository {get}
     var photoDataRepository: PhotoDataRepository {get}
@@ -25,8 +25,8 @@ public protocol AppDIContainer {
     var travelRepository: TravelDetectionRepository {get}
     var homeZoneRepository: HomeZoneRepository {get}
     var faceClusterRepository: FaceClusterRepository {get}
-    
+    var similarRepository: SimilarPhotoClusterRepository {get}
+
     func makeSplashViewModel() -> SplashViewModel
     func makeMainViewModel() -> MainViewModel
 }
-

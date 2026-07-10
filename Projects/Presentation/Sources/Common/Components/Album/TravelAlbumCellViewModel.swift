@@ -10,19 +10,19 @@ import UIKit
 import Domain
 
 struct TravelAlbumCellViewModel: AlbumCellViewModel {
-    
+
     var id: UUID
     var localIdentifier: String
     var displayName: String
     var formattedDate: String
     var photoCount: Int
-    
+
     var album: Album
     var imageLoader: any ImageLoadable
-    
+
     let countryName: String
     let dateRangeText: String
-    
+
     init(album: Album, imageLoader: any ImageLoadable) {
         self.id = album.id
         self.localIdentifier = album.coverPhotoIdentifier ?? ""
@@ -31,16 +31,18 @@ struct TravelAlbumCellViewModel: AlbumCellViewModel {
         self.photoCount = album.photoCount
         self.album = album
         self.imageLoader = imageLoader
-        
+
         self.countryName = ""
 
         let formatter = DateIntervalFormatter()
         formatter.locale = Locale(identifier: "ko")
         formatter.dateStyle = .medium
         formatter.timeStyle = .none
-        
-        self.dateRangeText = formatter.string(
-            from: album.startDate,
-            to: album.endDate)
+
+        if let startDate = album.startDate, let endDate = album.endDate {
+            self.dateRangeText = formatter.string(from: startDate, to: endDate)
+        } else {
+            self.dateRangeText = "-"
+        }
     }
 }

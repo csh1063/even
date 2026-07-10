@@ -34,16 +34,15 @@ final class ProgressRow: UIView {
     private let spinner: UIActivityIndicatorView = {
         let view = UIActivityIndicatorView(style: .medium)
         view.color = Theme.primary
-        view.startAnimating()
         return view
     }()
-    
+
     private let progressView: UIView = {
         let view = UIView()
         view.backgroundColor = Theme.primary
         return view
     }()
-    
+
     private let fillLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 15, weight: .semibold)
@@ -68,7 +67,20 @@ final class ProgressRow: UIView {
         layer.borderWidth = 1
         layer.borderColor = Theme.strokeSoft.cgColor
     }
-    
+
+    func setTitle(_ title: String) {
+        titleLabel.text = title
+        fillLabel.text = title
+    }
+
+    func startSpinner() {
+        spinner.startAnimating()
+    }
+
+    func stopSpinner() {
+        spinner.stopAnimating()
+    }
+
     func updateProgress(_ progress: Double) {
         let width = self.frame.size.width
         UIView.animate(withDuration: 0.1) {
@@ -81,26 +93,26 @@ final class ProgressRow: UIView {
     }
 
     private func setupLayout() {
-        
+
         iconBackground.addSubview(iconView)
 
         progressView.clipsToBounds = true
-        
+
         addSubview(titleLabel)
         addSubview(progressView)
         progressView.addSubview(fillLabel)
         addSubview(iconBackground)
         addSubview(spinner)
-        
+
         self.snp.makeConstraints { make in
             make.height.equalTo(58)
         }
-        
+
         progressView.snp.makeConstraints { make in
             make.leading.top.bottom.equalTo(self)
             make.width.equalTo(0)
         }
-        
+
         iconBackground.snp.makeConstraints { make in
             make.leading.equalTo(self).offset(12)
             make.centerY.equalTo(self)
@@ -111,17 +123,17 @@ final class ProgressRow: UIView {
             make.center.equalTo(iconBackground)
             make.width.height.equalTo(16)
         }
-        
+
         titleLabel.snp.makeConstraints { make in
             make.leading.equalTo(iconBackground.snp.trailing).offset(12)
             make.centerY.equalTo(self)
         }
-        
+
         fillLabel.snp.makeConstraints { make in
             make.leading.equalTo(iconBackground.snp.trailing).offset(12)
             make.centerY.equalTo(self)
         }
-        
+
         spinner.snp.makeConstraints { make in
             make.trailing.equalTo(self).offset(-12)
             make.centerY.equalTo(self)

@@ -18,6 +18,7 @@ extension PhotoEntity {
             analyzedAt: analyzedAt,
             latitude: latitude,
             longitude: longitude,
+            isoCountryCode: isoCountryCode,
             address: address,
             addressEn: addressEn,
             year: year,
@@ -26,7 +27,7 @@ extension PhotoEntity {
             faceEmbedding: []
         )
     }
-    
+
     func toDomainWithLabels() -> Photo {
         return Photo(
             id: id,
@@ -35,6 +36,7 @@ extension PhotoEntity {
             analyzedAt: analyzedAt,
             latitude: latitude,
             longitude: longitude,
+            isoCountryCode: isoCountryCode,
             address: address,
             addressEn: addressEn,
             year: year,
@@ -43,7 +45,7 @@ extension PhotoEntity {
             faceEmbedding: []
         )
     }
-    
+
     func toDomainWithEmbedding() -> Photo {
         return Photo(
             id: id,
@@ -52,6 +54,7 @@ extension PhotoEntity {
             analyzedAt: analyzedAt,
             latitude: latitude,
             longitude: longitude,
+            isoCountryCode: isoCountryCode,
             address: address,
             addressEn: addressEn,
             year: year,
@@ -60,7 +63,7 @@ extension PhotoEntity {
             faceEmbedding: faceEmbeddings.map { $0.toDomain() }
         )
     }
-    
+
     func toDomainAll() -> Photo {
         return Photo(
             id: id,
@@ -69,6 +72,7 @@ extension PhotoEntity {
             analyzedAt: analyzedAt,
             latitude: latitude,
             longitude: longitude,
+            isoCountryCode: isoCountryCode,
             address: address,
             addressEn: addressEn,
             year: year,

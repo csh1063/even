@@ -19,6 +19,8 @@ final class ImageViewerViewController: UIViewController {
     private var currentIndex: Int
     private var beganY: CGFloat = 0
 
+    // MARK: - UI
+
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
@@ -44,20 +46,28 @@ final class ImageViewerViewController: UIViewController {
         return button
     }()
 
-    private let topBarView = UIView()
+    private let checkButton: UIButton = {
+        let button = UIButton(type: .system)
+        let config = UIImage.SymbolConfiguration(pointSize: 22, weight: .medium)
+        button.setImage(UIImage(systemName: "circle", withConfiguration: config), for: .normal)
+        button.tintColor = .white
+        button.isHidden = true
+        return button
+    }()
 
+    private let topBarView = UIView()
     private lazy var bottomInfoView: UIVisualEffectView = makeBottomInfoView()
+
     private let dateLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 17, weight: .semibold)
         label.textColor = .white
         return label
     }()
-    
+
     private let albumBadge = UIView()
     private let albumBadgeLabel: UILabel = {
         let label = UILabel()
-//        label.text = "연결된 앨범 2개"
         label.font = .systemFont(ofSize: 13, weight: .semibold)
         label.textColor = Theme.primary
         return label
@@ -68,7 +78,7 @@ final class ImageViewerViewController: UIViewController {
         label.font = .systemFont(ofSize: 14, weight: .regular)
         return label
     }()
-    
+
     private let label: UILabel = {
         let label = UILabel()
         label.numberOfLines = 0
@@ -76,6 +86,8 @@ final class ImageViewerViewController: UIViewController {
         label.textColor = .white
         return label
     }()
+
+    // MARK: - Init
 
     init(viewModel: ImageViewerViewModel) {
         self.viewModel = viewModel
@@ -86,28 +98,28 @@ final class ImageViewerViewController: UIViewController {
 
     required init?(coder: NSCoder) { fatalError() }
 
+    // MARK: - Lifecycle
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = Theme.viewerBackground
         setupViews()
         bind()
-        
-        self.viewModel.send(.pageChanged(self.currentIndex))
+        updateCheckButton(selectedIdentifiers: viewModel.selectedIdentifiers)
+        viewModel.send(.appear)
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         scrollToInitialIndex()
     }
-    
+
+    // MARK: - Setup
+
     private func setupViews() {
-        
         view.addSubview(collectionView)
-        collectionView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
-        
-        // 상단
+        collectionView.snp.makeConstraints { make in make.edges.equalToSuperview() }
+
         view.addSubview(topBarView)
         topBarView.snp.makeConstraints { make in
             make.top.leading.trailing.equalToSuperview()
@@ -119,34 +131,35 @@ final class ImageViewerViewController: UIViewController {
         topGradient.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 100)
         topBarView.layer.insertSublayer(topGradient, at: 0)
 
-        let buttonCoverView = UIVisualEffectView(
-            effect: UIBlurEffect(style: .systemUltraThinMaterialDark)
-        )
+        let buttonCoverView = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterialDark))
         buttonCoverView.frame = CGRect(x: 0, y: 0, width: 40, height: 40)
         buttonCoverView.isUserInteractionEnabled = false
         buttonCoverView.layer.cornerRadius = 20
         buttonCoverView.clipsToBounds = true
         topBarView.addSubview(buttonCoverView)
         topBarView.addSubview(dismissButton)
+        topBarView.addSubview(checkButton)
 
-        buttonCoverView.snp.makeConstraints { make in
-            make.edges.equalTo(dismissButton)
-        }
-        
+        buttonCoverView.snp.makeConstraints { make in make.edges.equalTo(dismissButton) }
+
         dismissButton.snp.makeConstraints { make in
             make.leading.equalToSuperview().inset(16)
             make.top.equalTo(view.safeAreaLayoutGuide).offset(8)
             make.width.height.equalTo(40)
         }
+        checkButton.snp.makeConstraints { make in
+            make.trailing.equalToSuperview().inset(16)
+            make.centerY.equalTo(dismissButton)
+            make.width.height.equalTo(40)
+        }
 
-        // 하단
         view.addSubview(bottomInfoView)
         bottomInfoView.snp.makeConstraints { make in
             make.leading.trailing.equalToSuperview().inset(16)
             make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-8)
             make.height.equalTo(96)
         }
-        
+
         view.addSubview(label)
         label.snp.makeConstraints { make in
             make.top.equalTo(100)
@@ -156,8 +169,7 @@ final class ImageViewerViewController: UIViewController {
 
     private func scrollToInitialIndex() {
         DispatchQueue.main.async {
-            let indexPath = IndexPath(item: self.currentIndex, section: 0)
-            self.collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: false)
+            self.collectionView.scrollToItem(at: IndexPath(item: self.currentIndex, section: 0), at: .centeredHorizontally, animated: false)
         }
     }
 
@@ -167,79 +179,97 @@ final class ImageViewerViewController: UIViewController {
         output.currentPhoto
             .receive(on: DispatchQueue.main)
             .sink { [weak self] photoDetail in
-                if let photoDetail {
-                    self?.updateInfo(with: photoDetail)
-                }
+                if let photoDetail { self?.updateInfo(with: photoDetail) }
             }
             .store(in: &cancellables)
-        
-        dismissButton.publisher(for: .touchUpInside)
-            .sink(receiveValue: { _ in
-                self.dismiss(animated: true)
-            })
+
+        output.selectedIdentifiers
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] identifiers in
+                self?.updateCheckButton(selectedIdentifiers: identifiers)
+            }
             .store(in: &cancellables)
-        
+
+        dismissButton.publisher(for: .touchUpInside)
+            .sink { [weak self] _ in self?.dismiss(animated: true) }
+            .store(in: &cancellables)
+
+        checkButton.publisher(for: .touchUpInside)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                let currentId = viewModel.photoDetails[currentIndex].id
+                viewModel.send(.toggleSelection(id: currentId))
+            }
+            .store(in: &cancellables)
+
         let tap = UITapGestureRecognizer()
         tap.cancelsTouchesInView = false
         collectionView.addGestureRecognizer(tap)
         tap.eventPublisher
-            .sink { gesture in
-                self.showOverlay.toggle()
+            .sink { [weak self] _ in
+                guard let self else { return }
+                showOverlay.toggle()
                 UIView.animate(withDuration: 0.2) {
                     let alpha: CGFloat = self.showOverlay ? 1 : 0
-                    let ty: CGFloat = self.showOverlay ? 0 : 20
                     self.topBarView.alpha = alpha
                     self.bottomInfoView.alpha = alpha
-                    self.bottomInfoView.transform = CGAffineTransform(translationX: 0, y: self.showOverlay ? 0 : ty)
+                    self.bottomInfoView.transform = CGAffineTransform(translationX: 0, y: self.showOverlay ? 0 : 20)
                 }
             }
             .store(in: &cancellables)
-        
+
         let pan = UIPanGestureRecognizer()
         pan.cancelsTouchesInView = false
         pan.delegate = self
         collectionView.addGestureRecognizer(pan)
         pan.eventPublisher
-            .sink { gesture in
-                
+            .sink { [weak self] gesture in
+                guard let self else { return }
                 switch gesture.state {
                 case .began:
-                    self.beganY = gesture.location(in: self.view).y
+                    beganY = gesture.location(in: view).y
                 case .ended:
-                    let after = gesture.location(in: self.view).y
-                    if after > self.beganY + 200 || gesture.velocity(in: self.view).y > 1000 {
-                        self.dismiss(animated: true)
+                    let after = gesture.location(in: view).y
+                    if after > beganY + 200 || gesture.velocity(in: view).y > 1000 {
+                        dismiss(animated: true)
                     }
                 default: break
                 }
             }
             .store(in: &cancellables)
-        
-        let tapBottom = UITapGestureRecognizer()
-        bottomInfoView.addGestureRecognizer(tapBottom)
-        tapBottom.eventPublisher
-            .sink { gesture in
-                print("!!")
-            }
-            .store(in: &cancellables)
     }
+
+    // MARK: - Check Button
+
+    private func updateCheckButton(selectedIdentifiers: Set<String>) {
+        checkButton.isHidden = !viewModel.isSelectionMode
+        guard viewModel.isSelectionMode else { return }
+
+        let currentId = viewModel.photoDetails[safe: currentIndex]?.id ?? ""
+        let isSelected = selectedIdentifiers.contains(currentId)
+        let imageName = isSelected ? "checkmark.circle.fill" : "circle"
+        let config = UIImage.SymbolConfiguration(pointSize: 22, weight: .medium)
+        checkButton.setImage(UIImage(systemName: imageName, withConfiguration: config), for: .normal)
+        checkButton.tintColor = isSelected ? Theme.primary : .white
+    }
+
+    // MARK: - Info
 
     private func updateInfo(with photoDetail: PhotoDetail) {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy년 M월 d일"
         formatter.locale = Locale(identifier: "ko_KR")
-        if let date = photoDetail.createdDate {
-            dateLabel.text = formatter.string(from: date)
-        } else {
-            dateLabel.text = "날짜 정보 없음"
-        }
-        
+        dateLabel.text = photoDetail.createdDate.map { formatter.string(from: $0) } ?? "날짜 정보 없음"
+
         if let photo = photoDetail.photo {
             albumBadge.isHidden = true
-//            albumBadgeLabel.text = "연결된 앨범 2개"
-            
-            let components = [photo.country, photo.administrativeArea, photo.locality].compactMap { $0 }
-            
+            let components = [photo.address?.country, photo.address?.administrativeArea, photo.address?.locality, photo.address?.subLocality]
+                .compactMap { $0 }
+                .filter { !$0.isEmpty }
+                .reduce(into: [String]()) { result, value in
+                    if !result.contains(value) { result.append(value) }
+                }
+
             if components.isEmpty {
                 locationIcon.image = UIImage(systemName: "location.slash")
                 locationIcon.tintColor = .white.withAlphaComponent(0.72)
@@ -251,10 +281,7 @@ final class ImageViewerViewController: UIViewController {
                 locationLabel.text = components.joined(separator: " ")
                 locationLabel.textColor = .white.withAlphaComponent(0.92)
             }
-            
-            print("labels", photoDetail.labels.map {$0.name}.joined(separator: ", ")
-)
-            label.text = photoDetail.labels.map {"\($0.name): \($0.confidence)"}.joined(separator: ", ")
+            label.text = photoDetail.id + "\n" + photoDetail.labels.map { "\($0.name): \($0.confidence)" }.joined(separator: ", ")
         } else {
             albumBadge.isHidden = false
             albumBadgeLabel.text = "미분석"
@@ -266,7 +293,6 @@ final class ImageViewerViewController: UIViewController {
     }
 
     private func makeBottomInfoView() -> UIVisualEffectView {
-        
         let container = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterialDark))
         container.layer.cornerRadius = 22
         container.layer.borderWidth = 1
@@ -299,27 +325,25 @@ final class ImageViewerViewController: UIViewController {
         stack.spacing = 14
 
         container.contentView.addSubview(stack)
-        stack.snp.makeConstraints { make in
-            make.edges.equalToSuperview().inset(18)
-        }
+        stack.snp.makeConstraints { make in make.edges.equalToSuperview().inset(18) }
 
         return container
     }
 }
 
 // MARK: - UICollectionViewDataSource
-extension ImageViewerViewController: UICollectionViewDataSource {
 
+extension ImageViewerViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         viewModel.photoDetails.count
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ImageViewerCell.identifier, for: indexPath) as! ImageViewerCell
-        Task {
-            let image = await viewModel.loadImage(for: indexPath.item, size: collectionView.bounds.size)
-            await MainActor.run {
-                cell.configure(image: image)
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ImageViewerCell.identifier, for: indexPath)
+        if let imageCell = cell as? ImageViewerCell {
+            Task {
+                let image = await viewModel.loadImage(for: indexPath.item, size: collectionView.bounds.size)
+                await MainActor.run { imageCell.configure(image: image) }
             }
         }
         return cell
@@ -327,8 +351,8 @@ extension ImageViewerViewController: UICollectionViewDataSource {
 }
 
 // MARK: - UICollectionViewDelegateFlowLayout
-extension ImageViewerViewController: UICollectionViewDelegateFlowLayout {
 
+extension ImageViewerViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         collectionView.bounds.size
     }
@@ -338,13 +362,24 @@ extension ImageViewerViewController: UICollectionViewDelegateFlowLayout {
         guard page != currentIndex else { return }
         currentIndex = page
         viewModel.send(.pageChanged(page))
+        updateCheckButton(selectedIdentifiers: viewModel.selectedIdentifiers)
     }
 }
+
+// MARK: - UIGestureRecognizerDelegate
 
 extension ImageViewerViewController: UIGestureRecognizerDelegate {
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         guard let pan = gestureRecognizer as? UIPanGestureRecognizer else { return true }
         let velocity = pan.velocity(in: view)
         return abs(velocity.y) > abs(velocity.x)
+    }
+}
+
+// MARK: - Array safe subscript
+
+private extension Array {
+    subscript(safe index: Int) -> Element? {
+        indices.contains(index) ? self[index] : nil
     }
 }

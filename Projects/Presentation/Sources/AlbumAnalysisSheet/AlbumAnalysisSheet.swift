@@ -13,8 +13,7 @@ import Combine
 final class AlbumAnalysisSheet: UIViewController {
 
     var progress: AnalyzeProgress
-    var onEnd: (() -> Void)?
-    
+
     private let grabberView: UIView = {
         let view = UIView()
         view.backgroundColor = Theme.strokeStrong
@@ -29,12 +28,10 @@ final class AlbumAnalysisSheet: UIViewController {
         return view
     }()
 
-    private let progressIndicator: UIActivityIndicatorView = {
-        let view = UIActivityIndicatorView(style: .medium)
-        view.color = Theme.primary
-        view.transform = CGAffineTransform(scaleX: 1.3, y: 1.3)
-        view.startAnimating()
-        return view
+    private let logoImageView: UIImageView = {
+        let imageView = UIImageView(image: UIImage(named: "icon", in: .module, with: nil))
+        imageView.contentMode = .scaleAspectFit
+        return imageView
     }()
 
     private let titleLabel: UILabel = {
@@ -48,7 +45,7 @@ final class AlbumAnalysisSheet: UIViewController {
 
     private let subtitleLabel: UILabel = {
         let label = UILabel()
-        label.text = "사진을 분석하고 관련 사진끼리 앨범을 만들고 있어요"
+        label.text = "사진과 얼굴, 위치를 분석하고\n관련 앨범을 만들고 있어요\n완료될 때까지 조금만 기다려주세요"
         label.font = .systemFont(ofSize: 14, weight: .regular)
         label.textColor = Theme.textSecondary
         label.textAlignment = .center
@@ -59,42 +56,24 @@ final class AlbumAnalysisSheet: UIViewController {
     private let photoRow = ProgressRow(icon: "photo.badge.plus", title: "사진 분석 중")
     private let albumRow = ProgressRow(icon: "square.stack.3d.up.fill", title: "앨범 생성 중")
 
-    private let locationNoteView: UIView = {
-        let view = UIView()
-        view.backgroundColor = Theme.surfaceCool
-        view.layer.cornerRadius = 14
-        return view
-    }()
-
-    private let locationIcon: UIImageView = {
-        let imageView = UIImageView(image: UIImage(systemName: "location.fill.viewfinder"))
-        imageView.tintColor = Theme.secondary
-        imageView.contentMode = .scaleAspectFit
-        return imageView
-    }()
-
-    private let locationLabel: UILabel = {
-        let label = UILabel()
-        label.text = "이후 사진의 좌표 분석은 백그라운드에서 계속 진행돼요"
-        label.font = .systemFont(ofSize: 13, weight: .medium)
-        label.textColor = Theme.textSecondary
-        label.numberOfLines = 0
-        return label
-    }()
-    
     private let progressPublisher: AnyPublisher<Double, Never>
+    private let photoCompletedPublisher: AnyPublisher<Void, Never>
     private let albumProgressPublisher: AnyPublisher<Double, Never>
+    private let albumCompletedPublisher: AnyPublisher<Void, Never>
     private var cancellables = Set<AnyCancellable>()
+    private var didStartAlbumGeneration = false
 
     init(progress: AnalyzeProgress) {
         self.progress = progress
-        
+
         self.progressPublisher = progress.photoProgress
+        self.photoCompletedPublisher = progress.photoCompleted
         self.albumProgressPublisher = progress.albumProgress
-        
+        self.albumCompletedPublisher = progress.albumCompleted
+
         super.init(nibName: nil, bundle: nil)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("AlbumAnalysisSheet does not support NSCoding.")
     }
@@ -116,26 +95,10 @@ final class AlbumAnalysisSheet: UIViewController {
 
     private func setupLayout() {
         // Circle
-        circleBackground.addSubview(progressIndicator)
-        progressIndicator.translatesAutoresizingMaskIntoConstraints = false
-        progressIndicator.snp.makeConstraints { make in
+        circleBackground.addSubview(logoImageView)
+        logoImageView.snp.makeConstraints { make in
             make.center.equalTo(circleBackground)
-        }
-
-        // Location note
-        locationNoteView.addSubview(locationIcon)
-        locationNoteView.addSubview(locationLabel)
-        
-        locationIcon.snp.makeConstraints { make in
-            make.leading.equalTo(locationNoteView).offset(14)
-            make.centerY.equalTo(locationNoteView)
-            make.width.height.equalTo(18)
-        }
-        
-        locationLabel.snp.makeConstraints { make in
-            make.leading.equalTo(locationIcon.snp.trailing).offset(8)
-            make.trailing.equalTo(locationNoteView).offset(-14)
-            make.top.bottom.equalTo(locationNoteView).inset(10)
+            make.width.height.equalTo(48)
         }
 
         // Text stack
@@ -152,8 +115,7 @@ final class AlbumAnalysisSheet: UIViewController {
         let mainStack = UIStackView(arrangedSubviews: [
             circleBackground,
             textStack,
-            rowStack,
-            locationNoteView
+            rowStack
         ])
         mainStack.axis = .vertical
         mainStack.spacing = 18
@@ -169,52 +131,80 @@ final class AlbumAnalysisSheet: UIViewController {
             make.width.equalTo(42)
             make.height.equalTo(5)
         }
-        
+
         circleBackground.snp.makeConstraints { make in
             make.width.height.equalTo(84)
         }
-        
+
         mainStack.snp.makeConstraints { make in
             make.top.equalTo(grabberView.snp.bottom).offset(20)
             make.leading.trailing.equalTo(view).inset(20)
         }
-        
-        locationNoteView.snp.makeConstraints { make in
-            make.leading.trailing.equalTo(mainStack)
-        }
-        
+
         rowStack.snp.makeConstraints { make in
             make.leading.trailing.equalTo(mainStack)
         }
-        
+
         subtitleLabel.snp.makeConstraints { make in
             make.leading.trailing.equalTo(view).inset(24)
         }
     }
-    
+
     private func setupBindings() {
+        // 사진 분석이 끝나기 전까지는 앨범 생성은 아직 시작 전이니 "대기" 상태로 보여준다
+        photoRow.startSpinner()
+        albumRow.setTitle("앨범 생성 대기")
+        albumRow.stopSpinner()
+
+        // progress 값(0~1)은 오직 진행률 바 표시용 — @Published라 구독 시점 현재값을 리플레이하기 때문에
+        // "완료"라는 확정적인 상태 전환은 이 값으로 추론하지 않고, 아래 photoCompleted/albumCompleted
+        // 이벤트(PassthroughSubject라 리플레이 없음)로만 판단한다
         progressPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] progress in
-                print("progressPublisher \(progress)")
                 self?.photoRow.updateProgress(progress)
             }
             .store(in: &cancellables)
-        
+
         albumProgressPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] progress in
-                print("albumProgressPublisher \(progress)")
                 self?.albumRow.updateProgress(progress)
-                if progress >= 1.0 {
-                    self?.endPage()
-                }
+            }
+            .store(in: &cancellables)
+
+        photoCompletedPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+                self?.startAlbumGenerationIfNeeded()
+            }
+            .store(in: &cancellables)
+
+        albumCompletedPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+                guard let self else { return }
+                self.startAlbumGenerationIfNeeded()
+                self.albumRow.updateProgress(1.0)
+                self.albumRow.setTitle("앨범 생성 완료")
+                self.albumRow.stopSpinner()
+                self.endPage()
             }
             .store(in: &cancellables)
     }
-    
+
+    private func startAlbumGenerationIfNeeded() {
+        guard !didStartAlbumGeneration else { return }
+        didStartAlbumGeneration = true
+
+        photoRow.setTitle("사진 분석 완료")
+        photoRow.stopSpinner()
+
+        albumRow.setTitle("앨범 생성 중")
+        albumRow.startSpinner()
+    }
+
     private func endPage() {
-        self.onEnd?()
         self.dismiss(animated: true)
     }
 }
