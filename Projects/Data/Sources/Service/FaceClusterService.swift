@@ -43,10 +43,10 @@ public final class FaceClusterService {
     private let mergeThreshold: Float = 0.60
 
     /// 병합 후 내부 유사도 검증 기준 (평균 기준 — 한 쌍만 유독 낮아도 다른 멤버들과 평균이 높으면 통과될 수 있음)
-    private let minimumInternalSimilarity: Float = 0.20
+    private let minimumInternalSimilarity: Float = 0.10
 
     /// 평균이 기준을 넘어도, 다른 멤버 중 단 한 명과의 유사도라도 이 값 미만이면 그 얼굴을 아웃라이어로 판단
-    private let minimumPairwiseSimilarity: Float = 0.20
+    private let minimumPairwiseSimilarity: Float = 0.10
 
     private let libraryService: PhotoLibraryService
 
