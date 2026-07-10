@@ -29,8 +29,12 @@ public final class FaceClusterService {
     /// 이웃 판단 기준 — 이 값 이상이면 엣지 연결
     private let similarityThreshold: Float = 0.64
 
-    /// 최소 클러스터 크기
-    private let minimumClusterSize: Int = 10
+    /// 최소 클러스터 크기 — 이 크기 이상인 조각들만 병합 후보로 인정
+    private let minimumClusterSize: Int = 2
+
+    /// 병합 후 최종 크기 기준 — minimumClusterSize를 통과한 조각들을 병합한 결과가 이 값 미만이면
+    /// (서로 병합 상대를 못 찾아 혼자 남은 조각 포함) 앨범으로 만들지 않고 버림
+    private let minimumMergedClusterSize: Int = 10
 
     /// 개별 클러스터 품질 기준 — 이 미만이면 짜투리로 버림
     private let minimumClusterQuality: Float = 0.50
@@ -138,7 +142,7 @@ public final class FaceClusterService {
 
             // 평균을 심하게 깎아먹는 애를 먼저 제거해보고, 남은 애들 기준으로 품질을 재평가한다.
             // (그냥 평균만 보면 나머지는 멀쩡한데 1명 때문에 그룹 전체가 통째로 버려질 수 있음)
-            let cleaned = removeOutliers(indices: indices, n: n, similarityMatrix: similarityMatrix, photoIds: photoIds)
+            let cleaned = removeOutliers(indices: indices, n: n, similarityMatrix: similarityMatrix, photoIds: photoIds, minimumSize: minimumClusterSize)
             guard cleaned.count >= minimumClusterSize else {
                 skipped += 1
                 continue
@@ -170,7 +174,7 @@ public final class FaceClusterService {
         var finalSkipped = 0
 
         for indices in mergedList {
-            guard indices.count >= minimumClusterSize else {
+            guard indices.count >= minimumMergedClusterSize else {
                 finalSkipped += 1
                 continue
             }
@@ -325,7 +329,9 @@ public final class FaceClusterService {
         ) -> [[Int]] {
             let m = clusterIndices.count
             guard m > 1 else {
-                return clusterIndices.map { removeOutliers(indices: $0, n: n, similarityMatrix: similarityMatrix, photoIds: photoIds) }
+                return clusterIndices.map {
+                    removeOutliers(indices: $0, n: n, similarityMatrix: similarityMatrix, photoIds: photoIds, minimumSize: minimumMergedClusterSize)
+                }
             }
 
             let dim = embeddings[0].embedding.count
@@ -412,8 +418,8 @@ public final class FaceClusterService {
             var finalClusters: [[Int]] = []
             for root in merged.keys.sorted() {
                 let indices = merged[root]!
-                let cleaned = removeOutliers(indices: indices, n: n, similarityMatrix: similarityMatrix, photoIds: photoIds)
-                if cleaned.count >= minimumClusterSize {
+                let cleaned = removeOutliers(indices: indices, n: n, similarityMatrix: similarityMatrix, photoIds: photoIds, minimumSize: minimumMergedClusterSize)
+                if cleaned.count >= minimumMergedClusterSize {
                     finalClusters.append(cleaned)
                 }
             }
@@ -422,10 +428,10 @@ public final class FaceClusterService {
         }
 
 
-    private func removeOutliers(indices: [Int], n: Int, similarityMatrix: [Float], photoIds: [String]) -> [Int] {
+    private func removeOutliers(indices: [Int], n: Int, similarityMatrix: [Float], photoIds: [String], minimumSize: Int) -> [Int] {
         var current = indices
 
-        while current.count >= minimumClusterSize { // 최소 크기 미만으로 떨어지면 어차피 탈락이므로 탈출
+        while current.count >= minimumSize { // 최소 크기 미만으로 떨어지면 어차피 탈락이므로 탈출
             let denominator = Float(current.count - 1)
             guard denominator > 0 else { break } // 0 나누기 방지 안전장치
 
