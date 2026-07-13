@@ -24,6 +24,8 @@ extension AlbumEntity {
             photos: [],
             photoCount: photoCount,
             from: from,
+            isEdited: isEdited,
+            isRenamed: isRenamed,
             clusterId: clusters.map { $0.id.uuidString }
         )
     }
@@ -41,7 +43,9 @@ extension AlbumEntity {
             keywords: keywords.map { $0.keyword },
             photos: [],
             photoCount: photoCount,
-            from: from
+            from: from,
+            isEdited: isEdited,
+            isRenamed: isRenamed
         )
     }
 
@@ -58,7 +62,9 @@ extension AlbumEntity {
             keywords: [],
             photos: photos.sorted { $0.createdAt > $1.createdAt }.prefix(4).map { $0.toDomain() },
             photoCount: photoCount,
-            from: from
+            from: from,
+            isEdited: isEdited,
+            isRenamed: isRenamed
         )
     }
 
@@ -75,7 +81,9 @@ extension AlbumEntity {
             keywords: keywords.map { $0.keyword },
             photos: photos.sorted { $0.createdAt > $1.createdAt }.prefix(4).map { $0.toDomain() },
             photoCount: photoCount,
-            from: from
+            from: from,
+            isEdited: isEdited,
+            isRenamed: isRenamed
         )
     }
 }

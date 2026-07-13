@@ -40,6 +40,7 @@ public final class AlbumDIContainer {
             albumDataRepository: appDIContainer.albumDataRepository,
             labelRepository: appDIContainer.photoLabelDataRepository,
             faceClusterRepository: appDIContainer.faceClusterRepository,
+            photoDataRepository: appDIContainer.photoDataRepository,
             isSelectMode: isSelectMode
         )
     }
@@ -50,7 +51,8 @@ public final class AlbumDIContainer {
             photoLibraryRepository: appDIContainer.photoLibraryRepository,
             albumDataRepository: appDIContainer.albumDataRepository,
             photoLabelDataRepository: appDIContainer.photoLabelDataRepository,
-            faceClusterRepository: appDIContainer.faceClusterRepository
+            faceClusterRepository: appDIContainer.faceClusterRepository,
+            photoDataRepository: appDIContainer.photoDataRepository
         )
     }
 }

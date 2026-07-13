@@ -355,6 +355,20 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
         return ranked.map { AlbumMergeCandidate(album: $0.0.toDomain(), similarity: $0.1) }
     }
 
+    public func fetchFaceAlbumIds(forPhotoIds photoIds: [String]) async throws -> [UUID] {
+        let context = ModelContext(container)
+
+        let ids = Set(photoIds)
+        let embeddings = try context.fetch(FetchDescriptor<FaceEmbeddingEntity>())
+        let matched = embeddings.filter { entity in
+            guard let localIdentifier = entity.photo?.localIdentifier else { return false }
+            return ids.contains(localIdentifier)
+        }
+
+        let albumIds = matched.compactMap { $0.cluster?.album?.id }
+        return Array(Set(albumIds))
+    }
+
     // MARK: - 앨범 분리 (병합 되돌리기)
 
     public func fetchClusters(albumId: UUID) async throws -> [FaceClusterSummary] {

@@ -172,19 +172,20 @@ final class AlbumViewController: BaseViewController {
     }
 
     /// 여행앨범: 세로 리스트, 높이 100pt
+    /// 풀블리드 사진 + 하단 그라데이션 캡션 디자인이라, 카드 하나가 충분히 커야 사진이 잘 보인다 —
+    /// 기존처럼 2장을 쌓아 보여주지 않고 페이지당 큼직한 카드 1장만 보여준다
     private func makeTravelSection() -> NSCollectionLayoutSection {
         let itemSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
-            heightDimension: .fractionalHeight(0.5)
+            heightDimension: .fractionalHeight(1.0)
         )
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
         let groupSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(0.85), // 0.85로 오른쪽에 다음 셀 살짝 보이게
-            heightDimension: .absolute(212)         // 100 * 2 + spacing 12
+            heightDimension: .absolute(220)
         )
         let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
-        group.interItemSpacing = .fixed(12)
 
         let section = NSCollectionLayoutSection(group: group)
         section.orthogonalScrollingBehavior = .groupPaging

@@ -24,12 +24,6 @@ final class TravelAlbumCell: UICollectionViewCell {
         return iv
     }()
 
-    private let thumbOverlay: UIView = {
-        let v = UIView()
-        v.backgroundColor = Theme.accent.withAlphaComponent(0.15)
-        return v
-    }()
-
     private let placeholderIcon: UIImageView = {
         let iv = UIImageView()
         iv.image = UIImage(systemName: "airplane")?.withRenderingMode(.alwaysTemplate)
@@ -38,15 +32,31 @@ final class TravelAlbumCell: UICollectionViewCell {
         return iv
     }()
 
-    private let infoView = UIView()
+    // 사진 위에 텍스트가 읽히도록 하단만 어둡게 깔아주는 그라데이션 (공용 GradientView 재사용)
+    private let gradientView = GradientView()
 
-    private let badgeView  = UIView()
-    private let badgeIcon  = UIImageView()
-    private let badgeLabel = UILabel()
+    private let nameLabel: UILabel = {
+        let lb = UILabel()
+        lb.textColor = .white
+        lb.font = .systemFont(ofSize: 17, weight: .bold)
+        lb.numberOfLines = 1
+        return lb
+    }()
 
-    private let nameLabel  = UILabel()
-    private let dateLabel  = UILabel()
-    private let countLabel = UILabel()
+    private let dateLabel: UILabel = {
+        let lb = UILabel()
+        lb.textColor = UIColor.white.withAlphaComponent(0.85)
+        lb.font = .systemFont(ofSize: 13, weight: .regular)
+        return lb
+    }()
+
+    private let countLabel: UILabel = {
+        let lb = UILabel()
+        lb.textColor = UIColor.white.withAlphaComponent(0.85)
+        lb.font = .systemFont(ofSize: 13, weight: .regular)
+        lb.textAlignment = .right
+        return lb
+    }()
 
     private var task: Task<Void, Never>?
     private var assetIdentifier: String?
@@ -76,47 +86,18 @@ final class TravelAlbumCell: UICollectionViewCell {
         contentView.backgroundColor = Theme.background
 
         containerView.backgroundColor = Theme.surfaceWarm
-        containerView.layer.cornerRadius = 18
+        containerView.layer.cornerRadius = 20
         containerView.layer.masksToBounds = true
         containerView.addBorder(color: Theme.strokeSoft, borderWidth: 1)
         contentView.addSubview(containerView)
 
-        // 썸네일 (고정 너비)
         containerView.addSubview(thumbImageView)
-        thumbImageView.addSubview(thumbOverlay)
         thumbImageView.addSubview(placeholderIcon)
+        containerView.addSubview(gradientView)
 
-        // 정보 영역
-        infoView.backgroundColor = .clear
-        containerView.addSubview(infoView)
-
-        // 배지
-        badgeView.backgroundColor = Theme.accent
-        badgeView.layer.cornerRadius = 6
-        badgeView.layer.masksToBounds = true
-        infoView.addSubview(badgeView)
-
-        badgeIcon.image = UIImage(systemName: "mappin.and.ellipse")?.withRenderingMode(.alwaysTemplate)
-        badgeIcon.tintColor = UIColor("#7a4a00")
-        badgeIcon.contentMode = .scaleAspectFit
-        badgeView.addSubview(badgeIcon)
-
-        badgeLabel.textColor = UIColor("#7a4a00")
-        badgeLabel.font = .systemFont(ofSize: 11, weight: .semibold)
-        badgeView.addSubview(badgeLabel)
-
-        nameLabel.textColor = Theme.textPrimary
-        nameLabel.font = .systemFont(ofSize: 16, weight: .semibold)
-        nameLabel.numberOfLines = 1
-        infoView.addSubview(nameLabel)
-
-        dateLabel.textColor = Theme.textSecondary
-        dateLabel.font = .systemFont(ofSize: 12, weight: .regular)
-        infoView.addSubview(dateLabel)
-
-        countLabel.textColor = Theme.textTertiary
-        countLabel.font = .systemFont(ofSize: 12, weight: .regular)
-        infoView.addSubview(countLabel)
+        gradientView.addSubview(nameLabel)
+        gradientView.addSubview(dateLabel)
+        gradientView.addSubview(countLabel)
 
         // MARK: Constraints
 
@@ -125,56 +106,34 @@ final class TravelAlbumCell: UICollectionViewCell {
         }
 
         thumbImageView.snp.makeConstraints { make in
-            make.top.leading.bottom.equalToSuperview()
-            make.width.equalTo(100)
-        }
-
-        thumbOverlay.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
 
         placeholderIcon.snp.makeConstraints { make in
             make.center.equalToSuperview()
-            make.size.equalTo(32)
+            make.size.equalTo(36)
         }
 
-        infoView.snp.makeConstraints { make in
-            make.top.bottom.trailing.equalToSuperview()
-            make.leading.equalTo(thumbImageView.snp.trailing)
-            make.height.equalTo(100)
-        }
-
-        badgeView.snp.makeConstraints { make in
-            make.top.equalToSuperview().inset(14)
-            make.leading.equalToSuperview().inset(14)
-            make.height.equalTo(20)
-        }
-
-        badgeIcon.snp.makeConstraints { make in
-            make.leading.equalToSuperview().inset(7)
-            make.centerY.equalToSuperview()
-            make.size.equalTo(11)
-        }
-
-        badgeLabel.snp.makeConstraints { make in
-            make.leading.equalTo(badgeIcon.snp.trailing).offset(3)
-            make.trailing.equalToSuperview().inset(7)
-            make.centerY.equalToSuperview()
+        gradientView.snp.makeConstraints { make in
+            make.leading.trailing.bottom.equalToSuperview()
+            make.height.equalToSuperview().multipliedBy(0.6)
         }
 
         nameLabel.snp.makeConstraints { make in
-            make.top.equalTo(badgeView.snp.bottom).offset(6)
-            make.leading.trailing.equalToSuperview().inset(14)
+            make.leading.equalToSuperview().offset(16)
+            make.trailing.equalToSuperview().inset(16)
+            make.bottom.equalTo(dateLabel.snp.top).offset(-2)
         }
 
         dateLabel.snp.makeConstraints { make in
-            make.top.equalTo(nameLabel.snp.bottom).offset(4)
-            make.leading.trailing.equalToSuperview().inset(14)
+            make.leading.equalToSuperview().offset(16)
+            make.bottom.equalToSuperview().inset(14)
         }
 
         countLabel.snp.makeConstraints { make in
-            make.top.equalTo(dateLabel.snp.bottom).offset(2)
-            make.leading.trailing.equalToSuperview().inset(14)
+            make.leading.equalTo(dateLabel.snp.trailing).offset(8)
+            make.trailing.equalToSuperview().inset(16)
+            make.centerY.equalTo(dateLabel)
         }
     }
 
@@ -182,17 +141,16 @@ final class TravelAlbumCell: UICollectionViewCell {
 
     func configure(with viewModel: TravelAlbumCellViewModel) {
         assetIdentifier = viewModel.localIdentifier
-        badgeLabel.text = viewModel.countryName
-        nameLabel.text  = viewModel.displayName
-        dateLabel.text  = viewModel.dateRangeText
-        countLabel.text = "사진 \(viewModel.photoCount.formatted())장"
+        nameLabel.text = viewModel.displayName
+        dateLabel.text = viewModel.dateRangeText
+        countLabel.text = "\(viewModel.photoCount.formatted())장"
 
         task = Task {
-            let size = CGSize(width: 200, height: 200)
+            let size = CGSize(width: 400, height: 400)
             let image = await viewModel.loadImage(size: size)
             guard !Task.isCancelled, assetIdentifier == viewModel.localIdentifier else { return }
             thumbImageView.image = image
-            placeholderIcon.isHidden = true
+            placeholderIcon.isHidden = image != nil
         }
     }
 }

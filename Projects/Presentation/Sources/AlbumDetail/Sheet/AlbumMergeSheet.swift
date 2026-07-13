@@ -288,7 +288,7 @@ private final class AlbumMergeSectionHeaderView: UICollectionReusableView {
         super.init(frame: frame)
         addSubview(titleLabel)
         titleLabel.snp.makeConstraints { make in
-            make.leading.equalToSuperview()
+            make.leading.equalToSuperview().offset(20)
             make.bottom.equalToSuperview().offset(-6)
         }
     }

@@ -32,4 +32,7 @@ public protocol FaceClusterRepository {
 
     /// 다른 얼굴 앨범들을 이 앨범과의 centroid 유사도가 높은 순으로 정렬해 반환 — 합치기 후보 추천용
     func fetchOtherFaceAlbumsSortedBySimilarity(excluding albumId: UUID) async throws -> [AlbumMergeCandidate]
+
+    /// 주어진 사진들에 등장하는 얼굴이 속한 얼굴 앨범 id들 (중복 제거) — 여행 앨범에 사진 추가 시 인물 자동 연결용
+    func fetchFaceAlbumIds(forPhotoIds photoIds: [String]) async throws -> [UUID]
 }

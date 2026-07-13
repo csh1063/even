@@ -42,6 +42,8 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
                 self?.showMergeTargetPicker(candidates: candidates)
             case .pickSplitClusters(let clusters):
                 self?.showClusterSplitPicker(clusters: clusters)
+            case .pickTravelerManagement(let travelers, let others):
+                self?.showTravelerManagement(travelers: travelers, others: others)
             }
         }
 
@@ -59,7 +61,18 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
     }
 
     func showAlbumRenameSheet(album: Album) {
-        let sheet = AlbumRenameSheet(albumName: album.displayName)
+        // 한 번도 직접 이름을 바꾼 적 없는 앨범은 자동 생성된 이름(예: "인물 3", "부산 여행")이 그대로 채워지지 않도록 비워서 보여준다
+        // (isEdited는 병합/제외/분리 등 구조 변경 여부라 이름 변경 여부와는 별개 — isRenamed로 따로 구분)
+        let sheet: AlbumRenameSheet
+        if album.from == "face" {
+            sheet = AlbumRenameSheet(
+                albumName: album.isRenamed ? album.displayName : "",
+                title: "이름 변경",
+                subtitle: "이름을 정해주세요"
+            )
+        } else {
+            sheet = AlbumRenameSheet(albumName: album.isRenamed ? album.displayName : "")
+        }
         sheet.onSave = { [weak self] newName in
             self?.delegate?.save(name: newName)
         }
@@ -92,6 +105,19 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
             options.append(
                 OptionRowConfig(icon: "square.on.square.dashed", title: "앨범 분리", style: .normal) { [weak self] in
                     self?.delegate?.splitTapped()
+                }
+            )
+        }
+
+        if album.from == "travel" {
+            options.append(
+                OptionRowConfig(icon: "photo.badge.plus", title: "사진 추가", style: .normal) { [weak self] in
+                    self?.showAddPhotos(album: album)
+                }
+            )
+            options.append(
+                OptionRowConfig(icon: "person.2.fill", title: "여행자 관리", style: .normal) { [weak self] in
+                    self?.delegate?.travelerManagementTapped()
                 }
             )
         }
@@ -162,6 +188,82 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
         }
 
         navigationController.present(sheet, animated: true)
+    }
+
+    func showTravelerManagement(travelers: [Album], others: [Album]) {
+        let sheet = TravelerManagementSheet(
+            travelers: travelers,
+            others: others,
+            imageUseCase: diContainer.makeImageUseCase(),
+            albumUseCase: diContainer.makeAlbumUseCase(),
+            detailUseCase: diContainer.makeAlbumDetailUseCase()
+        )
+        sheet.onConfirm = { [weak self] travelerIds in
+            self?.delegate?.saveTravelerManagement(travelerIds: travelerIds)
+        }
+
+        sheet.modalPresentationStyle = .pageSheet
+        if let presentation = sheet.sheetPresentationController {
+            presentation.detents = [.medium(), .large()]
+            presentation.preferredCornerRadius = 28
+            presentation.prefersGrabberVisible = false
+        }
+        sheet.isModalInPresentation = true
+
+        navigationController.present(sheet, animated: true)
+    }
+
+    // MARK: - 사진 추가 (이전 사진 → 다음 사진 2단계)
+
+    func showAddPhotos(album: Album) {
+        guard let startDate = album.startDate else { return }
+
+        let viewModel = TravelPhotoPickerViewModel(
+            album: album,
+            direction: .before(startDate),
+            carriedSelections: [],
+            imageUseCase: diContainer.makeImageUseCase(),
+            detailUseCase: diContainer.makeAlbumDetailUseCase()
+        )
+        let vc = TravelPhotoPickerViewController(viewModel: viewModel)
+
+        vc.onCancel = { [weak self] in
+            self?.dismissAddPhotosFlow()
+        }
+        vc.onNext = { [weak self] carriedSelections in
+            self?.showAddPhotosStep2(album: album, carriedSelections: carriedSelections)
+        }
+
+        navigationController.pushViewController(vc, animated: true)
+    }
+
+    private func showAddPhotosStep2(album: Album, carriedSelections: [PhotoInAlbum]) {
+        guard let endDate = album.endDate else { return }
+
+        let viewModel = TravelPhotoPickerViewModel(
+            album: album,
+            direction: .after(endDate),
+            carriedSelections: carriedSelections,
+            imageUseCase: diContainer.makeImageUseCase(),
+            detailUseCase: diContainer.makeAlbumDetailUseCase()
+        )
+        let vc = TravelPhotoPickerViewController(viewModel: viewModel)
+
+        vc.onBack = { [weak self] in
+            self?.navigationController.popViewController(animated: true)
+        }
+        vc.onFinish = { [weak self] in
+            self?.delegate?.refreshAfterPhotosAdded()
+            self?.dismissAddPhotosFlow()
+        }
+
+        navigationController.pushViewController(vc, animated: true)
+    }
+
+    /// "사진 추가" 플로우 중 몇 단계에 있든, 원래 앨범 상세 화면까지 한 번에 돌아간다
+    private func dismissAddPhotosFlow() {
+        guard let albumDetailVC = viewController else { return }
+        navigationController.popToViewController(albumDetailVC, animated: true)
     }
 
 //    func showDetail(_ photoDetails: [PhotoDetail], index: Int) {

@@ -194,6 +194,7 @@ public final class DefaultAlbumDataRepository: AlbumDataRepository {
         }
 
         entity.displayName = name
+        entity.isRenamed = true
 
         try context.save()
 
@@ -368,6 +369,31 @@ public final class DefaultAlbumDataRepository: AlbumDataRepository {
     public func syncAlbums() throws {
         let updated = try fetchAll()
         albumsSubject.send(updated)
+    }
+
+    public func updateLinkedFaceAlbums(albumId: UUID, faceAlbumIds: [UUID]) throws {
+        let context = ModelContext(container)
+
+        let descriptor = FetchDescriptor<AlbumEntity>(predicate: #Predicate { $0.id == albumId })
+        guard let entity = try context.fetch(descriptor).first else { return }
+
+        entity.linkedFaceAlbumIds = faceAlbumIds
+        try context.save()
+    }
+
+    public func fetchLinkedFaceAlbums(albumId: UUID) throws -> [Album] {
+        let context = ModelContext(container)
+
+        let descriptor = FetchDescriptor<AlbumEntity>(predicate: #Predicate { $0.id == albumId })
+        guard let entity = try context.fetch(descriptor).first else { return [] }
+
+        let ids = Set(entity.linkedFaceAlbumIds)
+        guard !ids.isEmpty else { return [] }
+
+        let faceAlbums = try context.fetch(FetchDescriptor<AlbumEntity>(
+            predicate: #Predicate { $0.from == "face" }
+        ))
+        return faceAlbums.filter { ids.contains($0.id) }.map { $0.toDomainWithKey() }
     }
 
     public func deleteAll() throws {

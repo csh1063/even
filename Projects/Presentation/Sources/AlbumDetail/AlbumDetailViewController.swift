@@ -94,6 +94,19 @@ final class AlbumDetailViewController: BaseViewController {
     }
     private var isSelectionMode: Bool { pageMode != .list }
     private(set) var selectedIdentifiers: Set<String> = []
+    private var travelPeopleText: String? {
+        // reloadData()는 사진 셀까지 전부 다시 그려서 깜빡였다 — 헤더가 이미 떠 있으면 그 뷰의 텍스트만
+        // 직접 바꾸고, 크기 재계산만 invalidateLayout으로 처리한다 (사진 셀은 전혀 안 건드림).
+        // 헤더가 아직 없던 상태(처음 생기는 경우)는 supplementaryViewProvider가 나중에 만들어질 때
+        // 이 시점의 최신 값을 그대로 읽어가므로 별도 처리가 필요 없다
+        didSet {
+            if let text = travelPeopleText,
+               let header = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader).first as? TravelPeopleHeaderView {
+                header.configure(text: text)
+            }
+            collectionView.collectionViewLayout.invalidateLayout()
+        }
+    }
 
     // MARK: - Init
 
@@ -191,6 +204,11 @@ final class AlbumDetailViewController: BaseViewController {
                 guard let self, pageMode == .list else { return }
                 enterMode(mode)
             }
+            .store(in: &cancellables)
+
+        output.travelPeopleText
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] text in self?.travelPeopleText = text }
             .store(in: &cancellables)
 
         bindNaviActions()
@@ -323,6 +341,25 @@ extension AlbumDetailViewController {
         dataSource = UICollectionViewDiffableDataSource<Int, PhotoCellItemViewModel>(collectionView: collectionView) { cv, indexPath, vm in
             cv.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: vm)
         }
+
+        collectionView.register(
+            TravelPeopleHeaderView.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+            withReuseIdentifier: TravelPeopleHeaderView.reuseIdentifier
+        )
+        dataSource.supplementaryViewProvider = { [weak self] cv, kind, indexPath in
+            guard let self, kind == UICollectionView.elementKindSectionHeader,
+                  let text = self.travelPeopleText,
+                  let header = cv.dequeueReusableSupplementaryView(
+                    ofKind: kind,
+                    withReuseIdentifier: TravelPeopleHeaderView.reuseIdentifier,
+                    for: indexPath
+                  ) as? TravelPeopleHeaderView else {
+                return nil
+            }
+            header.configure(text: text)
+            return header
+        }
     }
 
     private func applySnapshot(with photos: [PhotoCellItemViewModel]) {
@@ -356,6 +393,16 @@ extension AlbumDetailViewController: UICollectionViewDelegate {
 
     func collectionView(_ collectionView: UICollectionView, shouldBeginMultipleSelectionInteractionAt indexPath: IndexPath) -> Bool {
         return true
+    }
+}
+
+// MARK: - UICollectionViewDelegateFlowLayout
+
+extension AlbumDetailViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        guard let text = travelPeopleText else { return .zero }
+        let height = TravelPeopleHeaderView.height(for: text, width: collectionView.bounds.width)
+        return CGSize(width: collectionView.bounds.width, height: height)
     }
 
     func collectionView(_ collectionView: UICollectionView, didBeginMultipleSelectionInteractionAt indexPath: IndexPath) {

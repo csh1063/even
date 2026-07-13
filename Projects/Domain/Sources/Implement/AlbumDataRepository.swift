@@ -31,6 +31,11 @@ public protocol AlbumDataRepository {
     func syncPhotoCount() throws
     func syncAlbums() throws
     func deleteAll() throws
+
+    /// 여행 앨범 생성 시점에 사진이 겹치는 얼굴 앨범들을 연결
+    func updateLinkedFaceAlbums(albumId: UUID, faceAlbumIds: [UUID]) throws
+    /// 연결된 얼굴 앨범들을 현재 상태(이름 변경 여부 포함) 그대로 조회
+    func fetchLinkedFaceAlbums(albumId: UUID) throws -> [Album]
 }
 
 extension AlbumDataRepository {

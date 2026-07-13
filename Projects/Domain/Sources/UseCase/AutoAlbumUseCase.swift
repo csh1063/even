@@ -447,6 +447,15 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
 
         let clusters = try await travelRepository.detect(from: allPhotosForTravel, homeZones: homeZones)
 
+        // 얼굴 앨범들의 사진 id 집합을 미리 한 번만 만들어둔다 — 여행 앨범마다 매번 다시 조회하지 않도록.
+        // "누가 포함되는지"는 이 시점에 고정되고(재생성해야 갱신), 그 사람 이름은 항상 얼굴 앨범을
+        // 다시 조회해서 보여주므로 나중에 이름을 바꿔도 자동으로 반영된다
+        let faceAlbums = try albumDataRepository.fetchAll(from: "face")
+        let faceAlbumPhotoSets: [(id: UUID, photoIds: Set<String>)] = try faceAlbums.map { album in
+            let photos = try albumDataRepository.fetchPhotos(by: album.id)
+            return (album.id, Set(photos.map { $0.localIdentifier }))
+        }
+
         var placeCounts: [String: Int] = [:]
 
         for cluster in clusters {
@@ -456,7 +465,9 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
             let albumName = "\(place) \(currentCount)"
             placeCounts[place] = currentCount + 1
 
-            let displayName = "\(place) 여행"
+            // 하루짜리 여행은 "여행"보다 "나들이"가 더 자연스럽다 (출발/도착 구분이 무의미한 짧은 일정)
+            let isSingleDay = Calendar.current.isDate(cluster.startDate, inSameDayAs: cluster.endDate)
+            let displayName = isSingleDay ? "\(place) 나들이" : "\(place) 여행"
 
             let album = Album(
                 name: albumName,
@@ -469,6 +480,13 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
             if let saved = try albumDataRepository.saveAlbum(album: album, returnExist: true) {
                 let identifiers = cluster.photos.map { $0.localIdentifier }
                 try albumDataRepository.addPhotos(albumId: saved.id, photoIdentifiers: identifiers)
+
+                // 이 여행 사진과 한 장이라도 겹치는 얼굴 앨범들을 연결
+                let travelPhotoIds = Set(identifiers)
+                let linkedFaceAlbumIds = faceAlbumPhotoSets
+                    .filter { !$0.photoIds.isDisjoint(with: travelPhotoIds) }
+                    .map { $0.id }
+                try albumDataRepository.updateLinkedFaceAlbums(albumId: saved.id, faceAlbumIds: linkedFaceAlbumIds)
             }
         }
 

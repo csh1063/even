@@ -25,7 +25,6 @@ final class AlbumRenameSheet: UIViewController {
 
     private let titleLabel: UILabel = {
         let titleLabel = UILabel()
-        titleLabel.text = "앨범명 변경"
         titleLabel.font = .systemFont(ofSize: 20, weight: .bold)
         titleLabel.textColor = Theme.textPrimary
         return titleLabel
@@ -33,7 +32,6 @@ final class AlbumRenameSheet: UIViewController {
 
     private let subtitleLabel: UILabel = {
         let subtitleLabel = UILabel()
-        subtitleLabel.text = "자동 생성된 앨범 이름을 원하는 이름으로 바꿀 수 있어요"
         subtitleLabel.font = .systemFont(ofSize: 14, weight: .regular)
         subtitleLabel.textColor = Theme.textSecondary
         subtitleLabel.numberOfLines = 0
@@ -88,9 +86,13 @@ final class AlbumRenameSheet: UIViewController {
         return saveButton
     }()
 
-    init(albumName: String) {
+    init(albumName: String,
+         title: String = "앨범명 변경",
+         subtitle: String = "자동 생성된 앨범 이름을 원하는 이름으로 바꿀 수 있어요") {
         self.albumName = albumName
         super.init(nibName: nil, bundle: nil)
+        self.titleLabel.text = title
+        self.subtitleLabel.text = subtitle
     }
 
     required init?(coder: NSCoder) { fatalError() }

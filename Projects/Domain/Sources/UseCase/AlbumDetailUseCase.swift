@@ -19,6 +19,20 @@ public protocol AlbumDetailUseCase {
     func excludePhoto(_ photoId: String, fromAlbumId: UUID) async throws
     func fetchClusters(albumId: UUID) async throws -> [FaceClusterSummary]
     func splitAlbum(albumId: UUID, clusterIds: [UUID]) async throws
+    func fetchLinkedFaceAlbums(albumId: UUID) async throws -> [Album]
+    /// 여행자 관리 시트용 — 전체 얼굴 앨범을 이미 연결된(여행자) / 안 된(인물 앨범) 두 그룹으로 나눠서 반환.
+    /// "나"가 아직 연결 안 됐다면 "인물 앨범" 쪽 맨 앞으로
+    func fetchFaceAlbumsForTravelerManagement(albumId: UUID) async throws -> (travelers: [Album], others: [Album])
+    /// 여행자 관리 시트의 "결정" — 넘긴 id 목록으로 연결 상태를 통째로 교체
+    func updateLinkedFaceAlbums(albumId: UUID, faceAlbumIds: [UUID]) async throws
+
+    /// 여행 앨범 "사진 추가" 피커 — 기준 날짜 이전 사진(최신순) / 이후 사진(오래된순)
+    func fetchLibraryPhotos(before date: Date, page: Int, pageCount: Int) async throws -> PhotoList
+    func fetchLibraryPhotos(after date: Date, page: Int, pageCount: Int) async throws -> PhotoList
+    /// 고른 사진들을 앨범에 추가 (아직 분석 안 된 사진이면 기본 정보로 새로 저장) + 등장 인물 얼굴 앨범 자동 연결
+    func addPhotosToAlbum(albumId: UUID, photos: [PhotoInAlbum]) async throws
+    /// 사진 삭제 후 호출 — 연결된 얼굴 앨범 중 이 앨범에 더 이상 사진이 하나도 안 남은 건 연결 해제
+    func pruneLinkedFaceAlbums(albumId: UUID) async throws
 }
 
 public final class DefaultAlbumDetailUseCase: AlbumDetailUseCase {
@@ -26,13 +40,16 @@ public final class DefaultAlbumDetailUseCase: AlbumDetailUseCase {
     private let repository: AlbumDataRepository
     private let libraryRepository: PhotoLibraryRepository
     private let faceClusterRepository: FaceClusterRepository
+    private let photoDataRepository: PhotoDataRepository
 
     public init(repository: AlbumDataRepository,
                 libraryRepository: PhotoLibraryRepository,
-                faceClusterRepository: FaceClusterRepository) {
+                faceClusterRepository: FaceClusterRepository,
+                photoDataRepository: PhotoDataRepository) {
         self.repository = repository
         self.libraryRepository = libraryRepository
         self.faceClusterRepository = faceClusterRepository
+        self.photoDataRepository = photoDataRepository
     }
 
     public func fetchPhotos(by albumId: UUID) async throws -> [Photo] {
@@ -79,5 +96,75 @@ public final class DefaultAlbumDetailUseCase: AlbumDetailUseCase {
     public func splitAlbum(albumId: UUID, clusterIds: [UUID]) async throws {
         try await faceClusterRepository.splitAlbum(albumId: albumId, clusterIds: clusterIds)
         try repository.syncAlbums()
+    }
+
+    public func fetchLinkedFaceAlbums(albumId: UUID) async throws -> [Album] {
+        try repository.fetchLinkedFaceAlbums(albumId: albumId)
+    }
+
+    public func fetchFaceAlbumsForTravelerManagement(albumId: UUID) async throws -> (travelers: [Album], others: [Album]) {
+        let allFaceAlbums = try repository.fetchAll(from: "face")
+        let linkedIds = Set(try repository.fetchLinkedFaceAlbums(albumId: albumId).map { $0.id })
+
+        let travelers = allFaceAlbums.filter { linkedIds.contains($0.id) }
+        var others = allFaceAlbums.filter { !linkedIds.contains($0.id) }
+        if let meIndex = others.firstIndex(where: { $0.displayName == "나" }) {
+            let me = others.remove(at: meIndex)
+            others.insert(me, at: 0)
+        }
+        return (travelers, others)
+    }
+
+    public func updateLinkedFaceAlbums(albumId: UUID, faceAlbumIds: [UUID]) async throws {
+        try repository.updateLinkedFaceAlbums(albumId: albumId, faceAlbumIds: faceAlbumIds)
+    }
+
+    public func fetchLibraryPhotos(before date: Date, page: Int, pageCount: Int) async throws -> PhotoList {
+        try await libraryRepository.fetchPhotos(before: date, page: page, pageCount: pageCount)
+    }
+
+    public func fetchLibraryPhotos(after date: Date, page: Int, pageCount: Int) async throws -> PhotoList {
+        try await libraryRepository.fetchPhotos(after: date, page: page, pageCount: pageCount)
+    }
+
+    public func addPhotosToAlbum(albumId: UUID, photos: [PhotoInAlbum]) async throws {
+        guard !photos.isEmpty else { return }
+
+        // 아직 한 번도 분석 안 된 사진(스크린샷, 방금 전달받은 사진 등)은 기본 정보로라도 먼저 저장해야
+        // 앨범에 연결할 수 있다 (이미 있으면 savePhoto가 조용히 스킵함)
+        for photo in photos {
+            let basicPhoto = Photo(
+                localIdentifier: photo.localIdentifier,
+                createdAt: photo.createdDate ?? Date(),
+                latitude: photo.latitude,
+                longitude: photo.longitude
+            )
+            try photoDataRepository.savePhoto(photo: basicPhoto)
+        }
+
+        let photoIds = photos.map { $0.localIdentifier }
+        try repository.addPhotos(albumId: albumId, photoIdentifiers: photoIds)
+
+        // 새로 추가된 사진에 등장하는 얼굴이 있으면 그 얼굴 앨범들도 여행자로 자동 연결
+        let newFaceAlbumIds = try await faceClusterRepository.fetchFaceAlbumIds(forPhotoIds: photoIds)
+        guard !newFaceAlbumIds.isEmpty else { return }
+
+        let currentLinkedIds = try repository.fetchLinkedFaceAlbums(albumId: albumId).map { $0.id }
+        let union = Array(Set(currentLinkedIds).union(newFaceAlbumIds))
+        try repository.updateLinkedFaceAlbums(albumId: albumId, faceAlbumIds: union)
+    }
+
+    public func pruneLinkedFaceAlbums(albumId: UUID) async throws {
+        let remainingPhotoIds = Set(try repository.fetchPhotos(by: albumId).map { $0.localIdentifier })
+        let linkedFaceAlbums = try repository.fetchLinkedFaceAlbums(albumId: albumId)
+
+        var keptIds: [UUID] = []
+        for faceAlbum in linkedFaceAlbums {
+            let facePhotoIds = Set(try repository.fetchPhotos(by: faceAlbum.id).map { $0.localIdentifier })
+            if !facePhotoIds.isDisjoint(with: remainingPhotoIds) {
+                keptIds.append(faceAlbum.id)
+            }
+        }
+        try repository.updateLinkedFaceAlbums(albumId: albumId, faceAlbumIds: keptIds)
     }
 }
