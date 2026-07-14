@@ -6,7 +6,6 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
-import CoreLocation
 import Foundation
 
 public protocol AutoAlbumUseCase {
@@ -51,7 +50,7 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
     ]
 
     private let suffixesForOverseas = [
-        "부", "SAR", "특별행정구", "현"
+        "부", "SAR", "특별행정구", "현", "시"
     ]
 
     // 날짜/주소/카테고리 분류 시 페이지 단위로 끊어서 처리 (전체를 한 번에 메모리에 올리면 사진이 많을 때 오래 걸림)
@@ -442,7 +441,7 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
         let homeZones = try fetchHomeZones()
         print("🏠 이번 여행 판정에 사용되는 홈존 \(homeZones.count)개")
         for zone in homeZones {
-            print("   - \(addressDescription(for: zone, in: allPhotosForTravel)) (분석일: \(zone.analyzedAt))")
+            print("   - \(zone.addressDescription(in: allPhotosForTravel)) (분석일: \(zone.analyzedAt))")
         }
 
         let clusters = try await travelRepository.detect(from: allPhotosForTravel, homeZones: homeZones)
@@ -459,14 +458,20 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
         var placeCounts: [String: Int] = [:]
 
         for cluster in clusters {
+            // 하루짜리 여행은 "여행"보다 "나들이"가 더 자연스럽다 (출발/도착 구분이 무의미한 짧은 일정)
+            let isSingleDay = Calendar.current.isDate(cluster.startDate, inSameDayAs: cluster.endDate)
+            let duration = cluster.endDate.timeIntervalSince(cluster.startDate)
+            // 3시간 이하의 짧은 나들이는 앨범으로 묶을 만큼 의미 있는 일정이 아니라고 보고 건너뛴다
+            if isSingleDay && duration <= 3 * 60 * 60 {
+                continue
+            }
+
             let place = cleanAreaName(cluster.address, isoCode: cluster.isoCountryCode)
 
             let currentCount = placeCounts[place, default: 0]
             let albumName = "\(place) \(currentCount)"
             placeCounts[place] = currentCount + 1
 
-            // 하루짜리 여행은 "여행"보다 "나들이"가 더 자연스럽다 (출발/도착 구분이 무의미한 짧은 일정)
-            let isSingleDay = Calendar.current.isDate(cluster.startDate, inSameDayAs: cluster.endDate)
             let displayName = isSingleDay ? "\(place) 나들이" : "\(place) 여행"
 
             let album = Album(
@@ -562,33 +567,10 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
 
         print("🏠 홈존 분석 결과 → \(zones.count)개")
         for zone in zones {
-            print("   - \(addressDescription(for: zone, in: recent))")
+            print("   - \(zone.addressDescription(in: recent))")
         }
 
         try homeZoneRepository.saveHomeZones(zones)
-    }
-
-    // 홈존 위경도 기준으로 가장 가까운 사진의 주소를 찾아 사람이 알아볼 수 있는 문자열로 변환
-    private func addressDescription(for zone: HomeZone, in photos: [PhotoLocationSnapshot]) -> String {
-        let zoneLocation = CLLocation(latitude: zone.latitude, longitude: zone.longitude)
-        guard let nearest = photos
-            .filter({ $0.latitude != 0 || $0.longitude != 0 })
-            .min(by: {
-                CLLocation(latitude: $0.latitude, longitude: $0.longitude).distance(from: zoneLocation)
-                < CLLocation(latitude: $1.latitude, longitude: $1.longitude).distance(from: zoneLocation)
-            })
-        else {
-            return "주소 확인 불가 (lat: \(zone.latitude), lng: \(zone.longitude))"
-        }
-
-        let components = [nearest.country, nearest.administrativeArea, nearest.locality, nearest.subLocality]
-            .compactMap { $0 }
-            .filter { !$0.isEmpty }
-            .reduce(into: [String]()) { result, value in
-                if !result.contains(value) { result.append(value) }
-            }
-
-        return components.isEmpty ? "주소 확인 불가 (lat: \(zone.latitude), lng: \(zone.longitude))" : components.joined(separator: ", ")
     }
 
     // 홈존 목록 반환 (여행 필터링용)

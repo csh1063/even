@@ -14,10 +14,11 @@ enum TravelPhotoPickerDirection {
     case before(Date)
     case after(Date)
 
-    var title: String {
+    /// 상단바 아래, 콜렉션뷰 위에 놓이는 안내 문구
+    var headerText: String {
         switch self {
-        case .before: return "이전 사진 선택"
-        case .after: return "다음 사진 선택"
+        case .before: return "여행 기간 이전 사진"
+        case .after: return "여행 기간 다음 사진"
         }
     }
 }

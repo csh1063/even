@@ -52,7 +52,13 @@ public final class AlbumDetailViewModel: BaseViewModel {
         let isLoading: AnyPublisher<Bool, Never>
         let errorMessage: AnyPublisher<String?, Never>
         let selectionMode: AnyPublisher<AlbumDetailPageMode, Never>
-        let travelPeopleText: AnyPublisher<String?, Never>
+        let travelPeopleInfo: AnyPublisher<TravelPeopleInfo?, Never>
+    }
+
+    /// 여행 헤더에 "이름 문구"와 "인원 수"를 분리해서 보여주기 위한 값
+    struct TravelPeopleInfo {
+        let name: String
+        let count: Int
     }
 
     @Published private var album: Album
@@ -60,7 +66,7 @@ public final class AlbumDetailViewModel: BaseViewModel {
     @Published private var photos: [Photo] = []
     @Published private var errorMessage: String?
     @Published private var selectionMode: AlbumDetailPageMode = .list
-    @Published private var travelPeopleText: String?
+    @Published private var travelPeopleInfo: TravelPeopleInfo?
 
     var onAction: ((AlbumDetailViewModelAction) -> Void)?
 
@@ -75,6 +81,14 @@ public final class AlbumDetailViewModel: BaseViewModel {
     private var faceBoundingBoxes: [String: CGRect] = [:]
     var isFaceAlbum: Bool { album.from == "face" }
     var isTravelAlbum: Bool { album.from == "travel" }
+    /// AutoAlbumUseCase의 앨범 명명 기준과 동일하게, 당일치기면 "나들이" 아니면 "여행"
+    private var tripSuffix: String {
+        guard let start = album.startDate, let end = album.endDate,
+              Calendar.current.isDate(start, inSameDayAs: end) else {
+            return "여행"
+        }
+        return "나들이"
+    }
 
     public init(album: Album,
                 imageUseCase: PhotoImageUseCase,
@@ -101,7 +115,7 @@ public final class AlbumDetailViewModel: BaseViewModel {
             isLoading: $isLoading.eraseToAnyPublisher(),
             errorMessage: $errorMessage.eraseToAnyPublisher(),
             selectionMode: $selectionMode.eraseToAnyPublisher(),
-            travelPeopleText: $travelPeopleText.eraseToAnyPublisher()
+            travelPeopleInfo: $travelPeopleInfo.eraseToAnyPublisher()
         )
     }
 
@@ -236,7 +250,7 @@ public final class AlbumDetailViewModel: BaseViewModel {
             }
             if isTravelAlbum {
                 let linkedFaceAlbums = try await detailUseCase.fetchLinkedFaceAlbums(albumId: album.id)
-                travelPeopleText = Self.formatTravelPeopleText(linkedFaceAlbums)
+                travelPeopleInfo = formatTravelPeopleInfo(linkedFaceAlbums)
             }
             self.photos = photos
             self.photoDetails = photos.map {
@@ -248,30 +262,26 @@ public final class AlbumDetailViewModel: BaseViewModel {
         }
     }
 
-    /// 여행에 등장한 얼굴 앨범들을 "A와 사람과 사람 3명의 여행"처럼 이름 나열 문구로 만든다.
-    /// 이름 지어준 사람은 실제 이름, 아직 안 지어준 사람은 "사람"으로 표시한다 (숫자 없이)
-    private static func formatTravelPeopleText(_ linkedFaceAlbums: [Album]) -> String? {
+    /// 여행에 등장한 얼굴 앨범들을 "A와 사람의 여행"처럼 이름 나열 문구로 만들고, 인원 수는 따로 반환한다.
+    /// 이름 지어준 사람은 실제 이름, 아직 안 지어준 사람은 "사람"으로 표시한다.
+    /// 앨범 기간이 당일치기면(AutoAlbumUseCase의 명명 기준과 동일) "여행" 대신 "나들이"로 표시한다
+    private func formatTravelPeopleInfo(_ linkedFaceAlbums: [Album]) -> TravelPeopleInfo? {
         guard !linkedFaceAlbums.isEmpty else { return nil }
 
         let names = linkedFaceAlbums.map { $0.isRenamed ? $0.displayName : "사람" }
+        let suffix = tripSuffix
 
-        guard names.count > 1 else {
-            return "\(names[0])의 여행"
+        let name: String
+        if names.count > 1 {
+            let joinedPrefix = names.dropLast()
+                .map { "\($0)\($0.josa ? "과" : "와")" }
+                .joined(separator: " ")
+            name = "\(joinedPrefix) \(names.last!)의 \(suffix)"
+        } else {
+            name = "\(names[0])의 \(suffix)"
         }
 
-        let joinedPrefix = names.dropLast()
-            .map { "\($0)\(josa(for: $0, no: "와", has: "과"))" }
-            .joined(separator: " ")
-        return "\(joinedPrefix) \(names.last!) \(names.count)명의 여행"
-    }
-
-    /// 단어의 마지막 글자에 받침이 있는지로 "와/과" 같은 조사를 고른다 (한글이 아니면 받침 없는 것으로 취급)
-    private static func josa(for word: String, no: String, has: String) -> String {
-        guard let last = word.unicodeScalars.last, (0xAC00...0xD7A3).contains(last.value) else {
-            return no
-        }
-        let hasBatchim = (last.value - 0xAC00) % 28 != 0
-        return hasBatchim ? has : no
+        return TravelPeopleInfo(name: name, count: names.count)
     }
 
     private func deleteSelected(ids: [String], deleteInLibrary: Bool = false) async {
@@ -430,7 +440,7 @@ extension AlbumDetailViewModel: AlbumDetailViewModelDelegate {
             do {
                 try await detailUseCase.updateLinkedFaceAlbums(albumId: album.id, faceAlbumIds: travelerIds)
                 let linkedFaceAlbums = try await detailUseCase.fetchLinkedFaceAlbums(albumId: album.id)
-                travelPeopleText = Self.formatTravelPeopleText(linkedFaceAlbums)
+                travelPeopleInfo = formatTravelPeopleInfo(linkedFaceAlbums)
             } catch {}
         }
     }

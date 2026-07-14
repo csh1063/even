@@ -30,7 +30,7 @@ final class TravelPeopleHeaderView: UICollectionReusableView {
         return iv
     }()
 
-    private let titleLabel: UILabel = {
+    private let nameLabel: UILabel = {
         let lb = UILabel()
         lb.font = .systemFont(ofSize: 15, weight: .semibold)
         lb.textColor = Theme.textPrimary
@@ -38,10 +38,19 @@ final class TravelPeopleHeaderView: UICollectionReusableView {
         return lb
     }()
 
+    private let countLabel: UILabel = {
+        let lb = UILabel()
+        lb.font = .systemFont(ofSize: 13, weight: .medium)
+        lb.textColor = Theme.textSecondary
+        return lb
+    }()
+
     private static let outerMargin: CGFloat = 16
     private static let cardInnerPadding: CGFloat = 12
     private static let iconWidth: CGFloat = 18
     private static let iconTitleSpacing: CGFloat = 8
+    // count 라벨("N명")이 대략 차지하는 폭 — height 계산 시 nameLabel이 줄바꿈될 지점을 대략 맞추기 위한 여유값
+    private static let countLabelReservedWidth: CGFloat = 44
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -50,18 +59,19 @@ final class TravelPeopleHeaderView: UICollectionReusableView {
 
     required init?(coder: NSCoder) { fatalError() }
 
-    func configure(text: String) {
-        titleLabel.text = text
+    func configure(name: String, count: Int) {
+        nameLabel.text = name
+        countLabel.text = "\(count)명"
     }
 
-    static func height(for text: String, width: CGFloat) -> CGFloat {
+    static func height(for name: String, width: CGFloat) -> CGFloat {
         let cardWidth = width - outerMargin * 2
-        let textWidth = cardWidth - cardInnerPadding * 2 - iconWidth - iconTitleSpacing
+        let textWidth = cardWidth - cardInnerPadding * 2 - iconWidth - iconTitleSpacing - countLabelReservedWidth
 
         let label = UILabel()
         label.font = .systemFont(ofSize: 15, weight: .semibold)
         label.numberOfLines = 0
-        label.text = text
+        label.text = name
         let size = label.sizeThatFits(CGSize(width: textWidth, height: .greatestFiniteMagnitude))
 
         return max(size.height, iconWidth) + cardInnerPadding * 2 + outerMargin
@@ -70,7 +80,8 @@ final class TravelPeopleHeaderView: UICollectionReusableView {
     private func setupLayout() {
         addSubview(cardView)
         cardView.addSubview(iconView)
-        cardView.addSubview(titleLabel)
+        cardView.addSubview(nameLabel)
+        cardView.addSubview(countLabel)
 
         cardView.snp.makeConstraints { make in
             make.leading.trailing.equalToSuperview().inset(Self.outerMargin)
@@ -82,9 +93,13 @@ final class TravelPeopleHeaderView: UICollectionReusableView {
             make.top.equalToSuperview().offset(Self.cardInnerPadding)
             make.width.height.equalTo(Self.iconWidth)
         }
-        titleLabel.snp.makeConstraints { make in
-            make.leading.equalTo(iconView.snp.trailing).offset(Self.iconTitleSpacing)
+        countLabel.snp.makeConstraints { make in
             make.trailing.equalToSuperview().inset(Self.cardInnerPadding)
+            make.centerY.equalTo(iconView)
+        }
+        nameLabel.snp.makeConstraints { make in
+            make.leading.equalTo(iconView.snp.trailing).offset(Self.iconTitleSpacing)
+            make.trailing.equalTo(countLabel.snp.leading).offset(-8)
             make.top.equalToSuperview().offset(Self.cardInnerPadding)
             make.bottom.equalToSuperview().inset(Self.cardInnerPadding)
         }

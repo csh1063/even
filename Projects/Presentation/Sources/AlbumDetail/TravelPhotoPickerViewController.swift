@@ -10,8 +10,8 @@ import UIKit
 import SnapKit
 import Domain
 
-/// 여행 앨범에 사진을 수동으로 추가하는 2단계 마법사의 한 화면.
-/// direction이 .before면 "이전 사진 선택"(X/다음), .after면 "다음 사진 선택"(이전/추가)이 된다
+/// 여행 앨범에 사진을 수동으로 추가하는 2단계 마법사의 한 화면. 타이틀은 항상 "사진 선택".
+/// direction이 .before면 "여행 기간 이전 사진"(취소/다음), .after면 "여행 기간 다음 사진"(이전/추가)이 된다
 final class TravelPhotoPickerViewController: UIViewController {
 
     // MARK: - Callbacks
@@ -47,6 +47,13 @@ final class TravelPhotoPickerViewController: UIViewController {
         config.baseForegroundColor = Theme.primary
         let btn = UIButton(configuration: config)
         return btn
+    }()
+
+    private let headerLabel: UILabel = {
+        let lb = UILabel()
+        lb.font = .systemFont(ofSize: 15, weight: .semibold)
+        lb.textColor = Theme.textPrimary
+        return lb
     }()
 
     private lazy var collectionView: UICollectionView = {
@@ -100,6 +107,7 @@ final class TravelPhotoPickerViewController: UIViewController {
         view.addSubview(leadingButton)
         view.addSubview(titleLabel)
         view.addSubview(trailingButton)
+        view.addSubview(headerLabel)
         view.addSubview(collectionView)
 
         leadingButton.snp.makeConstraints { make in
@@ -116,19 +124,26 @@ final class TravelPhotoPickerViewController: UIViewController {
             make.centerX.equalToSuperview()
             make.centerY.equalTo(leadingButton)
         }
+        headerLabel.snp.makeConstraints { make in
+            make.leading.equalToSuperview().offset(20)
+            make.trailing.equalToSuperview().inset(20)
+            make.top.equalTo(leadingButton.snp.bottom).offset(16)
+        }
         collectionView.snp.makeConstraints { make in
-            make.top.equalTo(leadingButton.snp.bottom).offset(12)
+            make.top.equalTo(headerLabel.snp.bottom).offset(12)
             make.leading.trailing.bottom.equalToSuperview()
         }
     }
 
     private func setupTopBar() {
-        titleLabel.text = viewModel.direction.title
+        titleLabel.text = "사진 선택"
+        headerLabel.text = viewModel.direction.headerText
 
         switch viewModel.direction {
         case .before:
-            leadingButton.configuration?.image = UIImage(systemName: "xmark")
-            leadingButton.configuration?.title = nil
+            var leadingTitleAttr = AttributeContainer()
+            leadingTitleAttr.font = .systemFont(ofSize: 16, weight: .regular)
+            leadingButton.configuration?.attributedTitle = AttributedString("취소", attributes: leadingTitleAttr)
             var trailingTitleAttr = AttributeContainer()
             trailingTitleAttr.font = .systemFont(ofSize: 16, weight: .semibold)
             trailingButton.configuration?.attributedTitle = AttributedString("다음", attributes: trailingTitleAttr)
