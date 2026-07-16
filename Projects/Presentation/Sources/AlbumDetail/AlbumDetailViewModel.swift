@@ -100,12 +100,16 @@ public final class AlbumDetailViewModel: BaseViewModel {
         // 빈 문자열("")을 쓰면 NaviBarView의 스택뷰가 .fillProportionally라 titleLabel의
         // intrinsic width가 0에 가까워지면서 옆 버튼들이 비율을 이상하게 나눠 갖는 버그가 있어서,
         // 공백 한 칸으로 "보이기엔 비어있지만 폭은 0이 아닌" 상태를 만든다 (NaviBarView 자체는 안 건드림)
-        self.albumName = (album.from == "face" && !album.isRenamed) ? " " : album.displayName
+        self.albumName = Self.computedAlbumName(for: album)
         self.imageUseCase = imageUseCase
         self.detailUseCase = detailUseCase
         self.selectionMode = startInSelectionMode ? .onlySelect : .list
         super.init()
         bind()
+    }
+
+    private static func computedAlbumName(for album: Album) -> String {
+        (album.from == "face" && !album.isRenamed) ? " " : album.displayName
     }
 
     public func transform() -> Output {
@@ -242,6 +246,12 @@ public final class AlbumDetailViewModel: BaseViewModel {
     private func loadPhotos() async {
         do {
             isLoading = true
+            // 병합처럼 서버 쪽에서 기간/이름이 바뀔 수 있는 작업 후에도 이 화면이 들고 있는 album이
+            // 그대로라 사진 추가 등에서 옛 기간을 기준으로 조회하는 문제가 있었다 — 매번 최신으로 갱신
+            if let refreshed = try await detailUseCase.fetchAlbum(id: album.id) {
+                album = refreshed
+                albumName = Self.computedAlbumName(for: album)
+            }
             let photos = try await detailUseCase.fetchPhotos(by: album.id)
             // photos를 publish하면 셀이 바로 loadFaceImage를 호출하므로,
             // faceBoundingBoxes는 그보다 먼저 채워둬야 첫 진입에서도 크롭이 뜬다

@@ -89,6 +89,12 @@ public final class DefaultAlbumDataRepository: AlbumDataRepository {
         return try context.fetch(fetchDescriptor).map {$0.toDomainWithKey()}
     }
 
+    public func fetchAlbum(id: UUID) throws -> Album? {
+        let context = ModelContext(container)
+        let fetchDescriptor = FetchDescriptor<AlbumEntity>(predicate: #Predicate { $0.id == id })
+        return try context.fetch(fetchDescriptor).first?.toDomainWithKey()
+    }
+
     public func fetchAutoAll() throws -> [Album] {
 
         let context = ModelContext(container)

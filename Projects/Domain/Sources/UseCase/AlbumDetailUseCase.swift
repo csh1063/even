@@ -9,6 +9,8 @@
 import Foundation
 
 public protocol AlbumDetailUseCase {
+    /// 병합 등으로 기간/이름이 바뀌었을 수 있을 때 앨범 최신 상태를 다시 조회
+    func fetchAlbum(id: UUID) async throws -> Album?
     func fetchPhotos(by albumId: UUID) async throws -> [Photo]
     func fetchFaceBoundingBoxes(clusterId: String) async throws -> [String: CGRect]
     func editAlbumName(new name: String, id: UUID) async throws
@@ -58,6 +60,10 @@ public final class DefaultAlbumDetailUseCase: AlbumDetailUseCase {
         self.faceClusterRepository = faceClusterRepository
         self.photoDataRepository = photoDataRepository
         self.travelRepository = travelRepository
+    }
+
+    public func fetchAlbum(id: UUID) async throws -> Album? {
+        try repository.fetchAlbum(id: id)
     }
 
     public func fetchPhotos(by albumId: UUID) async throws -> [Photo] {

@@ -16,6 +16,8 @@ public protocol AlbumDataRepository {
     func saveAlbum(album: Album, returnExist: Bool) throws -> Album?
     func fetchAll() throws -> [Album]
     func fetchAll(from: String) throws -> [Album]
+    /// 병합 등으로 앨범 상세를 열어둔 채로 서버 쪽 상태(기간/이름 등)가 바뀌었을 수 있을 때, 최신 상태로 다시 조회
+    func fetchAlbum(id: UUID) throws -> Album?
     func fetchAutoAll() throws -> [Album]
     func fetchPhotos(by albumId: UUID) throws -> [Photo]
     func fetchFaceBoundingBoxes(clusterId: String) throws -> [String: CGRect]
