@@ -228,29 +228,34 @@ public final class DefaultPhotoDataRepository: PhotoDataRepository {
 
     public func fetchSyncPhotoId(byAlbum localIdentifier: UUID) throws -> String? {
         let context = ModelContext(container)
-        var fetchDescriptor = FetchDescriptor<PhotoEntity>(
-            predicate: #Predicate<PhotoEntity> {
-                $0.albums.contains { $0.id == localIdentifier }
-            },
-            sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
+        // PhotoEntity를 관계 predicate($0.albums.contains)로 직접 조회하면, 다른 컨텍스트에서 방금
+        // 바뀐 관계가 앱을 재시작하기 전까진 반영이 안 되는 경우가 있다(SwiftData의 to-many 관계
+        // predicate 관련 알려진 문제). AlbumEntity를 id로 먼저 찾아 album.photos로 읽으면
+        // 관계 폴팅이 정상적으로 최신 상태를 반영한다.
+        let albumDescriptor = FetchDescriptor<AlbumEntity>(
+            predicate: #Predicate { $0.id == localIdentifier }
         )
-        fetchDescriptor.fetchLimit = 1
+        guard let album = try context.fetch(albumDescriptor).first else { return nil }
 
-        guard let entity = try context.fetch(fetchDescriptor).first else {
-            return nil
-        }
-
-        return entity.localIdentifier
+        return album.photos.max(by: { $0.createdAt < $1.createdAt })?.localIdentifier
     }
 
     public func fetchSyncPhotoCount(byAlbum localIdentifier: UUID) throws -> Int {
         let context = ModelContext(container)
-        let fetchDescriptor = FetchDescriptor<PhotoEntity>(
-            predicate: #Predicate<PhotoEntity> {
-                $0.albums.contains { $0.id == localIdentifier }
-            }
+        let albumDescriptor = FetchDescriptor<AlbumEntity>(
+            predicate: #Predicate { $0.id == localIdentifier }
         )
-        return try context.fetchCount(fetchDescriptor)
+        guard let album = try context.fetch(albumDescriptor).first else { return 0 }
+
+        return album.photos.count
+    }
+
+    public func fetchPhotos(from startDate: Date, to endDate: Date) throws -> [Photo] {
+        let context = ModelContext(container)
+        let fetchDescriptor = FetchDescriptor<PhotoEntity>(
+            predicate: #Predicate { $0.createdAt >= startDate && $0.createdAt <= endDate }
+        )
+        return try context.fetch(fetchDescriptor).map { $0.toDomain() }
     }
 
     public func fetchUnanalyzed() throws -> [Photo] {

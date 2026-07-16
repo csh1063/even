@@ -36,23 +36,6 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
     private let gridSize: Double = 50                               // 10km
     private let maxHomeZones: Int = 5
 
-    private let administrativeAreaReplacements: [String: String] = [
-        "전북특별자치도": "전라북도",
-        "강원특별자치도": "강원도",
-        "제주특별자치도": "제주도",
-        "제주시": "제주도",
-        "서귀포시": "제주도",
-        "도쿄도": "도쿄"
-    ]
-
-    private let suffixesToRemove = [
-        "특별자치시", "특별광역시", "광역시", "특별시", "시"
-    ]
-
-    private let suffixesForOverseas = [
-        "부", "SAR", "특별행정구", "현", "시"
-    ]
-
     // 날짜/주소/카테고리 분류 시 페이지 단위로 끊어서 처리 (전체를 한 번에 메모리에 올리면 사진이 많을 때 오래 걸림)
     private let classificationPageSize = 300
 
@@ -466,13 +449,13 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
                 continue
             }
 
-            let place = cleanAreaName(cluster.address, isoCode: cluster.isoCountryCode)
+            let place = TravelAlbumNaming.cleanAreaName(cluster.address, isoCode: cluster.isoCountryCode)
 
             let currentCount = placeCounts[place, default: 0]
             let albumName = "\(place) \(currentCount)"
             placeCounts[place] = currentCount + 1
 
-            let displayName = isSingleDay ? "\(place) 나들이" : "\(place) 여행"
+            let displayName = TravelAlbumNaming.displayName(place: place, startDate: cluster.startDate, endDate: cluster.endDate)
 
             let album = Album(
                 name: albumName,
@@ -621,33 +604,13 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
         }
     }
 
-    private func cleanAreaName(_ name: String, isoCode: String) -> String {
-        var result = self.administrativeAreaReplacements[name] ?? name
-        if isoCode.uppercased() == "KR" {
-            for suffix in self.suffixesToRemove {
-                if result.hasSuffix(suffix) {
-                    result = String(result.dropLast(suffix.count)).trimmingCharacters(in: .whitespaces)
-                    break
-                }
-            }
-        } else {
-            for suffix in self.suffixesForOverseas {
-                if result.uppercased().hasSuffix(suffix.uppercased()) {
-                    result = String(result.dropLast(suffix.count)).trimmingCharacters(in: .whitespaces)
-                    break
-                }
-            }
-        }
-        return result
-    }
-
     private func addressKeyValue(_ address: PhotoLocation) -> (key: String, value: String)? {
         if let country = address.country, !country.isEmpty {
             let isoCode = address.isoCountryCode ?? ""
-            let administrativeArea = cleanAreaName(address.administrativeArea ?? "", isoCode: isoCode)
-            let locality = cleanAreaName(address.locality ?? "", isoCode: isoCode)
-            let subLocality = cleanAreaName(address.subLocality ?? "", isoCode: isoCode)
-            let key = "\(cleanAreaName(country, isoCode: isoCode)) \(administrativeArea)".trimmingCharacters(in: .whitespaces)
+            let administrativeArea = TravelAlbumNaming.cleanAreaName(address.administrativeArea ?? "", isoCode: isoCode)
+            let locality = TravelAlbumNaming.cleanAreaName(address.locality ?? "", isoCode: isoCode)
+            let subLocality = TravelAlbumNaming.cleanAreaName(address.subLocality ?? "", isoCode: isoCode)
+            let key = "\(TravelAlbumNaming.cleanAreaName(country, isoCode: isoCode)) \(administrativeArea)".trimmingCharacters(in: .whitespaces)
 
             let addressText: String
             if locality == administrativeArea || locality.hasSuffix("도") {

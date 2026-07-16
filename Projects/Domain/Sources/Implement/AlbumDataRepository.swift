@@ -36,6 +36,21 @@ public protocol AlbumDataRepository {
     func updateLinkedFaceAlbums(albumId: UUID, faceAlbumIds: [UUID]) throws
     /// 연결된 얼굴 앨범들을 현재 상태(이름 변경 여부 포함) 그대로 조회
     func fetchLinkedFaceAlbums(albumId: UUID) throws -> [Album]
+
+    /// 여행 앨범 병합 후보 — 현재 앨범과 기간이 가까운 순으로 정렬 (여행 중간에 위치가 안 잡혀 둘로
+    /// 나뉜 경우 등, 이어붙일 다른 여행을 찾기 쉽게)
+    func fetchOtherTravelAlbums(excluding albumId: UUID) throws -> [AlbumMergeCandidate]
+    /// 여행 앨범 병합 — source를 새로 계산된 값(전체 사진/기간/이름/연결된 얼굴 앨범)으로 갱신하고 target은 삭제.
+    /// 이름/기간/연결 얼굴 앨범 재계산은 AlbumDetailUseCase에서 미리 끝내고 결과만 넘겨준다
+    func mergeTravelAlbums(
+        sourceId: UUID,
+        targetId: UUID,
+        photoIdentifiers: [String],
+        startDate: Date,
+        endDate: Date,
+        displayName: String,
+        linkedFaceAlbumIds: [UUID]
+    ) throws
 }
 
 extension AlbumDataRepository {

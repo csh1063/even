@@ -33,6 +33,11 @@ public protocol AlbumDetailUseCase {
     func addPhotosToAlbum(albumId: UUID, photos: [PhotoInAlbum]) async throws
     /// 사진 삭제 후 호출 — 연결된 얼굴 앨범 중 이 앨범에 더 이상 사진이 하나도 안 남은 건 연결 해제
     func pruneLinkedFaceAlbums(albumId: UUID) async throws
+
+    /// 여행 앨범 병합 후보 — 기간이 가까운 다른 여행 앨범 순으로 정렬
+    func fetchOtherTravelAlbums(excluding albumId: UUID) async throws -> [AlbumMergeCandidate]
+    /// 여행 앨범 병합 — target을 source로 합치고 target은 삭제
+    func mergeTravelAlbums(sourceId: UUID, targetId: UUID) async throws
 }
 
 public final class DefaultAlbumDetailUseCase: AlbumDetailUseCase {
@@ -41,15 +46,18 @@ public final class DefaultAlbumDetailUseCase: AlbumDetailUseCase {
     private let libraryRepository: PhotoLibraryRepository
     private let faceClusterRepository: FaceClusterRepository
     private let photoDataRepository: PhotoDataRepository
+    private let travelRepository: TravelDetectionRepository
 
     public init(repository: AlbumDataRepository,
                 libraryRepository: PhotoLibraryRepository,
                 faceClusterRepository: FaceClusterRepository,
-                photoDataRepository: PhotoDataRepository) {
+                photoDataRepository: PhotoDataRepository,
+                travelRepository: TravelDetectionRepository) {
         self.repository = repository
         self.libraryRepository = libraryRepository
         self.faceClusterRepository = faceClusterRepository
         self.photoDataRepository = photoDataRepository
+        self.travelRepository = travelRepository
     }
 
     public func fetchPhotos(by albumId: UUID) async throws -> [Photo] {
@@ -166,5 +174,60 @@ public final class DefaultAlbumDetailUseCase: AlbumDetailUseCase {
             }
         }
         try repository.updateLinkedFaceAlbums(albumId: albumId, faceAlbumIds: keptIds)
+    }
+
+    public func fetchOtherTravelAlbums(excluding albumId: UUID) async throws -> [AlbumMergeCandidate] {
+        try repository.fetchOtherTravelAlbums(excluding: albumId)
+    }
+
+    /// source(현재 보고 있는 앨범)를 살리고 target을 삭제하는 방향으로 합친다.
+    /// 두 여행 기간 사이(위치가 안 잡혀 클러스터링에서 빠졌던 사진들 포함)를 전부 다시 모아서
+    /// 사진/기간/이름/연결된 얼굴 앨범을 AutoAlbumUseCase와 동일한 알고리즘으로 다시 계산한다
+    public func mergeTravelAlbums(sourceId: UUID, targetId: UUID) async throws {
+        let travelAlbums = try repository.fetchAll(from: "travel")
+        guard let source = travelAlbums.first(where: { $0.id == sourceId }),
+              let target = travelAlbums.first(where: { $0.id == targetId }) else { return }
+
+        let starts = [source.startDate, target.startDate].compactMap { $0 }
+        let ends = [source.endDate, target.endDate].compactMap { $0 }
+        guard let mergedStart = starts.min(), let mergedEnd = ends.max() else { return }
+
+        let photosInRange = try photoDataRepository.fetchPhotos(from: mergedStart, to: mergedEnd)
+        let photoIdentifiers = photosInRange.map { $0.localIdentifier }
+
+        // 대표 주소는 위치가 있는 사진만으로 계산 (위치 없는 사진을 그대로 넘기면 (0,0) 근처로 잘못 지오코딩될 수 있음)
+        let geoSnapshots = photosInRange
+            .filter { ($0.latitude ?? 0) != 0 || ($0.longitude ?? 0) != 0 }
+            .map { PhotoLocationSnapshot(from: $0) }
+        let cluster = try? await travelRepository.buildCluster(from: geoSnapshots)
+
+        let displayName: String
+        if let cluster {
+            let place = TravelAlbumNaming.cleanAreaName(cluster.address, isoCode: cluster.isoCountryCode)
+            displayName = TravelAlbumNaming.displayName(place: place, startDate: mergedStart, endDate: mergedEnd)
+        } else {
+            displayName = source.displayName
+        }
+
+        // 연결된 얼굴 앨범도 기존 것들의 합집합이 아니라, 새로 모인 전체 사진 기준으로 다시 계산
+        let mergedPhotoIdSet = Set(photoIdentifiers)
+        let faceAlbums = try repository.fetchAll(from: "face")
+        let linkedFaceAlbumIds = try faceAlbums
+            .filter { faceAlbum in
+                let facePhotoIds = Set(try repository.fetchPhotos(by: faceAlbum.id).map { $0.localIdentifier })
+                return !facePhotoIds.isDisjoint(with: mergedPhotoIdSet)
+            }
+            .map { $0.id }
+
+        try repository.mergeTravelAlbums(
+            sourceId: sourceId,
+            targetId: targetId,
+            photoIdentifiers: photoIdentifiers,
+            startDate: mergedStart,
+            endDate: mergedEnd,
+            displayName: displayName,
+            linkedFaceAlbumIds: linkedFaceAlbumIds
+        )
+        try repository.syncAlbums()
     }
 }

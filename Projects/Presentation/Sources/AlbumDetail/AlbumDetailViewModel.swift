@@ -14,7 +14,7 @@ enum AlbumDetailViewModelAction {
     case options(album: Album)
     case pop
     case selectPhoto(_ photoDetails: [PhotoDetail], index: Int, inSelectionMode: Bool)
-    case pickMergeTarget(candidates: [AlbumMergeCandidate])
+    case pickMergeTarget(candidates: [AlbumMergeCandidate], isTravel: Bool, currentAlbum: Album)
     case pickSplitClusters(clusters: [FaceClusterSummary])
     case pickTravelerManagement(travelers: [Album], others: [Album])
 }
@@ -340,7 +340,11 @@ public final class AlbumDetailViewModel: BaseViewModel {
         do {
             isLoading = true
             for targetId in targetAlbumIds {
-                try await detailUseCase.mergeAlbums(sourceId: album.id, targetId: targetId)
+                if isTravelAlbum {
+                    try await detailUseCase.mergeTravelAlbums(sourceId: album.id, targetId: targetId)
+                } else {
+                    try await detailUseCase.mergeAlbums(sourceId: album.id, targetId: targetId)
+                }
             }
             await loadPhotos()
             isLoading = false
@@ -400,8 +404,10 @@ extension AlbumDetailViewModel: AlbumDetailViewModelDelegate {
         Task { [weak self] in
             guard let self else { return }
             do {
-                let candidates = try await detailUseCase.fetchOtherFaceAlbums(excluding: album.id)
-                onAction?(.pickMergeTarget(candidates: candidates))
+                let candidates = isTravelAlbum
+                    ? try await detailUseCase.fetchOtherTravelAlbums(excluding: album.id)
+                    : try await detailUseCase.fetchOtherFaceAlbums(excluding: album.id)
+                onAction?(.pickMergeTarget(candidates: candidates, isTravel: isTravelAlbum, currentAlbum: album))
             } catch {}
         }
     }

@@ -60,6 +60,11 @@ final class TravelPhotoPickerViewModel {
         photos.filter { selectedIds.contains($0.localIdentifier) }
     }
 
+    /// 상세(뷰어) 화면에 넘겨줄 목록 — 앨범 상세와 동일하게 이미지를 탭하면 상세로 볼 수 있게 한다
+    var photoDetails: [PhotoDetail] {
+        photos.map { PhotoDetail(id: $0.localIdentifier, createdDate: $0.createdDate, photo: $0.photo) }
+    }
+
     /// carriedSelections + 이번 단계에서 고른 것 — "다음"/"추가"로 넘어갈 때 사용
     var accumulatedSelections: [PhotoInAlbum] {
         carriedSelections + selectedPhotos
@@ -103,6 +108,11 @@ final class TravelPhotoPickerViewModel {
         } else {
             selectedIds.insert(id)
         }
+    }
+
+    /// 상세(뷰어)에서 선택 상태를 바꾸고 돌아왔을 때 그리드에도 반영
+    func syncSelection(_ identifiers: Set<String>) {
+        selectedIds = identifiers
     }
 
     /// 마지막 단계("다음 사진 선택")에서 "추가" 확정 시 호출

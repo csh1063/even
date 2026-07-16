@@ -94,7 +94,7 @@ public final class DefaultTravelDetectionRepository: TravelDetectionRepository {
         var initialClusters: [TravelCluster] = []
         for raw in filteredClusters {
             let snapshots = raw.map { $0.0 }
-            if let cluster = try await makeTravelCluster(from: snapshots) {
+            if let cluster = try await buildCluster(from: snapshots) {
                 initialClusters.append(cluster)
             }
         }
@@ -150,7 +150,7 @@ public final class DefaultTravelDetectionRepository: TravelDetectionRepository {
         }
     }
 
-    private func makeTravelCluster(from photos: [PhotoLocationSnapshot]) async throws -> TravelCluster? {
+    public func buildCluster(from photos: [PhotoLocationSnapshot]) async throws -> TravelCluster? {
         guard !photos.isEmpty else { return nil }
 
         let dates = photos.map { $0.createdAt }

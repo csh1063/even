@@ -8,10 +8,12 @@
 
 import UIKit
 import SnapKit
+import Combine
 import Domain
 
-/// 여행 앨범에 사진을 수동으로 추가하는 2단계 마법사의 한 화면. 타이틀은 항상 "사진 선택".
-/// direction이 .before면 "여행 기간 이전 사진"(취소/다음), .after면 "여행 기간 다음 사진"(이전/추가)이 된다
+/// 여행 앨범에 사진을 수동으로 추가하는 2단계 마법사의 한 화면. 타이틀은 항상 "사진 선택",
+/// 다른 화면과 동일하게 NaviBarView(.leading)를 써서 왼쪽 버튼 옆에 붙인다.
+/// direction이 .before면 "여행 기간 이전 사진"(취소/다음), .after면 "여행 기간 다음 사진"(취소/이전/추가)이 된다
 final class TravelPhotoPickerViewController: UIViewController {
 
     // MARK: - Callbacks
@@ -20,34 +22,19 @@ final class TravelPhotoPickerViewController: UIViewController {
     var onNext: (([PhotoInAlbum]) -> Void)?
     var onBack: (() -> Void)?
     var onFinish: (() -> Void)?
+    /// 이미지를 탭해서 상세(뷰어)로 보여달라는 요청 — 앨범 상세와 동일하게 뷰어에서도 선택할 수 있다
+    var onSelectPhoto: ((_ photoDetails: [PhotoDetail], _ index: Int, _ selectedIdentifiers: Set<String>) -> Void)?
 
     // MARK: - Properties
 
     private let viewModel: TravelPhotoPickerViewModel
     private var dataSource: UICollectionViewDiffableDataSource<Int, PhotoCellItemViewModel>!
+    private var cancellables = Set<AnyCancellable>()
+    private var isCommitting = false
 
     // MARK: - UI
 
-    private let leadingButton: UIButton = {
-        var config = UIButton.Configuration.plain()
-        config.baseForegroundColor = Theme.textSecondary
-        let btn = UIButton(configuration: config)
-        return btn
-    }()
-
-    private let titleLabel: UILabel = {
-        let lb = UILabel()
-        lb.font = .systemFont(ofSize: 17, weight: .semibold)
-        lb.textColor = Theme.textPrimary
-        return lb
-    }()
-
-    private let trailingButton: UIButton = {
-        var config = UIButton.Configuration.plain()
-        config.baseForegroundColor = Theme.primary
-        let btn = UIButton(configuration: config)
-        return btn
-    }()
+    private let naviView = NaviBarView(type: .title(.leading))
 
     private let headerLabel: UILabel = {
         let lb = UILabel()
@@ -104,30 +91,17 @@ final class TravelPhotoPickerViewController: UIViewController {
     // MARK: - Setup
 
     private func setupLayout() {
-        view.addSubview(leadingButton)
-        view.addSubview(titleLabel)
-        view.addSubview(trailingButton)
+        view.addSubview(naviView)
         view.addSubview(headerLabel)
         view.addSubview(collectionView)
 
-        leadingButton.snp.makeConstraints { make in
-            make.leading.equalToSuperview().offset(12)
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(8)
-            make.height.equalTo(36)
-        }
-        trailingButton.snp.makeConstraints { make in
-            make.trailing.equalToSuperview().inset(12)
-            make.centerY.equalTo(leadingButton)
-            make.height.equalTo(36)
-        }
-        titleLabel.snp.makeConstraints { make in
-            make.centerX.equalToSuperview()
-            make.centerY.equalTo(leadingButton)
+        naviView.snp.makeConstraints { make in
+            make.top.leading.trailing.equalToSuperview()
         }
         headerLabel.snp.makeConstraints { make in
             make.leading.equalToSuperview().offset(20)
             make.trailing.equalToSuperview().inset(20)
-            make.top.equalTo(leadingButton.snp.bottom).offset(16)
+            make.top.equalTo(naviView.snp.bottom).offset(16)
         }
         collectionView.snp.makeConstraints { make in
             make.top.equalTo(headerLabel.snp.bottom).offset(12)
@@ -136,53 +110,43 @@ final class TravelPhotoPickerViewController: UIViewController {
     }
 
     private func setupTopBar() {
-        titleLabel.text = "사진 선택"
+        naviView.setTitle("사진 선택", font: .systemFont(ofSize: 17, weight: .semibold))
         headerLabel.text = viewModel.direction.headerText
 
         switch viewModel.direction {
         case .before:
-            var leadingTitleAttr = AttributeContainer()
-            leadingTitleAttr.font = .systemFont(ofSize: 16, weight: .regular)
-            leadingButton.configuration?.attributedTitle = AttributedString("취소", attributes: leadingTitleAttr)
-            var trailingTitleAttr = AttributeContainer()
-            trailingTitleAttr.font = .systemFont(ofSize: 16, weight: .semibold)
-            trailingButton.configuration?.attributedTitle = AttributedString("다음", attributes: trailingTitleAttr)
+            naviView.addButtons([LeftButton(type: .text("취소")), RightButton(type: .text("다음"))])
         case .after:
-            var leadingTitleAttr = AttributeContainer()
-            leadingTitleAttr.font = .systemFont(ofSize: 16, weight: .regular)
-            leadingButton.configuration?.attributedTitle = AttributedString("이전", attributes: leadingTitleAttr)
-            var trailingTitleAttr = AttributeContainer()
-            trailingTitleAttr.font = .systemFont(ofSize: 16, weight: .bold)
-            trailingButton.configuration?.attributedTitle = AttributedString("추가", attributes: trailingTitleAttr)
+            naviView.addButtons([LeftButton(type: .text("취소")), RightButton(type: .text("이전")), RightButton(type: .text("추가"))])
         }
 
-        leadingButton.addTarget(self, action: #selector(leadingTapped), for: .touchUpInside)
-        trailingButton.addTarget(self, action: #selector(trailingTapped), for: .touchUpInside)
+        naviView.publisher
+            .sink { [weak self] type in
+                guard let self, case .text(let text) = type else { return }
+                switch text {
+                case "취소": onCancel?()
+                case "이전": onBack?()
+                case "다음": onNext?(viewModel.accumulatedSelections)
+                case "추가": addTapped()
+                default: break
+                }
+            }
+            .store(in: &cancellables)
     }
 
     // MARK: - Actions
 
-    @objc private func leadingTapped() {
-        switch viewModel.direction {
-        case .before: onCancel?()
-        case .after: onBack?()
-        }
-    }
-
-    @objc private func trailingTapped() {
-        switch viewModel.direction {
-        case .before:
-            onNext?(viewModel.accumulatedSelections)
-        case .after:
-            trailingButton.isEnabled = false
-            Task {
-                do {
-                    try await viewModel.commit()
-                    onFinish?()
-                } catch {
-                    trailingButton.isEnabled = true
-                }
+    private func addTapped() {
+        guard !isCommitting else { return }
+        isCommitting = true
+        Task {
+            do {
+                try await viewModel.commit()
+                onFinish?()
+            } catch {
+                print("🐛 사진 추가 commit 실패:", error)
             }
+            isCommitting = false
         }
     }
 }
@@ -197,8 +161,15 @@ extension TravelPhotoPickerViewController {
             cell.setSelectionMode(true)
             cell.setSelected(viewModel.selectedIds.contains(cellViewModel.localIdentifier))
             // collectionView가 isEditing + allowsMultipleSelectionDuringEditing 상태라, 탭 한 번이든
-            // 길게 눌러서 드래그로 여러 개든 전부 didSelectItemAt/didDeselectItemAt으로 들어온다 —
-            // 여기서 별도로 탭을 처리하면 두 경로가 겹쳐서 토글이 두 번 일어날 수 있어 비워둔다
+            // 길게 눌러서 드래그로 여러 개든 전부 didSelectItemAt/didDeselectItemAt으로 들어와 그리드
+            // 선택은 그쪽에서 처리된다. onImageTap은 선택을 건드리지 않고 상세(뷰어)만 띄운다 —
+            // 앨범 상세와 동일하게 두 경로가 각자 역할만 하므로 겹쳐도 문제없다
+            cell.onImageTap = { [weak self] in
+                guard let self,
+                      let index = self.viewModel.photos.firstIndex(where: { $0.localIdentifier == cellViewModel.localIdentifier })
+                else { return }
+                self.onSelectPhoto?(self.viewModel.photoDetails, index, self.viewModel.selectedIds)
+            }
         }
 
         dataSource = UICollectionViewDiffableDataSource<Int, PhotoCellItemViewModel>(collectionView: collectionView) { cv, indexPath, vm in
@@ -214,6 +185,23 @@ extension TravelPhotoPickerViewController {
         snapshot.appendSections([0])
         snapshot.appendItems(items)
         dataSource.apply(snapshot, animatingDifferences: true)
+    }
+
+    // 상세(뷰어)에서 선택 상태를 바꾸고 돌아왔을 때 호출 — 앨범 상세의 syncSelection과 동일한 패턴
+    func syncSelection(_ identifiers: Set<String>) {
+        viewModel.syncSelection(identifiers)
+        collectionView.visibleCells.forEach { cell in
+            guard let photoCell = cell as? PhotoCell,
+                  let indexPath = collectionView.indexPath(for: photoCell),
+                  let item = dataSource.itemIdentifier(for: indexPath) else { return }
+            photoCell.setSelected(identifiers.contains(item.localIdentifier))
+        }
+    }
+
+    func scrollToItem(id: String) {
+        let items = dataSource.snapshot().itemIdentifiers(inSection: 0)
+        guard let index = items.firstIndex(where: { $0.localIdentifier == id }) else { return }
+        collectionView.scrollToItem(at: IndexPath(item: index, section: 0), at: .centeredVertically, animated: false)
     }
 }
 

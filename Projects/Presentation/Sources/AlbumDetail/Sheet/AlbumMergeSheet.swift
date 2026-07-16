@@ -28,9 +28,23 @@ final class AlbumMergeSheet: UIViewController {
     private let sections: [MergeSection]
     private let imageUseCase: PhotoImageUseCase
     private let albumUseCase: AlbumUseCase
+    private let isTravel: Bool
     private var selectedIds: Set<UUID> = []
 
     var onConfirm: (([UUID]) -> Void)?
+
+    static let dateRangeFormatter: DateIntervalFormatter = {
+        let formatter = DateIntervalFormatter()
+        formatter.locale = Locale(identifier: "ko")
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return formatter
+    }()
+
+    private static func dateRangeText(for album: Album) -> String? {
+        guard let start = album.startDate, let end = album.endDate else { return nil }
+        return dateRangeFormatter.string(from: start, to: end)
+    }
 
     // MARK: - UI
 
@@ -43,7 +57,6 @@ final class AlbumMergeSheet: UIViewController {
 
     private let titleLabel: UILabel = {
         let lb = UILabel()
-        lb.text = "동일 인물 앨범 선택"
         lb.font = .systemFont(ofSize: 20, weight: .bold)
         lb.textColor = Theme.textPrimary
         return lb
@@ -58,6 +71,10 @@ final class AlbumMergeSheet: UIViewController {
         return lb
     }()
 
+    // 얼굴 앨범은 사진만 봐도 구분되지만, 여행은 이름/기간을 봐야 어떤 여행인지 알 수 있어서
+    // 2줄(이름+기간)만큼 셀 높이를 늘려서 보여준다
+    private static let travelInfoHeight: CGFloat = 40
+
     private lazy var collectionView: UICollectionView = {
         let space: CGFloat = 12
         let count: CGFloat = 3
@@ -67,7 +84,8 @@ final class AlbumMergeSheet: UIViewController {
         layout.minimumLineSpacing = space
         layout.minimumInteritemSpacing = space
         let width = (UIScreen.main.bounds.width - 40 - (space * (count - 1))) / count
-        layout.itemSize = CGSize(width: width, height: width)
+        let height = isTravel ? width + Self.travelInfoHeight : width
+        layout.itemSize = CGSize(width: width, height: height)
         let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
         cv.backgroundColor = .clear
         cv.register(AlbumMergeCell.self, forCellWithReuseIdentifier: AlbumMergeCell.reuseIdentifier)
@@ -98,7 +116,15 @@ final class AlbumMergeSheet: UIViewController {
 
     // MARK: - Init
 
-    init(candidates: [AlbumMergeCandidate], imageUseCase: PhotoImageUseCase, albumUseCase: AlbumUseCase) {
+    init(
+        candidates: [AlbumMergeCandidate],
+        title: String = "동일 인물 앨범 선택",
+        subtitle: String? = nil,
+        sectionHeaderText: String? = nil,
+        isTravel: Bool = false,
+        imageUseCase: PhotoImageUseCase,
+        albumUseCase: AlbumUseCase
+    ) {
         let similar = candidates.filter { $0.similarity > Self.similarThreshold }
         let others = candidates.filter { $0.similarity <= Self.similarThreshold }
 
@@ -107,13 +133,18 @@ final class AlbumMergeSheet: UIViewController {
             sections.append(MergeSection(title: "닮은 사람", items: similar, showsFooterDivider: !others.isEmpty))
         }
         if !others.isEmpty {
-            sections.append(MergeSection(title: nil, items: others, showsFooterDivider: false))
+            sections.append(MergeSection(title: sectionHeaderText, items: others, showsFooterDivider: false))
         }
         self.sections = sections
 
         self.imageUseCase = imageUseCase
         self.albumUseCase = albumUseCase
+        self.isTravel = isTravel
         super.init(nibName: nil, bundle: nil)
+        self.titleLabel.text = title
+        if let subtitle {
+            self.subtitleLabel.text = subtitle
+        }
     }
 
     required init?(coder: NSCoder) {
@@ -208,7 +239,11 @@ extension AlbumMergeSheet: UICollectionViewDataSource {
             imageUseCase: imageUseCase,
             albumUseCase: albumUseCase
         )
-        cell.configure(with: faceViewModel)
+        if isTravel {
+            cell.configure(with: faceViewModel, name: album.displayName, dateRangeText: Self.dateRangeText(for: album))
+        } else {
+            cell.configure(with: faceViewModel)
+        }
 
         return cell
     }
@@ -341,6 +376,25 @@ private final class AlbumMergeCell: UICollectionViewCell {
         return iv
     }()
 
+    // 여행 합치기에서만 쓰는 이름/기간 라벨 — 얼굴 합치기는 사진만으로 충분해 nil로 둔다
+    private let nameLabel: UILabel = {
+        let lb = UILabel()
+        lb.font = .systemFont(ofSize: 12, weight: .semibold)
+        lb.textColor = Theme.textPrimary
+        lb.textAlignment = .center
+        lb.numberOfLines = 1
+        return lb
+    }()
+
+    private let dateLabel: UILabel = {
+        let lb = UILabel()
+        lb.font = .systemFont(ofSize: 11, weight: .regular)
+        lb.textColor = Theme.textSecondary
+        lb.textAlignment = .center
+        lb.numberOfLines = 1
+        return lb
+    }()
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupLayout()
@@ -351,33 +405,49 @@ private final class AlbumMergeCell: UICollectionViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         faceCellView.prepareForReuse()
+        nameLabel.text = nil
+        dateLabel.text = nil
     }
 
-    func configure(with viewModel: FaceCellViewModel) {
+    func configure(with viewModel: FaceCellViewModel, name: String? = nil, dateRangeText: String? = nil) {
         faceCellView.configure(with: viewModel)
+        nameLabel.text = name
+        dateLabel.text = dateRangeText
     }
 
     func setSelected(_ isSelected: Bool) {
-        contentView.layer.borderWidth = isSelected ? 3 : 0
-        contentView.layer.borderColor = Theme.primary.cgColor
+        faceCellView.layer.borderWidth = isSelected ? 3 : 0
+        faceCellView.layer.borderColor = Theme.primary.cgColor
         checkmarkView.image = UIImage(systemName: isSelected ? "checkmark.circle.fill" : "circle")
         checkmarkView.tintColor = isSelected ? Theme.primary : .white
     }
 
     private func setupLayout() {
-        contentView.layer.cornerRadius = 14
-        contentView.layer.masksToBounds = true
-        contentView.clipsToBounds = true
+        faceCellView.layer.cornerRadius = 14
+        faceCellView.layer.masksToBounds = true
+        faceCellView.clipsToBounds = true
 
         contentView.addSubview(faceCellView)
         contentView.addSubview(checkmarkView)
+        contentView.addSubview(nameLabel)
+        contentView.addSubview(dateLabel)
 
         faceCellView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
+            make.top.leading.trailing.equalToSuperview()
+            make.height.equalTo(faceCellView.snp.width)
         }
         checkmarkView.snp.makeConstraints { make in
-            make.top.trailing.equalToSuperview().inset(6)
+            make.top.trailing.equalTo(faceCellView).inset(6)
             make.width.height.equalTo(20)
+        }
+        nameLabel.snp.makeConstraints { make in
+            make.top.equalTo(faceCellView.snp.bottom).offset(4)
+            make.leading.trailing.equalToSuperview()
+        }
+        dateLabel.snp.makeConstraints { make in
+            make.top.equalTo(nameLabel.snp.bottom).offset(1)
+            make.leading.trailing.equalToSuperview()
+            make.bottom.lessThanOrEqualToSuperview()
         }
     }
 }
