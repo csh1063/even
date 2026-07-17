@@ -130,6 +130,7 @@
 		CF81691B1D464F6197555282 /* PhotoLibraryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60D8D272D5A1AFB3C3C374D5 /* PhotoLibraryViewController.swift */; };
 		D075825C73560FD93C983C9D /* TabbarDIContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67BC566822730766F3AE64D4 /* TabbarDIContainer.swift */; };
 		D16F155FE2E16F2C9B1B6748 /* BaseViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4970CC3CF7281FDEDF5A2E4 /* BaseViewModel.swift */; };
+		D19E49C56F9ECBF9CEBE70A8 /* TravelPhotoGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E63BBFFD46370B7AA49F54C /* TravelPhotoGridView.swift */; };
 		D24C0F7E143F39B377B212AF /* DateAlbumCellViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C34337A5C9A294A2CDD5EBC /* DateAlbumCellViewModel.swift */; };
 		D42E0F0F75FAEAF72E9D94EF /* SplashViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1A9C282BE62BA859D280F2 /* SplashViewController.swift */; };
 		D780798251ABB602C673F957 /* AlbumSectionHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EADC85A61F46BF0C87AB56FC /* AlbumSectionHeaderView.swift */; };
@@ -267,6 +268,7 @@
 		9C0B13220E12811B68CC62A4 /* TravelAlbumCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TravelAlbumCell.swift; sourceTree = "<group>"; };
 		9CFD949F167607A72D1EA3AA /* Extension_NSMutableAttributedString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension_NSMutableAttributedString.swift; sourceTree = "<group>"; };
 		9D5978061AAA23A7ABA308AE /* AlbumEmtpyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumEmtpyView.swift; sourceTree = "<group>"; };
+		9E63BBFFD46370B7AA49F54C /* TravelPhotoGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TravelPhotoGridView.swift; sourceTree = "<group>"; };
 		9E90CD40C5DEBE648B0955EE /* MainDIContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainDIContainer.swift; sourceTree = "<group>"; };
 		9F75D7585252F6F216EA3407 /* MiniProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniProgressView.swift; sourceTree = "<group>"; };
 		9FDEDB4CAE7BA9B8DFF9FACB /* FaceAlbumCellViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceAlbumCellViewModel.swift; sourceTree = "<group>"; };
@@ -662,6 +664,7 @@
 				FDE0D246DE24CB8D997BAF99 /* AlbumDetailViewController.swift */,
 				A5B5DDF86843F2E3695365DF /* AlbumDetailViewModel.swift */,
 				E8A70E4F79A7785BA3CD5034 /* TravelPeopleHeaderView.swift */,
+				9E63BBFFD46370B7AA49F54C /* TravelPhotoGridView.swift */,
 				AAFB70882D42294BD4E86FE8 /* TravelPhotoPickerViewController.swift */,
 				1CF8663F01CB92E36D2D1D10 /* TravelPhotoPickerViewModel.swift */,
 			);
@@ -929,6 +932,7 @@
 				B04ACDE152B6714853F8B1DB /* ClusterSplitSheet.swift in Sources */,
 				5703BD4BAE5496B74D659326 /* TravelerManagementSheet.swift in Sources */,
 				5A1588EBA10AA4941FC4263E /* TravelPeopleHeaderView.swift in Sources */,
+				D19E49C56F9ECBF9CEBE70A8 /* TravelPhotoGridView.swift in Sources */,
 				C18ED94B87279A8101BF08CC /* TravelPhotoPickerViewController.swift in Sources */,
 				12E9FF70A3466C3426ACDA94 /* TravelPhotoPickerViewModel.swift in Sources */,
 				59A50E712EE67BD7E93271EF /* AlbumListCoordinator.swift in Sources */,

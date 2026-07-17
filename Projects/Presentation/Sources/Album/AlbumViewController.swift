@@ -88,19 +88,6 @@ final class AlbumViewController: BaseViewController {
 
     private func setupBindings() {
 
-        naviView.publisher
-            .sink { [weak self] type in
-                guard let self else {return}
-                switch type {
-                case .analysis:
-                    self.viewModel.send(.analysis)
-                case .reset:
-                    self.viewModel.send(.clear)
-                default: break
-                }
-            }
-            .store(in: &cancellables)
-
         emptyView.publisher
             .sink { [weak self] _ in
                 self?.viewModel.send(.analysis)

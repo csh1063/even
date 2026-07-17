@@ -14,11 +14,11 @@ enum TravelPhotoPickerDirection {
     case before(Date)
     case after(Date)
 
-    /// 상단바 아래, 콜렉션뷰 위에 놓이는 안내 문구
+    /// 헤더 토글 버튼에 쓰이는 문구
     var headerText: String {
         switch self {
-        case .before: return "여행 기간 이전 사진"
-        case .after: return "여행 기간 다음 사진"
+        case .before: return "여행 기간 이전"
+        case .after: return "여행 기간 이후"
         }
     }
 }
@@ -28,8 +28,6 @@ final class TravelPhotoPickerViewModel {
 
     let album: Album
     let direction: TravelPhotoPickerDirection
-    /// 이전 단계("이전 사진 선택")에서 이미 골라둔 사진들 — 최종 커밋 때 이번 단계 선택과 합쳐진다
-    let carriedSelections: [PhotoInAlbum]
 
     private let imageUseCase: PhotoImageUseCase
     private let detailUseCase: AlbumDetailUseCase
@@ -43,15 +41,15 @@ final class TravelPhotoPickerViewModel {
     private var isLoadingPage = false
 
     var onPhotosUpdated: (() -> Void)?
+    /// 이전/이후 선택 상태가 바뀔 때마다 알려서, 화면 쪽에서 "추가" 버튼 활성화 여부를 갱신할 수 있게 한다
+    var onSelectionChanged: (() -> Void)?
 
     init(album: Album,
          direction: TravelPhotoPickerDirection,
-         carriedSelections: [PhotoInAlbum],
          imageUseCase: PhotoImageUseCase,
          detailUseCase: AlbumDetailUseCase) {
         self.album = album
         self.direction = direction
-        self.carriedSelections = carriedSelections
         self.imageUseCase = imageUseCase
         self.detailUseCase = detailUseCase
     }
@@ -63,11 +61,6 @@ final class TravelPhotoPickerViewModel {
     /// 상세(뷰어) 화면에 넘겨줄 목록 — 앨범 상세와 동일하게 이미지를 탭하면 상세로 볼 수 있게 한다
     var photoDetails: [PhotoDetail] {
         photos.map { PhotoDetail(id: $0.localIdentifier, createdDate: $0.createdDate, photo: $0.photo) }
-    }
-
-    /// carriedSelections + 이번 단계에서 고른 것 — "다음"/"추가"로 넘어갈 때 사용
-    var accumulatedSelections: [PhotoInAlbum] {
-        carriedSelections + selectedPhotos
     }
 
     func loadFirstPageIfNeeded() async {
@@ -108,16 +101,13 @@ final class TravelPhotoPickerViewModel {
         } else {
             selectedIds.insert(id)
         }
+        onSelectionChanged?()
     }
 
     /// 상세(뷰어)에서 선택 상태를 바꾸고 돌아왔을 때 그리드에도 반영
     func syncSelection(_ identifiers: Set<String>) {
         selectedIds = identifiers
-    }
-
-    /// 마지막 단계("다음 사진 선택")에서 "추가" 확정 시 호출
-    func commit() async throws {
-        try await detailUseCase.addPhotosToAlbum(albumId: album.id, photos: accumulatedSelections)
+        onSelectionChanged?()
     }
 }
 

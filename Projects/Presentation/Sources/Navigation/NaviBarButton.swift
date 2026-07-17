@@ -29,7 +29,7 @@ final class NaviBarButton: UIView {
         return imageView
     }()
 
-    private let type: NaviBarButtonType
+    let type: NaviBarButtonType
 
     var publisher: AnyPublisher<NaviBarButtonType, Never> {
         button.tapPublisher
@@ -48,6 +48,11 @@ final class NaviBarButton: UIView {
 
     required init?(coder: NSCoder) {
         fatalError("NaviBarButton dose not support")
+    }
+
+    func setEnabled(_ enabled: Bool) {
+        button.isEnabled = enabled
+        alpha = enabled ? 1.0 : 0.4
     }
 
     private func setupView() {

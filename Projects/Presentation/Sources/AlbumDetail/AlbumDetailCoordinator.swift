@@ -231,51 +231,33 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
         navigationController.present(sheet, animated: true)
     }
 
-    // MARK: - 사진 추가 (이전 사진 → 다음 사진 2단계)
+    // MARK: - 사진 추가 (이전/이후 헤더 토글 + 페이징 그리드가 있는 화면 하나)
 
     func showAddPhotos(album: Album) {
-        guard let startDate = album.startDate else { return }
+        guard let startDate = album.startDate, let endDate = album.endDate else { return }
 
-        let viewModel = TravelPhotoPickerViewModel(
+        let detailUseCase = diContainer.makeAlbumDetailUseCase()
+        let beforeViewModel = TravelPhotoPickerViewModel(
             album: album,
             direction: .before(startDate),
-            carriedSelections: [],
             imageUseCase: diContainer.makeImageUseCase(),
-            detailUseCase: diContainer.makeAlbumDetailUseCase()
+            detailUseCase: detailUseCase
         )
-        let vc = TravelPhotoPickerViewController(viewModel: viewModel)
-
-        vc.onCancel = { [weak self] in
-            self?.dismissAddPhotosFlow()
-        }
-        vc.onNext = { [weak self] carriedSelections in
-            self?.showAddPhotosStep2(album: album, carriedSelections: carriedSelections)
-        }
-        vc.onSelectPhoto = { [weak self, weak vc] photoDetails, index, selectedIdentifiers in
-            guard let vc else { return }
-            self?.showPickerDetail(pickerVC: vc, photoDetails: photoDetails, index: index, selectedIdentifiers: selectedIdentifiers)
-        }
-
-        navigationController.pushViewController(vc, animated: true)
-    }
-
-    private func showAddPhotosStep2(album: Album, carriedSelections: [PhotoInAlbum]) {
-        guard let endDate = album.endDate else { return }
-
-        let viewModel = TravelPhotoPickerViewModel(
+        let afterViewModel = TravelPhotoPickerViewModel(
             album: album,
             direction: .after(endDate),
-            carriedSelections: carriedSelections,
             imageUseCase: diContainer.makeImageUseCase(),
-            detailUseCase: diContainer.makeAlbumDetailUseCase()
+            detailUseCase: detailUseCase
         )
-        let vc = TravelPhotoPickerViewController(viewModel: viewModel)
+        let vc = TravelPhotoPickerViewController(
+            albumId: album.id,
+            beforeViewModel: beforeViewModel,
+            afterViewModel: afterViewModel,
+            detailUseCase: detailUseCase
+        )
 
         vc.onCancel = { [weak self] in
             self?.dismissAddPhotosFlow()
-        }
-        vc.onBack = { [weak self] in
-            self?.navigationController.popViewController(animated: true)
         }
         vc.onFinish = { [weak self] in
             self?.delegate?.refreshAfterPhotosAdded()
