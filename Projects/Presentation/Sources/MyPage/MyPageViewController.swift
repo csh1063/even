@@ -86,8 +86,9 @@ final class MyPageViewController: BaseViewController {
         output.cellTyps
             .receive(on: DispatchQueue.main)
             .sink { cellTypes in
+                // applySnapshot이 이미 diffable snapshot으로 갱신하는데, 뒤에 reloadData()를 또 부르면
+                // 테이블 전체가 통째로 다시 그려지면서 깜빡였다 — diffable 갱신만으로 충분해서 제거함
                 self.applySnapshot(with: cellTypes)
-                self.tableView.reloadData()
             }
             .store(in: &cancellables)
     }

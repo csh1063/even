@@ -18,6 +18,10 @@ public final class PhotoLibraryService {
     private var pHResultMap: [PHCollection: PHFetchResult<PHAsset>] = [:]
     private var allPhotos: PHFetchResult<PHAsset>?
 
+    // 여행 앨범 "사진 추가" 피커용 — 기준 날짜 이전/이후 캐시 (같은 날짜로 여러 페이지 넘길 때 매번 새로 조회하지 않도록)
+    private var beforeResultMap: [Date: PHFetchResult<PHAsset>] = [:]
+    private var afterResultMap: [Date: PHFetchResult<PHAsset>] = [:]
+
 //    private var assetCache: [String: PHAsset] = [:]
     private let assetCache = AssetCache()
 
@@ -136,6 +140,58 @@ public final class PhotoLibraryService {
             hasNext: rangeEnd < totalCount,
             totalCount: totalCount
         )
+    }
+
+    /// 기준 날짜보다 이전 사진들을 최신순(날짜 내림차순)으로 페이지 단위로 반환
+    public func getPhotosBefore(_ date: Date, page: Int, pageCount: Int) async throws -> PhotoAssetListEntity {
+        let result: PHFetchResult<PHAsset>
+        if let cached = beforeResultMap[date] {
+            result = cached
+        } else {
+            let options = PHFetchOptions()
+            options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+            options.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
+                NSPredicate(format: "mediaType = %d", PHAssetMediaType.image.rawValue),
+                NSPredicate(format: "creationDate < %@", date as NSDate)
+            ])
+            result = PHAsset.fetchAssets(with: .image, options: options)
+            beforeResultMap[date] = result
+        }
+        return await makeList(from: result, title: "", page: page, pageCount: pageCount)
+    }
+
+    /// 기준 날짜보다 이후 사진들을 오래된순(날짜 오름차순)으로 페이지 단위로 반환
+    public func getPhotosAfter(_ date: Date, page: Int, pageCount: Int) async throws -> PhotoAssetListEntity {
+        let result: PHFetchResult<PHAsset>
+        if let cached = afterResultMap[date] {
+            result = cached
+        } else {
+            let options = PHFetchOptions()
+            options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
+            options.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
+                NSPredicate(format: "mediaType = %d", PHAssetMediaType.image.rawValue),
+                NSPredicate(format: "creationDate > %@", date as NSDate)
+            ])
+            result = PHAsset.fetchAssets(with: .image, options: options)
+            afterResultMap[date] = result
+        }
+        return await makeList(from: result, title: "", page: page, pageCount: pageCount)
+    }
+
+    private func makeList(from result: PHFetchResult<PHAsset>, title: String, page: Int, pageCount: Int) async -> PhotoAssetListEntity {
+        let totalCount = result.count
+        let realPage = max(1, page)
+        let start = min((realPage - 1) * pageCount, totalCount)
+        let end = min(start + pageCount, totalCount)
+
+        var photos: [PhotoAssetEntity] = []
+        for index in start..<end {
+            let asset = result.object(at: index)
+            await assetCache.set(asset.localIdentifier, asset: asset)
+            photos.append(PhotoAssetEntity(asset: asset))
+        }
+
+        return PhotoAssetListEntity(title: title, photos: photos, hasNext: end < totalCount, totalCount: totalCount)
     }
 
     public func getPhotoCount(from collection: PHAssetCollection? = nil) async throws -> Int {

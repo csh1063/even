@@ -38,10 +38,12 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
                 self?.pop()
             case .selectPhoto(let photoDetails, let index, let inSelectionMode):
                 self?.showDetail(photoDetails, index: index, inSelectionMode: inSelectionMode)
-            case .pickMergeTarget(let candidates):
-                self?.showMergeTargetPicker(candidates: candidates)
+            case .pickMergeTarget(let candidates, let isTravel, let currentAlbum):
+                self?.showMergeTargetPicker(candidates: candidates, isTravel: isTravel, currentAlbum: currentAlbum)
             case .pickSplitClusters(let clusters):
                 self?.showClusterSplitPicker(clusters: clusters)
+            case .pickTravelerManagement(let travelers, let others):
+                self?.showTravelerManagement(travelers: travelers, others: others)
             }
         }
 
@@ -59,7 +61,18 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
     }
 
     func showAlbumRenameSheet(album: Album) {
-        let sheet = AlbumRenameSheet(albumName: album.displayName)
+        // 한 번도 직접 이름을 바꾼 적 없는 앨범은 자동 생성된 이름(예: "인물 3", "부산 여행")이 그대로 채워지지 않도록 비워서 보여준다
+        // (isEdited는 병합/제외/분리 등 구조 변경 여부라 이름 변경 여부와는 별개 — isRenamed로 따로 구분)
+        let sheet: AlbumRenameSheet
+        if album.from == "face" {
+            sheet = AlbumRenameSheet(
+                albumName: album.isRenamed ? album.displayName : "",
+                title: "이름 변경",
+                subtitle: "이름을 정해주세요"
+            )
+        } else {
+            sheet = AlbumRenameSheet(albumName: album.isRenamed ? album.displayName : "")
+        }
         sheet.onSave = { [weak self] newName in
             self?.delegate?.save(name: newName)
         }
@@ -96,6 +109,24 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
             )
         }
 
+        if album.from == "travel" {
+            options.append(
+                OptionRowConfig(icon: "photo.badge.plus", title: "사진 추가", style: .normal) { [weak self] in
+                    self?.showAddPhotos(album: album)
+                }
+            )
+            options.append(
+                OptionRowConfig(icon: "person.2.fill", title: "여행자 관리", style: .normal) { [weak self] in
+                    self?.delegate?.travelerManagementTapped()
+                }
+            )
+            options.append(
+                OptionRowConfig(icon: "arrow.triangle.merge", title: "여행 합치기", style: .normal) { [weak self] in
+                    self?.delegate?.mergeTapped()
+                }
+            )
+        }
+
         options.append(
             OptionRowConfig(icon: "trash", title: "앨범 삭제", style: .destructive) { [weak self] in
                 self?.delegate?.deleteAlert()
@@ -112,11 +143,11 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
         navigationController.present(sheet, animated: true)
     }
 
-    func showMergeTargetPicker(candidates: [AlbumMergeCandidate]) {
+    func showMergeTargetPicker(candidates: [AlbumMergeCandidate], isTravel: Bool, currentAlbum: Album) {
         guard !candidates.isEmpty else {
             let alert = UIAlertController(
                 title: "합칠 앨범 없음",
-                message: "합칠 수 있는 다른 인물 앨범이 없어요",
+                message: isTravel ? "합칠 수 있는 다른 여행 앨범이 없어요" : "합칠 수 있는 다른 인물 앨범이 없어요",
                 preferredStyle: .alert
             )
             alert.addAction(UIAlertAction(title: "확인", style: .default))
@@ -124,7 +155,20 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
             return
         }
 
-        let sheet = AlbumMergeSheet(candidates: candidates, imageUseCase: diContainer.makeImageUseCase(), albumUseCase: diContainer.makeAlbumUseCase())
+        var currentDateRangeText: String?
+        if let start = currentAlbum.startDate, let end = currentAlbum.endDate {
+            currentDateRangeText = AlbumMergeSheet.dateRangeFormatter.string(from: start, to: end)
+        }
+
+        let sheet = AlbumMergeSheet(
+            candidates: candidates,
+            title: isTravel ? "합칠 여행 선택" : "동일 인물 앨범 선택",
+            subtitle: isTravel ? "끊어진 두 여행을 연결해요" : nil,
+            sectionHeaderText: isTravel ? currentDateRangeText.map { "현재 여행 날짜 : \($0)" } : nil,
+            isTravel: isTravel,
+            imageUseCase: diContainer.makeImageUseCase(),
+            albumUseCase: diContainer.makeAlbumUseCase()
+        )
         sheet.onConfirm = { [weak self] selectedIds in
             guard !selectedIds.isEmpty else { return }
             self?.delegate?.mergeInto(albumIds: selectedIds)
@@ -162,6 +206,96 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
         }
 
         navigationController.present(sheet, animated: true)
+    }
+
+    func showTravelerManagement(travelers: [Album], others: [Album]) {
+        let sheet = TravelerManagementSheet(
+            travelers: travelers,
+            others: others,
+            imageUseCase: diContainer.makeImageUseCase(),
+            albumUseCase: diContainer.makeAlbumUseCase(),
+            detailUseCase: diContainer.makeAlbumDetailUseCase()
+        )
+        sheet.onConfirm = { [weak self] travelerIds in
+            self?.delegate?.saveTravelerManagement(travelerIds: travelerIds)
+        }
+
+        sheet.modalPresentationStyle = .pageSheet
+        if let presentation = sheet.sheetPresentationController {
+            presentation.detents = [.medium(), .large()]
+            presentation.preferredCornerRadius = 28
+            presentation.prefersGrabberVisible = false
+        }
+        sheet.isModalInPresentation = true
+
+        navigationController.present(sheet, animated: true)
+    }
+
+    // MARK: - 사진 추가 (이전/이후 헤더 토글 + 페이징 그리드가 있는 화면 하나)
+
+    func showAddPhotos(album: Album) {
+        guard let startDate = album.startDate, let endDate = album.endDate else { return }
+
+        let detailUseCase = diContainer.makeAlbumDetailUseCase()
+        let beforeViewModel = TravelPhotoPickerViewModel(
+            album: album,
+            direction: .before(startDate),
+            imageUseCase: diContainer.makeImageUseCase(),
+            detailUseCase: detailUseCase
+        )
+        let afterViewModel = TravelPhotoPickerViewModel(
+            album: album,
+            direction: .after(endDate),
+            imageUseCase: diContainer.makeImageUseCase(),
+            detailUseCase: detailUseCase
+        )
+        let vc = TravelPhotoPickerViewController(
+            albumId: album.id,
+            beforeViewModel: beforeViewModel,
+            afterViewModel: afterViewModel,
+            detailUseCase: detailUseCase
+        )
+
+        vc.onCancel = { [weak self] in
+            self?.dismissAddPhotosFlow()
+        }
+        vc.onFinish = { [weak self] in
+            self?.delegate?.refreshAfterPhotosAdded()
+            self?.dismissAddPhotosFlow()
+        }
+        vc.onSelectPhoto = { [weak self, weak vc] photoDetails, index, selectedIdentifiers in
+            guard let vc else { return }
+            self?.showPickerDetail(pickerVC: vc, photoDetails: photoDetails, index: index, selectedIdentifiers: selectedIdentifiers)
+        }
+
+        navigationController.pushViewController(vc, animated: true)
+    }
+
+    /// "사진 추가" 플로우 중 몇 단계에 있든, 원래 앨범 상세 화면까지 한 번에 돌아간다
+    private func dismissAddPhotosFlow() {
+        guard let albumDetailVC = viewController else { return }
+        navigationController.popToViewController(albumDetailVC, animated: true)
+    }
+
+    /// "사진 추가" 마법사에서 이미지를 탭했을 때 — 앨범 상세와 동일하게 상세(뷰어)를 선택 모드로 띄우고,
+    /// 뷰어에서 선택을 바꾸면 그 결과를 다시 피커 그리드에 반영한다
+    private func showPickerDetail(pickerVC: TravelPhotoPickerViewController, photoDetails: [PhotoDetail], index: Int, selectedIdentifiers: Set<String>) {
+        let vm = diContainer.makeImageViewerViewModel(
+            photoDetails: photoDetails,
+            index: index,
+            isSelectionMode: true,
+            selectedIdentifiers: selectedIdentifiers
+        )
+        vm.onAction = { [weak pickerVC] action in
+            switch action {
+            case .pageChanged(let id):
+                pickerVC?.scrollToItem(id: id)
+            case .selectionChanged(let identifiers):
+                pickerVC?.syncSelection(identifiers)
+            }
+        }
+        let vc = ImageViewerViewController(viewModel: vm)
+        navigationController.present(vc, animated: true)
     }
 
 //    func showDetail(_ photoDetails: [PhotoDetail], index: Int) {

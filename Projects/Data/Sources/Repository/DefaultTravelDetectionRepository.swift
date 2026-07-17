@@ -35,7 +35,7 @@ public final class DefaultTravelDetectionRepository: TravelDetectionRepository {
         guard !located.isEmpty else { return [] }
 
         // 홈존별 대표 주소를 미리 한 번만 계산해서, 제거 로그 찍을 때 매번 다시 찾지 않도록 함
-        let homeZoneAddresses = homeZones.map { zoneAddress($0, allPhotos: photos) }
+        let homeZoneAddresses = homeZones.map { $0.addressDescription(in: photos) }
 
         var rawClusters: [[(PhotoLocationSnapshot, CLLocation)]] = []
         var current: [(PhotoLocationSnapshot, CLLocation)] = [located[0]]
@@ -94,7 +94,7 @@ public final class DefaultTravelDetectionRepository: TravelDetectionRepository {
         var initialClusters: [TravelCluster] = []
         for raw in filteredClusters {
             let snapshots = raw.map { $0.0 }
-            if let cluster = try await makeTravelCluster(from: snapshots) {
+            if let cluster = try await buildCluster(from: snapshots) {
                 initialClusters.append(cluster)
             }
         }
@@ -150,30 +150,7 @@ public final class DefaultTravelDetectionRepository: TravelDetectionRepository {
         }
     }
 
-    // 홈존 위경도 기준으로 가장 가까운 사진의 주소를 찾아 사람이 알아볼 수 있는 문자열로 변환
-    private func zoneAddress(_ zone: HomeZone, allPhotos: [PhotoLocationSnapshot]) -> String {
-        let zoneLocation = CLLocation(latitude: zone.latitude, longitude: zone.longitude)
-        guard let nearest = allPhotos
-            .filter({ $0.latitude != 0 || $0.longitude != 0 })
-            .min(by: {
-                CLLocation(latitude: $0.latitude, longitude: $0.longitude).distance(from: zoneLocation)
-                < CLLocation(latitude: $1.latitude, longitude: $1.longitude).distance(from: zoneLocation)
-            })
-        else {
-            return "주소 확인 불가 (lat: \(zone.latitude), lng: \(zone.longitude))"
-        }
-
-        let components = [nearest.country, nearest.administrativeArea, nearest.locality, nearest.subLocality]
-            .compactMap { $0 }
-            .filter { !$0.isEmpty }
-            .reduce(into: [String]()) { result, value in
-                if !result.contains(value) { result.append(value) }
-            }
-
-        return components.isEmpty ? "주소 확인 불가 (lat: \(zone.latitude), lng: \(zone.longitude))" : components.joined(separator: ", ")
-    }
-
-    private func makeTravelCluster(from photos: [PhotoLocationSnapshot]) async throws -> TravelCluster? {
+    public func buildCluster(from photos: [PhotoLocationSnapshot]) async throws -> TravelCluster? {
         guard !photos.isEmpty else { return nil }
 
         let dates = photos.map { $0.createdAt }

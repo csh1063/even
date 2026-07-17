@@ -27,6 +27,9 @@ public protocol PhotoDataRepository {
     func fetchSyncPhotoId(byAlbum localIdentifier: UUID) throws -> String?
     func fetchSyncPhotoCount(byAlbum localIdentifier: UUID) throws -> Int
     func delete(identifier: String) throws
+    /// 날짜 범위(양끝 포함) 안의 분석된 사진 전체 — 여행 앨범 합치기에서 두 여행 사이 기간의 사진을
+    /// 위치 유무와 상관없이 전부 다시 모을 때 사용
+    func fetchPhotos(from startDate: Date, to endDate: Date) throws -> [Photo]
 }
 
 extension PhotoDataRepository {

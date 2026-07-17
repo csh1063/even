@@ -6,7 +6,6 @@
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
 
-import CoreLocation
 import Foundation
 
 public protocol AutoAlbumUseCase {
@@ -36,23 +35,6 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
     private let reanalyzePeriod: TimeInterval = 90 * 24 * 60 * 60  // 3개월
     private let gridSize: Double = 50                               // 10km
     private let maxHomeZones: Int = 5
-
-    private let administrativeAreaReplacements: [String: String] = [
-        "전북특별자치도": "전라북도",
-        "강원특별자치도": "강원도",
-        "제주특별자치도": "제주도",
-        "제주시": "제주도",
-        "서귀포시": "제주도",
-        "도쿄도": "도쿄"
-    ]
-
-    private let suffixesToRemove = [
-        "특별자치시", "특별광역시", "광역시", "특별시", "시"
-    ]
-
-    private let suffixesForOverseas = [
-        "부", "SAR", "특별행정구", "현"
-    ]
 
     // 날짜/주소/카테고리 분류 시 페이지 단위로 끊어서 처리 (전체를 한 번에 메모리에 올리면 사진이 많을 때 오래 걸림)
     private let classificationPageSize = 300
@@ -442,21 +424,38 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
         let homeZones = try fetchHomeZones()
         print("🏠 이번 여행 판정에 사용되는 홈존 \(homeZones.count)개")
         for zone in homeZones {
-            print("   - \(addressDescription(for: zone, in: allPhotosForTravel)) (분석일: \(zone.analyzedAt))")
+            print("   - \(zone.addressDescription(in: allPhotosForTravel)) (분석일: \(zone.analyzedAt))")
         }
 
         let clusters = try await travelRepository.detect(from: allPhotosForTravel, homeZones: homeZones)
 
+        // 얼굴 앨범들의 사진 id 집합을 미리 한 번만 만들어둔다 — 여행 앨범마다 매번 다시 조회하지 않도록.
+        // "누가 포함되는지"는 이 시점에 고정되고(재생성해야 갱신), 그 사람 이름은 항상 얼굴 앨범을
+        // 다시 조회해서 보여주므로 나중에 이름을 바꿔도 자동으로 반영된다
+        let faceAlbums = try albumDataRepository.fetchAll(from: "face")
+        let faceAlbumPhotoSets: [(id: UUID, photoIds: Set<String>)] = try faceAlbums.map { album in
+            let photos = try albumDataRepository.fetchPhotos(by: album.id)
+            return (album.id, Set(photos.map { $0.localIdentifier }))
+        }
+
         var placeCounts: [String: Int] = [:]
 
         for cluster in clusters {
-            let place = cleanAreaName(cluster.address, isoCode: cluster.isoCountryCode)
+            // 하루짜리 여행은 "여행"보다 "나들이"가 더 자연스럽다 (출발/도착 구분이 무의미한 짧은 일정)
+            let isSingleDay = Calendar.current.isDate(cluster.startDate, inSameDayAs: cluster.endDate)
+            let duration = cluster.endDate.timeIntervalSince(cluster.startDate)
+            // 3시간 이하의 짧은 나들이는 앨범으로 묶을 만큼 의미 있는 일정이 아니라고 보고 건너뛴다
+            if isSingleDay && duration <= 3 * 60 * 60 {
+                continue
+            }
+
+            let place = TravelAlbumNaming.cleanAreaName(cluster.address, isoCode: cluster.isoCountryCode)
 
             let currentCount = placeCounts[place, default: 0]
             let albumName = "\(place) \(currentCount)"
             placeCounts[place] = currentCount + 1
 
-            let displayName = "\(place) 여행"
+            let displayName = TravelAlbumNaming.displayName(place: place, startDate: cluster.startDate, endDate: cluster.endDate)
 
             let album = Album(
                 name: albumName,
@@ -469,6 +468,13 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
             if let saved = try albumDataRepository.saveAlbum(album: album, returnExist: true) {
                 let identifiers = cluster.photos.map { $0.localIdentifier }
                 try albumDataRepository.addPhotos(albumId: saved.id, photoIdentifiers: identifiers)
+
+                // 이 여행 사진과 한 장이라도 겹치는 얼굴 앨범들을 연결
+                let travelPhotoIds = Set(identifiers)
+                let linkedFaceAlbumIds = faceAlbumPhotoSets
+                    .filter { !$0.photoIds.isDisjoint(with: travelPhotoIds) }
+                    .map { $0.id }
+                try albumDataRepository.updateLinkedFaceAlbums(albumId: saved.id, faceAlbumIds: linkedFaceAlbumIds)
             }
         }
 
@@ -544,33 +550,10 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
 
         print("🏠 홈존 분석 결과 → \(zones.count)개")
         for zone in zones {
-            print("   - \(addressDescription(for: zone, in: recent))")
+            print("   - \(zone.addressDescription(in: recent))")
         }
 
         try homeZoneRepository.saveHomeZones(zones)
-    }
-
-    // 홈존 위경도 기준으로 가장 가까운 사진의 주소를 찾아 사람이 알아볼 수 있는 문자열로 변환
-    private func addressDescription(for zone: HomeZone, in photos: [PhotoLocationSnapshot]) -> String {
-        let zoneLocation = CLLocation(latitude: zone.latitude, longitude: zone.longitude)
-        guard let nearest = photos
-            .filter({ $0.latitude != 0 || $0.longitude != 0 })
-            .min(by: {
-                CLLocation(latitude: $0.latitude, longitude: $0.longitude).distance(from: zoneLocation)
-                < CLLocation(latitude: $1.latitude, longitude: $1.longitude).distance(from: zoneLocation)
-            })
-        else {
-            return "주소 확인 불가 (lat: \(zone.latitude), lng: \(zone.longitude))"
-        }
-
-        let components = [nearest.country, nearest.administrativeArea, nearest.locality, nearest.subLocality]
-            .compactMap { $0 }
-            .filter { !$0.isEmpty }
-            .reduce(into: [String]()) { result, value in
-                if !result.contains(value) { result.append(value) }
-            }
-
-        return components.isEmpty ? "주소 확인 불가 (lat: \(zone.latitude), lng: \(zone.longitude))" : components.joined(separator: ", ")
     }
 
     // 홈존 목록 반환 (여행 필터링용)
@@ -621,33 +604,13 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
         }
     }
 
-    private func cleanAreaName(_ name: String, isoCode: String) -> String {
-        var result = self.administrativeAreaReplacements[name] ?? name
-        if isoCode.uppercased() == "KR" {
-            for suffix in self.suffixesToRemove {
-                if result.hasSuffix(suffix) {
-                    result = String(result.dropLast(suffix.count)).trimmingCharacters(in: .whitespaces)
-                    break
-                }
-            }
-        } else {
-            for suffix in self.suffixesForOverseas {
-                if result.uppercased().hasSuffix(suffix.uppercased()) {
-                    result = String(result.dropLast(suffix.count)).trimmingCharacters(in: .whitespaces)
-                    break
-                }
-            }
-        }
-        return result
-    }
-
     private func addressKeyValue(_ address: PhotoLocation) -> (key: String, value: String)? {
         if let country = address.country, !country.isEmpty {
             let isoCode = address.isoCountryCode ?? ""
-            let administrativeArea = cleanAreaName(address.administrativeArea ?? "", isoCode: isoCode)
-            let locality = cleanAreaName(address.locality ?? "", isoCode: isoCode)
-            let subLocality = cleanAreaName(address.subLocality ?? "", isoCode: isoCode)
-            let key = "\(cleanAreaName(country, isoCode: isoCode)) \(administrativeArea)".trimmingCharacters(in: .whitespaces)
+            let administrativeArea = TravelAlbumNaming.cleanAreaName(address.administrativeArea ?? "", isoCode: isoCode)
+            let locality = TravelAlbumNaming.cleanAreaName(address.locality ?? "", isoCode: isoCode)
+            let subLocality = TravelAlbumNaming.cleanAreaName(address.subLocality ?? "", isoCode: isoCode)
+            let key = "\(TravelAlbumNaming.cleanAreaName(country, isoCode: isoCode)) \(administrativeArea)".trimmingCharacters(in: .whitespaces)
 
             let addressText: String
             if locality == administrativeArea || locality.hasSuffix("도") {

@@ -4,6 +4,7 @@ extension Project {
 
     static let bundleId = "com.baci.moa"
     static let iosVersion = "17.0"
+    static let developmentTeam = "CPA9XG2727"
 
     /// Helper function to create the Project for this ExampleApp
     public static func app(
@@ -96,6 +97,10 @@ extension Project {
                 sources: sources,
                 resources: resources,
                 dependencies: dependencies,
+                settings: product == .app ? .settings(base: [
+                    "CODE_SIGN_STYLE": "Automatic",
+                    "DEVELOPMENT_TEAM": SettingValue(stringLiteral: developmentTeam)
+                ]) : nil,
                 coreDataModels: coreDataModels
             )
         }

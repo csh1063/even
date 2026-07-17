@@ -46,4 +46,12 @@ public final class DefaultPhotoLibraryRepository: PhotoLibraryRepository {
         let cgImage = try await self.libraryService.loadImage(id: id, type: type)
         return ImageData(cgImage: cgImage as? T)
     }
+
+    public func fetchPhotos(before date: Date, page: Int, pageCount: Int) async throws -> PhotoList {
+        try await self.libraryService.getPhotosBefore(date, page: page, pageCount: pageCount).toDomain()
+    }
+
+    public func fetchPhotos(after date: Date, page: Int, pageCount: Int) async throws -> PhotoList {
+        try await self.libraryService.getPhotosAfter(date, page: page, pageCount: pageCount).toDomain()
+    }
 }

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 55;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -96,7 +96,7 @@
 		128368EC009916124428DD3C /* DefaultSimilarPhotoClusterRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultSimilarPhotoClusterRepository.swift; sourceTree = "<group>"; };
 		16740A9D26F7F47AE40CEDE9 /* AlbumEntityMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumEntityMapper.swift; sourceTree = "<group>"; };
 		1818CB29A1914B6416E20D3E /* PhotoAssetEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoAssetEntity.swift; sourceTree = "<group>"; };
-		1B5CDF57D65F9F18DBDB7878 /* AdaFace_IR50.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = AdaFace_IR50.mlpackage; sourceTree = "<group>"; };
+		1B5CDF57D65F9F18DBDB7878 /* AdaFace_IR50.mlpackage */ = {isa = PBXFileReference; path = AdaFace_IR50.mlpackage; sourceTree = "<group>"; };
 		1D6BD6C0BFFB08B0574D32AF /* PhotoCategoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCategoryService.swift; sourceTree = "<group>"; };
 		1E0A1E65D202F027E3B90C53 /* PhotoLabelEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLabelEntity.swift; sourceTree = "<group>"; };
 		22D00CECFC40ACA66E15A488 /* UserDefaultsKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsKey.swift; sourceTree = "<group>"; };
@@ -521,7 +521,10 @@
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = (
+					"$(inherited)",
+					DEBUG,
+				);
 				SWIFT_COMPILATION_MODE = singlefile;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;

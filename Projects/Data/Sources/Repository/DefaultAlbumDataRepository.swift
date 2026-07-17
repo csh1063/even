@@ -89,6 +89,12 @@ public final class DefaultAlbumDataRepository: AlbumDataRepository {
         return try context.fetch(fetchDescriptor).map {$0.toDomainWithKey()}
     }
 
+    public func fetchAlbum(id: UUID) throws -> Album? {
+        let context = ModelContext(container)
+        let fetchDescriptor = FetchDescriptor<AlbumEntity>(predicate: #Predicate { $0.id == id })
+        return try context.fetch(fetchDescriptor).first?.toDomainWithKey()
+    }
+
     public func fetchAutoAll() throws -> [Album] {
 
         let context = ModelContext(container)
@@ -102,15 +108,18 @@ public final class DefaultAlbumDataRepository: AlbumDataRepository {
     public func fetchPhotos(by albumId: UUID) throws -> [Photo] {
 
         let context = ModelContext(container)
-        let photoFetchDescriptor = FetchDescriptor<PhotoEntity>(
-            predicate: #Predicate { photo in
-                photo.albums.contains { $0.id == albumId }
-            },
-            sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
+        // PhotoEntity를 관계 predicate(photo.albums.contains)로 직접 조회하면, 다른 컨텍스트에서 방금
+        // 추가한 관계가 앱을 재시작하기 전까진 반영이 안 되는 경우가 있었다(SwiftData의 to-many 관계
+        // predicate 관련 알려진 문제). AlbumEntity를 id로 먼저 찾아 album.photos로 읽으면 관계 폴팅이
+        // 정상적으로 최신 상태를 반영한다.
+        let albumDescriptor = FetchDescriptor<AlbumEntity>(
+            predicate: #Predicate { $0.id == albumId }
         )
+        guard let album = try context.fetch(albumDescriptor).first else { return [] }
 
-        let photos = try context.fetch(photoFetchDescriptor)
-        return photos.map { $0.toDomain() }
+        return album.photos
+            .sorted { $0.createdAt > $1.createdAt }
+            .map { $0.toDomain() }
     }
 
     /// 얼굴 앨범 디버깅용: 이 클러스터에 묶인 얼굴들의 사진별 boundingBox (정규화 좌표, Vision 기준 원점 좌하단)
@@ -194,6 +203,7 @@ public final class DefaultAlbumDataRepository: AlbumDataRepository {
         }
 
         entity.displayName = name
+        entity.isRenamed = true
 
         try context.save()
 
@@ -368,6 +378,98 @@ public final class DefaultAlbumDataRepository: AlbumDataRepository {
     public func syncAlbums() throws {
         let updated = try fetchAll()
         albumsSubject.send(updated)
+    }
+
+    public func updateLinkedFaceAlbums(albumId: UUID, faceAlbumIds: [UUID]) throws {
+        let context = ModelContext(container)
+
+        let descriptor = FetchDescriptor<AlbumEntity>(predicate: #Predicate { $0.id == albumId })
+        guard let entity = try context.fetch(descriptor).first else { return }
+
+        entity.linkedFaceAlbumIds = faceAlbumIds
+        try context.save()
+    }
+
+    public func fetchLinkedFaceAlbums(albumId: UUID) throws -> [Album] {
+        let context = ModelContext(container)
+
+        let descriptor = FetchDescriptor<AlbumEntity>(predicate: #Predicate { $0.id == albumId })
+        guard let entity = try context.fetch(descriptor).first else { return [] }
+
+        let ids = Set(entity.linkedFaceAlbumIds)
+        guard !ids.isEmpty else { return [] }
+
+        let faceAlbums = try context.fetch(FetchDescriptor<AlbumEntity>(
+            predicate: #Predicate { $0.from == "face" }
+        ))
+        return faceAlbums.filter { ids.contains($0.id) }.map { $0.toDomainWithKey() }
+    }
+
+    public func fetchOtherTravelAlbums(excluding albumId: UUID) throws -> [AlbumMergeCandidate] {
+        let context = ModelContext(container)
+
+        let albums = try context.fetch(FetchDescriptor<AlbumEntity>(
+            predicate: #Predicate { $0.from == "travel" }
+        ))
+        let others = albums.filter { $0.id != albumId }
+
+        guard let current = albums.first(where: { $0.id == albumId }),
+              let currentStart = current.startDate, let currentEnd = current.endDate
+        else {
+            return others.map { AlbumMergeCandidate(album: $0.toDomainWithKey(), similarity: -1) }
+        }
+
+        // 두 기간이 겹치면 0, 안 겹치면 더 가까운 쪽 경계까지의 간격(초) — 기간이 가까울수록 이어붙일
+        // 가능성이 높은 다른 여행이라고 보고 위로 올린다. AlbumMergeCandidate.similarity는 face 쪽의
+        // 0~1 유사도 개념이라 여기선 표시용이 아니라 정렬 순서를 매기는 용도로만 음수 간격을 채운다
+        func gap(to album: AlbumEntity) -> TimeInterval {
+            guard let start = album.startDate, let end = album.endDate else { return .greatestFiniteMagnitude }
+            if end < currentStart {
+                return currentStart.timeIntervalSince(end)
+            } else if start > currentEnd {
+                return start.timeIntervalSince(currentEnd)
+            } else {
+                return 0
+            }
+        }
+
+        return others
+            .sorted { gap(to: $0) < gap(to: $1) }
+            .map { AlbumMergeCandidate(album: $0.toDomainWithKey(), similarity: Float(-gap(to: $0))) }
+    }
+
+    public func mergeTravelAlbums(
+        sourceId: UUID,
+        targetId: UUID,
+        photoIdentifiers: [String],
+        startDate: Date,
+        endDate: Date,
+        displayName: String,
+        linkedFaceAlbumIds: [UUID]
+    ) throws {
+        let context = ModelContext(container)
+
+        let albums = try context.fetch(FetchDescriptor<AlbumEntity>())
+        guard let source = albums.first(where: { $0.id == sourceId }),
+              let target = albums.first(where: { $0.id == targetId }) else { return }
+
+        let photoDescriptor = FetchDescriptor<PhotoEntity>(
+            predicate: #Predicate { photoIdentifiers.contains($0.localIdentifier) }
+        )
+        let photos = try context.fetch(photoDescriptor)
+
+        source.photos = photos
+        source.photoCount = photos.count
+        source.startDate = startDate
+        source.endDate = endDate
+        source.displayName = displayName
+        source.isRenamed = false
+        source.isEdited = true
+        source.linkedFaceAlbumIds = linkedFaceAlbumIds
+        source.coverPhotoIdentifier = photos.max(by: { $0.createdAt < $1.createdAt })?.localIdentifier
+
+        context.delete(target)
+        try context.save()
     }
 
     public func deleteAll() throws {

@@ -3,18 +3,12 @@ import Foundation
 // 문자열 기능 확장
 extension String {
 
-    // 종성 받침 여부
-    var josa: Bool? {
-        guard Locale.current.language.languageCode?.identifier == "ko" else { return nil}
-        guard let text = self.last else { return false }
-        let val = UnicodeScalar(String(text))?.value
-        guard let value = val, value > 0xac00 else { return false }
-        let code = value - 0xac00
-        guard code < 11172 else { return false }
-        if (code) % 28 == 0 {
+    // 종성 받침 여부 (한글이 아니면 받침 없는 것으로 취급)
+    var josa: Bool {
+        guard let last = unicodeScalars.last, (0xAC00...0xD7A3).contains(last.value) else {
             return false
         }
-        return true
+        return (last.value - 0xAC00) % 28 != 0
     }
 
     // 한글 검색시 사용 가능

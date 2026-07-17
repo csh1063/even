@@ -36,8 +36,7 @@ struct FaceAlbumCellViewModel: AlbumCellViewModel {
         self.imageUseCase = imageUseCase
         self.albumUseCase = albumUseCase
 
-        let hasCustomName  = album.displayName != album.name && !album.displayName.isEmpty
-        self.isNamed       = hasCustomName
+        self.isNamed       = album.isRenamed
         self.isHighlighted = album.displayName == "나"
     }
 

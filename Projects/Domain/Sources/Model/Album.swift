@@ -11,7 +11,7 @@ import Foundation
 public struct Album {
     public let id: UUID
     public let name: String
-    public let displayName: String
+    public var displayName: String
     public let createdAt: Date
     public var startDate: Date?
     public var endDate: Date?
@@ -22,7 +22,8 @@ public struct Album {
     public var photos: [Photo]
     public var photoCount: Int
     public var from: String
-    public var isEdited: Bool = false
+    public var isEdited: Bool = false        // 병합/제외/분리 등 구조가 변경된 적 있는지
+    public var isRenamed: Bool = false       // 사용자가 이름을 직접 바꾼 적 있는지
 
     public var clusterId: [String] = []
 
@@ -39,6 +40,8 @@ public struct Album {
         photos: [Photo] = [],
         photoCount: Int,
         from: String,
+        isEdited: Bool = false,
+        isRenamed: Bool = false,
         clusterId: [String] = []
     ) {
         self.id = id
@@ -53,6 +56,8 @@ public struct Album {
         self.photos = photos
         self.photoCount = photoCount
         self.from = from
+        self.isEdited = isEdited
+        self.isRenamed = isRenamed
         self.clusterId = clusterId
     }
 }

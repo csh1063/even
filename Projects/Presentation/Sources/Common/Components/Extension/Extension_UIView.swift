@@ -101,10 +101,16 @@ extension UIView {
         }
     }
 
-    // border 생성
+    // border 생성 — CALayer의 borderColor는 UIColor와 달리 라이트/다크 모드를 자동으로 안 따라가고
+    // 지정한 시점의 색을 그대로 굳혀버린다. 그래서 트레잇(다크모드 등)이 바뀔 때마다 다시 풀어주는
+    // 핸들러를 걸어둔다. addBorder가 같은 뷰에 여러 번 불려도(예: layoutSubviews마다) 핸들러가
+    // 중복으로 쌓이긴 하지만, 전부 "그때그때 원하던 색"을 다시 바르는 것뿐이라 결과는 항상 맞다
     func addBorder(color: UIColor, borderWidth: CGFloat = 1) {
-        layer.borderColor = color.cgColor
+        layer.borderColor = color.resolvedColor(with: traitCollection).cgColor
         layer.borderWidth = borderWidth
+        registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (view: UIView, _: UITraitCollection) in
+            view.layer.borderColor = color.resolvedColor(with: view.traitCollection).cgColor
+        }
     }
 
     // border 삭제
@@ -113,12 +119,15 @@ extension UIView {
         layer.borderWidth = 0
     }
 
-    // shadow 생성
+    // shadow 생성 — 원리는 addBorder와 동일 (shadowColor도 CALayer 색상이라 트레잇 변화에 안 따라감)
     func addShadow(color: UIColor, opacity: Float, offset: CGSize, radius: CGFloat) {
-        layer.shadowColor = color.cgColor
+        layer.shadowColor = color.resolvedColor(with: traitCollection).cgColor
         layer.shadowOpacity = opacity
         layer.shadowOffset = offset
         layer.shadowRadius = radius
+        registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (view: UIView, _: UITraitCollection) in
+            view.layer.shadowColor = color.resolvedColor(with: view.traitCollection).cgColor
+        }
     }
 
     // 뷰의 내부로 shadow 생성

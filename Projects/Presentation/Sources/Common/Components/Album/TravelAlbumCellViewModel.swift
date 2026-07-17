@@ -20,7 +20,6 @@ struct TravelAlbumCellViewModel: AlbumCellViewModel {
     var album: Album
     var imageLoader: any ImageLoadable
 
-    let countryName: String
     let dateRangeText: String
 
     init(album: Album, imageLoader: any ImageLoadable) {
@@ -31,8 +30,6 @@ struct TravelAlbumCellViewModel: AlbumCellViewModel {
         self.photoCount = album.photoCount
         self.album = album
         self.imageLoader = imageLoader
-
-        self.countryName = ""
 
         let formatter = DateIntervalFormatter()
         formatter.locale = Locale(identifier: "ko")

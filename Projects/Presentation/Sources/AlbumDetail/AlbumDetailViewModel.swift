@@ -14,8 +14,9 @@ enum AlbumDetailViewModelAction {
     case options(album: Album)
     case pop
     case selectPhoto(_ photoDetails: [PhotoDetail], index: Int, inSelectionMode: Bool)
-    case pickMergeTarget(candidates: [AlbumMergeCandidate])
+    case pickMergeTarget(candidates: [AlbumMergeCandidate], isTravel: Bool, currentAlbum: Album)
     case pickSplitClusters(clusters: [FaceClusterSummary])
+    case pickTravelerManagement(travelers: [Album], others: [Album])
 }
 
 @MainActor
@@ -27,6 +28,9 @@ protocol AlbumDetailViewModelDelegate: AnyObject {
     func mergeInto(albumIds: [UUID])
     func splitTapped()
     func splitInto(clusterIds: [UUID])
+    func travelerManagementTapped()
+    func saveTravelerManagement(travelerIds: [UUID])
+    func refreshAfterPhotosAdded()
 }
 
 @MainActor
@@ -48,6 +52,13 @@ public final class AlbumDetailViewModel: BaseViewModel {
         let isLoading: AnyPublisher<Bool, Never>
         let errorMessage: AnyPublisher<String?, Never>
         let selectionMode: AnyPublisher<AlbumDetailPageMode, Never>
+        let travelPeopleInfo: AnyPublisher<TravelPeopleInfo?, Never>
+    }
+
+    /// 여행 헤더에 "이름 문구"와 "인원 수"를 분리해서 보여주기 위한 값
+    struct TravelPeopleInfo {
+        let name: String
+        let count: Int
     }
 
     @Published private var album: Album
@@ -55,6 +66,7 @@ public final class AlbumDetailViewModel: BaseViewModel {
     @Published private var photos: [Photo] = []
     @Published private var errorMessage: String?
     @Published private var selectionMode: AlbumDetailPageMode = .list
+    @Published private var travelPeopleInfo: TravelPeopleInfo?
 
     var onAction: ((AlbumDetailViewModelAction) -> Void)?
 
@@ -68,18 +80,36 @@ public final class AlbumDetailViewModel: BaseViewModel {
     /// 얼굴 앨범 디버깅용: 사진 id별 이 앨범에 묶이게 한 얼굴의 boundingBox
     private var faceBoundingBoxes: [String: CGRect] = [:]
     var isFaceAlbum: Bool { album.from == "face" }
+    var isTravelAlbum: Bool { album.from == "travel" }
+    /// AutoAlbumUseCase의 앨범 명명 기준과 동일하게, 당일치기면 "나들이" 아니면 "여행"
+    private var tripSuffix: String {
+        guard let start = album.startDate, let end = album.endDate,
+              Calendar.current.isDate(start, inSameDayAs: end) else {
+            return "여행"
+        }
+        return "나들이"
+    }
 
     public init(album: Album,
                 imageUseCase: PhotoImageUseCase,
                 detailUseCase: AlbumDetailUseCase,
                 startInSelectionMode: Bool = false) {
         self.album = album
-        self.albumName = album.displayName
+        // 얼굴 앨범은 자동 생성된 이름("인물 3")을 상단 타이틀에 그대로 보여주지 않고,
+        // 사용자가 실제로 이름을 지어준 경우에만("isRenamed") 그 이름을 보여준다.
+        // 빈 문자열("")을 쓰면 NaviBarView의 스택뷰가 .fillProportionally라 titleLabel의
+        // intrinsic width가 0에 가까워지면서 옆 버튼들이 비율을 이상하게 나눠 갖는 버그가 있어서,
+        // 공백 한 칸으로 "보이기엔 비어있지만 폭은 0이 아닌" 상태를 만든다 (NaviBarView 자체는 안 건드림)
+        self.albumName = Self.computedAlbumName(for: album)
         self.imageUseCase = imageUseCase
         self.detailUseCase = detailUseCase
         self.selectionMode = startInSelectionMode ? .onlySelect : .list
         super.init()
         bind()
+    }
+
+    private static func computedAlbumName(for album: Album) -> String {
+        (album.from == "face" && !album.isRenamed) ? " " : album.displayName
     }
 
     public func transform() -> Output {
@@ -88,7 +118,8 @@ public final class AlbumDetailViewModel: BaseViewModel {
             photos: $photos.eraseToAnyPublisher(),
             isLoading: $isLoading.eraseToAnyPublisher(),
             errorMessage: $errorMessage.eraseToAnyPublisher(),
-            selectionMode: $selectionMode.eraseToAnyPublisher()
+            selectionMode: $selectionMode.eraseToAnyPublisher(),
+            travelPeopleInfo: $travelPeopleInfo.eraseToAnyPublisher()
         )
     }
 
@@ -215,11 +246,21 @@ public final class AlbumDetailViewModel: BaseViewModel {
     private func loadPhotos() async {
         do {
             isLoading = true
+            // 병합처럼 서버 쪽에서 기간/이름이 바뀔 수 있는 작업 후에도 이 화면이 들고 있는 album이
+            // 그대로라 사진 추가 등에서 옛 기간을 기준으로 조회하는 문제가 있었다 — 매번 최신으로 갱신
+            if let refreshed = try await detailUseCase.fetchAlbum(id: album.id) {
+                album = refreshed
+                albumName = Self.computedAlbumName(for: album)
+            }
             let photos = try await detailUseCase.fetchPhotos(by: album.id)
             // photos를 publish하면 셀이 바로 loadFaceImage를 호출하므로,
             // faceBoundingBoxes는 그보다 먼저 채워둬야 첫 진입에서도 크롭이 뜬다
             if isFaceAlbum {
                 faceBoundingBoxes = try await detailUseCase.fetchFaceBoundingBoxes(clusterId: album.name)
+            }
+            if isTravelAlbum {
+                let linkedFaceAlbums = try await detailUseCase.fetchLinkedFaceAlbums(albumId: album.id)
+                travelPeopleInfo = formatTravelPeopleInfo(linkedFaceAlbums)
             }
             self.photos = photos
             self.photoDetails = photos.map {
@@ -231,10 +272,36 @@ public final class AlbumDetailViewModel: BaseViewModel {
         }
     }
 
+    /// 여행에 등장한 얼굴 앨범들을 "A와 사람의 여행"처럼 이름 나열 문구로 만들고, 인원 수는 따로 반환한다.
+    /// 이름 지어준 사람은 실제 이름, 아직 안 지어준 사람은 "사람"으로 표시한다.
+    /// 앨범 기간이 당일치기면(AutoAlbumUseCase의 명명 기준과 동일) "여행" 대신 "나들이"로 표시한다
+    private func formatTravelPeopleInfo(_ linkedFaceAlbums: [Album]) -> TravelPeopleInfo? {
+        guard !linkedFaceAlbums.isEmpty else { return nil }
+
+        let names = linkedFaceAlbums.map { $0.isRenamed ? $0.displayName : "사람" }
+        let suffix = tripSuffix
+
+        let name: String
+        if names.count > 1 {
+            let joinedPrefix = names.dropLast()
+                .map { "\($0)\($0.josa ? "과" : "와")" }
+                .joined(separator: " ")
+            name = "\(joinedPrefix) \(names.last!)의 \(suffix)"
+        } else {
+            name = "\(names[0])의 \(suffix)"
+        }
+
+        return TravelPeopleInfo(name: name, count: names.count)
+    }
+
     private func deleteSelected(ids: [String], deleteInLibrary: Bool = false) async {
         do {
             isLoading = true
             try await detailUseCase.deletePhotos(ids, albumId: album.id, deleteInLibrary: deleteInLibrary)
+            // 여행 앨범에서 사진을 지웠을 때, 연결된 얼굴 앨범의 사진이 하나도 안 남았으면 그 연결도 같이 해제한다
+            if isTravelAlbum {
+                try await detailUseCase.pruneLinkedFaceAlbums(albumId: album.id)
+            }
             await loadPhotos()
             isLoading = false
         } catch {
@@ -247,6 +314,10 @@ public final class AlbumDetailViewModel: BaseViewModel {
             isLoading = true
             try await detailUseCase.editAlbumName(new: name, id: album.id)
             albumName = name
+            // album 자체도 갱신해둬야, 다음에 다시 이름 변경 시트를 열었을 때 이전 이름이 아니라
+            // 방금 저장한 이름/isRenamed 상태가 정확히 반영된다
+            album.displayName = name
+            album.isRenamed = true
             isLoading = false
         } catch {
             isLoading = false
@@ -279,7 +350,11 @@ public final class AlbumDetailViewModel: BaseViewModel {
         do {
             isLoading = true
             for targetId in targetAlbumIds {
-                try await detailUseCase.mergeAlbums(sourceId: album.id, targetId: targetId)
+                if isTravelAlbum {
+                    try await detailUseCase.mergeTravelAlbums(sourceId: album.id, targetId: targetId)
+                } else {
+                    try await detailUseCase.mergeAlbums(sourceId: album.id, targetId: targetId)
+                }
             }
             await loadPhotos()
             isLoading = false
@@ -339,8 +414,10 @@ extension AlbumDetailViewModel: AlbumDetailViewModelDelegate {
         Task { [weak self] in
             guard let self else { return }
             do {
-                let candidates = try await detailUseCase.fetchOtherFaceAlbums(excluding: album.id)
-                onAction?(.pickMergeTarget(candidates: candidates))
+                let candidates = isTravelAlbum
+                    ? try await detailUseCase.fetchOtherTravelAlbums(excluding: album.id)
+                    : try await detailUseCase.fetchOtherFaceAlbums(excluding: album.id)
+                onAction?(.pickMergeTarget(candidates: candidates, isTravel: isTravelAlbum, currentAlbum: album))
             } catch {}
         }
     }
@@ -361,5 +438,30 @@ extension AlbumDetailViewModel: AlbumDetailViewModelDelegate {
 
     func splitInto(clusterIds: [UUID]) {
         Task { await splitAlbum(clusterIds: clusterIds) }
+    }
+
+    func travelerManagementTapped() {
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                let (travelers, others) = try await detailUseCase.fetchFaceAlbumsForTravelerManagement(albumId: album.id)
+                onAction?(.pickTravelerManagement(travelers: travelers, others: others))
+            } catch {}
+        }
+    }
+
+    func saveTravelerManagement(travelerIds: [UUID]) {
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                try await detailUseCase.updateLinkedFaceAlbums(albumId: album.id, faceAlbumIds: travelerIds)
+                let linkedFaceAlbums = try await detailUseCase.fetchLinkedFaceAlbums(albumId: album.id)
+                travelPeopleInfo = formatTravelPeopleInfo(linkedFaceAlbums)
+            } catch {}
+        }
+    }
+
+    func refreshAfterPhotosAdded() {
+        send(.refresh)
     }
 }

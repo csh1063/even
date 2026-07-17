@@ -81,6 +81,10 @@ final class NaviBarView: UIView {
         }
     }
 
+    public func setEnabled(_ enabled: Bool, for type: NaviBarButtonType) {
+        buttons.first(where: { $0.type == type })?.setEnabled(enabled)
+    }
+
     public func addButtons(_ settings: [NaviButtonSetting]) {
         self.clearButtons()
         self.buttons = settings.map { [weak self] setting in

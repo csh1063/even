@@ -17,6 +17,7 @@ public protocol FaceClusterUseCase {
     func fetchClusters(albumId: UUID) async throws -> [FaceClusterSummary]
     func splitAlbum(albumId: UUID, clusterIds: [UUID]) async throws
     func fetchOtherFaceAlbumsSortedBySimilarity(excluding albumId: UUID) async throws -> [AlbumMergeCandidate]
+    func fetchFaceAlbumIds(forPhotoIds photoIds: [String]) async throws -> [UUID]
 }
 
 public final class DefaultFaceClusterUseCase: FaceClusterUseCase {
@@ -56,5 +57,9 @@ public final class DefaultFaceClusterUseCase: FaceClusterUseCase {
 
     public func fetchOtherFaceAlbumsSortedBySimilarity(excluding albumId: UUID) async throws -> [AlbumMergeCandidate] {
         try await repository.fetchOtherFaceAlbumsSortedBySimilarity(excluding: albumId)
+    }
+
+    public func fetchFaceAlbumIds(forPhotoIds photoIds: [String]) async throws -> [UUID] {
+        try await repository.fetchFaceAlbumIds(forPhotoIds: photoIds)
     }
 }
