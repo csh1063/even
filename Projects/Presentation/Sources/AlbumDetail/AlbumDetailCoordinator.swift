@@ -64,7 +64,7 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
         // 한 번도 직접 이름을 바꾼 적 없는 앨범은 자동 생성된 이름(예: "인물 3", "부산 여행")이 그대로 채워지지 않도록 비워서 보여준다
         // (isEdited는 병합/제외/분리 등 구조 변경 여부라 이름 변경 여부와는 별개 — isRenamed로 따로 구분)
         let sheet: AlbumRenameSheet
-        if album.from == "face" {
+        if album.from == "face" || album.from == "animal" {
             sheet = AlbumRenameSheet(
                 albumName: album.isRenamed ? album.displayName : "",
                 title: "이름 변경",
@@ -96,7 +96,7 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
             }
         ]
 
-        if album.from == "face" {
+        if album.from == "face" || album.from == "animal" {
             options.append(
                 OptionRowConfig(icon: "person.2.crop.square.stack", title: "앨범 합치기", style: .normal) { [weak self] in
                     self?.delegate?.mergeTapped()
@@ -144,12 +144,18 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
     }
 
     func showMergeTargetPicker(candidates: [AlbumMergeCandidate], isTravel: Bool, currentAlbum: Album) {
+        let isAnimal = currentAlbum.from == "animal"
+
         guard !candidates.isEmpty else {
-            let alert = UIAlertController(
-                title: "합칠 앨범 없음",
-                message: isTravel ? "합칠 수 있는 다른 여행 앨범이 없어요" : "합칠 수 있는 다른 인물 앨범이 없어요",
-                preferredStyle: .alert
-            )
+            let message: String
+            if isTravel {
+                message = "합칠 수 있는 다른 여행 앨범이 없어요"
+            } else if isAnimal {
+                message = "합칠 수 있는 다른 동물 앨범이 없어요"
+            } else {
+                message = "합칠 수 있는 다른 인물 앨범이 없어요"
+            }
+            let alert = UIAlertController(title: "합칠 앨범 없음", message: message, preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "확인", style: .default))
             navigationController.present(alert, animated: true)
             return
@@ -160,9 +166,18 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
             currentDateRangeText = AlbumMergeSheet.dateRangeFormatter.string(from: start, to: end)
         }
 
+        let title: String
+        if isTravel {
+            title = "합칠 여행 선택"
+        } else if isAnimal {
+            title = "동일 개체 앨범 선택"
+        } else {
+            title = "동일 인물 앨범 선택"
+        }
+
         let sheet = AlbumMergeSheet(
             candidates: candidates,
-            title: isTravel ? "합칠 여행 선택" : "동일 인물 앨범 선택",
+            title: title,
             subtitle: isTravel ? "끊어진 두 여행을 연결해요" : nil,
             sectionHeaderText: isTravel ? currentDateRangeText.map { "현재 여행 날짜 : \($0)" } : nil,
             isTravel: isTravel,

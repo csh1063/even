@@ -31,6 +31,9 @@ public final class AlbumEntity {
     // 다시 조회해서 보여주므로 이름을 나중에 바꿔도 자동으로 반영된다.
     public var linkedFaceAlbumIds: [UUID] = []
 
+    /// linkedFaceAlbumIds와 같은 개념을 동물 앨범에도 적용한 것 — 별도 필드로 두는 이유도 동일하다.
+    public var linkedAnimalAlbumIds: [UUID] = []
+
     @Relationship(deleteRule: .nullify)
     public var photos: [PhotoEntity] = []
 
@@ -39,6 +42,9 @@ public final class AlbumEntity {
 
     @Relationship(deleteRule: .cascade)
     public var clusters: [ClusterEntity] = []
+
+    @Relationship(deleteRule: .cascade)
+    public var animalClusters: [AnimalClusterEntity] = []
     public init(
         id: UUID = UUID(),
         name: String,

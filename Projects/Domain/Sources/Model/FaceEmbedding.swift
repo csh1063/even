@@ -9,7 +9,7 @@
 import Foundation
 import CoreGraphics
 
-public struct FaceEmbedding: Hashable {
+public struct FaceEmbedding: Hashable, ClusterableEmbedding {
     public let id: UUID
     public let embedding: [Float]
     public let boundingBox: CGRect

@@ -22,6 +22,7 @@ public protocol AlbumDataRepository {
     func fetchPhotos(by albumId: UUID) throws -> [Photo]
     func fetchFaceBoundingBoxes(clusterId: String) throws -> [String: CGRect]
     func fetchCoverFaceBoundingBox(albumId: UUID) throws -> CGRect?
+    func fetchCoverAnimalBoundingBox(albumId: UUID) throws -> CGRect?
     func updateAlbum(album: Album) throws
     func updateAlbumName(new name: String, id: UUID) throws
     func delete(id: UUID) throws
@@ -39,6 +40,10 @@ public protocol AlbumDataRepository {
     /// 연결된 얼굴 앨범들을 현재 상태(이름 변경 여부 포함) 그대로 조회
     func fetchLinkedFaceAlbums(albumId: UUID) throws -> [Album]
 
+    /// updateLinkedFaceAlbums/fetchLinkedFaceAlbums와 같은 개념을 동물 앨범에 적용
+    func updateLinkedAnimalAlbums(albumId: UUID, animalAlbumIds: [UUID]) throws
+    func fetchLinkedAnimalAlbums(albumId: UUID) throws -> [Album]
+
     /// 여행 앨범 병합 후보 — 현재 앨범과 기간이 가까운 순으로 정렬 (여행 중간에 위치가 안 잡혀 둘로
     /// 나뉜 경우 등, 이어붙일 다른 여행을 찾기 쉽게)
     func fetchOtherTravelAlbums(excluding albumId: UUID) throws -> [AlbumMergeCandidate]
@@ -51,7 +56,8 @@ public protocol AlbumDataRepository {
         startDate: Date,
         endDate: Date,
         displayName: String,
-        linkedFaceAlbumIds: [UUID]
+        linkedFaceAlbumIds: [UUID],
+        linkedAnimalAlbumIds: [UUID]
     ) throws
 }
 

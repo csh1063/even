@@ -176,7 +176,7 @@ public final class TabbarViewModel: BaseViewModel {
                             // 이 플로우는 사진 분석 없이 앨범 생성만 다시 하므로, 사진 분석 단계는 곧바로 완료 처리한다
                             self.progressRatio = 1.0
                             self.photoCompletedSubject.send(())
-                            await self.runAlbumGeneration()
+                            await self.runAlbumGeneration(fullRegenerate: true)
                         }
                     },
                     AlertButtonConfig(title: "날짜 앨범", style: .default) { [weak self] in
@@ -201,6 +201,12 @@ public final class TabbarViewModel: BaseViewModel {
                         Task {
                             guard let self else {return}
                             await self.createFaceAutoAlbum()
+                        }
+                    },
+                    AlertButtonConfig(title: "동물 앨범", style: .default) { [weak self] in
+                        Task {
+                            guard let self else {return}
+                            await self.createAnimalAutoAlbum()
                         }
                     },
                     AlertButtonConfig(title: "여행 앨범", style: .default) { [weak self] in
@@ -295,10 +301,10 @@ public final class TabbarViewModel: BaseViewModel {
         print("⏱️ [분석] 종료: \(finishedAt) — 총 \(String(format: "%.1f", elapsedMinutes))분 소요")
     }
 
-    private func runAlbumGeneration() async {
+    private func runAlbumGeneration(fullRegenerate: Bool = false) async {
         self.isComplete = false
         do {
-            for try await progress in autoAlbumUseCase.generateAllAlbums() {
+            for try await progress in autoAlbumUseCase.generateAllAlbums(fullRegenerate: fullRegenerate) {
                 self.autoAlbumProgressRatio = progress.ratio
                 if case .completed = progress.step {
                     self.autoAlbumProgressRatio = 1.0
@@ -390,6 +396,19 @@ public final class TabbarViewModel: BaseViewModel {
         do {
             self.isLoading = true
             try await autoAlbumUseCase.createFaceAlbums()
+            self.isLoading = false
+            self.isComplete = true
+        } catch {
+            self.isLoading = false
+            self.isComplete = true
+        }
+    }
+
+    private func createAnimalAutoAlbum() async {
+        self.isComplete = false
+        do {
+            self.isLoading = true
+            try await autoAlbumUseCase.createAnimalAlbums()
             self.isLoading = false
             self.isComplete = true
         } catch {

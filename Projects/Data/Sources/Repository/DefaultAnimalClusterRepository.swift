@@ -1,21 +1,28 @@
 //
-//  DefaultFaceClusterRepository.swift
+//  DefaultAnimalClusterRepository.swift
 //  Data
 //
-//  Created by sanghyeon on 5/18/26.
+//  Created by sanghyeon on 7/19/26.
 //  Copyright © 2026 sanghyeon. All rights reserved.
 //
+//  DefaultFaceClusterRepository를 거의 그대로 미러링한다. 다른 점:
+//  - 대상 엔티티가 AnimalEmbeddingEntity/AnimalClusterEntity/AnimalClusterBlacklistEntity
+//  - 안경(hasGlasses) 필터링 개념이 없음 — 전체 임베딩을 그대로 클러스터링 대상으로 씀
+//  - 커버 사진/클러스터 요약 선정 기준이 captureQuality 대신 detectionConfidence
+//  - 임베딩 차원이 512가 아니라 384 (DINOv2)
+//  - from: "animal", 이름 접두사 "동물 N"
 
 import Domain
 import Foundation
 import SwiftData
 import Accelerate
 
-public final class DefaultFaceClusterRepository: FaceClusterRepository {
+public final class DefaultAnimalClusterRepository: AnimalClusterRepository {
     private let container: ModelContainer
-    private let clusterService: FaceClusterService
+    private let clusterService: AnimalClusterService
+    private let dim = 384
 
-    public init(container: ModelContainer, clusterService: FaceClusterService) {
+    public init(container: ModelContainer, clusterService: AnimalClusterService) {
         self.container = container
         self.clusterService = clusterService
     }
@@ -23,76 +30,74 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
     // MARK: - 전체 클러스터링 및 앨범 저장
 
     public func clusterAndSaveAlbums() async throws {
-        print("\n=== 🚀 [Repository] 클러스터링 및 앨범 저장 프로세스 시작 ===")
+        print("\n=== 🐾 [AnimalRepository] 클러스터링 및 앨범 저장 프로세스 시작 ===")
         let context = ModelContext(container)
 
-        // 1. DB에서 모든 FaceEmbeddingEntity 로드
-        // SwiftData의 fetch 순서 자체가 실행마다 안정적으로 보장되지 않아서, id(UUID) 문자열 기준으로
-        // 직접 정렬해 순서를 고정한다 — 안 그러면 Chinese Whispers 내부 순회를 고정해봤자
-        // 입력 순서 자체가 매번 달라져서 같은 사진으로 재분석해도 결과가 달라질 수 있다.
-        let embeddingDescriptor = FetchDescriptor<FaceEmbeddingEntity>(
-            predicate: #Predicate { $0.hasGlasses == false }
-        )
+        let embeddingDescriptor = FetchDescriptor<AnimalEmbeddingEntity>()
         let allEntities = try context.fetch(embeddingDescriptor)
             .sorted { $0.id.uuidString < $1.id.uuidString }
 
-        print("📦 [Repository] 총 \(allEntities.count)개 임베딩 로드")
+        print("📦 [AnimalRepository] 총 \(allEntities.count)개 임베딩 로드")
 
         guard !allEntities.isEmpty else { return }
 
-        // 블랙리스트 로드
-        let blacklists = try context.fetch(FetchDescriptor<ClusterBlacklistEntity>())
+        let blacklists = try context.fetch(FetchDescriptor<AnimalClusterBlacklistEntity>())
         let blacklistSets = blacklists.map { Set($0.embeddingIds) }
 
-        // 기존 face 앨범 수 기준으로 인물 번호 시작
         let existingAlbumCount = try context.fetchCount(FetchDescriptor<AlbumEntity>(
-            predicate: #Predicate { $0.from == "face" }
+            predicate: #Predicate { $0.from == "animal" }
         ))
 
-        // 기존 클러스터 로드 — 재실행 시 같은 사람을 새 앨범으로 또 만들지 않고 재사용하기 위함
-        var existingClusters = try context.fetch(FetchDescriptor<ClusterEntity>())
+        var existingClusters = try context.fetch(FetchDescriptor<AnimalClusterEntity>())
 
-        // 클러스터링 — raw cluster 형성에서 버려진 임베딩은 leftover만 모아 최대 3회 재시도한 뒤
-        // 전체 라운드의 raw cluster를 합쳐 최종 병합까지 끝낸 결과가 outcome.clusters로 온다
+        // 개와 고양이는 임베딩이 아무리 비슷해도 절대 같은 개체일 수 없다 — 유사도 임계값에만 기대지 않고
+        // 애초에 종별로 나눠서 따로 클러스터링해서 구조적으로 섞이지 않게 한다
+        // (같은 사진 속 서로 다른 개체는 다른 개체라는 규칙과 같은 종류의 "확실한" 제약)
+        // raw cluster 형성에서 버려진 임베딩은 leftover만 모아 최대 3회 재시도 — 종이 재시도 라운드에서도
+        // 섞이지 않도록 dog/cat 각각 따로 재시도한다
         let embeddings = Array(allEntities.map { $0.toDomain() }.reversed())
-        let outcome = clusterService.clusterWithLeftoverRetry(embeddings: embeddings)
+        let dogEmbeddings = embeddings.filter { $0.species == .dog }
+        let catEmbeddings = embeddings.filter { $0.species == .cat }
+        let dogOutcome = clusterService.clusterWithLeftoverRetry(embeddings: dogEmbeddings)
+        let catOutcome = clusterService.clusterWithLeftoverRetry(embeddings: catEmbeddings)
+        let clusterResults = dogOutcome.clusters + catOutcome.clusters
+        let leftoverCount = dogOutcome.leftover.count + catOutcome.leftover.count
 
-        print("📊 총 \(outcome.clusters.count)개 클러스터 생성 (leftover \(outcome.leftover.count)개)")
+        print("📊 총 \(clusterResults.count)개 클러스터 생성 (leftover \(leftoverCount)개)")
 
         let entityById = Dictionary(uniqueKeysWithValues: allEntities.map { ($0.id, $0) })
-        var personIndex = existingAlbumCount + 1
-        let dim = 512
+        var animalIndex = existingAlbumCount + 1
 
-        for result in outcome.clusters {
+        for result in clusterResults {
             applyClusterResult(
                 result,
                 context: context,
                 entityById: entityById,
                 blacklistSets: blacklistSets,
                 existingClusters: &existingClusters,
-                personIndex: &personIndex,
+                animalIndex: &animalIndex,
                 dim: dim
             )
         }
 
         try context.save()
-        print("✅ [Repository] 저장 완료\n")
+        print("✅ [AnimalRepository] 저장 완료\n")
     }
 
     /// 클러스터 결과 하나를 기존 앨범과 매칭하거나 새 앨범으로 만들어 저장한다. 1차 raw cluster든
     /// leftover 재시도에서 나온 raw cluster든 상관없이 동일하게 "기존 앨범 우선 매칭" 정책이 적용된다.
     private func applyClusterResult(
-        _ result: ClusterResult<FaceEmbedding>,
+        _ result: ClusterResult<AnimalEmbedding>,
         context: ModelContext,
-        entityById: [UUID: FaceEmbeddingEntity],
+        entityById: [UUID: AnimalEmbeddingEntity],
         blacklistSets: [Set<UUID>],
-        existingClusters: inout [ClusterEntity],
-        personIndex: inout Int,
+        existingClusters: inout [AnimalClusterEntity],
+        animalIndex: inout Int,
         dim: Int
     ) {
+        guard let resultSpecies = result.embeddings.first?.species else { return }
         let embeddingIds = Set(result.embeddings.map { $0.id })
 
-        // 블랙리스트 체크
         let isBlacklisted = blacklistSets.contains { blacklistSet in
             let intersection = embeddingIds.intersection(blacklistSet)
             return Double(intersection.count) / Double(blacklistSet.count) >= 0.5
@@ -102,18 +107,20 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
             return
         }
 
-        let cluster: ClusterEntity
+        let cluster: AnimalClusterEntity
         let album: AlbumEntity
 
-        // 기존 클러스터 중 centroid가 충분히 비슷한 게 있으면 새로 안 만들고 재사용
-        if let matched = findMatchingCluster(centroid: result.centroid, in: existingClusters, dim: dim),
+        // 기존 클러스터 재사용 매칭도 같은 종끼리만 비교한다
+        let sameSpeciesExistingClusters = existingClusters.filter { species(of: $0) == resultSpecies.rawValue }
+
+        if let matched = findMatchingCluster(centroid: result.centroid, in: sameSpeciesExistingClusters, dim: dim),
            let matchedAlbum = matched.album {
             cluster = matched
             album = matchedAlbum
             print("🔄 [\(album.name)] 기존 앨범 재사용")
         } else {
             let centroidData = result.centroid.withUnsafeBytes { Data($0) }
-            let albumName = "인물 \(personIndex)"
+            let albumName = "동물 \(animalIndex)"
 
             album = AlbumEntity(
                 id: UUID(),
@@ -121,15 +128,15 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
                 displayName: albumName,
                 isAuto: true,
                 coverPhotoIdentifier: nil,
-                from: "face"
+                from: "animal"
             )
             context.insert(album)
-            personIndex += 1
+            animalIndex += 1
 
-            cluster = ClusterEntity(centroidData: centroidData)
+            cluster = AnimalClusterEntity(centroidData: centroidData)
             context.insert(cluster)
             cluster.album = album
-            album.clusters.append(cluster)
+            album.animalClusters.append(cluster)
             existingClusters.append(cluster)
         }
 
@@ -138,8 +145,8 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
         for embedding in result.embeddings {
             guard let entity = entityById[embedding.id] else { continue }
             entity.cluster = cluster
-            if !cluster.faceEmbeddings.contains(where: { $0.id == entity.id }) {
-                cluster.faceEmbeddings.append(entity)
+            if !cluster.animalEmbeddings.contains(where: { $0.id == entity.id }) {
+                cluster.animalEmbeddings.append(entity)
             }
 
             guard let photo = entity.photo else { continue }
@@ -149,25 +156,25 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
             }
         }
 
-        // 재사용된 클러스터는 새로 합쳐진 멤버 기준으로 centroid 갱신
         updateCentroid(cluster: cluster, dim: dim)
 
         album.photoCount = album.photos.count
 
-        // 커버는 최신순이 아니라, 이 앨범(병합된 경우 모든 클러스터 포함) 안에서 얼굴 화질(captureQuality)이
-        // 가장 좋은 사진으로 고른다. boundingBox 크기(정규화 비율)로 고르면 저해상도 사진 속 얼굴이
-        // 고해상도 사진 속 더 작지만 실제로는 더 선명한 얼굴을 이기는 경우가 있어서 화질 점수로 바꿨다.
-        if let bestEntity = album.clusters
-            .flatMap({ $0.faceEmbeddings })
-            .max(by: { $0.captureQuality < $1.captureQuality }),
+        if let bestEntity = album.animalClusters
+            .flatMap({ $0.animalEmbeddings })
+            .max(by: { $0.detectionConfidence < $1.detectionConfidence }),
            let bestPhotoId = bestEntity.photo?.localIdentifier {
             album.coverPhotoIdentifier = bestPhotoId
         }
         print("✅ [\(album.name)] \(album.photoCount)장")
     }
 
-    // 새로 계산된 centroid가 기존 클러스터 중 하나와 충분히 비슷하면 그 클러스터를 반환 (없으면 nil)
-    private func findMatchingCluster(centroid: [Float], in clusters: [ClusterEntity], dim: Int, threshold: Float = 0.68) -> ClusterEntity? {
+    /// 클러스터를 구성하는 임베딩들의 종 — 종별로 분리해서 클러스터링하므로 클러스터 안은 항상 단일 종이다
+    private func species(of cluster: AnimalClusterEntity) -> String? {
+        cluster.animalEmbeddings.first?.species
+    }
+
+    private func findMatchingCluster(centroid: [Float], in clusters: [AnimalClusterEntity], dim: Int, threshold: Float = 0.68) -> AnimalClusterEntity? {
         guard !clusters.isEmpty else { return nil }
 
         let centroidsFlat: [Float] = clusters.flatMap { cluster -> [Float] in
@@ -186,33 +193,35 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
 
     public func matchAndAddNewEmbeddings(embeddingIds: [UUID]) async throws {
         guard !embeddingIds.isEmpty else { return }
-        print("\n=== 🔍 [Repository] 새 임베딩 \(embeddingIds.count)개 매칭 시작 ===")
+        print("\n=== 🔍 [AnimalRepository] 새 임베딩 \(embeddingIds.count)개 매칭 시작 ===")
 
         let context = ModelContext(container)
 
-        let newEntities = try context.fetch(FetchDescriptor<FaceEmbeddingEntity>()).filter {
-            embeddingIds.contains($0.id) && !$0.hasGlasses
+        let newEntities = try context.fetch(FetchDescriptor<AnimalEmbeddingEntity>()).filter {
+            embeddingIds.contains($0.id)
         }
 
-        let allClusters = try context.fetch(FetchDescriptor<ClusterEntity>())
+        let allClusters = try context.fetch(FetchDescriptor<AnimalClusterEntity>())
         guard !allClusters.isEmpty else { return }
 
-        let dim = 512
-        let centroidsFlat: [Float] = allClusters.flatMap { cluster -> [Float] in
-            cluster.centroidData.withUnsafeBytes { ptr in
-                Array(ptr.bindMemory(to: Float.self).prefix(dim))
-            }
-        }
-
         for entity in newEntities {
+            // 이 임베딩과 같은 종의 클러스터만 후보로 — 개/고양이는 아무리 비슷해도 매칭 대상이 될 수 없다
+            let sameSpeciesClusters = allClusters.filter { species(of: $0) == entity.species }
+            guard !sameSpeciesClusters.isEmpty else { continue }
+
             let embedding: [Float] = entity.embeddingData.withUnsafeBytes { ptr in
                 Array(ptr.bindMemory(to: Float.self).prefix(dim))
+            }
+            let centroidsFlat: [Float] = sameSpeciesClusters.flatMap { cluster -> [Float] in
+                cluster.centroidData.withUnsafeBytes { ptr in
+                    Array(ptr.bindMemory(to: Float.self).prefix(dim))
+                }
             }
 
             let similarities = computeSimilarities(
                 embedding: embedding,
                 centroids: centroidsFlat,
-                clusterCount: allClusters.count,
+                clusterCount: sameSpeciesClusters.count,
                 dim: dim
             )
 
@@ -220,7 +229,7 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
             let maxSim = similarities[maxIndex]
             guard maxSim >= 0.68 else { continue }
 
-            let matchedCluster = allClusters[maxIndex]
+            let matchedCluster = sameSpeciesClusters[maxIndex]
 
             if let photoId = entity.photo?.localIdentifier,
                matchedCluster.excludedPhotoIds.contains(photoId) {
@@ -229,7 +238,7 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
             }
 
             entity.cluster = matchedCluster
-            matchedCluster.faceEmbeddings.append(entity)
+            matchedCluster.animalEmbeddings.append(entity)
 
             if let photo = entity.photo, let album = matchedCluster.album {
                 if !album.photos.contains(where: { $0.localIdentifier == photo.localIdentifier }) {
@@ -243,7 +252,7 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
         }
 
         try context.save()
-        print("✅ [Repository] 새 임베딩 매칭 완료\n")
+        print("✅ [AnimalRepository] 새 임베딩 매칭 완료\n")
     }
 
     // MARK: - 앨범 병합
@@ -255,18 +264,15 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
         guard let source = albums.first(where: { $0.id == sourceId }),
               let target = albums.first(where: { $0.id == targetId }) else { return }
 
-        print("\n=== 🔀 [Repository] 앨범 병합: \(target.name) → \(source.name) ===")
+        print("\n=== 🔀 [AnimalRepository] 앨범 병합: \(target.name) → \(source.name) ===")
 
-        for cluster in target.clusters {
+        for cluster in target.animalClusters {
             cluster.album = source
-            if !source.clusters.contains(where: { $0.id == cluster.id }) {
-                source.clusters.append(cluster)
+            if !source.animalClusters.contains(where: { $0.id == cluster.id }) {
+                source.animalClusters.append(cluster)
             }
         }
-        // target.clusters를 비워둬야 한다 — AlbumEntity.clusters는 .cascade 삭제 규칙이라,
-        // 방금 source로 옮긴 클러스터가 여전히 target.clusters에 남아있으면 아래 context.delete(target)에서
-        // 그 클러스터까지 통째로 같이 삭제돼버린다 (병합했는데 분리할 클러스터가 사라지는 버그의 원인이었음)
-        target.clusters.removeAll()
+        target.animalClusters.removeAll()
 
         let existingPhotoIds = Set(source.photos.map { $0.localIdentifier })
         for photo in target.photos where !existingPhotoIds.contains(photo.localIdentifier) {
@@ -278,7 +284,7 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
 
         context.delete(target)
         try context.save()
-        print("✅ [Repository] 병합 완료 — \(source.name): \(source.photoCount)장\n")
+        print("✅ [AnimalRepository] 병합 완료 — \(source.name): \(source.photoCount)장\n")
     }
 
     // MARK: - 사진 제외
@@ -289,10 +295,10 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
         let albums = try context.fetch(FetchDescriptor<AlbumEntity>())
         guard let album = albums.first(where: { $0.id == fromAlbumId }) else { return }
 
-        print("\n=== 🚫 [Repository] 사진 제외: \(photoId) from \(album.name) ===")
+        print("\n=== 🚫 [AnimalRepository] 사진 제외: \(photoId) from \(album.name) ===")
 
-        for cluster in album.clusters {
-            if cluster.faceEmbeddings.contains(where: { $0.photo?.localIdentifier == photoId }) {
+        for cluster in album.animalClusters {
+            if cluster.animalEmbeddings.contains(where: { $0.photo?.localIdentifier == photoId }) {
                 cluster.excludedPhotoIds.append(photoId)
             }
         }
@@ -302,7 +308,7 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
         album.isEdited = true
 
         try context.save()
-        print("✅ [Repository] 사진 제외 완료\n")
+        print("✅ [AnimalRepository] 사진 제외 완료\n")
     }
 
     // MARK: - 앨범 삭제 + 블랙리스트
@@ -313,37 +319,40 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
         let albums = try context.fetch(FetchDescriptor<AlbumEntity>())
         guard let album = albums.first(where: { $0.id == albumId }) else { return }
 
-        print("\n=== 🗑️ [Repository] 앨범 삭제: \(album.name) ===")
+        print("\n=== 🗑️ [AnimalRepository] 앨범 삭제: \(album.name) ===")
 
-        for cluster in album.clusters {
-            let ids = cluster.faceEmbeddings.map { $0.id }
+        for cluster in album.animalClusters {
+            let ids = cluster.animalEmbeddings.map { $0.id }
             guard !ids.isEmpty else { continue }
-            let blacklist = ClusterBlacklistEntity(embeddingIds: ids)
+            let blacklist = AnimalClusterBlacklistEntity(embeddingIds: ids)
             context.insert(blacklist)
         }
 
         context.delete(album)
         try context.save()
-        print("✅ [Repository] 앨범 삭제 완료\n")
+        print("✅ [AnimalRepository] 앨범 삭제 완료\n")
     }
 
     // MARK: - 합칠 앨범 후보 (centroid 유사도 순 정렬)
 
-    /// 이미 계산되어 저장된 클러스터 centroid끼리 내적만 하면 되므로, 앨범 수가 많아도 사실상 즉시 끝난다
-    public func fetchOtherFaceAlbumsSortedBySimilarity(excluding albumId: UUID) async throws -> [AlbumMergeCandidate] {
+    public func fetchOtherAnimalAlbumsSortedBySimilarity(excluding albumId: UUID) async throws -> [AlbumMergeCandidate] {
         let context = ModelContext(container)
 
         let albums = try context.fetch(FetchDescriptor<AlbumEntity>(
-            predicate: #Predicate { $0.from == "face" }
+            predicate: #Predicate { $0.from == "animal" }
         ))
-        let others = albums.filter { $0.id != albumId }
 
         guard let current = albums.first(where: { $0.id == albumId }) else {
+            let others = albums.filter { $0.id != albumId }
             return others.map { AlbumMergeCandidate(album: $0.toDomain(), similarity: -1) }
         }
 
-        let dim = 512
-        let currentCentroids: [[Float]] = current.clusters.map { cluster in
+        // 종 라벨은 Vision 탐지 오류로 잘못 찍힐 수 있어서(예: 흰 강아지가 고양이로 오인식) 합치기
+        // 후보에서 종으로 미리 걸러내지 않는다 — 자동 클러스터링만 종을 하드 분리하고, 사람이 직접
+        // 보고 합치는 이 후보 목록은 유사도 순으로 전부 보여줘서 사용자가 최종 판단하게 한다
+        let others = albums.filter { $0.id != albumId }
+
+        let currentCentroids: [[Float]] = current.animalClusters.map { cluster in
             cluster.centroidData.withUnsafeBytes { ptr in Array(ptr.bindMemory(to: Float.self).prefix(dim)) }
         }
         guard !currentCentroids.isEmpty else {
@@ -352,7 +361,7 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
 
         func maxSimilarity(to album: AlbumEntity) -> Float {
             var best: Float = -1
-            for cluster in album.clusters {
+            for cluster in album.animalClusters {
                 let centroid = cluster.centroidData.withUnsafeBytes { ptr -> [Float] in
                     Array(ptr.bindMemory(to: Float.self).prefix(dim))
                 }
@@ -369,20 +378,14 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
             .map { ($0, maxSimilarity(to: $0)) }
             .sorted { $0.1 > $1.1 }
 
-        print("\n=== 🔎 [Repository] '\(current.name)'과 합칠 앨범 후보 유사도 순위 ===")
-        for (album, sim) in ranked {
-            print("   \(String(format: "%.4f", sim)) — \(album.name) (\(album.photoCount)장)")
-        }
-        print("--------------------------------------------------------------\n")
-
         return ranked.map { AlbumMergeCandidate(album: $0.0.toDomain(), similarity: $0.1) }
     }
 
-    public func fetchFaceAlbumIds(forPhotoIds photoIds: [String]) async throws -> [UUID] {
+    public func fetchAnimalAlbumIds(forPhotoIds photoIds: [String]) async throws -> [UUID] {
         let context = ModelContext(container)
 
         let ids = Set(photoIds)
-        let embeddings = try context.fetch(FetchDescriptor<FaceEmbeddingEntity>())
+        let embeddings = try context.fetch(FetchDescriptor<AnimalEmbeddingEntity>())
         let matched = embeddings.filter { entity in
             guard let localIdentifier = entity.photo?.localIdentifier else { return false }
             return ids.contains(localIdentifier)
@@ -400,9 +403,9 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
         let albums = try context.fetch(FetchDescriptor<AlbumEntity>())
         guard let album = albums.first(where: { $0.id == albumId }) else { return [] }
 
-        return album.clusters.map { cluster in
-            let cover = cluster.faceEmbeddings.max(by: { $0.captureQuality < $1.captureQuality })
-            let photoCount = Set(cluster.faceEmbeddings.compactMap { $0.photo?.localIdentifier }).count
+        return album.animalClusters.map { cluster in
+            let cover = cluster.animalEmbeddings.max(by: { $0.detectionConfidence < $1.detectionConfidence })
+            let photoCount = Set(cluster.animalEmbeddings.compactMap { $0.photo?.localIdentifier }).count
             return FaceClusterSummary(id: cluster.id, photoCount: photoCount, coverPhotoId: cover?.photo?.localIdentifier)
         }
     }
@@ -413,36 +416,34 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
         let albums = try context.fetch(FetchDescriptor<AlbumEntity>())
         guard let album = albums.first(where: { $0.id == albumId }) else { return }
 
-        let clustersToSplit = album.clusters.filter { clusterIds.contains($0.id) }
-        // 전부 떼어내면 원본 앨범이 텅 비므로, 최소 1개 클러스터는 남아있어야 분리가 성립한다
-        guard !clustersToSplit.isEmpty, clustersToSplit.count < album.clusters.count else { return }
+        let clustersToSplit = album.animalClusters.filter { clusterIds.contains($0.id) }
+        guard !clustersToSplit.isEmpty, clustersToSplit.count < album.animalClusters.count else { return }
 
-        print("\n=== ✂️ [Repository] 앨범 분리: \(album.name)에서 \(clustersToSplit.count)개 클러스터 분리 ===")
+        print("\n=== ✂️ [AnimalRepository] 앨범 분리: \(album.name)에서 \(clustersToSplit.count)개 클러스터 분리 ===")
 
         let existingAlbumCount = try context.fetchCount(FetchDescriptor<AlbumEntity>(
-            predicate: #Predicate { $0.from == "face" }
+            predicate: #Predicate { $0.from == "animal" }
         ))
-        let newAlbumName = "인물 \(existingAlbumCount + 1)"
+        let newAlbumName = "동물 \(existingAlbumCount + 1)"
         let newAlbum = AlbumEntity(
             id: UUID(),
             name: newAlbumName,
             displayName: newAlbumName,
             isAuto: true,
             coverPhotoIdentifier: nil,
-            from: "face"
+            from: "animal"
         )
         context.insert(newAlbum)
 
-        let movingPhotoIds = Set(clustersToSplit.flatMap { $0.faceEmbeddings.compactMap { $0.photo?.localIdentifier } })
+        let movingPhotoIds = Set(clustersToSplit.flatMap { $0.animalEmbeddings.compactMap { $0.photo?.localIdentifier } })
 
         for cluster in clustersToSplit {
             cluster.album = newAlbum
-            newAlbum.clusters.append(cluster)
-            album.clusters.removeAll { $0.id == cluster.id }
+            newAlbum.animalClusters.append(cluster)
+            album.animalClusters.removeAll { $0.id == cluster.id }
         }
 
-        // 남은 클러스터에도 걸쳐있는 사진(한 사진에 두 사람 얼굴)은 원본 앨범에도 계속 남겨둔다
-        let remainingPhotoIds = Set(album.clusters.flatMap { $0.faceEmbeddings.compactMap { $0.photo?.localIdentifier } })
+        let remainingPhotoIds = Set(album.animalClusters.flatMap { $0.animalEmbeddings.compactMap { $0.photo?.localIdentifier } })
         let photoEntities = Dictionary(uniqueKeysWithValues: album.photos.map { ($0.localIdentifier, $0) })
 
         for photoId in movingPhotoIds {
@@ -459,17 +460,17 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
         newAlbum.photoCount = newAlbum.photos.count
         album.isEdited = true
 
-        if let bestEntity = album.clusters.flatMap({ $0.faceEmbeddings }).max(by: { $0.captureQuality < $1.captureQuality }),
+        if let bestEntity = album.animalClusters.flatMap({ $0.animalEmbeddings }).max(by: { $0.detectionConfidence < $1.detectionConfidence }),
            let bestPhotoId = bestEntity.photo?.localIdentifier {
             album.coverPhotoIdentifier = bestPhotoId
         }
-        if let bestEntity = newAlbum.clusters.flatMap({ $0.faceEmbeddings }).max(by: { $0.captureQuality < $1.captureQuality }),
+        if let bestEntity = newAlbum.animalClusters.flatMap({ $0.animalEmbeddings }).max(by: { $0.detectionConfidence < $1.detectionConfidence }),
            let bestPhotoId = bestEntity.photo?.localIdentifier {
             newAlbum.coverPhotoIdentifier = bestPhotoId
         }
 
         try context.save()
-        print("✅ [Repository] 분리 완료 — \(album.name): \(album.photoCount)장 / \(newAlbum.name): \(newAlbum.photoCount)장\n")
+        print("✅ [AnimalRepository] 분리 완료 — \(album.name): \(album.photoCount)장 / \(newAlbum.name): \(newAlbum.photoCount)장\n")
     }
 
     // MARK: - Private Helpers
@@ -494,8 +495,8 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
         return result
     }
 
-    private func updateCentroid(cluster: ClusterEntity, dim: Int) {
-        let embeddings = cluster.faceEmbeddings.compactMap { entity -> [Float]? in
+    private func updateCentroid(cluster: AnimalClusterEntity, dim: Int) {
+        let embeddings = cluster.animalEmbeddings.compactMap { entity -> [Float]? in
             entity.embeddingData.withUnsafeBytes { ptr in
                 Array(ptr.bindMemory(to: Float.self).prefix(dim))
             }

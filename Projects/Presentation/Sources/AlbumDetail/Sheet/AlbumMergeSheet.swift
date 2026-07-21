@@ -233,16 +233,10 @@ extension AlbumMergeSheet: UICollectionViewDataSource {
         let album = sections[indexPath.section].items[indexPath.item].album
         cell.setSelected(selectedIds.contains(album.id))
 
-        let faceViewModel = FaceCellViewModel(
-            albumId: album.id,
-            photoId: album.coverPhotoIdentifier ?? "",
-            imageUseCase: imageUseCase,
-            albumUseCase: albumUseCase
-        )
         if isTravel {
-            cell.configure(with: faceViewModel, name: album.displayName, dateRangeText: Self.dateRangeText(for: album))
+            cell.configure(album: album, imageUseCase: imageUseCase, albumUseCase: albumUseCase, name: album.displayName, dateRangeText: Self.dateRangeText(for: album))
         } else {
-            cell.configure(with: faceViewModel)
+            cell.configure(album: album, imageUseCase: imageUseCase, albumUseCase: albumUseCase)
         }
 
         return cell
@@ -364,7 +358,9 @@ private final class AlbumMergeSectionFooterView: UICollectionReusableView {
 private final class AlbumMergeCell: UICollectionViewCell {
     static let reuseIdentifier = "AlbumMergeCell"
 
+    // 합치기 후보에 사람/동물 앨범이 섞일 수 있어서, 두 크롭 뷰를 겹쳐두고 종에 맞는 쪽만 보여준다
     private let faceCellView = FaceCellView()
+    private let animalCellView = AnimalCellView()
 
     private let checkmarkView: UIImageView = {
         let iv = UIImageView()
@@ -405,12 +401,34 @@ private final class AlbumMergeCell: UICollectionViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         faceCellView.prepareForReuse()
+        animalCellView.prepareForReuse()
         nameLabel.text = nil
         dateLabel.text = nil
     }
 
-    func configure(with viewModel: FaceCellViewModel, name: String? = nil, dateRangeText: String? = nil) {
-        faceCellView.configure(with: viewModel)
+    func configure(album: Album, imageUseCase: PhotoImageUseCase, albumUseCase: AlbumUseCase, name: String? = nil, dateRangeText: String? = nil) {
+        let isAnimal = album.from == "animal"
+        faceCellView.isHidden = isAnimal
+        animalCellView.isHidden = !isAnimal
+
+        if isAnimal {
+            let viewModel = AnimalCellViewModel(
+                albumId: album.id,
+                photoId: album.coverPhotoIdentifier ?? "",
+                imageUseCase: imageUseCase,
+                albumUseCase: albumUseCase
+            )
+            animalCellView.configure(with: viewModel)
+        } else {
+            let viewModel = FaceCellViewModel(
+                albumId: album.id,
+                photoId: album.coverPhotoIdentifier ?? "",
+                imageUseCase: imageUseCase,
+                albumUseCase: albumUseCase
+            )
+            faceCellView.configure(with: viewModel)
+        }
+
         nameLabel.text = name
         dateLabel.text = dateRangeText
     }
@@ -418,6 +436,8 @@ private final class AlbumMergeCell: UICollectionViewCell {
     func setSelected(_ isSelected: Bool) {
         faceCellView.layer.borderWidth = isSelected ? 3 : 0
         faceCellView.layer.borderColor = Theme.primary.cgColor
+        animalCellView.layer.borderWidth = isSelected ? 3 : 0
+        animalCellView.layer.borderColor = Theme.primary.cgColor
         checkmarkView.image = UIImage(systemName: isSelected ? "checkmark.circle.fill" : "circle")
         checkmarkView.tintColor = isSelected ? Theme.primary : .white
     }
@@ -427,7 +447,12 @@ private final class AlbumMergeCell: UICollectionViewCell {
         faceCellView.layer.masksToBounds = true
         faceCellView.clipsToBounds = true
 
+        animalCellView.layer.cornerRadius = 14
+        animalCellView.layer.masksToBounds = true
+        animalCellView.clipsToBounds = true
+
         contentView.addSubview(faceCellView)
+        contentView.addSubview(animalCellView)
         contentView.addSubview(checkmarkView)
         contentView.addSubview(nameLabel)
         contentView.addSubview(dateLabel)
@@ -435,6 +460,9 @@ private final class AlbumMergeCell: UICollectionViewCell {
         faceCellView.snp.makeConstraints { make in
             make.top.leading.trailing.equalToSuperview()
             make.height.equalTo(faceCellView.snp.width)
+        }
+        animalCellView.snp.makeConstraints { make in
+            make.edges.equalTo(faceCellView)
         }
         checkmarkView.snp.makeConstraints { make in
             make.top.trailing.equalTo(faceCellView).inset(6)

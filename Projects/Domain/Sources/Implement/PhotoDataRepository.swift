@@ -21,6 +21,9 @@ public protocol PhotoDataRepository {
     func fetchLocationUnanalyzed() throws -> [Photo]
     func fetchUnanalyzed() throws -> [Photo]
     func fetchAlbumUnclassified(limit: Int) throws -> [Photo]
+    /// albumsGeneratedAt 플래그를 무시하고 전체 사진을 offset 기준으로 페이지네이션해서 가져온다 —
+    /// "자동 앨범 전체 재생성"처럼 이미 분류된 사진도 다시 처리해야 할 때 사용
+    func fetchAllForClassification(limit: Int, offset: Int) throws -> [Photo]
     func markAlbumsGenerated(identifiers: [String]) throws
     func fetchSimilarUnchecked() throws -> [Photo]
     func markSimilarChecked(identifiers: [String]) throws

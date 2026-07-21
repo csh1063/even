@@ -60,6 +60,14 @@ public final class ServiceFactory {
         FaceClusterService(libraryService: photoLibraryService)
     }()
 
+    public var animalEmbeddingService: AnimalEmbeddingService = {
+        AnimalEmbeddingService()
+    }()
+
+    public lazy var animalClusterService: AnimalClusterService = {
+        AnimalClusterService()
+    }()
+
     public lazy var similarService: SimilarPhotoClusterService = {
         SimilarPhotoClusterService()
     }()

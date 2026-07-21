@@ -8,10 +8,12 @@ let project = Project.framework(module: Module.data,
                                     .glob(pattern: "Resources/**", excluding: [
                                         "Resources/AdaFace_IR18.mlpackage/**",
                                         "Resources/AdaFace_IR50.mlpackage/**",
-                                        "Resources/InsightFace_buffalo_l.mlpackage/**"
+                                        "Resources/InsightFace_buffalo_l.mlpackage/**",
+                                        "Resources/AnimalReID_DINOv2.mlpackage/**"
                                     ]),
                                     .folderReference(path: "Resources/AdaFace_IR18.mlpackage"),
                                     .folderReference(path: "Resources/AdaFace_IR50.mlpackage"),
-                                    .folderReference(path: "Resources/InsightFace_buffalo_l.mlpackage")
+                                    .folderReference(path: "Resources/InsightFace_buffalo_l.mlpackage"),
+                                    .folderReference(path: "Resources/AnimalReID_DINOv2.mlpackage")
                                 ]
 )
