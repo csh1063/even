@@ -17,6 +17,7 @@ public protocol AlbumUseCase {
     func fetchAll(from: String) async throws -> [Album]
     func createDummy() async throws
     func fetchCoverFaceBoundingBox(albumId: UUID) async throws -> CGRect?
+    func fetchCoverAnimalBoundingBox(albumId: UUID) async throws -> CGRect?
 }
 
 public final class DefaultAlbumUseCase: AlbumUseCase {
@@ -41,6 +42,10 @@ public final class DefaultAlbumUseCase: AlbumUseCase {
 
     public func fetchCoverFaceBoundingBox(albumId: UUID) async throws -> CGRect? {
         try self.albumRepository.fetchCoverFaceBoundingBox(albumId: albumId)
+    }
+
+    public func fetchCoverAnimalBoundingBox(albumId: UUID) async throws -> CGRect? {
+        try self.albumRepository.fetchCoverAnimalBoundingBox(albumId: albumId)
     }
 
     public func createDummy() async throws {

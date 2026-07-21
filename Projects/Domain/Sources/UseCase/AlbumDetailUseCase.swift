@@ -22,19 +22,29 @@ public protocol AlbumDetailUseCase {
     func fetchClusters(albumId: UUID) async throws -> [FaceClusterSummary]
     func splitAlbum(albumId: UUID, clusterIds: [UUID]) async throws
     func fetchLinkedFaceAlbums(albumId: UUID) async throws -> [Album]
-    /// 여행자 관리 시트용 — 전체 얼굴 앨범을 이미 연결된(여행자) / 안 된(인물 앨범) 두 그룹으로 나눠서 반환.
-    /// "나"가 아직 연결 안 됐다면 "인물 앨범" 쪽 맨 앞으로
-    func fetchFaceAlbumsForTravelerManagement(albumId: UUID) async throws -> (travelers: [Album], others: [Album])
-    /// 여행자 관리 시트의 "결정" — 넘긴 id 목록으로 연결 상태를 통째로 교체
-    func updateLinkedFaceAlbums(albumId: UUID, faceAlbumIds: [UUID]) async throws
+
+    // 동물 앨범용 — 이름/시그니처만 다를 뿐 얼굴 쪽과 동일한 동작(합치기/분리/제외/여행자 연결)
+    func fetchOtherAnimalAlbums(excluding albumId: UUID) async throws -> [AlbumMergeCandidate]
+    func mergeAnimalAlbums(sourceId: UUID, targetId: UUID) async throws
+    func excludeAnimalPhoto(_ photoId: String, fromAlbumId: UUID) async throws
+    func fetchAnimalClusters(albumId: UUID) async throws -> [FaceClusterSummary]
+    func splitAnimalAlbum(albumId: UUID, clusterIds: [UUID]) async throws
+    func fetchLinkedAnimalAlbums(albumId: UUID) async throws -> [Album]
+
+    /// 여행자 관리 시트용 — 얼굴+동물 앨범을 통틀어 이미 연결된(여행자) / 안 된(후보) 두 그룹으로 나눠서 반환.
+    /// 각 Album.from으로 사람/동물을 구분한다. "나"가 아직 연결 안 됐다면 후보 쪽 맨 앞으로
+    func fetchTravelerManagementCandidates(albumId: UUID) async throws -> (travelers: [Album], others: [Album])
+    /// 여행자 관리 시트의 "결정" — 얼굴/동물 id가 섞인 목록을 받아 각자의 연결 상태를 통째로 교체
+    func updateLinkedTravelerAlbums(albumId: UUID, albumIds: [UUID]) async throws
 
     /// 여행 앨범 "사진 추가" 피커 — 기준 날짜 이전 사진(최신순) / 이후 사진(오래된순)
     func fetchLibraryPhotos(before date: Date, page: Int, pageCount: Int) async throws -> PhotoList
     func fetchLibraryPhotos(after date: Date, page: Int, pageCount: Int) async throws -> PhotoList
-    /// 고른 사진들을 앨범에 추가 (아직 분석 안 된 사진이면 기본 정보로 새로 저장) + 등장 인물 얼굴 앨범 자동 연결
+    /// 고른 사진들을 앨범에 추가 (아직 분석 안 된 사진이면 기본 정보로 새로 저장) + 등장 인물/동물 앨범 자동 연결
     func addPhotosToAlbum(albumId: UUID, photos: [PhotoInAlbum]) async throws
-    /// 사진 삭제 후 호출 — 연결된 얼굴 앨범 중 이 앨범에 더 이상 사진이 하나도 안 남은 건 연결 해제
+    /// 사진 삭제 후 호출 — 연결된 얼굴/동물 앨범 중 이 앨범에 더 이상 사진이 하나도 안 남은 건 연결 해제
     func pruneLinkedFaceAlbums(albumId: UUID) async throws
+    func pruneLinkedAnimalAlbums(albumId: UUID) async throws
 
     /// 여행 앨범 병합 후보 — 기간이 가까운 다른 여행 앨범 순으로 정렬
     func fetchOtherTravelAlbums(excluding albumId: UUID) async throws -> [AlbumMergeCandidate]
@@ -47,17 +57,20 @@ public final class DefaultAlbumDetailUseCase: AlbumDetailUseCase {
     private let repository: AlbumDataRepository
     private let libraryRepository: PhotoLibraryRepository
     private let faceClusterRepository: FaceClusterRepository
+    private let animalClusterRepository: AnimalClusterRepository
     private let photoDataRepository: PhotoDataRepository
     private let travelRepository: TravelDetectionRepository
 
     public init(repository: AlbumDataRepository,
                 libraryRepository: PhotoLibraryRepository,
                 faceClusterRepository: FaceClusterRepository,
+                animalClusterRepository: AnimalClusterRepository,
                 photoDataRepository: PhotoDataRepository,
                 travelRepository: TravelDetectionRepository) {
         self.repository = repository
         self.libraryRepository = libraryRepository
         self.faceClusterRepository = faceClusterRepository
+        self.animalClusterRepository = animalClusterRepository
         self.photoDataRepository = photoDataRepository
         self.travelRepository = travelRepository
     }
@@ -116,21 +129,63 @@ public final class DefaultAlbumDetailUseCase: AlbumDetailUseCase {
         try repository.fetchLinkedFaceAlbums(albumId: albumId)
     }
 
-    public func fetchFaceAlbumsForTravelerManagement(albumId: UUID) async throws -> (travelers: [Album], others: [Album]) {
-        let allFaceAlbums = try repository.fetchAll(from: "face")
-        let linkedIds = Set(try repository.fetchLinkedFaceAlbums(albumId: albumId).map { $0.id })
+    // MARK: - 동물 앨범 (얼굴과 동일한 동작, 대상 repository만 다름)
 
-        let travelers = allFaceAlbums.filter { linkedIds.contains($0.id) }
-        var others = allFaceAlbums.filter { !linkedIds.contains($0.id) }
-        if let meIndex = others.firstIndex(where: { $0.displayName == "나" }) {
-            let me = others.remove(at: meIndex)
-            others.insert(me, at: 0)
-        }
-        return (travelers, others)
+    public func fetchOtherAnimalAlbums(excluding albumId: UUID) async throws -> [AlbumMergeCandidate] {
+        try await animalClusterRepository.fetchOtherAnimalAlbumsSortedBySimilarity(excluding: albumId)
     }
 
-    public func updateLinkedFaceAlbums(albumId: UUID, faceAlbumIds: [UUID]) async throws {
-        try repository.updateLinkedFaceAlbums(albumId: albumId, faceAlbumIds: faceAlbumIds)
+    public func mergeAnimalAlbums(sourceId: UUID, targetId: UUID) async throws {
+        try await animalClusterRepository.mergeAlbums(sourceId: sourceId, targetId: targetId)
+        try repository.syncAlbums()
+    }
+
+    public func excludeAnimalPhoto(_ photoId: String, fromAlbumId: UUID) async throws {
+        try await animalClusterRepository.excludePhoto(photoId: photoId, fromAlbumId: fromAlbumId)
+        try repository.syncAlbums()
+    }
+
+    public func fetchAnimalClusters(albumId: UUID) async throws -> [FaceClusterSummary] {
+        try await animalClusterRepository.fetchClusters(albumId: albumId)
+    }
+
+    public func splitAnimalAlbum(albumId: UUID, clusterIds: [UUID]) async throws {
+        try await animalClusterRepository.splitAlbum(albumId: albumId, clusterIds: clusterIds)
+        try repository.syncAlbums()
+    }
+
+    public func fetchLinkedAnimalAlbums(albumId: UUID) async throws -> [Album] {
+        try repository.fetchLinkedAnimalAlbums(albumId: albumId)
+    }
+
+    // MARK: - 여행자 관리 (얼굴 + 동물 통합)
+
+    public func fetchTravelerManagementCandidates(albumId: UUID) async throws -> (travelers: [Album], others: [Album]) {
+        let allFaceAlbums = try repository.fetchAll(from: "face")
+        let allAnimalAlbums = try repository.fetchAll(from: "animal")
+        let linkedFaceIds = Set(try repository.fetchLinkedFaceAlbums(albumId: albumId).map { $0.id })
+        let linkedAnimalIds = Set(try repository.fetchLinkedAnimalAlbums(albumId: albumId).map { $0.id })
+
+        let faceTravelers = allFaceAlbums.filter { linkedFaceIds.contains($0.id) }
+        let animalTravelers = allAnimalAlbums.filter { linkedAnimalIds.contains($0.id) }
+
+        var faceOthers = allFaceAlbums.filter { !linkedFaceIds.contains($0.id) }
+        let animalOthers = allAnimalAlbums.filter { !linkedAnimalIds.contains($0.id) }
+        if let meIndex = faceOthers.firstIndex(where: { $0.displayName == "나" }) {
+            let me = faceOthers.remove(at: meIndex)
+            faceOthers.insert(me, at: 0)
+        }
+
+        return (faceTravelers + animalTravelers, faceOthers + animalOthers)
+    }
+
+    public func updateLinkedTravelerAlbums(albumId: UUID, albumIds: [UUID]) async throws {
+        let allFaceIds = Set(try repository.fetchAll(from: "face").map { $0.id })
+        let allAnimalIds = Set(try repository.fetchAll(from: "animal").map { $0.id })
+        let selected = Set(albumIds)
+
+        try repository.updateLinkedFaceAlbums(albumId: albumId, faceAlbumIds: Array(selected.intersection(allFaceIds)))
+        try repository.updateLinkedAnimalAlbums(albumId: albumId, animalAlbumIds: Array(selected.intersection(allAnimalIds)))
     }
 
     public func fetchLibraryPhotos(before date: Date, page: Int, pageCount: Int) async throws -> PhotoList {
@@ -159,27 +214,40 @@ public final class DefaultAlbumDetailUseCase: AlbumDetailUseCase {
         let photoIds = photos.map { $0.localIdentifier }
         try repository.addPhotos(albumId: albumId, photoIdentifiers: photoIds)
 
-        // 새로 추가된 사진에 등장하는 얼굴이 있으면 그 얼굴 앨범들도 여행자로 자동 연결
+        // 새로 추가된 사진에 등장하는 얼굴/동물이 있으면 그 앨범들도 여행자로 자동 연결
         let newFaceAlbumIds = try await faceClusterRepository.fetchFaceAlbumIds(forPhotoIds: photoIds)
-        guard !newFaceAlbumIds.isEmpty else { return }
+        if !newFaceAlbumIds.isEmpty {
+            let currentLinkedIds = try repository.fetchLinkedFaceAlbums(albumId: albumId).map { $0.id }
+            let union = Array(Set(currentLinkedIds).union(newFaceAlbumIds))
+            try repository.updateLinkedFaceAlbums(albumId: albumId, faceAlbumIds: union)
+        }
 
-        let currentLinkedIds = try repository.fetchLinkedFaceAlbums(albumId: albumId).map { $0.id }
-        let union = Array(Set(currentLinkedIds).union(newFaceAlbumIds))
-        try repository.updateLinkedFaceAlbums(albumId: albumId, faceAlbumIds: union)
+        let newAnimalAlbumIds = try await animalClusterRepository.fetchAnimalAlbumIds(forPhotoIds: photoIds)
+        if !newAnimalAlbumIds.isEmpty {
+            let currentLinkedIds = try repository.fetchLinkedAnimalAlbums(albumId: albumId).map { $0.id }
+            let union = Array(Set(currentLinkedIds).union(newAnimalAlbumIds))
+            try repository.updateLinkedAnimalAlbums(albumId: albumId, animalAlbumIds: union)
+        }
     }
 
     public func pruneLinkedFaceAlbums(albumId: UUID) async throws {
         let remainingPhotoIds = Set(try repository.fetchPhotos(by: albumId).map { $0.localIdentifier })
         let linkedFaceAlbums = try repository.fetchLinkedFaceAlbums(albumId: albumId)
-
-        var keptIds: [UUID] = []
-        for faceAlbum in linkedFaceAlbums {
-            let facePhotoIds = Set(try repository.fetchPhotos(by: faceAlbum.id).map { $0.localIdentifier })
-            if !facePhotoIds.isDisjoint(with: remainingPhotoIds) {
-                keptIds.append(faceAlbum.id)
-            }
+        let candidates: [(id: UUID, photoIds: Set<String>)] = try linkedFaceAlbums.map { album in
+            (album.id, Set(try repository.fetchPhotos(by: album.id).map { $0.localIdentifier }))
         }
+        let keptIds = TravelerLinking.linkedAlbumIds(tripPhotoIds: remainingPhotoIds, candidates: candidates)
         try repository.updateLinkedFaceAlbums(albumId: albumId, faceAlbumIds: keptIds)
+    }
+
+    public func pruneLinkedAnimalAlbums(albumId: UUID) async throws {
+        let remainingPhotoIds = Set(try repository.fetchPhotos(by: albumId).map { $0.localIdentifier })
+        let linkedAnimalAlbums = try repository.fetchLinkedAnimalAlbums(albumId: albumId)
+        let candidates: [(id: UUID, photoIds: Set<String>)] = try linkedAnimalAlbums.map { album in
+            (album.id, Set(try repository.fetchPhotos(by: album.id).map { $0.localIdentifier }))
+        }
+        let keptIds = TravelerLinking.linkedAlbumIds(tripPhotoIds: remainingPhotoIds, candidates: candidates)
+        try repository.updateLinkedAnimalAlbums(albumId: albumId, animalAlbumIds: keptIds)
     }
 
     public func fetchOtherTravelAlbums(excluding albumId: UUID) async throws -> [AlbumMergeCandidate] {
@@ -215,15 +283,20 @@ public final class DefaultAlbumDetailUseCase: AlbumDetailUseCase {
             displayName = source.displayName
         }
 
-        // 연결된 얼굴 앨범도 기존 것들의 합집합이 아니라, 새로 모인 전체 사진 기준으로 다시 계산
+        // 연결된 얼굴/동물 앨범도 기존 것들의 합집합이 아니라, 새로 모인 전체 사진 기준으로 다시 계산
         let mergedPhotoIdSet = Set(photoIdentifiers)
+
         let faceAlbums = try repository.fetchAll(from: "face")
-        let linkedFaceAlbumIds = try faceAlbums
-            .filter { faceAlbum in
-                let facePhotoIds = Set(try repository.fetchPhotos(by: faceAlbum.id).map { $0.localIdentifier })
-                return !facePhotoIds.isDisjoint(with: mergedPhotoIdSet)
-            }
-            .map { $0.id }
+        let faceCandidates: [(id: UUID, photoIds: Set<String>)] = try faceAlbums.map { album in
+            (album.id, Set(try repository.fetchPhotos(by: album.id).map { $0.localIdentifier }))
+        }
+        let linkedFaceAlbumIds = TravelerLinking.linkedAlbumIds(tripPhotoIds: mergedPhotoIdSet, candidates: faceCandidates)
+
+        let animalAlbums = try repository.fetchAll(from: "animal")
+        let animalCandidates: [(id: UUID, photoIds: Set<String>)] = try animalAlbums.map { album in
+            (album.id, Set(try repository.fetchPhotos(by: album.id).map { $0.localIdentifier }))
+        }
+        let linkedAnimalAlbumIds = TravelerLinking.linkedAlbumIds(tripPhotoIds: mergedPhotoIdSet, candidates: animalCandidates)
 
         try repository.mergeTravelAlbums(
             sourceId: sourceId,
@@ -232,7 +305,8 @@ public final class DefaultAlbumDetailUseCase: AlbumDetailUseCase {
             startDate: mergedStart,
             endDate: mergedEnd,
             displayName: displayName,
-            linkedFaceAlbumIds: linkedFaceAlbumIds
+            linkedFaceAlbumIds: linkedFaceAlbumIds,
+            linkedAnimalAlbumIds: linkedAnimalAlbumIds
         )
         try repository.syncAlbums()
     }

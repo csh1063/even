@@ -16,6 +16,7 @@ public final class AlbumDetailDIContainer {
     private let albumDataRepository: AlbumDataRepository
     private let labelRepository: PhotoLabelDataRepository
     private let faceClusterRepository: FaceClusterRepository
+    private let animalClusterRepository: AnimalClusterRepository
     private let photoDataRepository: PhotoDataRepository
     private let travelRepository: TravelDetectionRepository
 
@@ -27,6 +28,7 @@ public final class AlbumDetailDIContainer {
                 albumDataRepository: AlbumDataRepository,
                 labelRepository: PhotoLabelDataRepository,
                 faceClusterRepository: FaceClusterRepository,
+                animalClusterRepository: AnimalClusterRepository,
                 photoDataRepository: PhotoDataRepository,
                 travelRepository: TravelDetectionRepository,
                 isSelectMode: Bool) {
@@ -35,6 +37,7 @@ public final class AlbumDetailDIContainer {
         self.albumDataRepository = albumDataRepository
         self.labelRepository = labelRepository
         self.faceClusterRepository = faceClusterRepository
+        self.animalClusterRepository = animalClusterRepository
         self.photoDataRepository = photoDataRepository
         self.travelRepository = travelRepository
         self.isSelectMode = isSelectMode
@@ -65,6 +68,7 @@ public final class AlbumDetailDIContainer {
             repository: albumDataRepository,
             libraryRepository: photoLibraryRepository,
             faceClusterRepository: faceClusterRepository,
+            animalClusterRepository: animalClusterRepository,
             photoDataRepository: photoDataRepository,
             travelRepository: travelRepository
         )

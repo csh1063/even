@@ -80,6 +80,7 @@ public final class AlbumDetailViewModel: BaseViewModel {
     /// 얼굴 앨범 디버깅용: 사진 id별 이 앨범에 묶이게 한 얼굴의 boundingBox
     private var faceBoundingBoxes: [String: CGRect] = [:]
     var isFaceAlbum: Bool { album.from == "face" }
+    var isAnimalAlbum: Bool { album.from == "animal" }
     var isTravelAlbum: Bool { album.from == "travel" }
     /// AutoAlbumUseCase의 앨범 명명 기준과 동일하게, 당일치기면 "나들이" 아니면 "여행"
     private var tripSuffix: String {
@@ -109,7 +110,7 @@ public final class AlbumDetailViewModel: BaseViewModel {
     }
 
     private static func computedAlbumName(for album: Album) -> String {
-        (album.from == "face" && !album.isRenamed) ? " " : album.displayName
+        ((album.from == "face" || album.from == "animal") && !album.isRenamed) ? " " : album.displayName
     }
 
     public func transform() -> Output {
@@ -260,7 +261,8 @@ public final class AlbumDetailViewModel: BaseViewModel {
             }
             if isTravelAlbum {
                 let linkedFaceAlbums = try await detailUseCase.fetchLinkedFaceAlbums(albumId: album.id)
-                travelPeopleInfo = formatTravelPeopleInfo(linkedFaceAlbums)
+                let linkedAnimalAlbums = try await detailUseCase.fetchLinkedAnimalAlbums(albumId: album.id)
+                travelPeopleInfo = formatTravelPeopleInfo(linkedFaceAlbums + linkedAnimalAlbums)
             }
             self.photos = photos
             self.photoDetails = photos.map {
@@ -272,13 +274,16 @@ public final class AlbumDetailViewModel: BaseViewModel {
         }
     }
 
-    /// 여행에 등장한 얼굴 앨범들을 "A와 사람의 여행"처럼 이름 나열 문구로 만들고, 인원 수는 따로 반환한다.
-    /// 이름 지어준 사람은 실제 이름, 아직 안 지어준 사람은 "사람"으로 표시한다.
+    /// 여행에 등장한 얼굴/동물 앨범들을 "A와 B와 C의 여행"처럼 이름 나열 문구로 만들고, 인원 수는 따로 반환한다.
+    /// 이름 지어준 경우는 실제 이름, 아직 안 지어준 경우는 사람은 "사람", 동물은 "반려동물"로 표시한다.
     /// 앨범 기간이 당일치기면(AutoAlbumUseCase의 명명 기준과 동일) "여행" 대신 "나들이"로 표시한다
-    private func formatTravelPeopleInfo(_ linkedFaceAlbums: [Album]) -> TravelPeopleInfo? {
-        guard !linkedFaceAlbums.isEmpty else { return nil }
+    private func formatTravelPeopleInfo(_ linkedAlbums: [Album]) -> TravelPeopleInfo? {
+        guard !linkedAlbums.isEmpty else { return nil }
 
-        let names = linkedFaceAlbums.map { $0.isRenamed ? $0.displayName : "사람" }
+        let names = linkedAlbums.map { album -> String in
+            if album.isRenamed { return album.displayName }
+            return album.from == "animal" ? "반려동물" : "사람"
+        }
         let suffix = tripSuffix
 
         let name: String
@@ -298,9 +303,10 @@ public final class AlbumDetailViewModel: BaseViewModel {
         do {
             isLoading = true
             try await detailUseCase.deletePhotos(ids, albumId: album.id, deleteInLibrary: deleteInLibrary)
-            // 여행 앨범에서 사진을 지웠을 때, 연결된 얼굴 앨범의 사진이 하나도 안 남았으면 그 연결도 같이 해제한다
+            // 여행 앨범에서 사진을 지웠을 때, 연결된 얼굴/동물 앨범의 사진이 하나도 안 남았으면 그 연결도 같이 해제한다
             if isTravelAlbum {
                 try await detailUseCase.pruneLinkedFaceAlbums(albumId: album.id)
+                try await detailUseCase.pruneLinkedAnimalAlbums(albumId: album.id)
             }
             await loadPhotos()
             isLoading = false
@@ -337,7 +343,11 @@ public final class AlbumDetailViewModel: BaseViewModel {
         do {
             isLoading = true
             for id in ids {
-                try await detailUseCase.excludePhoto(id, fromAlbumId: album.id)
+                if isAnimalAlbum {
+                    try await detailUseCase.excludeAnimalPhoto(id, fromAlbumId: album.id)
+                } else {
+                    try await detailUseCase.excludePhoto(id, fromAlbumId: album.id)
+                }
             }
             await loadPhotos()
             isLoading = false
@@ -352,6 +362,8 @@ public final class AlbumDetailViewModel: BaseViewModel {
             for targetId in targetAlbumIds {
                 if isTravelAlbum {
                     try await detailUseCase.mergeTravelAlbums(sourceId: album.id, targetId: targetId)
+                } else if isAnimalAlbum {
+                    try await detailUseCase.mergeAnimalAlbums(sourceId: album.id, targetId: targetId)
                 } else {
                     try await detailUseCase.mergeAlbums(sourceId: album.id, targetId: targetId)
                 }
@@ -366,7 +378,11 @@ public final class AlbumDetailViewModel: BaseViewModel {
     private func splitAlbum(clusterIds: [UUID]) async {
         do {
             isLoading = true
-            try await detailUseCase.splitAlbum(albumId: album.id, clusterIds: clusterIds)
+            if isAnimalAlbum {
+                try await detailUseCase.splitAnimalAlbum(albumId: album.id, clusterIds: clusterIds)
+            } else {
+                try await detailUseCase.splitAlbum(albumId: album.id, clusterIds: clusterIds)
+            }
             await loadPhotos()
             isLoading = false
         } catch {
@@ -414,9 +430,14 @@ extension AlbumDetailViewModel: AlbumDetailViewModelDelegate {
         Task { [weak self] in
             guard let self else { return }
             do {
-                let candidates = isTravelAlbum
-                    ? try await detailUseCase.fetchOtherTravelAlbums(excluding: album.id)
-                    : try await detailUseCase.fetchOtherFaceAlbums(excluding: album.id)
+                let candidates: [AlbumMergeCandidate]
+                if isTravelAlbum {
+                    candidates = try await detailUseCase.fetchOtherTravelAlbums(excluding: album.id)
+                } else if isAnimalAlbum {
+                    candidates = try await detailUseCase.fetchOtherAnimalAlbums(excluding: album.id)
+                } else {
+                    candidates = try await detailUseCase.fetchOtherFaceAlbums(excluding: album.id)
+                }
                 onAction?(.pickMergeTarget(candidates: candidates, isTravel: isTravelAlbum, currentAlbum: album))
             } catch {}
         }
@@ -430,7 +451,9 @@ extension AlbumDetailViewModel: AlbumDetailViewModelDelegate {
         Task { [weak self] in
             guard let self else { return }
             do {
-                let clusters = try await detailUseCase.fetchClusters(albumId: album.id)
+                let clusters = isAnimalAlbum
+                    ? try await detailUseCase.fetchAnimalClusters(albumId: album.id)
+                    : try await detailUseCase.fetchClusters(albumId: album.id)
                 onAction?(.pickSplitClusters(clusters: clusters))
             } catch {}
         }
@@ -444,7 +467,7 @@ extension AlbumDetailViewModel: AlbumDetailViewModelDelegate {
         Task { [weak self] in
             guard let self else { return }
             do {
-                let (travelers, others) = try await detailUseCase.fetchFaceAlbumsForTravelerManagement(albumId: album.id)
+                let (travelers, others) = try await detailUseCase.fetchTravelerManagementCandidates(albumId: album.id)
                 onAction?(.pickTravelerManagement(travelers: travelers, others: others))
             } catch {}
         }
@@ -454,9 +477,10 @@ extension AlbumDetailViewModel: AlbumDetailViewModelDelegate {
         Task { [weak self] in
             guard let self else { return }
             do {
-                try await detailUseCase.updateLinkedFaceAlbums(albumId: album.id, faceAlbumIds: travelerIds)
+                try await detailUseCase.updateLinkedTravelerAlbums(albumId: album.id, albumIds: travelerIds)
                 let linkedFaceAlbums = try await detailUseCase.fetchLinkedFaceAlbums(albumId: album.id)
-                travelPeopleInfo = formatTravelPeopleInfo(linkedFaceAlbums)
+                let linkedAnimalAlbums = try await detailUseCase.fetchLinkedAnimalAlbums(albumId: album.id)
+                travelPeopleInfo = formatTravelPeopleInfo(linkedFaceAlbums + linkedAnimalAlbums)
             } catch {}
         }
     }

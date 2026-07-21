@@ -94,8 +94,15 @@ final class AlbumListViewModel: BaseViewModel {
     private func loadAlbumFrom() async {
         do {
             print("load albums", self.from)
-            let albums = try await self.albumUseCase.fetchAll(from: self.from)
-//            self.albums = albums
+            // "인물" 섹션은 얼굴+동물 두 from을 합쳐서 보여주므로, 홈 화면과 동일하게 둘 다 가져온다
+            let albums: [Album]
+            if from == "face" {
+                let faceAlbums = try await self.albumUseCase.fetchAll(from: "face")
+                let animalAlbums = try await self.albumUseCase.fetchAll(from: "animal")
+                albums = faceAlbums + animalAlbums
+            } else {
+                albums = try await self.albumUseCase.fetchAll(from: self.from)
+            }
             self.buildSections(from: albums)
         } catch {
             print("loadFodlers error")
@@ -132,6 +139,14 @@ final class AlbumListViewModel: BaseViewModel {
                 .sorted { $0.photoCount > $1.photoCount }
                 .map {
                     .similar(SimilarAlbumCellViewModel(album: $0, imageLoader: self))
+                }
+        case "face":
+            list = albums.filter { AlbumSection.faceSectionFromValues.contains($0.from) }
+                .sorted { $0.photoCount > $1.photoCount }
+                .map { album in
+                    album.from == "animal"
+                        ? .animal(AnimalAlbumCellViewModel(album: album, imageLoader: self, imageUseCase: imageUseCase, albumUseCase: albumUseCase))
+                        : .face(FaceAlbumCellViewModel(album: album, imageLoader: self, imageUseCase: imageUseCase, albumUseCase: albumUseCase))
                 }
         default: list = []
         }

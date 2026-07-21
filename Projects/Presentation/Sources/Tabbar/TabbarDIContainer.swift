@@ -40,6 +40,7 @@ public final class TabbarDIContainer {
             travelRepository: appDiContainer.travelRepository,
             homeZoneRepository: appDiContainer.homeZoneRepository,
             faceClusterRepository: appDiContainer.faceClusterRepository,
+            animalClusterRepository: appDiContainer.animalClusterRepository,
             similarRepository: appDiContainer.similarRepository
         )
 

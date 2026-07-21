@@ -32,7 +32,8 @@ public final class RepositoryFactory {
             libraryService: serviceFactory.photoLibraryService,
             geocoderService: serviceFactory.geocoderService,
             networkService: serviceFactory.networkService,
-            faceEmbeddingService: serviceFactory.faceEmbeddingService
+            faceEmbeddingService: serviceFactory.faceEmbeddingService,
+            animalEmbeddingService: serviceFactory.animalEmbeddingService
         )
     }()
 
@@ -72,6 +73,12 @@ public final class RepositoryFactory {
         DefaultFaceClusterRepository(
             container: container,
             clusterService: serviceFactory.faceClusterService)
+    }()
+
+    public lazy var animalClusterRepository: AnimalClusterRepository = {
+        DefaultAnimalClusterRepository(
+            container: container,
+            clusterService: serviceFactory.animalClusterService)
     }()
 
     public lazy var travelRepository: TravelDetectionRepository = {

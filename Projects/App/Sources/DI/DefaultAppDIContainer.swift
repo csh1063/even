@@ -69,6 +69,10 @@ final class DefaultAppDIContainer: AppDIContainer {
         repositoryFactory.faceClusterRepository
     }
 
+    var animalClusterRepository: AnimalClusterRepository {
+        repositoryFactory.animalClusterRepository
+    }
+
     var similarRepository: SimilarPhotoClusterRepository {
         repositoryFactory.similarRepository
     }

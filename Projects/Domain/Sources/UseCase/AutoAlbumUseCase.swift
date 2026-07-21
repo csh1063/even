@@ -9,16 +9,26 @@
 import Foundation
 
 public protocol AutoAlbumUseCase {
-    func generateAllAlbums() -> AsyncThrowingStream<ProgressAlbum, Error>
+    /// fullRegenerate: true면 albumsGeneratedAt 플래그를 무시하고 전체 사진의 날짜/주소/카테고리를
+    /// 다시 분류한다 — "자동 앨범 전체 재생성"처럼 앨범만 지우고 이 플래그는 그대로인 상황에서
+    /// 날짜/주소/카테고리 앨범이 재생성되지 않는 문제를 피하기 위함
+    func generateAllAlbums(fullRegenerate: Bool) -> AsyncThrowingStream<ProgressAlbum, Error>
     func createDateAlbums() async throws
     func createLocationAlbums() async throws
     func createCategoryAlbums() async throws
     func createFaceAlbums() async throws
+    func createAnimalAlbums() async throws
     func createTravelAutoAlbum() -> AsyncThrowingStream<ProgressAlbum, Error>
     func createSimilarAlbum() async throws
     func syncPhotoCount() async throws
     func deletePhotos() async throws
     func deleteAutoAlbums() async throws
+}
+
+extension AutoAlbumUseCase {
+    public func generateAllAlbums() -> AsyncThrowingStream<ProgressAlbum, Error> {
+        generateAllAlbums(fullRegenerate: false)
+    }
 }
 
 public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
@@ -30,6 +40,7 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
     private let travelRepository: TravelDetectionRepository
     private let homeZoneRepository: HomeZoneRepository
     private let faceClusterRepository: FaceClusterRepository
+    private let animalClusterRepository: AnimalClusterRepository
     private let similarRepository: SimilarPhotoClusterRepository
 
     private let reanalyzePeriod: TimeInterval = 90 * 24 * 60 * 60  // 3개월
@@ -47,6 +58,7 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
         travelRepository: TravelDetectionRepository,
         homeZoneRepository: HomeZoneRepository,
         faceClusterRepository: FaceClusterRepository,
+        animalClusterRepository: AnimalClusterRepository,
         similarRepository: SimilarPhotoClusterRepository
     ) {
         self.photoDataRepository = photoDataRepository
@@ -56,6 +68,7 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
         self.travelRepository = travelRepository
         self.homeZoneRepository = homeZoneRepository
         self.faceClusterRepository = faceClusterRepository
+        self.animalClusterRepository = animalClusterRepository
         self.similarRepository = similarRepository
     }
 
@@ -63,23 +76,27 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
 
     /// 새로 분석된 사진만 대상으로 (날짜+주소+카테고리) → 얼굴 → 여행 → 비슷한사진 순으로 앨범을 갱신한다.
     /// 날짜/주소/카테고리는 아직 분류되지 않은 사진만, 비슷한사진은 시간 윈도우 안에서만 증분 처리한다.
-    public func generateAllAlbums() -> AsyncThrowingStream<ProgressAlbum, Error> {
+    public func generateAllAlbums(fullRegenerate: Bool) -> AsyncThrowingStream<ProgressAlbum, Error> {
         AsyncThrowingStream { continuation in
             Task {
                 do {
-                    let totalSteps = 4.0
+                    let totalSteps = 5.0
 
-                    try await classifyNewPhotosCore()
+                    try await classifyNewPhotosCore(fullRegenerate: fullRegenerate)
                     continuation.yield(ProgressAlbum(step: .creatingAlbums, ratio: 1 / totalSteps))
 
                     try await createFaceAlbumsCore()
                     continuation.yield(ProgressAlbum(step: .creatingAlbums, ratio: 2 / totalSteps))
 
-                    try await createTravelAlbumsCore()
+                    try await createAnimalAlbumsCore()
                     continuation.yield(ProgressAlbum(step: .creatingAlbums, ratio: 3 / totalSteps))
 
+                    // 여행 앨범이 "누가 포함되는지"(사람+동물)를 계산하려면 얼굴/동물 앨범이 먼저 만들어져 있어야 한다
+                    try await createTravelAlbumsCore()
+                    continuation.yield(ProgressAlbum(step: .creatingAlbums, ratio: 4 / totalSteps))
+
                     try await updateSimilarAlbumsIncrementalCore { ratio in
-                        continuation.yield(ProgressAlbum(step: .creatingAlbums, ratio: 3 / totalSteps + ratio * (1 / totalSteps)))
+                        continuation.yield(ProgressAlbum(step: .creatingAlbums, ratio: 4 / totalSteps + ratio * (1 / totalSteps)))
                     }
                     continuation.yield(ProgressAlbum(step: .creatingAlbums, ratio: 1.0))
 
@@ -122,6 +139,12 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
     public func createFaceAlbums() async throws {
         try self.albumDataRepository.deleteAutoAlbums(by: "face")
         try await createFaceAlbumsCore()
+        try albumDataRepository.syncAlbums()
+    }
+
+    public func createAnimalAlbums() async throws {
+        try self.albumDataRepository.deleteAutoAlbums(by: "animal")
+        try await createAnimalAlbumsCore()
         try albumDataRepository.syncAlbums()
     }
 
@@ -296,7 +319,11 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
     // generateAllAlbums()에서만 쓰는 증분 버전 — 아직 date/category/location 분류를 거치지 않은 사진만
     // fetchAlbumUnclassified로 가져와서 세 종류를 한 번에 처리하고, 처리한 사진은 markAlbumsGenerated로 표시한다.
     // (재생성 테스트 버튼용 createDateAlbums 등은 이 메서드를 쓰지 않고 위의 전체 재계산 버전을 그대로 사용한다.)
-    private func classifyNewPhotosCore() async throws {
+    // fullRegenerate가 true면 "이미 분류됨" 플래그를 무시하고 전체 사진을 offset 페이지네이션으로 다시 훑는다 —
+    // "자동 앨범 재생성" 버튼이 날짜/주소/카테고리 앨범을 지워도 이 플래그는 그대로 남아있어서 아무것도
+    // 다시 안 만들어지는 문제 때문에 필요. 전체 사진을 nil로 리셋하는 대신 이 조회 방식만 바꾸는 쪽이
+    // 불필요한 전체 테이블 갱신 없이 같은 결과를 낸다.
+    private func classifyNewPhotosCore(fullRegenerate: Bool = false) async throws {
         let ruleCategories: [String: AlbumRule] = try await photoCategoryRepository.fetchRuleCategories()
 
         var dateAlbums = try albumDataRepository.fetchAll(from: "date")
@@ -307,8 +334,11 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
         var locationAlbumPhotoMap: [UUID: [String]] = [:]
         var categoryAlbumPhotoMap: [UUID: [String]] = [:]
 
+        var offset = 0
         while true {
-            let photos = try photoDataRepository.fetchAlbumUnclassified(limit: classificationPageSize)
+            let photos = fullRegenerate
+                ? try photoDataRepository.fetchAllForClassification(limit: classificationPageSize, offset: offset)
+                : try photoDataRepository.fetchAlbumUnclassified(limit: classificationPageSize)
             if photos.isEmpty { break }
 
             // 날짜
@@ -394,6 +424,7 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
             }
 
             try photoDataRepository.markAlbumsGenerated(identifiers: photos.map { $0.localIdentifier })
+            if fullRegenerate { offset += photos.count }
         }
 
         for (albumId, photoIdentifiers) in dateAlbumPhotoMap {
@@ -409,6 +440,11 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
 
     private func createFaceAlbumsCore() async throws {
         try await faceClusterRepository.clusterAndSaveAlbums()
+        try albumDataRepository.syncAlbums()
+    }
+
+    private func createAnimalAlbumsCore() async throws {
+        try await animalClusterRepository.clusterAndSaveAlbums()
         try albumDataRepository.syncAlbums()
     }
 
@@ -434,6 +470,13 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
         // 다시 조회해서 보여주므로 나중에 이름을 바꿔도 자동으로 반영된다
         let faceAlbums = try albumDataRepository.fetchAll(from: "face")
         let faceAlbumPhotoSets: [(id: UUID, photoIds: Set<String>)] = try faceAlbums.map { album in
+            let photos = try albumDataRepository.fetchPhotos(by: album.id)
+            return (album.id, Set(photos.map { $0.localIdentifier }))
+        }
+
+        // 반려동물도 "이 여행에 함께 있었는지" 같은 방식으로 연결한다
+        let animalAlbums = try albumDataRepository.fetchAll(from: "animal")
+        let animalAlbumPhotoSets: [(id: UUID, photoIds: Set<String>)] = try animalAlbums.map { album in
             let photos = try albumDataRepository.fetchPhotos(by: album.id)
             return (album.id, Set(photos.map { $0.localIdentifier }))
         }
@@ -469,12 +512,13 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
                 let identifiers = cluster.photos.map { $0.localIdentifier }
                 try albumDataRepository.addPhotos(albumId: saved.id, photoIdentifiers: identifiers)
 
-                // 이 여행 사진과 한 장이라도 겹치는 얼굴 앨범들을 연결
+                // 이 여행 사진과 한 장이라도 겹치는 얼굴/동물 앨범들을 연결
                 let travelPhotoIds = Set(identifiers)
-                let linkedFaceAlbumIds = faceAlbumPhotoSets
-                    .filter { !$0.photoIds.isDisjoint(with: travelPhotoIds) }
-                    .map { $0.id }
+                let linkedFaceAlbumIds = TravelerLinking.linkedAlbumIds(tripPhotoIds: travelPhotoIds, candidates: faceAlbumPhotoSets)
                 try albumDataRepository.updateLinkedFaceAlbums(albumId: saved.id, faceAlbumIds: linkedFaceAlbumIds)
+
+                let linkedAnimalAlbumIds = TravelerLinking.linkedAlbumIds(tripPhotoIds: travelPhotoIds, candidates: animalAlbumPhotoSets)
+                try albumDataRepository.updateLinkedAnimalAlbums(albumId: saved.id, animalAlbumIds: linkedAnimalAlbumIds)
             }
         }
 

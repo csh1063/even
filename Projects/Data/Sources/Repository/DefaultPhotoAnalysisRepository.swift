@@ -20,7 +20,16 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
     private let geocoderService: GeocoderService
     private let networkService: NetworkService
     private let faceEmbeddingService: FaceEmbeddingService
+    private let animalEmbeddingService: AnimalEmbeddingService
     private let batchSize: Int
+
+    /// classifyImage(VNClassifyImageRequest) 결과 중 이 태그가 하나라도 있으면 동물 임베딩 추출을 시도한다.
+    /// PhotoCategoriesRule.json의 "동물" 카테고리 태그 목록에서, 개/고양이 개체식별과 무관한
+    /// 새/파충류 등은 빼고(VNRecognizeAnimalsRequest 자체가 개/고양이만 구분함) 재사용한 것이다.
+    private let animalGateTags: Set<String> = [
+        "animal", "dog", "pomeranian", "bichon", "chihuahua", "bulldog", "retriever", "pug", "poodle",
+        "cat", "kitten"
+    ]
 
     // MARK: - Init
 
@@ -30,6 +39,7 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
         geocoderService: GeocoderService,
         networkService: NetworkService,
         faceEmbeddingService: FaceEmbeddingService,
+        animalEmbeddingService: AnimalEmbeddingService,
         batchSize: Int = 20
     ) {
         self.analysisService = analysisService
@@ -37,6 +47,7 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
         self.geocoderService = geocoderService
         self.networkService = networkService
         self.faceEmbeddingService = faceEmbeddingService
+        self.animalEmbeddingService = animalEmbeddingService
         self.batchSize = batchSize
     }
 
@@ -66,6 +77,7 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
 
                                     let labels: [PhotoLabel]
                                     let embedding: [FaceEmbedding]
+                                    let animalEmbedding: [AnimalEmbedding]
                                     if let image = try? await self.loadImage(photoId: photoId) {
 
                                         labels = try await self.analysisService.analyze(image: image)
@@ -79,9 +91,16 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                                         } else {
                                             embedding = []
                                         }
+
+                                        if labels.contains(where: { self.animalGateTags.contains($0.name) }) {
+                                            animalEmbedding = await self.animalEmbeddingService.extractEmbeddings(from: image)
+                                        } else {
+                                            animalEmbedding = []
+                                        }
                                     } else {
                                         labels = []
                                         embedding = []
+                                        animalEmbedding = []
                                     }
 
                                     print("id: ", photo.asset.localIdentifier, "/ year: ", year ?? "?", ", month:", month ?? "?")
@@ -95,7 +114,8 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                                         year: year,
                                         month: month,
                                         labels: labels,
-                                        faceEmbedding: embedding
+                                        faceEmbedding: embedding,
+                                        animalEmbedding: animalEmbedding
                                     )
 
                                     return (newPhoto, labels)

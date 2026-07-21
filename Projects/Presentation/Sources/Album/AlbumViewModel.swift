@@ -187,10 +187,12 @@ public final class AlbumViewModel: BaseViewModel {
                 .category(CategoryAlbumCellViewModel(album: $0, imageLoader: self))
             }
 
-        data.items[.face] = albums.filter { $0.from == "face" }
+        data.items[.face] = albums.filter { AlbumSection.faceSectionFromValues.contains($0.from) }
             .sorted { $0.photoCount > $1.photoCount }
-            .map {
-                .face(FaceAlbumCellViewModel(album: $0, imageLoader: self, imageUseCase: imageUseCase, albumUseCase: albumUseCase))
+            .map { album in
+                album.from == "animal"
+                    ? .animal(AnimalAlbumCellViewModel(album: album, imageLoader: self, imageUseCase: imageUseCase, albumUseCase: albumUseCase))
+                    : .face(FaceAlbumCellViewModel(album: album, imageLoader: self, imageUseCase: imageUseCase, albumUseCase: albumUseCase))
             }
 
         data.items[.similar] = albums.filter { $0.from == "similar" }

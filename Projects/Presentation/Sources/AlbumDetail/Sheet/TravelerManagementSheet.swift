@@ -222,13 +222,13 @@ extension TravelerManagementSheet: UICollectionViewDataSource {
         }
 
         let person = indexPath.section == 0 ? travelers[indexPath.item] : others[indexPath.item]
-        let faceViewModel = FaceCellViewModel(
-            albumId: person.id,
-            photoId: person.coverPhotoIdentifier ?? "",
+        cell.configure(
+            with: person,
+            name: person.displayName,
+            isRenamed: person.isRenamed,
             imageUseCase: imageUseCase,
             albumUseCase: albumUseCase
         )
-        cell.configure(with: faceViewModel, name: person.displayName, isRenamed: person.isRenamed)
 
         cell.onTapPhoto = { [weak self] in
             guard let self else { return }
@@ -254,7 +254,7 @@ extension TravelerManagementSheet: UICollectionViewDataSource {
               ) as? TravelerSectionHeaderView else {
             return UICollectionReusableView()
         }
-        header.configure(title: indexPath.section == 0 ? "여행자" : "인물 앨범")
+        header.configure(title: indexPath.section == 0 ? "여행자" : "후보")
         return header
     }
 }
@@ -300,7 +300,9 @@ private final class TravelerSectionHeaderView: UICollectionReusableView {
 private final class TravelerManagementCell: UICollectionViewCell {
     static let reuseIdentifier = "TravelerManagementCell"
 
+    // 여행자 후보 풀에 사람/동물 앨범이 섞여 있어서, 두 크롭 뷰를 겹쳐두고 종에 맞는 쪽만 보여준다
     private let faceCellView = FaceCellView()
+    private let animalCellView = AnimalCellView()
     private let nameRow = UIView()
 
     private let nameLabel: UILabel = {
@@ -331,12 +333,34 @@ private final class TravelerManagementCell: UICollectionViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         faceCellView.prepareForReuse()
+        animalCellView.prepareForReuse()
         onTapPhoto = nil
         onTapRename = nil
     }
 
-    func configure(with viewModel: FaceCellViewModel, name: String, isRenamed: Bool) {
-        faceCellView.configure(with: viewModel)
+    func configure(with person: Album, name: String, isRenamed: Bool, imageUseCase: PhotoImageUseCase, albumUseCase: AlbumUseCase) {
+        let isAnimal = person.from == "animal"
+        faceCellView.isHidden = isAnimal
+        animalCellView.isHidden = !isAnimal
+
+        if isAnimal {
+            let viewModel = AnimalCellViewModel(
+                albumId: person.id,
+                photoId: person.coverPhotoIdentifier ?? "",
+                imageUseCase: imageUseCase,
+                albumUseCase: albumUseCase
+            )
+            animalCellView.configure(with: viewModel)
+        } else {
+            let viewModel = FaceCellViewModel(
+                albumId: person.id,
+                photoId: person.coverPhotoIdentifier ?? "",
+                imageUseCase: imageUseCase,
+                albumUseCase: albumUseCase
+            )
+            faceCellView.configure(with: viewModel)
+        }
+
         nameLabel.text = isRenamed ? name : "미정"
         nameLabel.textColor = isRenamed ? Theme.textPrimary : Theme.textTertiary
     }
@@ -346,7 +370,12 @@ private final class TravelerManagementCell: UICollectionViewCell {
         faceCellView.layer.masksToBounds = true
         faceCellView.isUserInteractionEnabled = true
 
+        animalCellView.layer.cornerRadius = 14
+        animalCellView.layer.masksToBounds = true
+        animalCellView.isUserInteractionEnabled = true
+
         contentView.addSubview(faceCellView)
+        contentView.addSubview(animalCellView)
         contentView.addSubview(nameRow)
         nameRow.addSubview(nameLabel)
         nameRow.addSubview(penIcon)
@@ -354,6 +383,9 @@ private final class TravelerManagementCell: UICollectionViewCell {
         faceCellView.snp.makeConstraints { make in
             make.top.leading.trailing.equalToSuperview()
             make.height.equalTo(faceCellView.snp.width)
+        }
+        animalCellView.snp.makeConstraints { make in
+            make.edges.equalTo(faceCellView)
         }
         nameRow.snp.makeConstraints { make in
             make.top.equalTo(faceCellView.snp.bottom).offset(4)
@@ -370,8 +402,8 @@ private final class TravelerManagementCell: UICollectionViewCell {
             make.width.height.equalTo(16)
         }
 
-        let photoTap = UITapGestureRecognizer(target: self, action: #selector(handlePhotoTap))
-        faceCellView.addGestureRecognizer(photoTap)
+        faceCellView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handlePhotoTap)))
+        animalCellView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handlePhotoTap)))
 
         nameRow.isUserInteractionEnabled = true
         let renameTap = UITapGestureRecognizer(target: self, action: #selector(handleRenameTap))

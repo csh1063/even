@@ -40,6 +40,9 @@ public final class PhotoEntity {
     @Relationship(deleteRule: .cascade)
     public var faceEmbeddings: [FaceEmbeddingEntity] = []
 
+    @Relationship(deleteRule: .cascade)
+    public var animalEmbeddings: [AnimalEmbeddingEntity] = []
+
     @Relationship(deleteRule: .nullify, inverse: \AlbumEntity.photos)
     public var albums: [AlbumEntity] = []
 

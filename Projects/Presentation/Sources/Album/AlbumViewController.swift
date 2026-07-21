@@ -335,6 +335,10 @@ extension AlbumViewController {
             cell.configure(with: vm)
         }
 
+        let animalRegistration = UICollectionView.CellRegistration<AnimalAlbumCell, AnimalAlbumCellViewModel> { cell, _, vm in
+            cell.configure(with: vm)
+        }
+
         let similarRegistration = UICollectionView.CellRegistration<SimilarAlbumCell, SimilarAlbumCellViewModel> { cell, _, vm in
             cell.configure(with: vm)
         }
@@ -383,6 +387,11 @@ extension AlbumViewController {
             case .face(let vm):
                 return collectionView.dequeueConfiguredReusableCell(
                     using: faceRegistration,
+                    for: indexPath,
+                    item: vm)
+            case .animal(let vm):
+                return collectionView.dequeueConfiguredReusableCell(
+                    using: animalRegistration,
                     for: indexPath,
                     item: vm)
             case .similar(let vm):

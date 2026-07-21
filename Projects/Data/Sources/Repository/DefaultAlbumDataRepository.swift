@@ -169,6 +169,26 @@ public final class DefaultAlbumDataRepository: AlbumDataRepository {
         return nil
     }
 
+    public func fetchCoverAnimalBoundingBox(albumId: UUID) throws -> CGRect? {
+        let context = ModelContext(container)
+        let fetchDescriptor = FetchDescriptor<AlbumEntity>(predicate: #Predicate { $0.id == albumId })
+
+        guard let album = try context.fetch(fetchDescriptor).first,
+              let coverPhotoIdentifier = album.coverPhotoIdentifier else { return nil }
+
+        for cluster in album.animalClusters {
+            if let entity = cluster.animalEmbeddings.first(where: { $0.photo?.localIdentifier == coverPhotoIdentifier }) {
+                return CGRect(
+                    x: entity.boundingBoxX,
+                    y: entity.boundingBoxY,
+                    width: entity.boundingBoxWidth,
+                    height: entity.boundingBoxHeight
+                )
+            }
+        }
+        return nil
+    }
+
     public func updateAlbum(album: Album) throws {
 
         let context = ModelContext(container)
@@ -405,6 +425,31 @@ public final class DefaultAlbumDataRepository: AlbumDataRepository {
         return faceAlbums.filter { ids.contains($0.id) }.map { $0.toDomainWithKey() }
     }
 
+    public func updateLinkedAnimalAlbums(albumId: UUID, animalAlbumIds: [UUID]) throws {
+        let context = ModelContext(container)
+
+        let descriptor = FetchDescriptor<AlbumEntity>(predicate: #Predicate { $0.id == albumId })
+        guard let entity = try context.fetch(descriptor).first else { return }
+
+        entity.linkedAnimalAlbumIds = animalAlbumIds
+        try context.save()
+    }
+
+    public func fetchLinkedAnimalAlbums(albumId: UUID) throws -> [Album] {
+        let context = ModelContext(container)
+
+        let descriptor = FetchDescriptor<AlbumEntity>(predicate: #Predicate { $0.id == albumId })
+        guard let entity = try context.fetch(descriptor).first else { return [] }
+
+        let ids = Set(entity.linkedAnimalAlbumIds)
+        guard !ids.isEmpty else { return [] }
+
+        let animalAlbums = try context.fetch(FetchDescriptor<AlbumEntity>(
+            predicate: #Predicate { $0.from == "animal" }
+        ))
+        return animalAlbums.filter { ids.contains($0.id) }.map { $0.toDomainWithKey() }
+    }
+
     public func fetchOtherTravelAlbums(excluding albumId: UUID) throws -> [AlbumMergeCandidate] {
         let context = ModelContext(container)
 
@@ -445,7 +490,8 @@ public final class DefaultAlbumDataRepository: AlbumDataRepository {
         startDate: Date,
         endDate: Date,
         displayName: String,
-        linkedFaceAlbumIds: [UUID]
+        linkedFaceAlbumIds: [UUID],
+        linkedAnimalAlbumIds: [UUID]
     ) throws {
         let context = ModelContext(container)
 
@@ -466,6 +512,7 @@ public final class DefaultAlbumDataRepository: AlbumDataRepository {
         source.isRenamed = false
         source.isEdited = true
         source.linkedFaceAlbumIds = linkedFaceAlbumIds
+        source.linkedAnimalAlbumIds = linkedAnimalAlbumIds
         source.coverPhotoIdentifier = photos.max(by: { $0.createdAt < $1.createdAt })?.localIdentifier
 
         context.delete(target)
@@ -480,22 +527,25 @@ public final class DefaultAlbumDataRepository: AlbumDataRepository {
         albums.forEach { $0.photos.removeAll() }
         try context.save()
 
-        // AlbumEntity.keywords / .clusters가 .cascade라서, 앨범을 먼저 지우면
-        // 아래 둘이 이미 같이 지워져버려 로그가 항상 0개로 찍힌다 — 자식을 먼저 지운다
+        // AlbumEntity.keywords / .clusters / .animalClusters가 .cascade라서, 앨범을 먼저 지우면
+        // 아래가 이미 같이 지워져버려 로그가 항상 0개로 찍힌다 — 자식을 먼저 지운다
         try deleteAllLogged(AlbumKeywordEntity.self, context: context)
         try deleteAllLogged(ClusterEntity.self, context: context)
+        try deleteAllLogged(AnimalClusterEntity.self, context: context)
 
         print("🗑️ AlbumEntity 삭제: \(albums.count)개")
         albums.forEach { context.delete($0) }
         try context.save()
 
-        // PhotoEntity.faceEmbeddings / .labels가 .cascade라서, 사진을 먼저 지우면
-        // 아래 둘이 이미 같이 지워져버려 로그가 항상 0개로 찍힌다 — 자식을 먼저 지운다
+        // PhotoEntity.faceEmbeddings / .animalEmbeddings / .labels가 .cascade라서, 사진을 먼저 지우면
+        // 아래가 이미 같이 지워져버려 로그가 항상 0개로 찍힌다 — 자식을 먼저 지운다
         try deleteAllLogged(PhotoLabelEntity.self, context: context)
         try deleteAllLogged(FaceEmbeddingEntity.self, context: context)
+        try deleteAllLogged(AnimalEmbeddingEntity.self, context: context)
         try deleteAllLogged(PhotoEntity.self, context: context)
 
         try deleteAllLogged(ClusterBlacklistEntity.self, context: context)
+        try deleteAllLogged(AnimalClusterBlacklistEntity.self, context: context)
         try deleteAllLogged(HomeZoneEntity.self, context: context)
 
         try self.syncAlbums()

@@ -145,6 +145,20 @@ public final class DefaultPhotoDataRepository: PhotoDataRepository {
                 }
             }
 
+            let animalEmbeddings = photo.animalEmbedding
+            if !photo.animalEmbedding.isEmpty {
+
+                entity.animalEmbeddings.forEach { context.delete($0) }
+
+                animalEmbeddings.forEach {
+                    let animalEmbeddingEntity = AnimalEmbeddingEntity.from(
+                        domain: $0,
+                        photo: entity
+                    )
+                    context.insert(animalEmbeddingEntity)
+                }
+            }
+
             entity.analyzedAt = Date()
             try context.save()
         }.value
@@ -274,6 +288,16 @@ public final class DefaultPhotoDataRepository: PhotoDataRepository {
             predicate: #Predicate { $0.albumsGeneratedAt == nil }
         )
         fetchDescriptor.fetchLimit = limit
+        return try context.fetch(fetchDescriptor).map { $0.toDomainAll() }
+    }
+
+    public func fetchAllForClassification(limit: Int, offset: Int) throws -> [Photo] {
+        let context = ModelContext(container)
+        var fetchDescriptor = FetchDescriptor<PhotoEntity>(
+            sortBy: [SortDescriptor(\.localIdentifier)]
+        )
+        fetchDescriptor.fetchLimit = limit
+        fetchDescriptor.fetchOffset = offset
         return try context.fetch(fetchDescriptor).map { $0.toDomainAll() }
     }
 
