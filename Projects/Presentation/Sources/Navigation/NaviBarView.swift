@@ -35,12 +35,20 @@ final class NaviBarView: UIView {
     private lazy var titleLabel = UILabel()
     private lazy var messageLabel = UILabel()
 
+    // 버튼 탭을 여기로 모아서 흘려보낸다 — addButtons()가 호출될 때마다 버튼 인스턴스 자체가
+    // 통째로 교체되는데, publisher가 그때그때의 buttons 배열로 새로 MergeMany를 만드는 방식이면
+    // 호출부가 최초 1번만 구독한 경우(이 앱의 일반적인 패턴) 그 이후 addButtons()로 버튼이
+    // 교체되고 나서는 새 버튼을 눌러도 옛날(이미 사라진) 버튼에 걸린 구독이라 이벤트가 하나도
+    // 안 온다 — 선택 모드 진입 후 취소/뒤로가 안 먹히던 버그의 원인. subject를 고정해두고 각
+    // 버튼의 탭을 여기로 중계하면, publisher 자체는 버튼이 몇 번 교체되든 안 바뀌어서 최초 1번
+    // 구독만으로도 계속 동작한다.
+    private let buttonTapSubject = PassthroughSubject<NaviBarButtonType, Never>()
     var publisher: AnyPublisher<NaviBarButtonType, Never> {
-        let publishers = buttons.map { $0.publisher }
-        return Publishers.MergeMany(publishers).eraseToAnyPublisher()
+        buttonTapSubject.eraseToAnyPublisher()
     }
 
     private var cancellables = Set<AnyCancellable>()
+    private var buttonCancellables = Set<AnyCancellable>()
 
     init(
         type: NaviBarType = .title(.leading),
@@ -87,23 +95,28 @@ final class NaviBarView: UIView {
 
     public func addButtons(_ settings: [NaviButtonSetting]) {
         self.clearButtons()
-        self.buttons = settings.map { [weak self] setting in
+        self.buttonCancellables.removeAll()
+        self.buttons = settings.map { setting in
 
             let button = NaviBarButton(type: setting.type)
             button.tintAdjustmentMode = .normal
 //            button.buttonTintColor = setting.color
 
+            button.publisher
+                .sink { [weak self] type in self?.buttonTapSubject.send(type) }
+                .store(in: &buttonCancellables)
+
             if setting.isLeft {
-                self?.stackView.insertArrangedSubview(button, at: 0)
+                self.stackView.insertArrangedSubview(button, at: 0)
 //                button.snp.makeConstraints { make in
 //                    make.width.equalTo(44)
 //                }
-                self?.coverView.snp.updateConstraints { make in
+                self.coverView.snp.updateConstraints { make in
                     make.leading.equalToSuperview()
                 }
                 return button
             } else {
-                self?.stackView.addArrangedSubview(button)
+                self.stackView.addArrangedSubview(button)
 //                button.snp.makeConstraints { make in
 //                    make.width.equalTo(44)
 //                }

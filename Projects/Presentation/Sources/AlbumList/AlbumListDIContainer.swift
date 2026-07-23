@@ -47,7 +47,9 @@ public final class AlbumListDIContainer {
         )
 
         let albumUseCase = DefaultAlbumUseCase(
-            albumRepository: albumDataRepository
+            albumRepository: albumDataRepository,
+            faceClusterRepository: faceClusterRepository,
+            animalClusterRepository: animalClusterRepository
         )
 
         return AlbumListViewModel(from: from,

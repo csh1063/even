@@ -28,7 +28,13 @@ extension AlbumCellViewModel {
     }
 
     static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.id == rhs.id && lhs.displayName == rhs.displayName
+        // photoCount/localIdentifier(커버 사진)까지 비교해야 한다 — id와 displayName만 같으면
+        // "안 바뀐 셀"로 취급돼서 UICollectionViewDiffableDataSource가 다시 안 그려준다(합치기/사진
+        // 추가로 사진 수·커버는 바뀌었는데 이름은 그대로인 흔한 경우에 갱신이 안 되던 원인이었음)
+        lhs.id == rhs.id
+            && lhs.displayName == rhs.displayName
+            && lhs.photoCount == rhs.photoCount
+            && lhs.localIdentifier == rhs.localIdentifier
     }
 
     func hash(into hasher: inout Hasher) {

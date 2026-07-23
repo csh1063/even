@@ -42,6 +42,7 @@ enum NaviBarButtonType: Equatable {
 //    case delete
     case add
     case close
+    case select
 
     var imageName: String {
         switch self {
@@ -67,6 +68,7 @@ enum NaviBarButtonType: Equatable {
 //        case .delete: return "trash"
         case .add: return "plus"
         case .close: return "xmark"
+        case .select: return ""
         }
     }
 
@@ -74,6 +76,7 @@ enum NaviBarButtonType: Equatable {
         switch self {
 //        case .analysis: return "분석"
 //        case .text(let text): return text
+        case .select: return "선택"
         default: return nil
         }
     }

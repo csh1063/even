@@ -18,18 +18,42 @@ public protocol AlbumUseCase {
     func createDummy() async throws
     func fetchCoverFaceBoundingBox(albumId: UUID) async throws -> CGRect?
     func fetchCoverAnimalBoundingBox(albumId: UUID) async throws -> CGRect?
+    /// 앨범 타입에 맞는 삭제 경로로 라우팅한다 — 인물/동물은 재분석해도 다시 안 생기도록
+    /// 블랙리스트까지 처리하는 전용 삭제를, 그 외 타입은 범용 삭제를 사용한다.
+    func deleteAlbum(_ album: Album) async throws
 }
 
 public final class DefaultAlbumUseCase: AlbumUseCase {
 
     private let albumRepository: AlbumDataRepository
+    private let faceClusterRepository: FaceClusterRepository
+    private let animalClusterRepository: AnimalClusterRepository
 
     public var albumsPublisher: AnyPublisher<[Album], Never> {
         self.albumRepository.albumsPublisher
     }
 
-    public init(albumRepository: AlbumDataRepository) {
+    public init(
+        albumRepository: AlbumDataRepository,
+        faceClusterRepository: FaceClusterRepository,
+        animalClusterRepository: AnimalClusterRepository
+    ) {
         self.albumRepository = albumRepository
+        self.faceClusterRepository = faceClusterRepository
+        self.animalClusterRepository = animalClusterRepository
+    }
+
+    public func deleteAlbum(_ album: Album) async throws {
+        switch album.from {
+        case "face":
+            try await faceClusterRepository.deleteAlbum(albumId: album.id)
+            try albumRepository.syncAlbums()
+        case "animal":
+            try await animalClusterRepository.deleteAlbum(albumId: album.id)
+            try albumRepository.syncAlbums()
+        default:
+            try albumRepository.delete(id: album.id)
+        }
     }
 
     public func fetchAll() async throws -> [Album] {

@@ -25,7 +25,9 @@ public final class AlbumDIContainer {
         )
 
         let albumUseCase = DefaultAlbumUseCase(
-            albumRepository: appDIContainer.albumDataRepository
+            albumRepository: appDIContainer.albumDataRepository,
+            faceClusterRepository: appDIContainer.faceClusterRepository,
+            animalClusterRepository: appDIContainer.animalClusterRepository
         )
 
         return AlbumViewModel(tabbarViewModel: tabbarViewModel,

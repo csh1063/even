@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 import Combine
+import Domain
 
 final class AlbumViewController: BaseViewController {
 
@@ -63,6 +64,9 @@ final class AlbumViewController: BaseViewController {
         collectionView.setCollectionViewLayout(makeLayout(), animated: false)
         collectionView.contentInset = UIEdgeInsets(top: 20, left: 0, bottom: 80, right: 0)
         collectionView.delegate = self
+
+        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(_:)))
+        collectionView.addGestureRecognizer(longPress)
 
         view.addSubview(collectionView)
         view.addSubview(naviView)
@@ -119,6 +123,14 @@ final class AlbumViewController: BaseViewController {
                 print("!!", permission)
             }
             .store(in: &cancellables)
+    }
+
+    @objc private func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
+        guard gesture.state == .began else { return }
+        let point = gesture.location(in: collectionView)
+        guard let indexPath = collectionView.indexPathForItem(at: point),
+              let album = dataSource.itemIdentifier(for: indexPath)?.album else { return }
+        viewModel.send(.showAlbumMenu(album))
     }
 
     // MARK: - Compositional Layout
@@ -413,10 +425,12 @@ extension AlbumViewController {
         snapshot.appendSections(data.sections)
         data.sections.forEach { snapshot.appendItems(data.items[$0] ?? [], toSection: $0) }
 
-        dataSource.apply(snapshot, animatingDifferences: true) {
-            // apply 완료 후 layout 갱신
-            self.collectionView.setCollectionViewLayout(self.makeLayout(), animated: false)
-        }
+        // 레이아웃 객체를 다시 만들 필요가 아예 없다 — makeLayout()의 섹션 프로바이더 클로저가
+        // 호출될 때마다 dataSource.snapshot()을 그때그때 새로 읽어서 섹션 구성을 판단하므로,
+        // apply()만 해주면 컴포지셔널 레이아웃이 알아서 최신 섹션 구성으로 다시 계산해준다.
+        // (레이아웃 객체를 setCollectionViewLayout으로 스왑하던 예전 방식이 최초 진입 시 스크롤이
+        // 맨 위가 아니게 밀리는 문제, 데이터 갱신 후 스크롤 위치가 리셋되는 문제 둘 다의 원인이었음)
+        dataSource.apply(snapshot, animatingDifferences: true)
     }
 }
 

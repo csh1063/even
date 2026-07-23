@@ -131,7 +131,7 @@ final class AlbumDetailViewController: BaseViewController {
     // MARK: - Setup
 
     private func setupView() {
-        naviView.addButtons([LeftButton(type: .back), RightButton(type: .more)])
+        naviView.addButtons([LeftButton(type: .back), RightButton(type: .select), RightButton(type: .more)])
         configureDataSource()
         collectionView.delegate = self
 
@@ -221,6 +221,7 @@ final class AlbumDetailViewController: BaseViewController {
                 switch type {
                 case .back:   viewModel.send(.dismiss)
                 case .more:   viewModel.send(.more)
+                case .select: viewModel.changeMode(.select)
                 case .cancel: exitSelectionMode()
                 default: break
                 }
@@ -262,7 +263,7 @@ final class AlbumDetailViewController: BaseViewController {
         case .list:
             collectionView.allowsMultipleSelection = false
             collectionView.allowsMultipleSelectionDuringEditing = false
-            naviView.addButtons([LeftButton(type: .back), RightButton(type: .more)])
+            naviView.addButtons([LeftButton(type: .back), RightButton(type: .select), RightButton(type: .more)])
         case .select:
             collectionView.allowsMultipleSelection = true
             collectionView.allowsMultipleSelectionDuringEditing = true
