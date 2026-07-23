@@ -14,7 +14,9 @@ public protocol AlbumDetailUseCase {
     func fetchPhotos(by albumId: UUID) async throws -> [Photo]
     func fetchFaceBoundingBoxes(clusterId: String) async throws -> [String: CGRect]
     func editAlbumName(new name: String, id: UUID) async throws
-    func deleteAlbum(_ id: UUID) async throws
+    /// 앨범 타입에 맞는 삭제 경로로 라우팅한다 — 인물/동물은 재분석해도 다시 안 생기도록
+    /// 블랙리스트까지 처리하는 전용 삭제를, 그 외 타입은 범용 삭제를 사용한다.
+    func deleteAlbum(_ album: Album) async throws
     func deletePhotos(_ photoIds: [String], albumId: UUID, deleteInLibrary: Bool) async throws
     func fetchOtherFaceAlbums(excluding albumId: UUID) async throws -> [AlbumMergeCandidate]
     func mergeAlbums(sourceId: UUID, targetId: UUID) async throws
@@ -91,8 +93,17 @@ public final class DefaultAlbumDetailUseCase: AlbumDetailUseCase {
         try repository.updateAlbumName(new: name, id: id)
     }
 
-    public func deleteAlbum(_ id: UUID) async throws {
-        try repository.delete(id: id)
+    public func deleteAlbum(_ album: Album) async throws {
+        switch album.from {
+        case "face":
+            try await faceClusterRepository.deleteAlbum(albumId: album.id)
+            try repository.syncAlbums()
+        case "animal":
+            try await animalClusterRepository.deleteAlbum(albumId: album.id)
+            try repository.syncAlbums()
+        default:
+            try repository.delete(id: album.id)
+        }
     }
 
     public func deletePhotos(_ photoIds: [String], albumId: UUID, deleteInLibrary: Bool) async throws {
@@ -228,6 +239,8 @@ public final class DefaultAlbumDetailUseCase: AlbumDetailUseCase {
             let union = Array(Set(currentLinkedIds).union(newAnimalAlbumIds))
             try repository.updateLinkedAnimalAlbums(albumId: albumId, animalAlbumIds: union)
         }
+
+        try repository.syncAlbums()
     }
 
     public func pruneLinkedFaceAlbums(albumId: UUID) async throws {

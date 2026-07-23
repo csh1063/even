@@ -333,7 +333,7 @@ public final class AlbumDetailViewModel: BaseViewModel {
     private func deleteAlbum() {
         isLoading = true
         Task {
-            try await detailUseCase.deleteAlbum(album.id)
+            try await detailUseCase.deleteAlbum(album)
             isLoading = false
             onAction?(.pop)
         }

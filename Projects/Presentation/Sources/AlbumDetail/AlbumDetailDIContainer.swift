@@ -60,7 +60,11 @@ public final class AlbumDetailDIContainer {
     }
 
     func makeAlbumUseCase() -> AlbumUseCase {
-        DefaultAlbumUseCase(albumRepository: albumDataRepository)
+        DefaultAlbumUseCase(
+            albumRepository: albumDataRepository,
+            faceClusterRepository: faceClusterRepository,
+            animalClusterRepository: animalClusterRepository
+        )
     }
 
     func makeAlbumDetailUseCase() -> AlbumDetailUseCase {

@@ -15,6 +15,8 @@ enum AlbumViewModelAction {
     case moveDetail(album: Album)
     case more(from: String)
     case pop
+    /// 앨범을 길게 눌렀을 때 — 타입별 앨범 메뉴(최소 "앨범 삭제")를 띄운다
+    case showAlbumMenu(Album)
 }
 
 struct AlbumSectionsData {
@@ -40,6 +42,7 @@ public final class AlbumViewModel: BaseViewModel {
         case selectItem(Album)
         case more(String)
         case permission
+        case showAlbumMenu(Album)
     }
 
     public struct Output {
@@ -135,6 +138,8 @@ public final class AlbumViewModel: BaseViewModel {
             self.onAction?(.more(from: type))
         case .permission:
             tabbarViewModel.send(.permission)
+        case .showAlbumMenu(let album):
+            self.onAction?(.showAlbumMenu(album))
         }
     }
 

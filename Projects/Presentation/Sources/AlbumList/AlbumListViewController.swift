@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 import Combine
+import Domain
 
 final class AlbumListViewController: BaseViewController {
 
@@ -27,9 +28,16 @@ final class AlbumListViewController: BaseViewController {
 
     private var dataSource: UICollectionViewDiffableDataSource<Int, AlbumType>!
 
+    private let actionBar = AlbumSelectionActionBar()
+
     private let viewModel: AlbumListViewModel
 
     private var cancellables = Set<AnyCancellable>()
+
+    private var isSelectionMode = false {
+        didSet { updateSelectionUI() }
+    }
+    private var selectedAlbumIds: Set<UUID> = []
 
     init(viewModel: AlbumListViewModel) {
         self.viewModel = viewModel
@@ -53,13 +61,18 @@ final class AlbumListViewController: BaseViewController {
     private func setupView() {
 
         self.naviView.setTitle("여행")
-        self.naviView.addButtons([LeftButton(type: .back)])
+        self.naviView.addButtons([LeftButton(type: .back), RightButton(type: .select)])
 
         collectionView.contentInset = UIEdgeInsets(top: 20, left: 0, bottom: 80, right: 0)
         collectionView.delegate = self
+        collectionView.setCollectionViewLayout(makeLayout(type: viewModel.from), animated: false)
+
+        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(_:)))
+        collectionView.addGestureRecognizer(longPress)
 
         self.view.addSubview(naviView)
         self.view.addSubview(collectionView)
+        self.view.addSubview(actionBar)
 
         self.configureDataSource()
 
@@ -73,6 +86,14 @@ final class AlbumListViewController: BaseViewController {
             make.top.equalTo(self.naviView.snp.bottom)
             make.bottom.equalToSuperview()
         }
+
+        actionBar.snp.makeConstraints { make in
+            make.leading.trailing.bottom.equalToSuperview()
+            make.height.equalTo(88)
+        }
+
+        actionBar.isHidden = true
+        actionBar.setSelectedCount(0)
     }
 
     private func binding() {
@@ -82,14 +103,68 @@ final class AlbumListViewController: BaseViewController {
         }
         .store(in: &cancellables)
 
-        naviView.publisher.sink { type in
+        naviView.publisher.sink { [weak self] type in
+            guard let self else { return }
             switch type {
             case .back:
                 self.viewModel.send(.dismiss)
+            case .select:
+                self.isSelectionMode = true
+            case .cancel:
+                self.isSelectionMode = false
             default: break
             }
         }
         .store(in: &cancellables)
+
+        actionBar.deletePublisher
+            .sink { [weak self] in
+                guard let self else { return }
+                let albums = self.selectedAlbumIds.compactMap { id in
+                    self.dataSource.snapshot().itemIdentifiers.first { $0.album.id == id }?.album
+                }
+                guard !albums.isEmpty else { return }
+                self.viewModel.send(.confirmDeleteAlbums(albums))
+            }
+            .store(in: &cancellables)
+    }
+
+    // MARK: - Selection Mode
+
+    private func updateSelectionUI() {
+        actionBar.isHidden = !isSelectionMode
+        if !isSelectionMode {
+            selectedAlbumIds.removeAll()
+        }
+        actionBar.setSelectedCount(selectedAlbumIds.count)
+        reloadVisibleSelectionOverlays()
+
+        // 앨범 상세와 동일하게, 선택 모드일 땐 "선택" 버튼 자리를 "X"(취소)로 바꾼다
+        naviView.addButtons(
+            isSelectionMode
+                ? [LeftButton(type: .back), RightButton(type: .cancel)]
+                : [LeftButton(type: .back), RightButton(type: .select)]
+        )
+    }
+
+    private func reloadVisibleSelectionOverlays() {
+        for cell in collectionView.visibleCells {
+            guard let indexPath = collectionView.indexPath(for: cell),
+                  let album = dataSource.itemIdentifier(for: indexPath)?.album else { continue }
+            cell.applySelectionOverlay(isSelectionMode: isSelectionMode, isSelected: selectedAlbumIds.contains(album.id))
+        }
+    }
+
+    @objc private func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
+        guard gesture.state == .began, !isSelectionMode else { return }
+        let point = gesture.location(in: collectionView)
+        guard let indexPath = collectionView.indexPathForItem(at: point),
+              let album = dataSource.itemIdentifier(for: indexPath)?.album else { return }
+        viewModel.send(.showAlbumMenu(album))
+    }
+
+    private func applySelectionOverlay(to cell: UICollectionViewCell, album: Album) {
+        cell.applySelectionOverlay(isSelectionMode: isSelectionMode, isSelected: selectedAlbumIds.contains(album.id))
     }
 
     // MARK: - Compositional Layout
@@ -269,37 +344,43 @@ final class AlbumListViewController: BaseViewController {
 extension AlbumListViewController {
     private func configureDataSource() {
 
-        let dateRegistration = UICollectionView.CellRegistration<DateAlbumCell, DateAlbumCellViewModel> { cell, _, vm in
+        let dateRegistration = UICollectionView.CellRegistration<DateAlbumCell, DateAlbumCellViewModel> { [weak self] cell, _, vm in
             cell.configure(with: vm)
+            self?.applySelectionOverlay(to: cell, album: vm.album)
         }
 
-        let travelRegistration = UICollectionView.CellRegistration<TravelAlbumCell, TravelAlbumCellViewModel> { cell, _, vm in
+        let travelRegistration = UICollectionView.CellRegistration<TravelAlbumCell, TravelAlbumCellViewModel> { [weak self] cell, _, vm in
             cell.configure(with: vm)
+            self?.applySelectionOverlay(to: cell, album: vm.album)
         }
 
-        let locationRegistration = UICollectionView.CellRegistration<LocationAlbumCell, LocationAlbumCellViewModel> { cell, _, vm in
+        let locationRegistration = UICollectionView.CellRegistration<LocationAlbumCell, LocationAlbumCellViewModel> { [weak self] cell, _, vm in
 //            let style: AddressCellStyle = (indexPath.item == 0) ? .large : .small
             cell.configure(with: vm, style: .small)
+            self?.applySelectionOverlay(to: cell, album: vm.album)
         }
 
-        let categoryRegistration = UICollectionView.CellRegistration<CategoryAlbumCell, CategoryAlbumCellViewModel> {/* [weak self]*/ cell, _, vm in
-//            guard let self else { return }
+        let categoryRegistration = UICollectionView.CellRegistration<CategoryAlbumCell, CategoryAlbumCellViewModel> { [weak self] cell, _, vm in
 //            let items = self.dataSource.snapshot().itemIdentifiers(inSection: .category)
 //            cell.isFirst = (indexPath.item == 0)
 //            cell.isLast  = (indexPath.item == items.count - 1)
             cell.configure(with: vm)
+            self?.applySelectionOverlay(to: cell, album: vm.album)
         }
 
-        let faceRegistration = UICollectionView.CellRegistration<FaceAlbumCell, FaceAlbumCellViewModel> { cell, _, vm in
+        let faceRegistration = UICollectionView.CellRegistration<FaceAlbumCell, FaceAlbumCellViewModel> { [weak self] cell, _, vm in
             cell.configure(with: vm)
+            self?.applySelectionOverlay(to: cell, album: vm.album)
         }
 
-        let animalRegistration = UICollectionView.CellRegistration<AnimalAlbumCell, AnimalAlbumCellViewModel> { cell, _, vm in
+        let animalRegistration = UICollectionView.CellRegistration<AnimalAlbumCell, AnimalAlbumCellViewModel> { [weak self] cell, _, vm in
             cell.configure(with: vm)
+            self?.applySelectionOverlay(to: cell, album: vm.album)
         }
 
-        let similarRegistration = UICollectionView.CellRegistration<SimilarAlbumCell, SimilarAlbumCellViewModel> { cell, _, vm in
+        let similarRegistration = UICollectionView.CellRegistration<SimilarAlbumCell, SimilarAlbumCellViewModel> { [weak self] cell, _, vm in
             cell.configure(with: vm, hasCover: true)
+            self?.applySelectionOverlay(to: cell, album: vm.album)
         }
 
         dataSource = UICollectionViewDiffableDataSource<Int, AlbumType>(
@@ -353,10 +434,9 @@ extension AlbumListViewController {
         snapshot.appendSections([0])  // 섹션 먼저
         snapshot.appendItems(data.albums)
 
-        dataSource.apply(snapshot, animatingDifferences: true) {
-            // apply 완료 후 layout 갱신
-            self.collectionView.setCollectionViewLayout(self.makeLayout(type: data.type), animated: false)
-        }
+        // 레이아웃은 이 화면 진입 시 한 번만 정해지면 된다(타입이 인스턴스 생애주기 동안 안 바뀜) —
+        // 매번 setCollectionViewLayout으로 새 레이아웃을 만들면 가로 캐러셀/세로 스크롤 위치가 리셋된다
+        dataSource.apply(snapshot, animatingDifferences: true)
     }
 }
 
@@ -364,7 +444,22 @@ extension AlbumListViewController: UICollectionViewDelegate {
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard let albumType = dataSource.itemIdentifier(for: indexPath) else { return }
-        viewModel.send(.selectItem(albumType.album))
+
+        guard isSelectionMode else {
+            viewModel.send(.selectItem(albumType.album))
+            return
+        }
+
+        let id = albumType.album.id
+        if selectedAlbumIds.contains(id) {
+            selectedAlbumIds.remove(id)
+        } else {
+            selectedAlbumIds.insert(id)
+        }
+        actionBar.setSelectedCount(selectedAlbumIds.count)
+        if let cell = collectionView.cellForItem(at: indexPath) {
+            cell.applySelectionOverlay(isSelectionMode: true, isSelected: selectedAlbumIds.contains(id))
+        }
     }
 
 }

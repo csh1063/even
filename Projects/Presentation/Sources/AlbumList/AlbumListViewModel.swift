@@ -23,6 +23,8 @@ final class AlbumListViewModel: BaseViewModel {
         case appear
         case selectItem(Album)
         case dismiss
+        case showAlbumMenu(Album)
+        case confirmDeleteAlbums([Album])
     }
 
     struct Output {
@@ -35,7 +37,7 @@ final class AlbumListViewModel: BaseViewModel {
     let input = PassthroughSubject<Input, Never>()
     var onAction: ((AlbumViewModelAction) -> Void)?
 
-    private let from: String
+    let from: String
     private let imageUseCase: PhotoImageUseCase
     private let albumUseCase: AlbumUseCase
 
@@ -55,12 +57,15 @@ final class AlbumListViewModel: BaseViewModel {
 
         self.bind()
 
-//        albumUseCase.albumsPublisher
-//            .receive(on: DispatchQueue.main)
-//            .handleEvents(receiveOutput: { albums in
-//                print("📂 albumsPublisher received: \(albums.count)")
-//            })
-//            .assign(to: &$albums)
+        // 길게 눌러서 뜨는 앨범 메뉴(삭제/합치기/분리 등)는 이 화면이 아니라 별도로 만든
+        // AlbumDetailViewModel을 통해 처리되므로, 이 화면 스스로 다시 불러오지 않으면 반영이 안 된다 —
+        // AlbumViewModel(홈 화면)과 동일하게 albumsPublisher를 구독해서 어디서 바뀌든 갱신되게 한다.
+        albumUseCase.albumsPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                Task { await self?.loadAlbumFrom() }
+            }
+            .store(in: &cancellables)
     }
 
     func transform() -> Output {
@@ -88,7 +93,40 @@ final class AlbumListViewModel: BaseViewModel {
             self.onAction?(.moveDetail(album: album))
         case .dismiss:
             self.onAction?(.pop)
+        case .showAlbumMenu(let album):
+            self.onAction?(.showAlbumMenu(album))
+        case .confirmDeleteAlbums(let albums):
+            confirmDeleteAlbums(albums)
         }
+    }
+
+    private func confirmDeleteAlbums(_ albums: [Album]) {
+        let message = albums.count > 1
+            ? "선택한 \(albums.count)개 앨범을 삭제할까요?\n사진은 삭제되지 않아요"
+            : "앨범을 삭제 할까요?\n사진은 삭제되지 않아요"
+        showAlert(
+            title: "앨범 삭제",
+            message: message,
+            buttons: [
+                AlertButtonConfig(title: "취소", style: .default, action: {}),
+                AlertButtonConfig(title: "삭제", style: .destructive) { [weak self] in
+                    Task { await self?.deleteAlbums(albums) }
+                }
+            ]
+        )
+    }
+
+    private func deleteAlbums(_ albums: [Album]) async {
+        for album in albums {
+            do {
+                try await albumUseCase.deleteAlbum(album)
+            } catch {
+                print("앨범 삭제 실패:", error)
+            }
+        }
+        // 이 ViewModel은 albumsPublisher를 구독하지 않으므로(AlbumViewModel과 달리), 삭제 후
+        // 직접 다시 불러와야 목록에서 사라진 게 반영된다
+        await loadAlbumFrom()
     }
 
     private func loadAlbumFrom() async {

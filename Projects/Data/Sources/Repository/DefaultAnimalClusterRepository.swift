@@ -10,7 +10,7 @@
 //  - 안경(hasGlasses) 필터링 개념이 없음 — 전체 임베딩을 그대로 클러스터링 대상으로 씀
 //  - 커버 사진/클러스터 요약 선정 기준이 captureQuality 대신 detectionConfidence
 //  - 임베딩 차원이 512가 아니라 384 (DINOv2)
-//  - from: "animal", 이름 접두사 "동물 N"
+//  - from: "animal", 이름 접두사 "반려동물 N" (종 탐지가 완벽하지 않아 강아지/고양이 구분 없이 통합 번호)
 
 import Domain
 import Foundation
@@ -80,8 +80,31 @@ public final class DefaultAnimalClusterRepository: AnimalClusterRepository {
             )
         }
 
+        // 최초 분석(또는 전체 삭제 후 재생성)일 때만 사진 수 기준으로 번호를 다시 매긴다 —
+        // 기존 동물 앨범이 이미 있었다면(일반적인 증분 분석) 번호는 건드리지 않는다.
+        if existingAlbumCount == 0 {
+            renumberAlbums(context: context)
+        }
+
         try context.save()
         print("✅ [AnimalRepository] 저장 완료\n")
+    }
+
+    /// 동물 앨범 전체를 (종 구분 없이) 사진 수 내림차순으로 "반려동물 1"부터 다시 번호 매긴다.
+    /// 종 탐지가 완벽하지 않아 강아지/고양이 앨범이 서로 섞이는 경우가 있어서, 종별로 이름을
+    /// 따로 붙이면 실제 내용과 안 맞을 수 있어 종 구분 없는 통합 번호로 단순화했다.
+    /// 사용자가 직접 이름을 바꾼 앨범(isRenamed)은 순위 계산엔 포함하되 번호를 소비하지 않는다.
+    private func renumberAlbums(context: ModelContext) {
+        guard let albums = try? context.fetch(FetchDescriptor<AlbumEntity>(
+            predicate: #Predicate { $0.from == "animal" }
+        )) else { return }
+
+        let sorted = albums.filter { !$0.isRenamed }.sorted { $0.photoCount > $1.photoCount }
+        for (index, album) in sorted.enumerated() {
+            let newName = "반려동물 \(index + 1)"
+            album.name = newName
+            album.displayName = newName
+        }
     }
 
     /// 클러스터 결과 하나를 기존 앨범과 매칭하거나 새 앨범으로 만들어 저장한다. 1차 raw cluster든
@@ -120,7 +143,7 @@ public final class DefaultAnimalClusterRepository: AnimalClusterRepository {
             print("🔄 [\(album.name)] 기존 앨범 재사용")
         } else {
             let centroidData = result.centroid.withUnsafeBytes { Data($0) }
-            let albumName = "동물 \(animalIndex)"
+            let albumName = "반려동물 \(animalIndex)"
 
             album = AlbumEntity(
                 id: UUID(),
@@ -266,6 +289,21 @@ public final class DefaultAnimalClusterRepository: AnimalClusterRepository {
 
         print("\n=== 🔀 [AnimalRepository] 앨범 병합: \(target.name) → \(source.name) ===")
 
+        // 원래 이름 기억 — 나중에 분리(splitAlbum)할 때 복원용. 이미 기록된 게 있으면(과거에 또
+        // 합쳐진 적 있는 클러스터) 덮어쓰지 않아서 제일 처음 이름을 계속 보존한다.
+        for cluster in source.animalClusters where cluster.originalDisplayName == nil {
+            cluster.originalName = source.name
+            cluster.originalDisplayName = source.displayName
+            cluster.originalIsRenamed = source.isRenamed
+        }
+        for cluster in target.animalClusters where cluster.originalDisplayName == nil {
+            cluster.originalName = target.name
+            cluster.originalDisplayName = target.displayName
+            cluster.originalIsRenamed = target.isRenamed
+        }
+
+        let identity = resolveMergedIdentity(source: source, target: target)
+
         for cluster in target.animalClusters {
             cluster.album = source
             if !source.animalClusters.contains(where: { $0.id == cluster.id }) {
@@ -279,12 +317,34 @@ public final class DefaultAnimalClusterRepository: AnimalClusterRepository {
             source.photos.append(photo)
         }
 
+        source.name = identity.name
+        source.displayName = identity.displayName
+        source.isRenamed = identity.isRenamed
         source.photoCount = source.photos.count
         source.isEdited = true
 
         context.delete(target)
         try context.save()
         print("✅ [AnimalRepository] 병합 완료 — \(source.name): \(source.photoCount)장\n")
+    }
+
+    /// 병합 결과 앨범이 어떤 이름/번호를 가져야 하는지 결정한다 — 둘 다 자동 번호면 낮은 번호,
+    /// 어느 한쪽이라도 사용자가 직접 이름을 바꿨으면(isRenamed) 그 이름을 우선한다. (종 구분 없는
+    /// 통합 번호로 단순화하면서 종이 다른 경우의 별도 규칙은 없앴다 — 어차피 같은 이름 풀을 쓴다)
+    private func resolveMergedIdentity(source: AlbumEntity, target: AlbumEntity) -> (name: String, displayName: String, isRenamed: Bool) {
+        if source.isRenamed && target.isRenamed { return (source.name, source.displayName, true) }
+        if target.isRenamed { return (target.name, target.displayName, true) }
+        if source.isRenamed { return (source.name, source.displayName, true) }
+
+        let sourceNum = trailingNumber(source.name) ?? Int.max
+        let targetNum = trailingNumber(target.name) ?? Int.max
+        return targetNum < sourceNum
+            ? (target.name, target.displayName, false)
+            : (source.name, source.displayName, false)
+    }
+
+    private func trailingNumber(_ name: String) -> Int? {
+        name.split(separator: " ").last.flatMap { Int($0) }
     }
 
     // MARK: - 사진 제외
@@ -421,18 +481,42 @@ public final class DefaultAnimalClusterRepository: AnimalClusterRepository {
 
         print("\n=== ✂️ [AnimalRepository] 앨범 분리: \(album.name)에서 \(clustersToSplit.count)개 클러스터 분리 ===")
 
-        let existingAlbumCount = try context.fetchCount(FetchDescriptor<AlbumEntity>(
-            predicate: #Predicate { $0.from == "animal" }
-        ))
-        let newAlbumName = "동물 \(existingAlbumCount + 1)"
+        // 분리 대상 클러스터들이 전부 같은 "원래 이름"을 기억하고 있으면(병합되기 전 이름) 그걸로
+        // 복원한다 — 새 번호를 매기지 않는다. 기억이 없거나 서로 다르면(여러 앨범이 합쳐진 걸
+        // 애매하게 나누는 경우) 기존처럼 새 번호를 매긴다.
+        let origins = Set(clustersToSplit.map { $0.originalDisplayName })
+        let newAlbumName: String
+        let newDisplayName: String
+        let newIsRenamed: Bool
+        if origins.count == 1,
+           let originalDisplayName = clustersToSplit.first?.originalDisplayName,
+           let originalName = clustersToSplit.first?.originalName {
+            newAlbumName = originalName
+            newDisplayName = originalDisplayName
+            newIsRenamed = clustersToSplit.first?.originalIsRenamed ?? false
+            // 집으로 돌아왔으니 기록 초기화 — 다음에 또 합쳐지면 그때 다시 기록된다
+            for cluster in clustersToSplit {
+                cluster.originalName = nil
+                cluster.originalDisplayName = nil
+                cluster.originalIsRenamed = false
+            }
+        } else {
+            let existingAlbumCount = try context.fetchCount(FetchDescriptor<AlbumEntity>(
+                predicate: #Predicate { $0.from == "animal" }
+            ))
+            newAlbumName = "반려동물 \(existingAlbumCount + 1)"
+            newDisplayName = newAlbumName
+            newIsRenamed = false
+        }
         let newAlbum = AlbumEntity(
             id: UUID(),
             name: newAlbumName,
-            displayName: newAlbumName,
+            displayName: newDisplayName,
             isAuto: true,
             coverPhotoIdentifier: nil,
             from: "animal"
         )
+        newAlbum.isRenamed = newIsRenamed
         context.insert(newAlbum)
 
         let movingPhotoIds = Set(clustersToSplit.flatMap { $0.animalEmbeddings.compactMap { $0.photo?.localIdentifier } })
