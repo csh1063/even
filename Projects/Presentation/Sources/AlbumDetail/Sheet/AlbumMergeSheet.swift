@@ -77,7 +77,9 @@ final class AlbumMergeSheet: UIViewController {
 
     private lazy var collectionView: UICollectionView = {
         let space: CGFloat = 12
-        let count: CGFloat = 3
+        // 여행은 이름/기간 텍스트가 셀 안에 들어가야 해서 한 줄에 2개만 두어 셀 폭을 넓힌다
+        // (얼굴/동물 합치기는 사진만 보여주면 되니 그대로 3개)
+        let count: CGFloat = isTravel ? 2 : 3
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
         layout.sectionInset = UIEdgeInsets(top: 4, left: 20, bottom: 20, right: 20)

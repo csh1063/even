@@ -110,11 +110,18 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
     }
 
     func showAlbumOptions(album: Album) {
-        var options: [OptionRowConfig] = [
-            OptionRowConfig(icon: "pencil.line", title: "앨범명 변경", style: .normal) { [weak self] in
-                self?.showAlbumRenameSheet(album: album)
-            }
-        ]
+        var options: [OptionRowConfig] = []
+
+        // 날짜/카테고리/장소/중복 앨범은 이름이 자동 분류 기준 그 자체라서(예: "2026년", "카페") 사용자가
+        // 바꿀 수 있게 두지 않는다 — 인물/동물/여행 앨범만 이름 변경 가능
+        let renameableTypes: Set<String> = ["face", "animal", "travel"]
+        if renameableTypes.contains(album.from) {
+            options.append(
+                OptionRowConfig(icon: "pencil.line", title: "앨범명 변경", style: .normal) { [weak self] in
+                    self?.showAlbumRenameSheet(album: album)
+                }
+            )
+        }
 
         if album.from == "face" || album.from == "animal" {
             options.append(

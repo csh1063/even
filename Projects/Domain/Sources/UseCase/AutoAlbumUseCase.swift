@@ -95,7 +95,7 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
                     try await createTravelAlbumsCore()
                     continuation.yield(ProgressAlbum(step: .creatingAlbums, ratio: 4 / totalSteps))
 
-                    try await updateSimilarAlbumsIncrementalCore { ratio in
+                    try await updateSimilarAlbumsIncrementalCore(fullRegenerate: fullRegenerate) { ratio in
                         continuation.yield(ProgressAlbum(step: .creatingAlbums, ratio: 4 / totalSteps + ratio * (1 / totalSteps)))
                     }
                     continuation.yield(ProgressAlbum(step: .creatingAlbums, ratio: 1.0))
@@ -537,13 +537,18 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
 
     // generateAllAlbums()에서만 쓰는 증분 버전 — 아직 비교하지 않은 새 사진만 시간 윈도우 기준으로 처리하고,
     // 기존 비슷한사진 앨범은 삭제하지 않는다 (createSimilarAlbum()은 재생성 테스트 버튼용으로 위 전체 재계산 버전을 그대로 씀).
+    // fullRegenerate가 true면(자동 앨범 재생성 — 이 시점엔 이미 "similar" 앨범이 전부 삭제된 상태)
+    // "이미 비교함" 플래그를 무시하고 전체 사진을 다시 비교 대상으로 삼는다 — 안 그러면 이미 체크된
+    // 사진들만 있어서 newPhotos가 비어 그냥 아무 것도 안 만들어지고 끝나버린다(중복 앨범이 재생성
+    // 후에는 하나도 안 생기던 버그의 원인).
     private func updateSimilarAlbumsIncrementalCore(
+        fullRegenerate: Bool = false,
         onProgress: @escaping @Sendable (Double) -> Void = { _ in }
     ) async throws {
-        let newPhotos = try photoDataRepository.fetchSimilarUnchecked()
+        let allPhotos = try photoDataRepository.fetchPhotos()
+        let newPhotos = fullRegenerate ? allPhotos : try photoDataRepository.fetchSimilarUnchecked()
         guard !newPhotos.isEmpty else { return }
 
-        let allPhotos = try photoDataRepository.fetchPhotos()
         try await similarRepository.clusterNewPhotos(newPhotos: newPhotos, allPhotos: allPhotos, onProgress: onProgress)
         try photoDataRepository.markSimilarChecked(identifiers: newPhotos.map { $0.localIdentifier })
     }
