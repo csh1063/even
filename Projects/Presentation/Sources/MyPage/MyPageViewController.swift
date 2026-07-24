@@ -21,6 +21,8 @@ final class MyPageViewController: BaseViewController {
         tableView.contentInset = UIEdgeInsets(top: 12, left: 0, bottom: 100, right: 0)
         tableView.alwaysBounceVertical = true
         tableView.showsVerticalScrollIndicator = false
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 58
 
         tableView.register(MyCell.self, forCellReuseIdentifier: MyCell.cellName)
         tableView.register(MyPageCell.self, forCellReuseIdentifier: MyPageCell.cellName)

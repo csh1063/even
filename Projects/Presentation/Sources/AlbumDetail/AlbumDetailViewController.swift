@@ -375,7 +375,8 @@ extension AlbumDetailViewController {
 
 extension AlbumDetailViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        guard let item = dataSource.itemIdentifier(for: indexPath),
+        guard isSelectionMode,
+              let item = dataSource.itemIdentifier(for: indexPath),
               let cell = collectionView.cellForItem(at: indexPath) as? PhotoCell else { return }
 
         selectedIdentifiers.insert(item.localIdentifier)
@@ -384,7 +385,8 @@ extension AlbumDetailViewController: UICollectionViewDelegate {
     }
 
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-        guard let item = dataSource.itemIdentifier(for: indexPath),
+        guard isSelectionMode,
+              let item = dataSource.itemIdentifier(for: indexPath),
               let cell = collectionView.cellForItem(at: indexPath) as? PhotoCell else { return }
 
         selectedIdentifiers.remove(item.localIdentifier)
@@ -393,7 +395,7 @@ extension AlbumDetailViewController: UICollectionViewDelegate {
     }
 
     func collectionView(_ collectionView: UICollectionView, shouldBeginMultipleSelectionInteractionAt indexPath: IndexPath) -> Bool {
-        return true
+        return isSelectionMode
     }
 }
 

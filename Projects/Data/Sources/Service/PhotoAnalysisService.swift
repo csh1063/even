@@ -146,18 +146,25 @@ public final class PhotoAnalysisService { // : @unchecked Sendable {
                 do {
                     try handler.perform([request])
 
-                    guard let results = request.results?.filter({
+                    // 바운딩 박스 크기뿐 아니라 실제 OCR 신뢰도(topCandidates)도 확인 —
+                    // 안 그러면 창문 격자처럼 사각형처럼 보이지만 실제 텍스트가 아닌 영역까지
+                    // 개수에 포함돼서 "document"로 오인되는 원인이 된다.
+                    let confidences = request.results?.filter {
                         $0.boundingBox.width >= 0.05 && $0.boundingBox.height >= 0.05
-                    }),
-                          !results.isEmpty else {
+                    }.compactMap { observation -> Float? in
+                        observation.topCandidates(1).first?.confidence
+                    }.filter { $0 >= 0.45 } ?? []
+
+                    guard !confidences.isEmpty else {
                         continuation.resume(returning: [])
                         return
                     }
 
-                    // 텍스트 양에 따라 라벨 구분
-                    let label = results.count > 10 ? "document" : "text"
+                    // 텍스트 양에 따라 라벨 구분, 신뢰도는 실제 OCR 신뢰도 중 최고값 사용
+                    let label = confidences.count > 10 ? "document" : "text"
+                    let confidence = confidences.max() ?? 0
                     continuation.resume(returning: [
-                        PhotoLabel(name: label, confidence: 1.0)
+                        PhotoLabel(name: label, confidence: confidence)
                     ])
                 } catch {
                     print("Vision detectText 에러:", error)
