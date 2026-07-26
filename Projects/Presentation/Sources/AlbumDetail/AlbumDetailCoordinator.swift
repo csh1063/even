@@ -154,11 +154,19 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
             )
         }
 
-        options.append(
-            OptionRowConfig(icon: "trash", title: "앨범 삭제", style: .destructive) { [weak self] in
-                self?.delegate?.deleteAlert()
-            }
-        )
+        if album.from == "similar" {
+            options.append(
+                OptionRowConfig(icon: "trash", title: "정리 완료", style: .destructive) { [weak self] in
+                    self?.delegate?.deleteAlert()
+                }
+            )
+        } else {
+            options.append(
+                OptionRowConfig(icon: "trash", title: "앨범 삭제", style: .destructive) { [weak self] in
+                    self?.delegate?.deleteAlert()
+                }
+            )
+        }
 
         let sheet = SelectionSheet(title: album.displayName, options: options)
 

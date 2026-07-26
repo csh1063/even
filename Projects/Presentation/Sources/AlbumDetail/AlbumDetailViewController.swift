@@ -271,7 +271,7 @@ final class AlbumDetailViewController: BaseViewController {
         case .onlySelect:
             collectionView.allowsMultipleSelection = true
             collectionView.allowsMultipleSelectionDuringEditing = true
-            naviView.addButtons([LeftButton(type: .back)])
+            naviView.addButtons([LeftButton(type: .back), RightButton(type: .more)])
         }
 
         bindNaviActions()
