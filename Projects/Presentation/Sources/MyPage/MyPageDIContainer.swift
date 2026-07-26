@@ -23,7 +23,8 @@ public final class MyPageDIContainer {
         let useCase = DefaultMyPageUseCase(
             photoLibraryRepository: appDIContainer.photoLibraryRepository,
             photoDataRepository: appDIContainer.photoDataRepository,
-            userDefaultRepository: appDIContainer.userDefaultRepository
+            userDefaultRepository: appDIContainer.userDefaultRepository,
+            albumDataRepository: appDIContainer.albumDataRepository
         )
 
         return MyPageViewModel(tabbarViewModel: tabbarViewModel, myPageUseCase: useCase)

@@ -98,6 +98,10 @@ final class DefaultAppDIContainer: AppDIContainer {
             fatalError("ModelContainer 생성 실패: \(error)")
         }
         self.providerFactory = ProviderFactory()
+
+        Task {
+            self.albumDataRepository.pruneOldHistory()
+        }
     }
 
     func makePhotoCheckUseCase() -> PhotoCheckUseCase {

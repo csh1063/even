@@ -32,6 +32,7 @@ final class MyPageViewModel: BaseViewModel {
     private var libraryCount: Int = 0
     private var photoCount: Int = 0
     private var analyzedDate: String = "-"
+    private var analyzedDataSize: String = ""
     private var unanalysisCount: Int = 0
     private var photoPermission: String = ""
     private var displayMode: String = ""
@@ -157,9 +158,18 @@ final class MyPageViewModel: BaseViewModel {
             async let unanalysis = myPageUseCase.photoUnanalysisCount()
             async let permission = myPageUseCase.checkPermission()
             async let displayMode = myPageUseCase.getDisplayMode()
+            async let dataSize = myPageUseCase.analysisDataSize()
             self.photoCount = try await count
             self.analyzedDate = relativeDate(from: try await date)
             self.unanalysisCount = try await unanalysis
+            // SwiftData 스토어는 완전히 비어도 테이블/인덱스 최소 페이지 크기 때문에 수백 KB가
+            // 남는다 — 이 정도는 사용자에게 "삭제됐는데 왜 안 지워졌지"로 보일 뿐이라 0으로 취급.
+            // ByteCountFormatter는 0바이트를 "Zero KB"라는 특수 문구로 표시해서, 0인 경우는
+            // 포매터를 거치지 않고 직접 문자열로 표시한다.
+            let rawDataSize = try await dataSize
+            self.analyzedDataSize = rawDataSize < 500_000
+                ? "0MB"
+                : ByteCountFormatter.string(fromByteCount: rawDataSize, countStyle: .file)
 
             switch try await permission {
             case .fullAccess:
@@ -186,11 +196,13 @@ final class MyPageViewModel: BaseViewModel {
         var analyzedItems = if analyzedDate == "-" {
             [
                 MyCellData(type: .analyzedDate, value: analyzedDate),
+                MyCellData(type: .analyzedData, value: analyzedDataSize),
                 MyCellData(type: .analysis)
             ]
         } else {
             [
                 MyCellData(type: .analyzedDate, value: analyzedDate),
+                MyCellData(type: .analyzedData, value: analyzedDataSize),
                 MyCellData(type: .analysis),
                 MyCellData(type: .travelAlbum),
                 MyCellData(type: .reAutoAlbum)

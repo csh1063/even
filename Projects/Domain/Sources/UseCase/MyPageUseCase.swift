@@ -16,6 +16,7 @@ public protocol MyPageUseCase {
     func getDisplayMode() async throws -> String
     func changeDisplayMode(_ mode: String) async throws
     func nextDisplayMode() async throws -> String
+    func analysisDataSize() async throws -> Int64
 }
 
 public final class DefaultMyPageUseCase: MyPageUseCase {
@@ -23,17 +24,24 @@ public final class DefaultMyPageUseCase: MyPageUseCase {
     private let photoLibraryRepository: PhotoLibraryRepository
     private let photoDataRepository: PhotoDataRepository
     private let userDefaultRepository: UserDefaultRepository
+    private let albumDataRepository: AlbumDataRepository
 
     public init(photoLibraryRepository: PhotoLibraryRepository,
                 photoDataRepository: PhotoDataRepository,
-                userDefaultRepository: UserDefaultRepository) {
+                userDefaultRepository: UserDefaultRepository,
+                albumDataRepository: AlbumDataRepository) {
         self.photoLibraryRepository = photoLibraryRepository
         self.photoDataRepository = photoDataRepository
         self.userDefaultRepository = userDefaultRepository
+        self.albumDataRepository = albumDataRepository
     }
 
     public func photoCount() async throws -> Int {
         try photoDataRepository.fetchPhotoCount()
+    }
+
+    public func analysisDataSize() async throws -> Int64 {
+        albumDataRepository.dataStoreSize()
     }
 
     public func lastAnalyzeDate() async throws -> String {

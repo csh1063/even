@@ -17,7 +17,7 @@ public final class LoadingManager {
     private var loadingView: CardStackLoadingView?
     private var dismissTimer: DispatchWorkItem?
 
-    public func show() {
+    public func show(allowDismiss: Bool = true) {
         guard loadingView == nil else { return }
 
         guard let window = UIApplication.shared.connectedScenes
@@ -45,6 +45,8 @@ public final class LoadingManager {
 
         self.dimView = dimView
         self.loadingView = view
+
+        guard allowDismiss else { return }
 
         let workItem = DispatchWorkItem { [weak self] in
             self?.loadingView?.showDismissButton()

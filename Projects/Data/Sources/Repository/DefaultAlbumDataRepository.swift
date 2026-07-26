@@ -10,6 +10,7 @@ import Foundation
 import SwiftData
 import Domain
 import Combine
+import SQLite3
 
 public final class DefaultAlbumDataRepository: AlbumDataRepository {
 
@@ -520,6 +521,8 @@ public final class DefaultAlbumDataRepository: AlbumDataRepository {
     }
 
     public func deleteAll() throws {
+        convertToAutoVacuumIfNeeded()
+
         let context = ModelContext(container)
 
         print("photo-album 연결 제거")
@@ -549,6 +552,100 @@ public final class DefaultAlbumDataRepository: AlbumDataRepository {
         try deleteAllLogged(HomeZoneEntity.self, context: context)
 
         try self.syncAlbums()
+
+        incrementalVacuum()
+    }
+
+    public func dataStoreSize() -> Int64 {
+        guard let url = container.configurations.first?.url else { return 0 }
+
+        let directory = url.deletingLastPathComponent()
+        let fileName = url.lastPathComponent
+        let candidates = [fileName, "\(fileName)-wal", "\(fileName)-shm"]
+            .map { directory.appendingPathComponent($0) }
+
+        return candidates.reduce(Int64(0)) { total, fileURL in
+            let size = try? FileManager.default.attributesOfItem(atPath: fileURL.path)[.size] as? Int64
+            return total + (size.flatMap { $0 } ?? 0)
+        }
+    }
+
+    // MARK: - Vacuum
+
+    // SQLite는 삭제된 행의 공간을 파일에서 자동으로 회수하지 않는다. auto_vacuum 모드가 아니면
+    // deleteAll() 이후에도 스토어 파일 크기가 그대로라, 최초 1회 INCREMENTAL 모드로 전환해두고
+    // 이후부턴 가벼운 incremental_vacuum만으로 공간을 회수한다.
+    // UserDefaults 플래그 대신 DB의 실제 auto_vacuum 모드를 매번 조회한다 — 플래그는 VACUUM이
+    // 조용히 실패해도 "성공했다"고 잘못 기록될 수 있어 신뢰할 수 없다.
+    private func convertToAutoVacuumIfNeeded() {
+        guard currentAutoVacuumMode() == 0 else { return } // 0 = NONE(미적용), 1 = FULL, 2 = INCREMENTAL
+
+        executeRawSQL("PRAGMA auto_vacuum = INCREMENTAL;", "VACUUM;", "PRAGMA wal_checkpoint(TRUNCATE);")
+    }
+
+    private func currentAutoVacuumMode() -> Int32? {
+        guard let url = container.configurations.first?.url else { return nil }
+
+        var db: OpaquePointer?
+        guard sqlite3_open(url.path, &db) == SQLITE_OK else {
+            sqlite3_close(db)
+            return nil
+        }
+        defer { sqlite3_close(db) }
+
+        var statement: OpaquePointer?
+        defer { sqlite3_finalize(statement) }
+        guard sqlite3_prepare_v2(db, "PRAGMA auto_vacuum;", -1, &statement, nil) == SQLITE_OK,
+              sqlite3_step(statement) == SQLITE_ROW else { return nil }
+
+        return sqlite3_column_int(statement, 0)
+    }
+
+    // ACHANGE/ATRANSACTION/ATRANSACTIONSTRING은 SwiftData(Core Data)가 내부적으로 남기는
+    // persistent history 로그 — 우리 엔티티가 아니고, 코드 어디서도 히스토리 API를 안 써서
+    // 실질적으로 아무 데도 안 쓰인다. deleteAll()로 모든 데이터를 지우는 시점에 같이 비워서
+    // 데이터와 그 변경 로그를 함께 초기화한다.
+    private func incrementalVacuum() {
+        executeRawSQL(
+            "DELETE FROM ACHANGE;",
+            "DELETE FROM ATRANSACTION;",
+            "DELETE FROM ATRANSACTIONSTRING;",
+            "PRAGMA incremental_vacuum;",
+            "PRAGMA wal_checkpoint(TRUNCATE);"
+        )
+    }
+
+    // 리셋과 별개로, 앱을 계속 쓰는 동안에도 ACHANGE/ATRANSACTION은 평소 분석/저장 때마다 계속
+    // 쌓인다. 앱 실행 시점마다 7일 지난 것만 지워서 무한정 자라는 걸 막는다. 이미 정리된 상태면
+    // 지울 게 없어서 사실상 공짜 연산이라, 별도로 "마지막 실행 언제였는지" 플래그를 둘 필요는 없다.
+    private static let historyRetentionInterval: TimeInterval = 7 * 24 * 60 * 60
+
+    public func pruneOldHistory() {
+        let cutoff = Date().addingTimeInterval(-Self.historyRetentionInterval).timeIntervalSinceReferenceDate
+        executeRawSQL(
+            "DELETE FROM ACHANGE WHERE ZTRANSACTIONID IN (SELECT Z_PK FROM ATRANSACTION WHERE ZTIMESTAMP < \(cutoff));",
+            "DELETE FROM ATRANSACTION WHERE ZTIMESTAMP < \(cutoff);",
+            "PRAGMA incremental_vacuum;",
+            "PRAGMA wal_checkpoint(TRUNCATE);"
+        )
+    }
+
+    // ModelContainer가 붙잡고 있는 커넥션과 별개로, 같은 스토어 파일에 직접 연결해서 raw SQL을 실행한다.
+    // VACUUM류는 SwiftData API로 노출되어 있지 않다. deleteAll()의 모든 save가 끝난 뒤에만 호출할 것 —
+    // 그렇지 않으면 배타적 락이 필요한 VACUUM이 진행 중인 다른 트랜잭션과 충돌해 실패할 수 있다.
+    private func executeRawSQL(_ statements: String...) {
+        guard let url = container.configurations.first?.url else { return }
+
+        var db: OpaquePointer?
+        guard sqlite3_open(url.path, &db) == SQLITE_OK else {
+            sqlite3_close(db)
+            return
+        }
+        defer { sqlite3_close(db) }
+
+        for sql in statements {
+            sqlite3_exec(db, sql, nil, nil, nil)
+        }
     }
 
     // 타입 단위 배치 삭제(context.delete(model:))는 필수 취급되는 역방향 관계가 있으면

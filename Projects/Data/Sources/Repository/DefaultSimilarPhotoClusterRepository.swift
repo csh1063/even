@@ -16,12 +16,15 @@ import Accelerate
 public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepository {
 
     public var threshold: Float = 0.35
-    public var timeWindowMinutes: Double = 1440.0
+    public var timeWindowMinutes: Double = 24 * 60 * 2
     /// 1차 클러스터링(윈도우 내)에서 시간 공백 때문에 끊긴 그룹들을,
     /// 시간 제약 없이 centroid(그룹 평균 벡터) 기준으로 한 번 더 병합할 때 쓰는 threshold.
     public var mergeThreshold: Float = 0.45
 
-    private let minSimilarCount: Int = 5
+    private let minSimilarCount: Int = 2
+    /// 1차(윈도우 내)/병합/증분 결과 상관없이, 최종 그룹 크기가 이 값 미만이면 앨범을 만들지 않는다.
+    /// minSimilarCount를 2로 낮춘 뒤로 사진 2~3장짜리 앨범이 너무 많이 생겨서 도입.
+    private let minimumAlbumSize: Int = 10
 
     private let container: ModelContainer
 
@@ -200,8 +203,10 @@ public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepo
         let photoEntities = try context.fetch(photoDescriptor)
         let entityMap = Dictionary(uniqueKeysWithValues: photoEntities.map { ($0.localIdentifier, $0) })
 
-        // 7. 앨범 저장
+        // 7. 앨범 저장 — 최종 그룹 크기가 minimumAlbumSize 미만이면 앨범을 만들지 않는다
         for (clusterId, groupPhotos) in validGroups {
+            guard groupPhotos.count >= minimumAlbumSize else { continue }
+
             let albumName = "similar_\(clusterId)"
             let album: AlbumEntity
 
@@ -425,6 +430,10 @@ public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepo
                 .compactMap { entity in entity.albums.first(where: { $0.from == "similar" }) }
                 .first
 
+            // 이미 있는 앨범에 몇 장 더 붙는 거면 그대로 진행하고, 새로 만드는 경우에만
+            // minimumAlbumSize 미만이면 앨범을 만들지 않는다
+            guard existingAlbum != nil || groupPhotos.count >= minimumAlbumSize else { continue }
+
             let album: AlbumEntity
             if let existingAlbum {
                 album = existingAlbum
@@ -508,186 +517,3 @@ public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepo
         return squaredSum.squareRoot()
     }
 }
-// public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepository {
-//
-//    public var threshold: Float = 0.35
-//    public var timeWindowMinutes: Double = 1440.0
-//    
-//    private let minSimilarCount: Int = 3
-//
-//    private let container: ModelContainer
-//
-//    public init(container: ModelContainer) {
-//        self.container = container
-//    }
-//
-//    public func clusterAndSaveAlbums(photos: [Photo], existingAlbums: [Album]) async throws {
-//        print("\n=== 🚀 [SimilarPhoto] 클러스터링 시작 ===")
-//
-//        guard !photos.isEmpty else {
-//            print("⚠️ [SimilarPhoto] 처리할 데이터 없음")
-//            return
-//        }
-//
-//        let context = ModelContext(container)
-//        let sorted = photos.sorted { $0.createdAt < $1.createdAt }
-//
-//        // 1. Union-Find
-//        var parent: [String: String] = Dictionary(
-//            uniqueKeysWithValues: sorted.map { ($0.localIdentifier, $0.localIdentifier) }
-//        )
-//
-//        func find(_ x: String) -> String {
-//            var x = x
-//            while parent[x] != x {
-//                parent[x] = parent[parent[x]!]!
-//                x = parent[x]!
-//            }
-//            return x
-//        }
-//
-//        func union(_ x: String, _ y: String) {
-//            let rx = find(x), ry = find(y)
-//            if rx != ry { parent[rx] = ry }
-//        }
-//
-//        // 2. 슬라이딩 윈도우 + 캐시
-//        let windowSeconds = timeWindowMinutes * 60
-//        var windowStart = 0
-//        var cache: [String: VNFeaturePrintObservation] = [:]
-//
-//        for i in 0..<sorted.count {
-//            let iPhoto = sorted[i]
-//
-//            let prevWindowStart = windowStart
-//            while sorted[i].createdAt.timeIntervalSince(sorted[windowStart].createdAt) > windowSeconds {
-//                windowStart += 1
-//            }
-//            for idx in prevWindowStart..<windowStart {
-//                cache.removeValue(forKey: sorted[idx].localIdentifier)
-//            }
-//
-//            guard windowStart < i else { continue }
-//            let windowSize = i - windowStart + 1
-//            guard windowSize >= minSimilarCount else { continue }
-//
-//            let iObs: VNFeaturePrintObservation?
-//            if let cached = cache[iPhoto.localIdentifier] {
-//                iObs = cached
-//            } else {
-//                iObs = await extractFeaturePrint(localIdentifier: iPhoto.localIdentifier)
-//            }
-//            guard let iObs else { continue }
-//            cache[iPhoto.localIdentifier] = iObs
-//
-//            for j in windowStart..<i {
-//                let jPhoto = sorted[j]
-//                let jObs: VNFeaturePrintObservation?
-//                if let cached = cache[jPhoto.localIdentifier] {
-//                    jObs = cached
-//                } else {
-//                    jObs = await extractFeaturePrint(localIdentifier: jPhoto.localIdentifier)
-//                }
-//                guard let jObs else { continue }
-//                cache[jPhoto.localIdentifier] = jObs
-//
-//                var distance: Float = 0
-//                guard (try? iObs.computeDistance(&distance, to: jObs)) != nil else { continue }
-//
-//                if distance < threshold {
-//                    union(iPhoto.localIdentifier, jPhoto.localIdentifier)
-//                }
-//            }
-//        }
-//
-//        // 3. 루트별 그룹핑 (2장 이상만)
-//        var groups: [String: [Photo]] = [:]
-//        for photo in sorted {
-//            let root = find(photo.localIdentifier)
-//            groups[root, default: []].append(photo)
-//        }
-//        let validGroups = groups.filter { $0.value.count >= minSimilarCount }
-//        print("📊 [SimilarPhoto] \(validGroups.count)개 그룹 생성")
-//
-//        // 4. DB에서 PhotoEntity 조회용 맵
-//        let allIdentifiers = photos.map { $0.localIdentifier }
-//        let photoDescriptor = FetchDescriptor<PhotoEntity>(
-//            predicate: #Predicate { allIdentifiers.contains($0.localIdentifier) }
-//        )
-//        let photoEntities = try context.fetch(photoDescriptor)
-//        let entityMap = Dictionary(uniqueKeysWithValues: photoEntities.map { ($0.localIdentifier, $0) })
-//
-//        // 5. 앨범 저장
-//        for (clusterId, groupPhotos) in validGroups {
-//            let albumName = "similar_\(clusterId)"
-//            let album: AlbumEntity
-//
-//            if existingAlbums.contains(where: { $0.name == albumName }),
-//               let existingEntity = try context.fetch(FetchDescriptor<AlbumEntity>(
-//                predicate: #Predicate { $0.name == albumName }
-//               )).first {
-//                album = existingEntity
-//            } else {
-//                album = AlbumEntity(
-//                    name: albumName,
-//                    displayName: "유사한 사진",
-//                    isAuto: true,
-//                    from: "similar"
-//                )
-//                context.insert(album)
-//            }
-//
-//            var currentIds = Set(album.photos.map { $0.localIdentifier })
-//            var added = 0
-//
-//            for photo in groupPhotos {
-//                guard let entity = entityMap[photo.localIdentifier] else { continue }
-//                if !currentIds.contains(photo.localIdentifier) {
-//                    album.photos.append(entity)
-//                    currentIds.insert(photo.localIdentifier)
-//                    added += 1
-//                }
-//            }
-//
-//            album.photoCount = album.photos.count
-//            album.coverPhotoIdentifier = album.photos.sorted { $0.createdAt > $1.createdAt }.first?.localIdentifier
-//            print("📝 [SimilarPhoto] [\(albumName)] +\(added)장 / 총 \(album.photoCount)장")
-//        }
-//
-//        // 6. 저장
-//        try context.save()
-//        print("✅ [SimilarPhoto] 완료\n")
-//    }
-//
-//    // MARK: - Private
-//    private func extractFeaturePrint(localIdentifier: String) async -> VNFeaturePrintObservation? {
-//        return await withCheckedContinuation { continuation in
-//            let options = PHImageRequestOptions()
-//            options.isSynchronous = true
-//            options.deliveryMode = .fastFormat
-//
-//            let result = PHAsset.fetchAssets(withLocalIdentifiers: [localIdentifier], options: nil)
-//            guard let asset = result.firstObject else {
-//                continuation.resume(returning: nil)
-//                return
-//            }
-//
-//            PHImageManager.default().requestImage(
-//                for: asset,
-//                targetSize: CGSize(width: 224, height: 224),
-//                contentMode: .aspectFit,
-//                options: options
-//            ) { image, _ in
-//                guard let cgImage = image?.cgImage else {
-//                    continuation.resume(returning: nil)
-//                    return
-//                }
-//
-//                let request = VNGenerateImageFeaturePrintRequest()
-//                let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-//                try? handler.perform([request])
-//                continuation.resume(returning: request.results?.first as? VNFeaturePrintObservation)
-//            }
-//        }
-//    }
-// }

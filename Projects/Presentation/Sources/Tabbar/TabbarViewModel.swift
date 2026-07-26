@@ -252,9 +252,9 @@ public final class TabbarViewModel: BaseViewModel {
                     AlertButtonConfig(title: "취소", style: .cancel, action: nil),
                     AlertButtonConfig(title: "삭제", style: .destructive) { [weak self] in
                         Task {
-                            self?.isLoading = true
+                            LoadingManager.shared.show(allowDismiss: false)
                             await self?.clear()
-                            self?.isLoading = false
+                            LoadingManager.shared.hide()
                         }
                     }
                 ]

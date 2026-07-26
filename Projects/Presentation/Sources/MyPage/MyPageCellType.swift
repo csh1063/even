@@ -74,6 +74,7 @@ enum MyPageCellType {
 
     // analysis
     case analyzedDate
+    case analyzedData
     case analysis
     case travelAlbum
     case reAutoAlbum
@@ -110,6 +111,7 @@ enum MyPageCellType {
         case .unanalysisPhoto: return "lasso.badge.sparkles"
         case .analyzedDate: return "clock.arrow.circlepath"
         case .analysis: return "sparkles"
+        case .analyzedData: return "cylinder.split.1x2"
         case .travelAlbum: return "globe.desk"
         case .reAutoAlbum: return "arrow.clockwise"
         case .reAnalysis: return "arrow.clockwise"
@@ -137,6 +139,7 @@ enum MyPageCellType {
         case .allPhoto: return "분석한 사진 수"
         case .unanalysisPhoto: return "미분석 사진 수"
         case .analyzedDate: return "최근 분석"
+        case .analyzedData: return "분석 용량"
         case .analysis: return "분석하기"
         case .travelAlbum: return "여행 앨범 만들기"
         case .reAutoAlbum: return "자동 앨범 재생성"
@@ -169,7 +172,7 @@ enum MyPageCellType {
 
     var style: MyPageCellStyle {
         switch self {
-        case .allLibraryPhoto, .allPhoto, .unanalysisPhoto, .analyzedDate:
+        case .allLibraryPhoto, .allPhoto, .unanalysisPhoto, .analyzedDate, .analyzedData:
             return .info
         case .analysis, .travelAlbum, .reAnalysis, .reset, .displayMode, .reAutoAlbum:
             return .button

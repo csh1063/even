@@ -34,6 +34,8 @@ public protocol AlbumDataRepository {
     func syncPhotoCount() throws
     func syncAlbums() throws
     func deleteAll() throws
+    func dataStoreSize() -> Int64
+    func pruneOldHistory()
 
     /// 여행 앨범 생성 시점에 사진이 겹치는 얼굴 앨범들을 연결
     func updateLinkedFaceAlbums(albumId: UUID, faceAlbumIds: [UUID]) throws

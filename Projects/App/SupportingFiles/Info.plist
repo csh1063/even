@@ -15,7 +15,7 @@
 	<key>CFBundleName</key>
 	<string>$(PRODUCT_NAME)</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.0</string>
+	<string>0.0.1</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>IDEPreferLogStreaming</key>
@@ -26,9 +26,9 @@
 		<true/>
 	</dict>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>사진 추가!.</string>
+	<string>모아가 사진을 분석해 비슷한 사진, 인물, 여행 앨범으로 자동 정리해드려요.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>사진 권한!.</string>
+	<string>모아가 사진을 분석해 비슷한 사진, 인물, 여행 앨범으로 자동 정리해드려요.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
