@@ -73,7 +73,6 @@ final class AlbumListViewModel: BaseViewModel {
     }
 
     func send(_ input: Input) {
-        print("send", input)
         self.input.send(input)
     }
 
@@ -121,7 +120,7 @@ final class AlbumListViewModel: BaseViewModel {
             do {
                 try await albumUseCase.deleteAlbum(album)
             } catch {
-                print("앨범 삭제 실패:", error)
+                debugLog("앨범 삭제 실패: \(error)")
             }
         }
         // 이 ViewModel은 albumsPublisher를 구독하지 않으므로(AlbumViewModel과 달리), 삭제 후
@@ -131,7 +130,6 @@ final class AlbumListViewModel: BaseViewModel {
 
     private func loadAlbumFrom() async {
         do {
-            print("load albums", self.from)
             // "인물" 섹션은 얼굴+동물 두 from을 합쳐서 보여주므로, 홈 화면과 동일하게 둘 다 가져온다
             let albums: [Album]
             if from == "face" {
@@ -143,7 +141,7 @@ final class AlbumListViewModel: BaseViewModel {
             }
             self.buildSections(from: albums)
         } catch {
-            print("loadFodlers error")
+            debugLog("loadAlbumFrom 실패: \(error)")
         }
     }
 
@@ -164,8 +162,6 @@ final class AlbumListViewModel: BaseViewModel {
             list = albums.filter { $0.from == "location" }
                 .sorted { $0.photoCount > $1.photoCount }
 //                .map {
-//                    print("displayName", $0.displayName)
-//                    //                print("keyword:", $0.keywords.joined(separator: ", "))
 //                    return $0
 //                }
                 .enumerated()
@@ -197,8 +193,6 @@ final class AlbumListViewModel: BaseViewModel {
 //        data.items[.location] = albums.filter { $0.from == "location" }
 //            .sorted { $0.photoCount > $1.photoCount }
 //            .map {
-//                print("displayName", $0.displayName)
-////                print("keyword:", $0.keywords.joined(separator: ", "))
 //                return $0
 //            }
 //            .prefix(3)
@@ -234,7 +228,7 @@ final class AlbumListViewModel: BaseViewModel {
 
             return UIImage(cgImage: cgImage)
         } catch {
-            print("이미지 로딩 실패: \(error.localizedDescription)")
+            debugLog("이미지 로딩 실패: \(error.localizedDescription)")
             return nil
         }
     }

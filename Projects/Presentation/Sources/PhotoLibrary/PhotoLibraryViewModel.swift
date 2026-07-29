@@ -82,7 +82,6 @@ public final class PhotoLibraryViewModel: BaseViewModel {
     }
 
     func send(_ input: Input) {
-        print("send", input)
         self.input.send(input)
     }
 
@@ -97,7 +96,7 @@ public final class PhotoLibraryViewModel: BaseViewModel {
 
             return UIImage(cgImage: cgImage)
         } catch {
-            print("이미지 로딩 실패: \(error.localizedDescription)")
+            debugLog("이미지 로딩 실패: \(error.localizedDescription)")
             return nil
         }
     }
@@ -128,7 +127,6 @@ public final class PhotoLibraryViewModel: BaseViewModel {
     }
 
     private func loadPhoto() async {
-        print("loadPhoto")
         defer {
             if isRefresh {
                 self.isLoading = false
@@ -141,7 +139,6 @@ public final class PhotoLibraryViewModel: BaseViewModel {
                 self.isLoading = true
             }
             let photoList = try await self.useCase.fetchPhoto()
-            print("photos count: ", photoList.photos.count)
 
             self.photoDetails = photoList.photos.map {
                 PhotoDetail(id: $0.localIdentifier, createdDate: $0.createdDate, photo: $0.photo)

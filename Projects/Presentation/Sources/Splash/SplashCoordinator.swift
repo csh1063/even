@@ -32,7 +32,6 @@ public final class SplashCoordinator: BaseCoordinator {
         viewModel.transform().finished
             .sink { [weak self] isFinished in
                 if isFinished {
-                    print("SplashCoordinator finished")
                     self?.finished.send(isFinished)
                 }
             }

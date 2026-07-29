@@ -80,7 +80,7 @@ public final class AlbumViewModel: BaseViewModel {
         albumUseCase.albumsPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] albums in
-                print("📂 albumsPublisher received: \(albums.count)")
+                debugLog("📂 albumsPublisher received: \(albums.count)")
                 // albums만 갱신하고 끝내면, 실제 화면을 그리는 sections는 그대로라 화면이 안 바뀐다 —
                 // 병합/분리처럼 다른 화면에서 syncAlbums()로 밀어준 변경사항이 여기 반영되려면 같이 재빌드해야 한다
                 self?.albums = albums
@@ -99,7 +99,6 @@ public final class AlbumViewModel: BaseViewModel {
     }
 
     func send(_ input: Input) {
-        print("send", input)
         self.input.send(input)
     }
 
@@ -127,12 +126,10 @@ public final class AlbumViewModel: BaseViewModel {
             await self.loadAlbums()
             self.isLoading = false
         case .analysis:
-            print("analysis 1")
             tabbarViewModel.send(.analysis)
         case .clear:
             tabbarViewModel.send(.clear)
         case .selectItem(let album):
-            print("!!!")
             self.onAction?(.moveDetail(album: album))
         case .more(let type):
             self.onAction?(.more(from: type))
@@ -145,13 +142,12 @@ public final class AlbumViewModel: BaseViewModel {
 
     private func loadAlbums() async {
         do {
-            print("load albums")
             let albums = try await self.albumUseCase.fetchAll()
             self.albums = albums
 
             self.buildSections(from: albums)
         } catch {
-            print("loadFodlers error")
+            debugLog("loadAlbums 실패: \(error)")
         }
     }
 
@@ -175,10 +171,7 @@ public final class AlbumViewModel: BaseViewModel {
 
         data.items[.location] = albums.filter { $0.from == "location" }
             .sorted { $0.photoCount > $1.photoCount }
-            .map {
-//                print("displayName", $0.displayName)
-//                print("keyword:", $0.keywords.joined(separator: ", "))
-                return $0
+            .map {                return $0
             }
             .prefix(3)
             .enumerated()
@@ -222,7 +215,7 @@ public final class AlbumViewModel: BaseViewModel {
 
             return UIImage(cgImage: cgImage)
         } catch {
-            print("이미지 로딩 실패: \(error.localizedDescription)")
+            debugLog("이미지 로딩 실패: \(error.localizedDescription)")
             return nil
         }
     }

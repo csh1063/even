@@ -329,39 +329,33 @@ final class FeedbackViewController: UIViewController {
     // MARK: - Actions
 
 //    @objc private func segmentChanged() {
-//        print("segmentChanged")
 //        let index = typeSegmentControl.selectedSegmentIndex
 //        viewModel.selectedType = FeedbackType.allCases[index]
 //        updatePlaceholder()
 //    }
 
     @objc private func submitTapped() {
-        print("submitTapped")
         Task { @MainActor in
             await viewModel.submit()
         }
     }
 
     @objc private func reviewTapped() {
-        print("reviewTapped")
         // App Store ID로 교체
         guard let url = URL(string: "https://apps.apple.com/app/idYOUR_APP_ID?action=write-review") else { return }
         UIApplication.shared.open(url)
     }
 
     @objc private func dismissKeyboard() {
-        print("dismissKeyboard")
         view.endEditing(true)
     }
 
     @objc private func keyboardWillShow(_ notification: Notification) {
-        print("keyboardWillShow")
         guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
         scrollView.contentInset.bottom = keyboardFrame.height
     }
 
     @objc private func keyboardWillHide(_ notification: Notification) {
-        print("keyboardWillHide")
         scrollView.contentInset.bottom = 0
     }
 

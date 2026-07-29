@@ -86,7 +86,6 @@ final class OptionPickerViewController: UIViewController {
                 case .back:
                     self.navigationController?.popViewController(animated: true)
                 case .confirm:
-                    print("confirm")
                     self.onSelect?(self.selectedOption)
                     self.navigationController?.popViewController(animated: true)
                 default: break

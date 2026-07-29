@@ -25,7 +25,7 @@ public actor AnimalEmbeddingService {
 
     private lazy var model: MLModel? = {
         guard let url = Bundle.module.url(forResource: "AnimalReID_DINOv2", withExtension: "mlmodelc") else {
-            print("AnimalEmbeddingService: AnimalReID_DINOv2.mlmodelc를 찾을 수 없음")
+            debugLog("AnimalEmbeddingService: AnimalReID_DINOv2.mlmodelc를 찾을 수 없음")
             return nil
         }
         return try? MLModel(contentsOf: url, configuration: MLModelConfiguration())
@@ -89,7 +89,7 @@ public actor AnimalEmbeddingService {
                 return AnimalDetection(boundingBox: observation.boundingBox, species: species, confidence: topLabel.confidence)
             }
         } catch {
-            print("AnimalEmbeddingService detectAnimals 에러:", error)
+            debugLog("AnimalEmbeddingService detectAnimals 에러: \(error)")
             return nil
         }
     }
@@ -193,13 +193,13 @@ public actor AnimalEmbeddingService {
         do {
             output = try model.prediction(from: input)
         } catch {
-            print("⚠️ AnimalEmbeddingService model.prediction 실패, 같은 모델로 재시도:", error)
+            debugLog("⚠️ AnimalEmbeddingService model.prediction 실패, 같은 모델로 재시도: \(error)")
             if let retried = try? model.prediction(from: input) {
                 output = retried
             } else {
-                print("⚠️ AnimalEmbeddingService 재시도 실패, CPU+GPU로 재시도")
+                debugLog("⚠️ AnimalEmbeddingService 재시도 실패, CPU+GPU로 재시도")
                 guard let fallbackModel, let fallbackRetried = try? fallbackModel.prediction(from: input) else {
-                    print("⚠️ AnimalEmbeddingService 모든 재시도 실패 (임베딩 유실됨)")
+                    debugLog("⚠️ AnimalEmbeddingService 모든 재시도 실패 (임베딩 유실됨)")
                     return nil
                 }
                 output = fallbackRetried

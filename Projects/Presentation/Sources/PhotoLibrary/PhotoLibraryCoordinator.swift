@@ -29,10 +29,8 @@ final class PhotoLibraryCoordinator: BaseCoordinator {
     override func start() {
         let viewModel = diContainer.makePhotoLibraryViewModel(tabbarViewModel: tabbarViewModel)
         viewModel.onAction = { [weak self] action in
-            print("onAction")
             switch action {
             case .selectPhoto(let photoDetails, let index):
-                print("move", index)
                 self?.showDetail(photoDetails, index: index)
             }
         }
@@ -50,7 +48,6 @@ final class PhotoLibraryCoordinator: BaseCoordinator {
     }
 
     func showDetail(_ photoDetails: [PhotoDetail], index: Int) {
-        print("showDetail")
         let vm = diContainer.makeImageViewerViewModel(photoDetails: photoDetails, index: index)
         vm.onAction = { [weak self] action in
             switch action {

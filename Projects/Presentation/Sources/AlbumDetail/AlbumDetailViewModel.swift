@@ -52,11 +52,11 @@ public final class AlbumDetailViewModel: BaseViewModel {
         let isLoading: AnyPublisher<Bool, Never>
         let errorMessage: AnyPublisher<String?, Never>
         let selectionMode: AnyPublisher<AlbumDetailPageMode, Never>
-        let travelPeopleInfo: AnyPublisher<TravelPeopleInfo?, Never>
+        let travelerInfo: AnyPublisher<TravelerInfo?, Never>
     }
 
     /// 여행 헤더에 "이름 문구"와 "인원 수"를 분리해서 보여주기 위한 값
-    struct TravelPeopleInfo {
+    struct TravelerInfo {
         let name: String
         let count: Int
     }
@@ -66,7 +66,7 @@ public final class AlbumDetailViewModel: BaseViewModel {
     @Published private var photos: [Photo] = []
     @Published private var errorMessage: String?
     @Published private var selectionMode: AlbumDetailPageMode = .list
-    @Published private var travelPeopleInfo: TravelPeopleInfo?
+    @Published private var travelerInfo: TravelerInfo?
 
     var onAction: ((AlbumDetailViewModelAction) -> Void)?
 
@@ -120,7 +120,7 @@ public final class AlbumDetailViewModel: BaseViewModel {
             isLoading: $isLoading.eraseToAnyPublisher(),
             errorMessage: $errorMessage.eraseToAnyPublisher(),
             selectionMode: $selectionMode.eraseToAnyPublisher(),
-            travelPeopleInfo: $travelPeopleInfo.eraseToAnyPublisher()
+            travelerInfo: $travelerInfo.eraseToAnyPublisher()
         )
     }
 
@@ -201,29 +201,18 @@ public final class AlbumDetailViewModel: BaseViewModel {
             }
 
         case .deleteSelected(let ids):
-            print("삭제?")
             showAlert(
                 title: "사진 삭제",
                 message: "선택한 사진을 삭제하시겠습니까?",
                 buttons: [
                     AlertButtonConfig(title: "이 앨범에서만 삭제", style: .default) { [weak self] in
                         Task {
-                            print("삭제!")
-//                            self.isLoading = true
-                            print("start date!!!:", Date())
                             await self?.deleteSelected(ids: ids)
-//                            self.isLoading = false
-                            print("end date!!!:", Date())
                         }
                     },
                     AlertButtonConfig(title: "애플 사진 앱에서도 삭제", style: .default) { [weak self] in
                         Task {
-                            print("삭제!")
-//                            self.isLoading = true
-                            print("start date!!!:", Date())
                             await self?.deleteSelected(ids: ids, deleteInLibrary: true)
-//                            self.isLoading = false
-                            print("end date!!!:", Date())
                         }
                     },
                     AlertButtonConfig(title: "취소", style: .cancel, action: nil)
@@ -262,7 +251,7 @@ public final class AlbumDetailViewModel: BaseViewModel {
             if isTravelAlbum {
                 let linkedFaceAlbums = try await detailUseCase.fetchLinkedFaceAlbums(albumId: album.id)
                 let linkedAnimalAlbums = try await detailUseCase.fetchLinkedAnimalAlbums(albumId: album.id)
-                travelPeopleInfo = formatTravelPeopleInfo(linkedFaceAlbums + linkedAnimalAlbums)
+                travelerInfo = formatTravelerInfo(linkedFaceAlbums + linkedAnimalAlbums)
             }
             self.photos = photos
             self.photoDetails = photos.map {
@@ -277,7 +266,7 @@ public final class AlbumDetailViewModel: BaseViewModel {
     /// 여행에 등장한 얼굴/동물 앨범들을 "A와 B와 C의 여행"처럼 이름 나열 문구로 만들고, 인원 수는 따로 반환한다.
     /// 이름 지어준 경우는 실제 이름, 아직 안 지어준 경우는 사람은 "사람", 동물은 "반려동물"로 표시한다.
     /// 앨범 기간이 당일치기면(AutoAlbumUseCase의 명명 기준과 동일) "여행" 대신 "나들이"로 표시한다
-    private func formatTravelPeopleInfo(_ linkedAlbums: [Album]) -> TravelPeopleInfo? {
+    private func formatTravelerInfo(_ linkedAlbums: [Album]) -> TravelerInfo? {
         guard !linkedAlbums.isEmpty else { return nil }
 
         let names = linkedAlbums.map { album -> String in
@@ -296,7 +285,7 @@ public final class AlbumDetailViewModel: BaseViewModel {
             name = "\(names[0])의 \(suffix)"
         }
 
-        return TravelPeopleInfo(name: name, count: names.count)
+        return TravelerInfo(name: name, count: names.count)
     }
 
     private func deleteSelected(ids: [String], deleteInLibrary: Bool = false) async {
@@ -480,7 +469,7 @@ extension AlbumDetailViewModel: AlbumDetailViewModelDelegate {
                 try await detailUseCase.updateLinkedTravelerAlbums(albumId: album.id, albumIds: travelerIds)
                 let linkedFaceAlbums = try await detailUseCase.fetchLinkedFaceAlbums(albumId: album.id)
                 let linkedAnimalAlbums = try await detailUseCase.fetchLinkedAnimalAlbums(albumId: album.id)
-                travelPeopleInfo = formatTravelPeopleInfo(linkedFaceAlbums + linkedAnimalAlbums)
+                travelerInfo = formatTravelerInfo(linkedFaceAlbums + linkedAnimalAlbums)
             } catch {}
         }
     }

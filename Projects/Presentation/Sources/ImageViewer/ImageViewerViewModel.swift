@@ -134,7 +134,7 @@ final class ImageViewerViewModel: BaseViewModel {
             let labels = try await imageUseCase.getLabels(by: id)
             currentPhoto?.labels = labels
         } catch {
-            print("labels load error", error.localizedDescription)
+            debugLog("labels load error: \(error.localizedDescription)")
         }
     }
 }
@@ -228,7 +228,6 @@ extension ImageViewerViewModel: ImageLoadable {}
 //            
 //            return image
 //        } catch {
-//            print("이미지 로딩 실패: \(error.localizedDescription)")
 //            return nil
 //        }
 //    }
@@ -238,7 +237,6 @@ extension ImageViewerViewModel: ImageLoadable {}
 //            let labels = try await imageUseCase.getLabels(by: id)
 //            self.currentPhoto?.labels = labels
 //        } catch {
-//            print("error", error.localizedDescription)
 //        }
 //    }
 //    

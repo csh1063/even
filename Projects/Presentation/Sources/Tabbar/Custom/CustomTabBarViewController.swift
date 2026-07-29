@@ -99,19 +99,16 @@ open class CustomTabBarController: UIViewController {
         self.initView()
         self.setupButtons()
         self.setMargin()
-        print("==== \(Self.self) viewDidLoad        ====================")
     }
 
     open override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        print("==== \(Self.self) viewWillAppear     ====================")
 
 //        self.updateView()
     }
 
     open override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        print("==== \(Self.self) viewDidAppear      ====================")
 
         self.tabBarShadowView.layer.masksToBounds = false
         self.tabBarShadowView.layer.shadowColor = color.cgColor
@@ -123,12 +120,10 @@ open class CustomTabBarController: UIViewController {
 
     open override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        print("==== \(Self.self) viewWillDisappear  ====================")
     }
 
     open override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        print("==== \(Self.self) viewDidDisappear   ====================")
     }
 
     @objc private func tabButtonTapped(_ sender: UIButton) {

@@ -458,9 +458,9 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
         try analyzeIfNeeded(from: allPhotosForTravel)
 
         let homeZones = try fetchHomeZones()
-        print("🏠 이번 여행 판정에 사용되는 홈존 \(homeZones.count)개")
+        debugLog("🏠 이번 여행 판정에 사용되는 홈존 \(homeZones.count)개")
         for zone in homeZones {
-            print("   - \(zone.addressDescription(in: allPhotosForTravel)) (분석일: \(zone.analyzedAt))")
+            debugLog("   - \(zone.addressDescription(in: allPhotosForTravel)) (분석일: \(zone.analyzedAt))")
         }
 
         let clusters = try await travelRepository.detect(from: allPhotosForTravel, homeZones: homeZones)
@@ -559,7 +559,7 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
     private func analyzeIfNeeded(from photos: [PhotoLocationSnapshot]) throws {
         let existing = try homeZoneRepository.fetchHomeZones()
         if let last = existing.first, Date().timeIntervalSince(last.analyzedAt) < reanalyzePeriod {
-            print("🏠 홈존 재분석 스킵 (마지막 분석: \(last.analyzedAt), 아직 3개월 안 지남)")
+            debugLog("🏠 홈존 재분석 스킵 (마지막 분석: \(last.analyzedAt), 아직 3개월 안 지남)")
             return
         }
         try analyze(from: photos)
@@ -597,9 +597,9 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
                 )
             }
 
-        print("🏠 홈존 분석 결과 → \(zones.count)개")
+        debugLog("🏠 홈존 분석 결과 → \(zones.count)개")
         for zone in zones {
-            print("   - \(zone.addressDescription(in: recent))")
+            debugLog("   - \(zone.addressDescription(in: recent))")
         }
 
         try homeZoneRepository.saveHomeZones(zones)

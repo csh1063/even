@@ -94,14 +94,14 @@ final class AlbumDetailViewController: BaseViewController {
     }
     private var isSelectionMode: Bool { pageMode != .list }
     private(set) var selectedIdentifiers: Set<String> = []
-    private var travelPeopleInfo: AlbumDetailViewModel.TravelPeopleInfo? {
+    private var travelerInfo: AlbumDetailViewModel.TravelerInfo? {
         // reloadData()는 사진 셀까지 전부 다시 그려서 깜빡였다 — 헤더가 이미 떠 있으면 그 뷰의 텍스트만
         // 직접 바꾸고, 크기 재계산만 invalidateLayout으로 처리한다 (사진 셀은 전혀 안 건드림).
         // 헤더가 아직 없던 상태(처음 생기는 경우)는 supplementaryViewProvider가 나중에 만들어질 때
         // 이 시점의 최신 값을 그대로 읽어가므로 별도 처리가 필요 없다
         didSet {
-            if let info = travelPeopleInfo,
-               let header = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader).first as? TravelPeopleHeaderView {
+            if let info = travelerInfo,
+               let header = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader).first as? TravelerHeaderView {
                 header.configure(name: info.name, count: info.count)
             }
             collectionView.collectionViewLayout.invalidateLayout()
@@ -206,9 +206,9 @@ final class AlbumDetailViewController: BaseViewController {
             }
             .store(in: &cancellables)
 
-        output.travelPeopleInfo
+        output.travelerInfo
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] info in self?.travelPeopleInfo = info }
+            .sink { [weak self] info in self?.travelerInfo = info }
             .store(in: &cancellables)
 
         bindNaviActions()
@@ -344,18 +344,18 @@ extension AlbumDetailViewController {
         }
 
         collectionView.register(
-            TravelPeopleHeaderView.self,
+            TravelerHeaderView.self,
             forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
-            withReuseIdentifier: TravelPeopleHeaderView.reuseIdentifier
+            withReuseIdentifier: TravelerHeaderView.reuseIdentifier
         )
         dataSource.supplementaryViewProvider = { [weak self] cv, kind, indexPath in
             guard let self, kind == UICollectionView.elementKindSectionHeader,
-                  let info = self.travelPeopleInfo,
+                  let info = self.travelerInfo,
                   let header = cv.dequeueReusableSupplementaryView(
                     ofKind: kind,
-                    withReuseIdentifier: TravelPeopleHeaderView.reuseIdentifier,
+                    withReuseIdentifier: TravelerHeaderView.reuseIdentifier,
                     for: indexPath
-                  ) as? TravelPeopleHeaderView else {
+                  ) as? TravelerHeaderView else {
                 return nil
             }
             header.configure(name: info.name, count: info.count)
@@ -403,8 +403,8 @@ extension AlbumDetailViewController: UICollectionViewDelegate {
 
 extension AlbumDetailViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        guard let info = travelPeopleInfo else { return .zero }
-        let height = TravelPeopleHeaderView.height(for: info.name, width: collectionView.bounds.width)
+        guard let info = travelerInfo else { return .zero }
+        let height = TravelerHeaderView.height(for: info.name, width: collectionView.bounds.width)
         return CGSize(width: collectionView.bounds.width, height: height)
     }
 

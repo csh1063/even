@@ -134,10 +134,10 @@ public final class ClusteringEngine<Item: ClusterableEmbedding> {
         var round = 0
         while round < maxRetryRounds, !pool.isEmpty {
             round += 1
-            print("🔁 [\(logTag)] leftover 재시도 \(round)차 (입력: \(pool.count)개)")
+            debugLog("🔁 [\(logTag)] leftover 재시도 \(round)차 (입력: \(pool.count)개)")
             let (raw, leftover) = formRawClusters(embeddings: pool)
             guard !raw.isEmpty else {
-                print("⏹️ [\(logTag)] 재시도 \(round)차에서 새 raw cluster 없음 — 조기 종료")
+                debugLog("⏹️ [\(logTag)] 재시도 \(round)차에서 새 raw cluster 없음 — 조기 종료")
                 break
             }
             rawGroups.append(contentsOf: raw)
@@ -147,7 +147,7 @@ public final class ClusteringEngine<Item: ClusterableEmbedding> {
         let (clusters, mergeLeftover) = mergeRawClusters(rawGroups)
         let finalLeftover = mergeLeftover + pool
 
-        print("📊 [\(logTag)] 전체 완료 → raw cluster \(rawGroups.count)개 → 최종 클러스터 \(clusters.count)개 / 최종 leftover \(finalLeftover.count)개")
+        debugLog("📊 [\(logTag)] 전체 완료 → raw cluster \(rawGroups.count)개 → 최종 클러스터 \(clusters.count)개 / 최종 leftover \(finalLeftover.count)개")
         return ClusteringOutcome(clusters: clusters, leftover: finalLeftover)
     }
 
@@ -159,7 +159,7 @@ public final class ClusteringEngine<Item: ClusterableEmbedding> {
         let n = embeddings.count
         guard n > 0 else { return ([], []) }
 
-        print("\n--- 🧩 [\(logTag)] raw cluster 형성 (입력: \(n)개, threshold: \(config.similarityThreshold)) ---")
+        debugLog("🧩 [\(logTag)] raw cluster 형성 (입력: \(n)개, threshold: \(config.similarityThreshold))")
 
         let similarityMatrix = buildSimilarityMatrix(embeddings: embeddings)
         let photoIds = embeddings.map { $0.photoId }
@@ -170,7 +170,7 @@ public final class ClusteringEngine<Item: ClusterableEmbedding> {
         for (i, label) in labels.enumerated() {
             groups[label, default: []].append(i)
         }
-        print("📊 Chinese Whispers 완료 → \(groups.count)개 그룹")
+        debugLog("📊 Chinese Whispers 완료 → \(groups.count)개 그룹")
 
         var raw: [[Item]] = []
         var leftoverIndices: Set<Int> = []
@@ -192,7 +192,7 @@ public final class ClusteringEngine<Item: ClusterableEmbedding> {
 
             let avgSim = averageInternalSimilarity(indices: cleaned, n: n, similarityMatrix: similarityMatrix)
             guard avgSim >= config.minimumClusterQuality else {
-                print("⛔️ 품질 낮은 그룹 스킵 (평균 유사도: \(String(format: "%.4f", avgSim)), \(cleaned.count)장)")
+                debugLog("⛔️ 품질 낮은 그룹 스킵 (평균 유사도: \(String(format: "%.4f", avgSim)), \(cleaned.count)장)")
                 leftoverIndices.formUnion(indices)
                 continue
             }
@@ -203,7 +203,7 @@ public final class ClusteringEngine<Item: ClusterableEmbedding> {
         }
 
         let leftover = leftoverIndices.sorted().map { embeddings[$0] }
-        print("📊 [\(logTag)] raw cluster 형성 완료 → \(raw.count)개 / leftover \(leftover.count)개")
+        debugLog("📊 [\(logTag)] raw cluster 형성 완료 → \(raw.count)개 / leftover \(leftover.count)개")
         return (raw, leftover)
     }
 
@@ -223,8 +223,7 @@ public final class ClusteringEngine<Item: ClusterableEmbedding> {
             }
         }
 
-        print("🔗 엣지 수: \(edges.count)개")
-
+        
         var nodeEdges = Array(repeating: [(idx: Int, sim: Float)](), count: n)
         for edge in edges {
             nodeEdges[edge.i].append((edge.j, edge.sim))
@@ -252,7 +251,7 @@ public final class ClusteringEngine<Item: ClusterableEmbedding> {
                 }
             }
 
-            print("🔄 iteration \(iteration + 1) — changed: \(changedCount)개")
+            debugLog("🔄 iteration \(iteration + 1) — changed: \(changedCount)개")
             if changedCount == 0 { break }
         }
 
@@ -343,7 +342,7 @@ public final class ClusteringEngine<Item: ClusterableEmbedding> {
             groups[gi] = combined
             groups.removeValue(forKey: gj)
             for idx in combined { groupOf[idx] = gi }
-            print("🔀 [\(logTag)] raw cluster 병합 확정 (클리크 검증 통과, centroid 유사도: \(String(format: "%.4f", pair.sim)))")
+            debugLog("🔀 [\(logTag)] raw cluster 병합 확정 (클리크 검증 통과, centroid 유사도: \(String(format: "%.4f", pair.sim)))")
         }
 
         var finalClusters: [ClusterResult<Item>] = []
@@ -367,7 +366,7 @@ public final class ClusteringEngine<Item: ClusterableEmbedding> {
 
     private func logClusterSummary(_ items: [Item]) {
         guard items.count > 1 else {
-            print("✅ [\(logTag)] 클러스터 \(items.count)장")
+            debugLog("✅ [\(logTag)] 클러스터 \(items.count)장")
             return
         }
         let matrix = buildSimilarityMatrix(embeddings: items)
@@ -383,7 +382,7 @@ public final class ClusteringEngine<Item: ClusterableEmbedding> {
             }
         }
         let avgSim = count > 0 ? total / Float(count) : 0
-        print("✅ [\(logTag)] 클러스터 \(items.count)장 (내부 유사도 min: \(String(format: "%.3f", minSim)), avg: \(String(format: "%.3f", avgSim)), max: \(String(format: "%.3f", maxSim)))")
+        debugLog("✅ [\(logTag)] 클러스터 \(items.count)장 (내부 유사도 min: \(String(format: "%.3f", minSim)), avg: \(String(format: "%.3f", avgSim)), max: \(String(format: "%.3f", maxSim)))")
     }
 
     /// 공유 유사도 행렬 없이 독립적인 `[Item]` 그룹에 대해 아웃라이어를 제거한다 — 로컬 유사도

@@ -25,7 +25,6 @@ public class LabelsCoordinator: BaseCoordinator {
     }
 
     public override func start() {
-        print("start!")
         let viewModel = diContainer.makeLabelsViewModel { [weak self] in
             self?.pop()
         }

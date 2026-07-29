@@ -72,38 +72,32 @@ public final class LabelsViewModel: BaseViewModel {
     private func loadLabels() async {
 
         do {
-            print("start loadLabels")
             self.isLoading = true
 //            self.photoLabels = try await self.useCase.fetchUniqueNames()
             let tuple = try await self.useCase.fetchLabelCounts()
 
             self.photoLabels = tuple.map { "\($0.name): \($0.count)" }
 
-            print("end loadLabels")
-            print(photoLabels)
 
             self.isLoading = false
         } catch {
-            print("error:", error.localizedDescription)
+            debugLog("error: \(error.localizedDescription)")
         }
     }
 
     private func loadAddressCount() async {
 
         do {
-            print("start loadLabels")
             self.isLoading = true
 
             let tuple = try await self.useCase.fetchAddressCounts()
 
             self.photoLabels = tuple.map { "\($0.name): \($0.count)" }
 
-            print("end loadLabels")
-            print(photoLabels)
 
             self.isLoading = false
         } catch {
-            print("error:", error.localizedDescription)
+            debugLog("error: \(error.localizedDescription)")
         }
     }
 }

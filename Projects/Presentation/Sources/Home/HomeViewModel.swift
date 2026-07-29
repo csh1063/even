@@ -54,7 +54,6 @@
 //    }
 //    
 //    func send(_ input: Input) {
-//        print("send", input)
 //        self.input.send(input)
 //    }
 //    
@@ -74,7 +73,6 @@
 //            
 //            return UIImage(cgImage: cgImage)
 //        } catch {
-//            print("이미지 로딩 실패: \(error.localizedDescription)")
 //            return nil
 //        }
 //    }
@@ -98,11 +96,9 @@
 //    }
 //    
 //    private func loadPhoto(page: Int) async {
-//        print("loadPhoto", page)
 //        do {
 //            self.isLoading = false
 //            let photoList = try await self.useCase.fetchData(page: page)
-//            print("photos count: ", photoList.photos.count)
 //            self.photos = photoList.photos
 //            self.hasNext = photoList.hasNext
 //            self.isLoading = true

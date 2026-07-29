@@ -1,5 +1,5 @@
 //
-//  TravelPeopleHeaderView.swift
+//  TravelerHeaderView.swift
 //  Presentation
 //
 //  Created by sanghyeon on 7/11/26.
@@ -10,8 +10,8 @@ import UIKit
 import SnapKit
 
 /// 여행 앨범 상세 상단에 전체 너비로 붙는 셀 — "A와 B와 사람 3명의 여행"처럼 등장 인물을 보여준다
-final class TravelPeopleHeaderView: UICollectionReusableView {
-    static let reuseIdentifier = "TravelPeopleHeaderView"
+final class TravelerHeaderView: UICollectionReusableView {
+    static let reuseIdentifier = "TravelerHeaderView"
 
     // 화면 가장자리에 카드가 딱 붙지 않도록 바깥쪽 여백을 두는 컨테이너
     private let cardView: UIView = {

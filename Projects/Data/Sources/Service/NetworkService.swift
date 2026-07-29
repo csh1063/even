@@ -31,7 +31,6 @@ public final class NetworkService {
     func locationOverseas(_ photosInCoordi: [String: [Photo]]) async throws -> [AddressDTO] {
         var params = [OverseasParam]()
         for (coordiString, photos) in photosInCoordi {
-            print("etcPhotos coordiString", coordiString)
             let coordi = coordiString.split(separator: ",")
             if coordi.count >= 2,
                 let latitude = Double(coordi[0]),

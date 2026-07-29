@@ -25,7 +25,6 @@ public final class PhotoTestCoordinator: BaseCoordinator {
     }
 
     public override func start() {
-        print("start!")
         let viewModel = diContainer.makePhotoTestViewModel { [weak self] in
             self?.pop()
         }

@@ -525,7 +525,6 @@ public final class DefaultAlbumDataRepository: AlbumDataRepository {
 
         let context = ModelContext(container)
 
-        print("photo-album 연결 제거")
         let albums = try context.fetch(FetchDescriptor<AlbumEntity>())
         albums.forEach { $0.photos.removeAll() }
         try context.save()
@@ -536,7 +535,7 @@ public final class DefaultAlbumDataRepository: AlbumDataRepository {
         try deleteAllLogged(ClusterEntity.self, context: context)
         try deleteAllLogged(AnimalClusterEntity.self, context: context)
 
-        print("🗑️ AlbumEntity 삭제: \(albums.count)개")
+        debugLog("🗑️ AlbumEntity 삭제: \(albums.count)개")
         albums.forEach { context.delete($0) }
         try context.save()
 
@@ -654,6 +653,6 @@ public final class DefaultAlbumDataRepository: AlbumDataRepository {
         let items = try context.fetch(FetchDescriptor<T>())
         items.forEach { context.delete($0) }
         try context.save()
-        print("🗑️ \(T.self) 삭제: \(items.count)개")
+        debugLog("🗑️ \(T.self) 삭제: \(items.count)개")
     }
 }

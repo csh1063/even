@@ -38,9 +38,9 @@ final public class DefaultPhotoTestUseCase: PhotoTestUseCase {
         }
 
         for (key, value) in unique {
-            print("photo", key, ":", value.count)
+            debugLog("photo \(key) : \(value.count)")
         }
-        print("unique total", unique.count)
+        debugLog("unique total \(unique.count)")
     }
 
     public func countIsKorea() async throws {
@@ -58,7 +58,7 @@ final public class DefaultPhotoTestUseCase: PhotoTestUseCase {
             }
         }
         for (key, value) in unique {
-            print("photo", key, ":", value.count)
+            debugLog("photo \(key) : \(value.count)")
         }
     }
 
@@ -74,11 +74,7 @@ final public class DefaultPhotoTestUseCase: PhotoTestUseCase {
         let address = try await self.geoRepository.locationToaddress(koreaPhotos)
 
         for (id, value) in address {
-            print("id:", id,
-                  ", value:", value.administrativeArea ?? "??",
-                  ", ", value.locality ?? "??",
-                  ", ", value.subLocality ?? "??",
-                  ", ", value.thoroughfare ?? "??")
+            debugLog("id: \(id), value: \(value.administrativeArea ?? "??"), \(value.locality ?? "??"), \(value.subLocality ?? "??"), \(value.thoroughfare ?? "??")")
         }
     }
 

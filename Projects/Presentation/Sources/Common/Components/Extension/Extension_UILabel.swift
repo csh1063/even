@@ -1,4 +1,5 @@
 import UIKit
+import Domain
 
 // 레이블 기능 확장
 extension UILabel {
@@ -73,7 +74,7 @@ extension UILabel {
             let result: String = text
             self.attributedText = try NSMutableAttributedString(htmlString: result)
         } catch let error {
-            print(error.localizedDescription)
+            debugLog(error.localizedDescription)
         }
     }
 

@@ -71,7 +71,7 @@ public final class PhotoAnalysisService { // : @unchecked Sendable {
                     continuation.resume(returning: labels)
 
                 } catch {
-                    print("Vision classifyImage 에러:", error)
+                    debugLog("Vision classifyImage 에러: \(error)")
                     continuation.resume(returning: [])
                 }
             }
@@ -128,7 +128,7 @@ public final class PhotoAnalysisService { // : @unchecked Sendable {
                     continuation.resume(returning: labels)
 
                 } catch {
-                    print("Vision detectFace 에러:", error)
+                    debugLog("Vision detectFace 에러: \(error)")
                     continuation.resume(returning: [])
                 }
             }
@@ -167,7 +167,7 @@ public final class PhotoAnalysisService { // : @unchecked Sendable {
                         PhotoLabel(name: label, confidence: confidence)
                     ])
                 } catch {
-                    print("Vision detectText 에러:", error)
+                    debugLog("Vision detectText 에러: \(error)")
                     continuation.resume(returning: [])
                 }
             }
@@ -196,7 +196,7 @@ public final class PhotoAnalysisService { // : @unchecked Sendable {
 
                     continuation.resume(returning: labels)
                 } catch {
-                    print("Vision detectBarcode 에러:", error)
+                    debugLog("Vision detectBarcode 에러: \(error)")
                     continuation.resume(returning: [])
                 }
             }

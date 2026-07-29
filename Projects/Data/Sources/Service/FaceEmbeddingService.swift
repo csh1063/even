@@ -26,7 +26,7 @@ public actor FaceEmbeddingService {
 
     private lazy var model: MLModel? = {
         guard let url = Bundle.module.url(forResource: "AdaFace_IR50", withExtension: "mlmodelc") else {
-            print("FaceEmbeddingService: AdaFace_IR50.mlmodelc를 찾을 수 없음")
+            debugLog("FaceEmbeddingService: AdaFace_IR50.mlmodelc를 찾을 수 없음")
             return nil
         }
         return try? MLModel(contentsOf: url, configuration: MLModelConfiguration())
@@ -64,16 +64,6 @@ public actor FaceEmbeddingService {
         }
         return embeddings
     }
-    
-    private var debugSaveCount = 0
-
-    private func saveDebugCrop(_ image: CGImage, boundingBox: CGRect) {
-        guard debugSaveCount < 20 else { return }
-        guard let cropped = cropFace(from: image, boundingBox: boundingBox) else { return }
-        let uiImage = UIImage(cgImage: cropped)
-        UIImageWriteToSavedPhotosAlbum(uiImage, nil, nil, nil)
-        debugSaveCount += 1
-    }
 
     // MARK: - Private: Detection
 
@@ -98,7 +88,7 @@ public actor FaceEmbeddingService {
                 return (observation, quality)
             }
         } catch {
-            print("FaceEmbeddingService detectFacesWithLandmarks 에러:", error)
+            debugLog("FaceEmbeddingService detectFacesWithLandmarks 에러: \(error)")
             return nil
         }
     }
@@ -139,13 +129,12 @@ public actor FaceEmbeddingService {
         }
 
 //        if isBabyFace(in: cropped) {
-//            print("👶 아기 얼굴 감지 → 클러스터링 제외")
 //            return nil
 //        }
 
         let hasGlasses = hasGlasses(in: cropped)
         if hasGlasses {
-            print("🕶️ 안경 감지")
+            debugLog("🕶️ 안경 감지")
         }
 
         // 눈 사이 거리까지 정규화하는 정식 정렬(회전+스케일+이동)이 가능하면 그걸 쓰고,
@@ -356,14 +345,14 @@ public actor FaceEmbeddingService {
             output = try model.prediction(from: input)
         } catch {
             // 수만 장 처리하는 중 순간적으로 나는 문제일 수 있어서, 같은(ANE 포함) 모델로 한 번 더 시도
-            print("⚠️ FaceEmbeddingService model.prediction 실패, 같은 모델로 재시도:", error)
+            debugLog("⚠️ FaceEmbeddingService model.prediction 실패, 같은 모델로 재시도: \(error)")
             if let retried = try? model.prediction(from: input) {
                 output = retried
             } else {
                 // 그래도 안 되면 CPU+GPU 전용 모델로 마지막 시도
-                print("⚠️ FaceEmbeddingService 재시도 실패, CPU+GPU로 재시도")
+                debugLog("⚠️ FaceEmbeddingService 재시도 실패, CPU+GPU로 재시도")
                 guard let fallbackModel, let fallbackRetried = try? fallbackModel.prediction(from: input) else {
-                    print("⚠️ FaceEmbeddingService 모든 재시도 실패 (임베딩 유실됨)")
+                    debugLog("⚠️ FaceEmbeddingService 모든 재시도 실패 (임베딩 유실됨)")
                     return nil
                 }
                 output = fallbackRetried

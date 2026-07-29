@@ -103,9 +103,6 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                                         animalEmbedding = []
                                     }
 
-                                    print("id: ", photo.asset.localIdentifier, "/ year: ", year ?? "?", ", month:", month ?? "?")
-                                    print("labels: ", (labels).map { $0.name }.joined(separator: ", "))
-//                                    print("location: ", photo.asset.location?.coordinate ?? "")
                                     let newPhoto = Photo(
                                         localIdentifier: photo.asset.localIdentifier,
                                         createdAt: photo.asset.creationDate ?? Date(),
@@ -177,9 +174,6 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                             address = try await self.geocoderService.fetchAddress(
                                 from: location,
                                 locale: Locale(identifier: "ko"))
-//                            print(
-//                                "id: ", asset.localIdentifier,
-//                                "location:", "\(address?.country ?? ""), \(address?.locality ?? ""), \(address?.subLocality ?? ""), \(address?.thoroughfare ?? ""),  \(address?.administrativeArea ?? "")")
 //                            addressEn = try await self.geocoderService.fetchAddress(
 //                                from: location,
 //                                id: asset.localIdentifier,

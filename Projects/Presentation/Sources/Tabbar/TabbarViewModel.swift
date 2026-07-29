@@ -271,7 +271,7 @@ public final class TabbarViewModel: BaseViewModel {
         self.isAnalyzing = true
 
         let startedAt = Date()
-        print("⏱️ [분석] 시작: \(startedAt)")
+        debugLog("⏱️ [분석] 시작: \(startedAt)")
 
         do {
             for try await progress in analysisUseCase.analysis() {
@@ -298,7 +298,7 @@ public final class TabbarViewModel: BaseViewModel {
 
         let finishedAt = Date()
         let elapsedMinutes = finishedAt.timeIntervalSince(startedAt) / 60
-        print("⏱️ [분석] 종료: \(finishedAt) — 총 \(String(format: "%.1f", elapsedMinutes))분 소요")
+        debugLog("⏱️ [분석] 종료: \(finishedAt) — 총 \(String(format: "%.1f", elapsedMinutes))분 소요")
     }
 
     private func runAlbumGeneration(fullRegenerate: Bool = false) async {
@@ -423,7 +423,7 @@ public final class TabbarViewModel: BaseViewModel {
             try await self.autoAlbumUseCase.deletePhotos()
             self.isComplete = true
         } catch {
-            print("error", error.localizedDescription)
+            debugLog("error: \(error.localizedDescription)")
         }
     }
 
@@ -433,7 +433,7 @@ public final class TabbarViewModel: BaseViewModel {
             try await self.autoAlbumUseCase.deleteAutoAlbums()
             self.isComplete = true
         } catch {
-            print("error", error.localizedDescription)
+            debugLog("error: \(error.localizedDescription)")
         }
     }
 
@@ -441,7 +441,7 @@ public final class TabbarViewModel: BaseViewModel {
         do {
             self.consent = try await permissionUseCase.showConsent()
         } catch {
-            print("checkConsent failed")
+            debugLog("checkConsent failed")
         }
     }
 
@@ -449,7 +449,7 @@ public final class TabbarViewModel: BaseViewModel {
         do {
             try await permissionUseCase.completeConsent()
         } catch {
-            print("consentComplete fail")
+            debugLog("consentComplete fail")
         }
     }
 
@@ -457,7 +457,7 @@ public final class TabbarViewModel: BaseViewModel {
         do {
             self.onboarding = try await permissionUseCase.showOnboarding()
         } catch {
-            print("checkConsent failed")
+            debugLog("checkConsent failed")
         }
     }
 
@@ -465,7 +465,7 @@ public final class TabbarViewModel: BaseViewModel {
         do {
             try await permissionUseCase.completeOnboarding()
         } catch {
-            print("consentComplete fail")
+            debugLog("consentComplete fail")
         }
     }
 
@@ -473,7 +473,7 @@ public final class TabbarViewModel: BaseViewModel {
         do {
             self.permission = try await permissionUseCase.checkPermission()
         } catch {
-            print("checkPermission failed")
+            debugLog("checkPermission failed")
         }
     }
 

@@ -78,46 +78,41 @@ public final class SplashViewModel: BaseViewModel {
 
     private func checkDeletedPhoto() async {
         do {
-            print("checkDeletedPhoto")
             for try await progress in try await self.useCase.checkDeletedPhoto() {
                 switch progress {
                 case .progress(let ratio):
-                    print("check progress:", ratio)
+                    debugLog("check progress: \(ratio)")
                 case .completed:
-                    print("check completed")
                     await self.syncData()
                 case .unavailable(let reason):
-                    print("check reason:", reason)
+                    debugLog("check reason: \(reason)")
                 }
             }
 
         } catch {
-            print("error:", error.localizedDescription)
+            debugLog("error: \(error.localizedDescription)")
         }
     }
 
     private func syncData() async {
         do {
-            print("syncData")
             for try await progress in try await self.useCase.syncCoverAndCount() {
                 switch progress {
                 case .progress(let ratio):
-                    print("syncData progress:", ratio)
+                    debugLog("syncData progress: \(ratio)")
                 case .completed:
-                    print("syncData completed")
 //                    await self.start()
                     appearSubject.send()
                 case .unavailable(let reason):
-                    print("syncData reason:", reason)
+                    debugLog("syncData reason: \(reason)")
                 }
             }
         } catch {
-            print("error:", error.localizedDescription)
+            debugLog("error: \(error.localizedDescription)")
         }
     }
 
     private func start() async {
-        print("start")
         try? await Task.sleep(nanoseconds: 1_000_000_000) // 3초 (1초 = 1_000_000_000 ns)
         self.finished = true
     }

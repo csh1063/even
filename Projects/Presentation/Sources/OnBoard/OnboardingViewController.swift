@@ -192,14 +192,12 @@ extension OnboardingViewController: UIPageViewControllerDelegate {
         guard completed,
               let vc = pageViewController.viewControllers?.first as? OnboardingPageViewController
         else { return }
-        print("index", vc.index)
         updateUI(for: vc.index)
     }
 }
 
 extension OnboardingViewController: UIScrollViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-//        print(scrollView.bounces, scrollView.contentOffset)
 
         let isFirstable = currentIndex == 0
         let isLastable = currentIndex == self.pages.count - 1

@@ -248,7 +248,12 @@ public final class PhotoLibraryService {
             contentMode = .default
         case .specialSize(let specialSize):
             options.resizeMode = .fast
-            options.deliveryMode = .opportunistic
+            // opportunistic은 저화질 콜백 → 고화질 콜백 순으로 두 번 불릴 수 있는데, 여기선
+            // continuation을 한 번만 resume할 수 있어서 저화질은 무시하고 고화질 콜백을 기다렸다.
+            // 그런데 자산에 따라 고화질 콜백이 아예 오지 않는 경우가 있어(특히 시뮬레이터에 방금
+            // 추가된 자산), continuation이 영원히 resume되지 않고 호출부가 무한 대기에 빠지는
+            // 버그가 있었다. 어차피 결과를 하나만 쓰므로 처음부터 고화질만 요청하도록 바꿔서 해결.
+            options.deliveryMode = .highQualityFormat
             options.isSynchronous = false
             options.isNetworkAccessAllowed = true
             size = specialSize
@@ -261,9 +266,8 @@ public final class PhotoLibraryService {
                 targetSize: size,
                 contentMode: contentMode,
                 options: options) { image, info in
-                    // 최종 결과인지 확인
                     let isDegraded = info?[PHImageResultIsDegradedKey] as? Bool ?? false
-                    if isDegraded { return }  // 저화질이면 무시
+                    if isDegraded { return }  // 저화질 중간 콜백은 무시(위 주석 참고)
 
                     if let error = info?[PHImageErrorKey] as? Error {
                         continuation.resume(throwing: error)

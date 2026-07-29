@@ -86,7 +86,6 @@
 //                return photos.map { PhotoCellItemViewModel(photo: $0, imageLoader: self.viewModel) }
 //            }
 //            .sink { [weak self] photos in
-//                print("photos sink: ", photos.count)
 //                self?.applySnapshot(with: photos)
 //            }
 //            .store(in: &cancellables)
@@ -156,7 +155,6 @@
 //    }
 //
 ////    private func applySnapshot(with photos: [PhotoInAlbum]) {
-////        print("스냅샷 적용! 데이터 개수: \(photos.count)") // 로그 추가
 ////        var snapshot = NSDiffableDataSourceSnapshot<Int, PhotoInAlbum>()
 ////        snapshot.appendSections([0])
 ////        snapshot.appendItems(photos)

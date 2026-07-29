@@ -92,7 +92,6 @@ final class MyPageViewModel: BaseViewModel {
         case .clear:
             tabbarViewModel.send(.clear)
         case let .selectItem(data):
-            print("gogo", data)
             switch data.type {
             case .allLibraryPhoto, .allPhoto, .unanalysisPhoto, .analyzedDate: break
             case .analysis: tabbarViewModel.send(.analysis)
@@ -141,7 +140,7 @@ final class MyPageViewModel: BaseViewModel {
             self.displayMode = DisplayMode(value).text
             self.cells()
         } catch {
-            print("error", error.localizedDescription)
+            debugLog("error: \(error.localizedDescription)")
         }
     }
 

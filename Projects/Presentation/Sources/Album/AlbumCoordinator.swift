@@ -58,7 +58,6 @@ public final class AlbumCoordinator: BaseCoordinator {
     }
 
     func moveDetail(album: Album, isSelectMode: Bool) {
-        print("move!")
         let detailDI = diContainer.makeDetailDIContainer(album: album, isSelectMode: isSelectMode)
 
         let detailCoordinator = AlbumDetailCoordinator(
@@ -70,7 +69,6 @@ public final class AlbumCoordinator: BaseCoordinator {
     }
 
     func moveFromList(_ from: String) {
-        print("move!")
         let listDI = diContainer.makeListDIContainer(from: from)
 
         let listCoordinator = AlbumListCoordinator(

@@ -23,7 +23,6 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
     // MARK: - 전체 클러스터링 및 앨범 저장
 
     public func clusterAndSaveAlbums() async throws {
-        print("\n=== 🚀 [Repository] 클러스터링 및 앨범 저장 프로세스 시작 ===")
         let context = ModelContext(container)
 
         // 1. DB에서 모든 FaceEmbeddingEntity 로드
@@ -36,7 +35,7 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
         let allEntities = try context.fetch(embeddingDescriptor)
             .sorted { $0.id.uuidString < $1.id.uuidString }
 
-        print("📦 [Repository] 총 \(allEntities.count)개 임베딩 로드")
+        debugLog("📦 [Repository] 총 \(allEntities.count)개 임베딩 로드")
 
         guard !allEntities.isEmpty else { return }
 
@@ -57,7 +56,7 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
         let embeddings = Array(allEntities.map { $0.toDomain() }.reversed())
         let outcome = clusterService.clusterWithLeftoverRetry(embeddings: embeddings)
 
-        print("📊 총 \(outcome.clusters.count)개 클러스터 생성 (leftover \(outcome.leftover.count)개)")
+        debugLog("📊 총 \(outcome.clusters.count)개 클러스터 생성 (leftover \(outcome.leftover.count)개)")
 
         let entityById = Dictionary(uniqueKeysWithValues: allEntities.map { ($0.id, $0) })
         var personIndex = existingAlbumCount + 1
@@ -82,7 +81,6 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
         }
 
         try context.save()
-        print("✅ [Repository] 저장 완료\n")
     }
 
     /// 인물 앨범 전체를 사진 수 내림차순으로 "인물 1"부터 다시 번호 매긴다. 사용자가 직접 이름을
@@ -119,7 +117,7 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
             return Double(intersection.count) / Double(blacklistSet.count) >= 0.5
         }
         guard !isBlacklisted else {
-            print("🚫 블랙리스트 클러스터 스킵")
+            debugLog("🚫 블랙리스트 클러스터 스킵")
             return
         }
 
@@ -131,7 +129,7 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
            let matchedAlbum = matched.album {
             cluster = matched
             album = matchedAlbum
-            print("🔄 [\(album.name)] 기존 앨범 재사용")
+            debugLog("🔄 [\(album.name)] 기존 앨범 재사용")
         } else {
             let centroidData = result.centroid.withUnsafeBytes { Data($0) }
             let albumName = "인물 \(personIndex)"
@@ -184,7 +182,7 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
            let bestPhotoId = bestEntity.photo?.localIdentifier {
             album.coverPhotoIdentifier = bestPhotoId
         }
-        print("✅ [\(album.name)] \(album.photoCount)장")
+        debugLog("✅ [\(album.name)] \(album.photoCount)장")
     }
 
     // 새로 계산된 centroid가 기존 클러스터 중 하나와 충분히 비슷하면 그 클러스터를 반환 (없으면 nil)
@@ -207,7 +205,7 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
 
     public func matchAndAddNewEmbeddings(embeddingIds: [UUID]) async throws {
         guard !embeddingIds.isEmpty else { return }
-        print("\n=== 🔍 [Repository] 새 임베딩 \(embeddingIds.count)개 매칭 시작 ===")
+        debugLog("🔍 새 임베딩 \(embeddingIds.count)개 매칭 시작")
 
         let context = ModelContext(container)
 
@@ -245,7 +243,7 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
 
             if let photoId = entity.photo?.localIdentifier,
                matchedCluster.excludedPhotoIds.contains(photoId) {
-                print("🚫 제외된 사진 스킵: \(photoId)")
+                debugLog("🚫 제외된 사진 스킵: \(photoId)")
                 continue
             }
 
@@ -260,11 +258,10 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
             }
 
             updateCentroid(cluster: matchedCluster, dim: dim)
-            print("✅ 매칭 성공 (유사도: \(String(format: "%.4f", maxSim)))")
+            debugLog("✅ 매칭 성공 (유사도: \(String(format: "%.4f", maxSim)))")
         }
 
         try context.save()
-        print("✅ [Repository] 새 임베딩 매칭 완료\n")
     }
 
     // MARK: - 앨범 병합
@@ -275,8 +272,6 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
         let albums = try context.fetch(FetchDescriptor<AlbumEntity>())
         guard let source = albums.first(where: { $0.id == sourceId }),
               let target = albums.first(where: { $0.id == targetId }) else { return }
-
-        print("\n=== 🔀 [Repository] 앨범 병합: \(target.name) → \(source.name) ===")
 
         // 원래 이름 기억 — 나중에 분리(splitAlbum)할 때 복원용. 이미 기록된 게 있으면(과거에 또
         // 합쳐진 적 있는 클러스터) 덮어쓰지 않아서 제일 처음 이름을 계속 보존한다.
@@ -317,7 +312,7 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
 
         context.delete(target)
         try context.save()
-        print("✅ [Repository] 병합 완료 — \(source.name): \(source.photoCount)장\n")
+        debugLog("🔀 병합 완료: \(target.name) → \(source.name), 최종 \(source.photoCount)장")
     }
 
     /// 병합 결과 앨범이 어떤 이름/번호를 가져야 하는지 결정한다 — 둘 다 자동 번호면 낮은 번호,
@@ -346,8 +341,6 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
         let albums = try context.fetch(FetchDescriptor<AlbumEntity>())
         guard let album = albums.first(where: { $0.id == fromAlbumId }) else { return }
 
-        print("\n=== 🚫 [Repository] 사진 제외: \(photoId) from \(album.name) ===")
-
         for cluster in album.clusters {
             if cluster.faceEmbeddings.contains(where: { $0.photo?.localIdentifier == photoId }) {
                 cluster.excludedPhotoIds.append(photoId)
@@ -359,7 +352,6 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
         album.isEdited = true
 
         try context.save()
-        print("✅ [Repository] 사진 제외 완료\n")
     }
 
     // MARK: - 앨범 삭제 + 블랙리스트
@@ -370,8 +362,6 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
         let albums = try context.fetch(FetchDescriptor<AlbumEntity>())
         guard let album = albums.first(where: { $0.id == albumId }) else { return }
 
-        print("\n=== 🗑️ [Repository] 앨범 삭제: \(album.name) ===")
-
         for cluster in album.clusters {
             let ids = cluster.faceEmbeddings.map { $0.id }
             guard !ids.isEmpty else { continue }
@@ -381,7 +371,6 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
 
         context.delete(album)
         try context.save()
-        print("✅ [Repository] 앨범 삭제 완료\n")
     }
 
     // MARK: - 합칠 앨범 후보 (centroid 유사도 순 정렬)
@@ -426,12 +415,6 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
             .map { ($0, maxSimilarity(to: $0)) }
             .sorted { $0.1 > $1.1 }
 
-        print("\n=== 🔎 [Repository] '\(current.name)'과 합칠 앨범 후보 유사도 순위 ===")
-        for (album, sim) in ranked {
-            print("   \(String(format: "%.4f", sim)) — \(album.name) (\(album.photoCount)장)")
-        }
-        print("--------------------------------------------------------------\n")
-
         return ranked.map { AlbumMergeCandidate(album: $0.0.toDomain(), similarity: $0.1) }
     }
 
@@ -473,8 +456,6 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
         let clustersToSplit = album.clusters.filter { clusterIds.contains($0.id) }
         // 전부 떼어내면 원본 앨범이 텅 비므로, 최소 1개 클러스터는 남아있어야 분리가 성립한다
         guard !clustersToSplit.isEmpty, clustersToSplit.count < album.clusters.count else { return }
-
-        print("\n=== ✂️ [Repository] 앨범 분리: \(album.name)에서 \(clustersToSplit.count)개 클러스터 분리 ===")
 
         // 분리 대상 클러스터들이 전부 같은 "원래 이름"을 기억하고 있으면(병합되기 전 이름) 그걸로
         // 복원한다 — 새 번호를 매기지 않는다. 기억이 없거나 서로 다르면(여러 앨범이 합쳐진 걸
@@ -550,7 +531,7 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
         }
 
         try context.save()
-        print("✅ [Repository] 분리 완료 — \(album.name): \(album.photoCount)장 / \(newAlbum.name): \(newAlbum.photoCount)장\n")
+        debugLog("✂️ 분리 완료 — \(album.name): \(album.photoCount)장 / \(newAlbum.name): \(newAlbum.photoCount)장")
     }
 
     // MARK: - Private Helpers

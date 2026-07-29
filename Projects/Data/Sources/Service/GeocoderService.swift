@@ -18,11 +18,8 @@ public final class GeocoderService {
               let data = try? Data(contentsOf: url),
               let dict = try? JSONDecoder().decode([String: String].self, from: data)
         else {
-            print("replaceTerms else")
+            debugLog("GeocoderService: ReplaceWord.json 로드 실패")
             return [:]
-        }
-        for (key, value) in dict {
-            print("replaceTerms key:", key, ", value:", value)
         }
         return dict
     }()
@@ -46,7 +43,7 @@ public final class GeocoderService {
             let location = mapping(of: data)
             return location
         } catch {
-            print("error CLGeocoder")
+            debugLog("CLGeocoder 실패: \(error)")
             return nil
         }
     }
@@ -65,7 +62,7 @@ public final class GeocoderService {
             let location = mapping(of: data)
             return location
         } catch {
-            print("error CLGeocoder")
+            debugLog("CLGeocoder 실패: \(error)")
             return nil
         }
     }

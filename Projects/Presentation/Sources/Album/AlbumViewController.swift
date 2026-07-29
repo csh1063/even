@@ -120,7 +120,6 @@ final class AlbumViewController: BaseViewController {
 
         output.permission
             .sink { permission in
-                print("!!", permission)
             }
             .store(in: &cancellables)
     }

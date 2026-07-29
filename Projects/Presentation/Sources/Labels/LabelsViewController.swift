@@ -82,7 +82,6 @@ final class LabelsViewController: BaseViewController {
 
         naviView.publisher
             .sink { [weak self] _ in
-                print("back!")
                 self?.viewModel.pop?()
             }
             .store(in: &cancellables)
@@ -101,7 +100,6 @@ final class LabelsViewController: BaseViewController {
 //                }
 //            }
             .sink { [weak self] photoLabels in
-                print("photoLabels sink: ", photoLabels.count)
                 self?.applySnapshot(with: photoLabels)
             }
             .store(in: &cancellables)

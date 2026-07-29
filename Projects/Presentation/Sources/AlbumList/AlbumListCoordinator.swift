@@ -31,7 +31,6 @@ public final class AlbumListCoordinator: BaseCoordinator {
     }
 
     public override func start() {
-        print("start!")
         let viewModel = diContainer.makeAlbumListViewModel()
 //        self.delegate = viewModel
         viewModel.onAction = { [weak self] type in
@@ -60,7 +59,6 @@ public final class AlbumListCoordinator: BaseCoordinator {
     }
 
     func moveDetail(album: Album, isSelectMode: Bool) {
-        print("move!")
         let detailDI = diContainer.makeDetailDIContainer(album: album, isSelectMode: isSelectMode)
 
         let detailCoordinator = AlbumDetailCoordinator(

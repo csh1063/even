@@ -73,7 +73,6 @@ public final class DefaultAlbumUseCase: AlbumUseCase {
     }
 
     public func createDummy() async throws {
-        print("usecase create dummy!")
         let albums = [
             Album(name: "dummy1", displayName: "dummy1", isAuto: true, photoCount: 0, from: "dummy"),
             Album(name: "dummy2", displayName: "dummy2", isAuto: true, photoCount: 0, from: "dummy"),

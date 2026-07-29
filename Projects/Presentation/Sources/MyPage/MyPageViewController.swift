@@ -117,7 +117,6 @@ extension MyPageViewController {
 
             let defaultCell = UITableViewCell()
             defaultCell.backgroundColor = .blue
-            print("indexPath row", indexPath.row, ", item", indexPath.item)
             return defaultCell
         })
     }
@@ -162,7 +161,6 @@ extension MyPageViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
         self.viewModel.send(.selectItem(item))
-//        print("didSelectRowAt")
     }
 
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {

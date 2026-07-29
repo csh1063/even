@@ -79,7 +79,7 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                                     }
                                 }
                             } catch {
-                                print("⚠️ 주소 분석 실패, 무시하고 계속 진행:", error)
+                                debugLog("⚠️ 주소 분석 실패, 무시하고 계속 진행: \(error)")
                                 _ = await combiner.updateAddress(1.0)
                             }
                         }
@@ -159,7 +159,7 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                         do {
                             koreaAddress = try await self.geoRepository.locationToaddress(koreaPhotos)
                         } catch {
-                            print("⚠️ 한국 주소 조회 실패, 무시하고 계속 진행:", error)
+                            debugLog("⚠️ 한국 주소 조회 실패, 무시하고 계속 진행: \(error)")
                             koreaAddress = [:]
                         }
 
@@ -207,7 +207,7 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                                 let batchResult = try await self.geoRepository.locationOverseas(batchDict)
                                 overseasAddress.merge(batchResult) { _, new in new }
                             } catch {
-                                print("⚠️ 해외 주소 배치 조회 실패, 이 배치만 건너뜀:", error)
+                                debugLog("⚠️ 해외 주소 배치 조회 실패, 이 배치만 건너뜀: \(error)")
                             }
                         }
 
@@ -248,7 +248,7 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                                 }
                                 address = resolved
                             } catch {
-                                print("⚠️ 개별 사진 주소 조회 실패, 이 사진만 건너뜀:", error)
+                                debugLog("⚠️ 개별 사진 주소 조회 실패, 이 사진만 건너뜀: \(error)")
                                 continue
                             }
 

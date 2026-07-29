@@ -107,7 +107,6 @@ final class PhotoLibraryViewController: BaseViewController {
         output.photos
             .receive(on: DispatchQueue.main)
             .sink { [weak self] photos in
-                print("photos sink: ", photos.count)
                 self?.applySnapshot(with: photos)
             }
             .store(in: &cancellables)
@@ -127,7 +126,6 @@ final class PhotoLibraryViewController: BaseViewController {
                 if permission.access {
                     self?.viewModel.send(.appear)
                 } else {
-                    print("// 설정앱으로 유도")
                 }
             }
             .store(in: &cancellables)
@@ -145,7 +143,6 @@ final class PhotoLibraryViewController: BaseViewController {
 
         case .changed:
             let scale = gesture.scale / pinchBeginScale
-            print("pinchBeginScale", pinchBeginScale, ", scale", scale)
             let newLayout = createDynamicLayout(columns: columnCount, scale: scale)
             collectionView.setCollectionViewLayout(newLayout, animated: false)
 
@@ -253,7 +250,6 @@ final class PhotoLibraryViewController: BaseViewController {
     }
 
     func scrollToItem(id: String) {
-        print("scrollToItem", id)
         let snapshot = dataSource.snapshot()
         for (sectionIndex, section) in snapshot.sectionIdentifiers.enumerated() {
             let items = snapshot.itemIdentifiers(inSection: section)

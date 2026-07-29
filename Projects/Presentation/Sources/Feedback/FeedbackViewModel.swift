@@ -57,7 +57,6 @@ final class FeedbackViewModel: BaseViewModel {
     }
 
     func send(_ input: Input) {
-        print("send", input)
         self.input.send(input)
     }
 
@@ -88,20 +87,16 @@ final class FeedbackViewModel: BaseViewModel {
     }
 
     func submit() async {
-        print("submit")
         guard isSubmitEnabled else { return }
         isLoading = true
 
         do {
-            print("~~")
             try await useCase.writeFeedback(
                 type: selectedType.rawValue,
                 content: content.trimmingCharacters(in: .whitespacesAndNewlines))
-            print("!!")
             submitResult = .success(())
-            print("@@")
         } catch {
-            print("##", error.localizedDescription)
+            debugLog("피드백 제출 실패: \(error.localizedDescription)")
             submitResult = .failure(error)
         }
 

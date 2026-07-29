@@ -42,19 +42,6 @@ public struct PhotoLocation: Codable, Equatable, Hashable {
         inlandWater: String? = nil,
         ocean: String? = nil
     ) {
-        print("name:", name ?? "nil",
-              "thoroughfare:", thoroughfare ?? "nil",
-              "subThoroughfare:", subThoroughfare ?? "nil",
-              "locality:", locality ?? "nil",
-              "subLocality:", subLocality ?? "nil",
-              "administrativeArea:", administrativeArea ?? "nil",
-              "subAdministrativeArea:", subAdministrativeArea ?? "nil",
-              "postalCode:", postalCode ?? "nil",
-              "isoCountryCode:", isoCountryCode ?? "nil",
-              "country:", country ?? "nil",
-              "inlandWater:", inlandWater ?? "nil",
-              "ocean:", ocean ?? "nil")
-
         self.name = name
         self.thoroughfare = thoroughfare
         self.subThoroughfare = subThoroughfare

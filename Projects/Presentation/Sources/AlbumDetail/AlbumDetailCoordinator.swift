@@ -32,7 +32,6 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
     }
 
     public override func start() {
-        print("start!")
         let viewModel = diContainer.makeAlbumDetailViewModel()
         wireActions(of: viewModel)
 
@@ -353,7 +352,6 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
     }
 
 //    func showDetail(_ photoDetails: [PhotoDetail], index: Int) {
-//        print("showDetail")
 //        let vm = diContainer.makeImageViewerViewModel(photoDetails: photoDetails, index: index)
 //        vm.onAction = { [weak self] action in
 //            switch action {

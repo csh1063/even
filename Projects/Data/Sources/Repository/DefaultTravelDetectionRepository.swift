@@ -34,9 +34,6 @@ public final class DefaultTravelDetectionRepository: TravelDetectionRepository {
 
         guard !located.isEmpty else { return [] }
 
-        // 홈존별 대표 주소를 미리 한 번만 계산해서, 제거 로그 찍을 때 매번 다시 찾지 않도록 함
-        let homeZoneAddresses = homeZones.map { $0.addressDescription(in: photos) }
-
         var rawClusters: [[(PhotoLocationSnapshot, CLLocation)]] = []
         var current: [(PhotoLocationSnapshot, CLLocation)] = [located[0]]
 
@@ -44,16 +41,7 @@ public final class DefaultTravelDetectionRepository: TravelDetectionRepository {
             let (prevSnapshot, prevLocation) = located[i - 1]
             let (currSnapshot, currLocation) = located[i]
 
-            if let zoneIdx = homeZoneIndex(currSnapshot, homeZones: homeZones) {
-                let components = [currSnapshot.country, currSnapshot.administrativeArea, currSnapshot.locality, currSnapshot.subLocality]
-                    .compactMap { $0 }
-                    .filter { !$0.isEmpty }
-                    .reduce(into: [String]()) { result, value in
-                        if !result.contains(value) {
-                            result.append(value)
-                        }
-                    }.joined(separator: ", ")
-//                print("홈존 \(homeZoneAddresses[zoneIdx]) / 홈존으로제거 \(components)")
+            if homeZoneIndex(currSnapshot, homeZones: homeZones) != nil {
                 rawClusters.append(current)
                 current = []
                 continue
@@ -69,15 +57,6 @@ public final class DefaultTravelDetectionRepository: TravelDetectionRepository {
             let gap = currSnapshot.createdAt.timeIntervalSince(prevSnapshot.createdAt)
             let distance = currLocation.distance(from: prevLocation)
             let isNormalStepping = gap < timeGapThreshold && distance < moveDistanceThreshold
-
-//            if gap / 86400 > 5 && isNormalStepping {
-//                print("⚠️ 6일 이상 gap인데 묶임: \(gap / 86400)일, distance: \(distance)")
-//                print("prev: \(prevSnapshot.createdAt), \(prevSnapshot.locality)")
-//                print("curr: \(currSnapshot.createdAt), \(currSnapshot.locality)")
-//            }
-//            print("gap days: \(gap / 86400), distance: \(distance), isNormalStepping: \(isNormalStepping)")
-//            print("prev: \(prevSnapshot.createdAt), \(prevSnapshot.locality)")
-//            print("curr: \(currSnapshot.createdAt), \(currSnapshot.locality)")
 
             if isNormalStepping {
                 current.append(located[i])
@@ -240,21 +219,8 @@ public final class DefaultTravelDetectionRepository: TravelDetectionRepository {
     }
 
     private func mostFrequent(_ values: [String]) -> String? {
-//        guard !values.isEmpty else { return nil }
-//        let counts = values.reduce(into: [:]) { $0[$1, default: 0] += 1 }
-//        return counts.max(by: { $0.value < $1.value })?.key
-        guard !values.isEmpty else {
-//            print("🚨 디버깅: values 배열이 완전히 비어있음!")
-            return nil
-        }
-//        print("디버깅 - values 목록: \(values)")
-
+        guard !values.isEmpty else { return nil }
         let counts = values.reduce(into: [:]) { $0[$1, default: 0] += 1 }
-//        print("📊 디버깅: 카운트 결과 딕셔너리 -> \(counts)")
-
-        let maxTuple = counts.max(by: { $0.value < $1.value })
-//        print("🏆 디버깅: max가 찾은 결과 -> \(String(describing: maxTuple))")
-
-        return maxTuple?.key
+        return counts.max(by: { $0.value < $1.value })?.key
     }
 }

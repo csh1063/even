@@ -94,7 +94,6 @@ public final class MyPageCoordinator: BaseCoordinator {
     }
 
     func moveLabels(isLabel: Bool) {
-        print("move!")
         let detailDI = diContainer.makeLabelsDIContainer(isLabel: isLabel)
 
         let detailCoordinator = LabelsCoordinator(
@@ -106,7 +105,6 @@ public final class MyPageCoordinator: BaseCoordinator {
     }
 
     func moveTest() {
-        print("test!")
         let detailDI = diContainer.makePhotoTestDIContainer()
 
         let detailCoordinator = PhotoTestCoordinator(

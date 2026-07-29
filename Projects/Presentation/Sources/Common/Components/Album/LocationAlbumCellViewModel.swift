@@ -37,8 +37,6 @@ struct LocationAlbumCellViewModel: AlbumCellViewModel {
         self.pinColor             = isMost ? Theme.primary : Theme.secondary
 
         self.subText = album.keywords.joined(separator: ", ")
-
-//        print("album.displayName:", album.displayName, ", subText:", subText)
     }
 
     // isMost/pinColor 교체용 (AlbumViewModel 내부에서 사용)

@@ -53,33 +53,30 @@ public final class PhotoTestViewModel: BaseViewModel {
     private func handle(_ input: Input) async {
         switch input {
         case .sameCount:
-            print("start sameCount")
             self.isLoading = true
             do {
                 try await self.useCase.countByPsition()
                 self.isLoading = false
             } catch {
-                print("error", error.localizedDescription)
+                debugLog("error: \(error.localizedDescription)")
                 self.isLoading = false
             }
         case .koreanCount:
-            print("start koreanCount")
             self.isLoading = true
             do {
                 try await self.useCase.countIsKorea()
                 self.isLoading = false
             } catch {
-                print("error", error.localizedDescription)
+                debugLog("error: \(error.localizedDescription)")
                 self.isLoading = false
             }
         case .coorToAddress:
-            print("start coorToAddress")
             self.isLoading = true
             do {
                 try await self.useCase.getAddressByCoordinate()
                 self.isLoading = false
             } catch {
-                print("error", error.localizedDescription)
+                debugLog("error: \(error.localizedDescription)")
                 self.isLoading = false
             }
         }

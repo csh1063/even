@@ -35,7 +35,6 @@ final class AppCoordinator: BaseCoordinator {
         splashCoordinator.finished
             .sink { [weak self] isFinished in
                 if isFinished {
-                    print("splashCoordinator finished")
                     self?.showMain()
                 }
             }
@@ -44,7 +43,6 @@ final class AppCoordinator: BaseCoordinator {
     }
 
     private func showMain() {
-        print("showMain!!")
         let mainDIContainer = MainDIContainer(appDiContainer: container)
         let mainCoordinator = MainCoordinator(container: mainDIContainer, window: window)
         mainCoordinator.logout

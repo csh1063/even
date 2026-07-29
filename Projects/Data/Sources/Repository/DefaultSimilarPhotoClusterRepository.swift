@@ -23,7 +23,6 @@ public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepo
 
     private let minSimilarCount: Int = 2
     /// 1차(윈도우 내)/병합/증분 결과 상관없이, 최종 그룹 크기가 이 값 미만이면 앨범을 만들지 않는다.
-    /// minSimilarCount를 2로 낮춘 뒤로 사진 2~3장짜리 앨범이 너무 많이 생겨서 도입.
     private let minimumAlbumSize: Int = 10
 
     private let container: ModelContainer
@@ -37,10 +36,8 @@ public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepo
         existingAlbums: [Album],
         onProgress: @escaping @Sendable (Double) -> Void
     ) async throws {
-        print("\n=== 🚀 [SimilarPhoto] 클러스터링 시작 ===")
-
         guard !photos.isEmpty else {
-            print("⚠️ [SimilarPhoto] 처리할 데이터 없음")
+            debugLog("⚠️ [SimilarPhoto] 처리할 데이터 없음")
             return
         }
 
@@ -74,7 +71,7 @@ public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepo
         var cache: [String: [Float]] = [:]
         var allVectors: [String: [Float]] = [:]
 
-        print("🔎 [SimilarPhoto] 특징 추출 시작 (\(sorted.count)장)")
+        debugLog("🔎 [SimilarPhoto] 특징 추출 시작 (\(sorted.count)장)")
 
         // 특징 벡터 추출 + 쌍대 비교가 대부분의 시간을 차지하는 구간 — 1%p 단위로만 진행률 보고 (과도한 호출 방지)
         var lastReportedPercent = -1
@@ -85,7 +82,7 @@ public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepo
                     lastReportedPercent = percent
                     onProgress(Double(i + 1) / Double(sorted.count))
                     if percent % 10 == 0 {
-                        print("⏳ [SimilarPhoto] 특징 추출 진행 \(percent)% (\(i + 1)/\(sorted.count))")
+                        debugLog("⏳ [SimilarPhoto] 특징 추출 진행 \(percent)% (\(i + 1)/\(sorted.count))")
                     }
                 }
             }
@@ -142,7 +139,7 @@ public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepo
             rawGroups[root, default: []].append(photo)
         }
         let candidateGroups = rawGroups.filter { $0.value.count >= minSimilarCount }
-        print("📊 [SimilarPhoto] 1차 그룹 \(candidateGroups.count)개 (윈도우 내)")
+        debugLog("📊 [SimilarPhoto] 1차 그룹 \(candidateGroups.count)개 (윈도우 내)")
 
         // 4. centroid 기반 그룹 간 재병합 (시간 제약 없음)
         //    윈도우 경계나 체인 중간의 애매한 사진 때문에 같은 장면이 여러 그룹으로
@@ -193,7 +190,7 @@ public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepo
             let mergedRoot = mergeFind(key)
             validGroups[mergedRoot, default: []].append(contentsOf: candidateGroups[key]!)
         }
-        print("📊 [SimilarPhoto] 병합 후 \(validGroups.count)개 그룹")
+        debugLog("📊 [SimilarPhoto] 병합 후 \(validGroups.count)개 그룹")
 
         // 6. DB에서 PhotoEntity 조회용 맵
         let allIdentifiers = photos.map { $0.localIdentifier }
@@ -239,12 +236,11 @@ public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepo
 
             album.photoCount = album.photos.count
             album.coverPhotoIdentifier = album.photos.sorted { $0.createdAt > $1.createdAt }.first?.localIdentifier
-            print("📝 [SimilarPhoto] [\(albumName)] +\(added)장 / 총 \(album.photoCount)장")
+            debugLog("📝 [SimilarPhoto] [\(albumName)] +\(added)장 / 총 \(album.photoCount)장")
         }
 
         // 8. 저장
         try context.save()
-        print("✅ [SimilarPhoto] 완료\n")
     }
 
     public func clusterNewPhotos(
@@ -275,7 +271,7 @@ public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepo
 
         let scoped = extractIndices.sorted().map { sorted[$0] }
         guard !scoped.isEmpty else { return }
-        print("🔍 [SimilarPhoto] 증분 비교 대상 \(scoped.count)개 (전체 \(sorted.count)개 중, 새 사진 \(newPhotos.count)개)")
+        debugLog("🔍 [SimilarPhoto] 증분 비교 대상 \(scoped.count)개 (전체 \(sorted.count)개 중, 새 사진 \(newPhotos.count)개)")
 
         // 1차: 시간 윈도우 슬라이딩 + Union-Find (scoped 대상으로만, 알고리즘은 전체 재계산 버전과 동일)
         var parent: [String: String] = Dictionary(uniqueKeysWithValues: scoped.map { ($0.localIdentifier, $0.localIdentifier) })
@@ -306,7 +302,7 @@ public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepo
                     lastReportedPercent = percent
                     onProgress(Double(i + 1) / Double(scoped.count))
                     if percent % 10 == 0 {
-                        print("⏳ [SimilarPhoto] 증분 특징 추출 진행 \(percent)% (\(i + 1)/\(scoped.count))")
+                        debugLog("⏳ [SimilarPhoto] 증분 특징 추출 진행 \(percent)% (\(i + 1)/\(scoped.count))")
                     }
                 }
             }
@@ -411,10 +407,10 @@ public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepo
         }
 
         guard !validGroups.isEmpty else {
-            print("📊 [SimilarPhoto] 증분 비교 결과 새 그룹 없음")
+            debugLog("📊 [SimilarPhoto] 증분 비교 결과 새 그룹 없음")
             return
         }
-        print("📊 [SimilarPhoto] 증분 비교로 \(validGroups.count)개 그룹 확인")
+        debugLog("📊 [SimilarPhoto] 증분 비교로 \(validGroups.count)개 그룹 확인")
 
         // 3. 결과 그룹을 기존 similar 앨범에 병합하거나 없으면 새로 생성 (기존 앨범은 삭제하지 않음)
         let allIdentifiersInGroups = Set(validGroups.values.flatMap { $0.map { $0.localIdentifier } })
@@ -461,11 +457,10 @@ public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepo
 
             album.photoCount = album.photos.count
             album.coverPhotoIdentifier = album.photos.sorted { $0.createdAt > $1.createdAt }.first?.localIdentifier
-            print("📝 [SimilarPhoto] [\(album.name)] +\(added)장 / 총 \(album.photoCount)장")
+            debugLog("📝 [SimilarPhoto] [\(album.name)] +\(added)장 / 총 \(album.photoCount)장")
         }
 
         try context.save()
-        print("✅ [SimilarPhoto] 증분 처리 완료\n")
     }
 
     // MARK: - Private

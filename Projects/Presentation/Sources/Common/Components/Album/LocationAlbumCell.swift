@@ -107,7 +107,6 @@ final class LocationAlbumCell: UICollectionViewCell {
         placeLabel.font = .systemFont(ofSize: 15, weight: .semibold)
         placeLabel.numberOfLines = 1
 
-        print("viewModel.displayName:", viewModel.displayName, ", viewModel.subText:", viewModel.subText)
         subLabel.text = viewModel.subText
 //        subLabel.textColor = Theme.textSecondary
         subLabel.textColor = .white.withAlphaComponent(0.92) // Theme.textSecondary

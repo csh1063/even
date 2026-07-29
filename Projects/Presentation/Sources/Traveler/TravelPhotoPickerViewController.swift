@@ -192,7 +192,7 @@ final class TravelPhotoPickerViewController: UIViewController {
                 try await detailUseCase.addPhotosToAlbum(albumId: albumId, photos: allSelected)
                 onFinish?()
             } catch {
-                print("🐛 사진 추가 commit 실패:", error)
+                debugLog("🐛 사진 추가 commit 실패: \(error)")
             }
             isCommitting = false
         }
