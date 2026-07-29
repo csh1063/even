@@ -10,9 +10,9 @@ import Domain
 
 public final class NetworkService {
 
-    private let excuteor: DefaultNetworkExecutor
+    private let excuteor: NetworkExecutor
 
-    public init(excuteor: DefaultNetworkExecutor) {
+    public init(excuteor: NetworkExecutor) {
         self.excuteor = excuteor
     }
 

@@ -18,9 +18,9 @@ import Foundation
 
 public final class ServiceFactory {
 
-    private let executor: DefaultNetworkExecutor
+    private let executor: NetworkExecutor
 
-    public init(executor: DefaultNetworkExecutor) {
+    public init(executor: NetworkExecutor) {
         self.executor = executor
     }
 

@@ -58,13 +58,3 @@ public struct PhotoInAlbum: Hashable {
         lhs.localIdentifier == rhs.localIdentifier
     }
 }
-
-public class CropInfo: NSObject {
-    let pos: CGPoint
-    let scale: CGFloat
-
-    init(pos: CGPoint, scale: CGFloat) {
-        self.pos = pos
-        self.scale = scale
-    }
-}

@@ -10,7 +10,7 @@ import Moya
 import Combine
 import Domain
 
-protocol NetworkExecutor {
+public protocol NetworkExecutor {
     func request<T: TargetType, R: Decodable>(_ target: T) async throws -> R
 }
 

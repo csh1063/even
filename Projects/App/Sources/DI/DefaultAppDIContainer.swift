@@ -78,7 +78,7 @@ final class DefaultAppDIContainer: AppDIContainer {
     }
 
     private let providerFactory: ProviderFactory
-    private lazy var executor: DefaultNetworkExecutor = {
+    private lazy var executor: NetworkExecutor = {
         DefaultNetworkExecutor(providerFactory: providerFactory)
     }()
 
