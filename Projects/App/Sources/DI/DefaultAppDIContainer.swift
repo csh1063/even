@@ -118,8 +118,4 @@ final class DefaultAppDIContainer: AppDIContainer {
     func makeMainUseCase() {
 
     }
-
-    func makeMainViewModel() -> MainViewModel {
-        MainViewModel()
-    }
 }

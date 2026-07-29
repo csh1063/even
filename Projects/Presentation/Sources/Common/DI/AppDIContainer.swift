@@ -29,5 +29,4 @@ public protocol AppDIContainer {
     var similarRepository: SimilarPhotoClusterRepository {get}
 
     func makeSplashViewModel() -> SplashViewModel
-    func makeMainViewModel() -> MainViewModel
 }
