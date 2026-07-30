@@ -18,6 +18,7 @@ final class ImageViewerViewController: UIViewController {
     private var cancellables = Set<AnyCancellable>()
     private var currentIndex: Int
     private var beganY: CGFloat = 0
+    private var hasScrolledToInitialIndex = false
 
     // MARK: - UI
 
@@ -109,8 +110,15 @@ final class ImageViewerViewController: UIViewController {
         viewModel.send(.appear)
     }
 
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // present 애니메이션이 시작되기 전, collectionView bounds가 확정되는 시점에 딱 한 번만
+        // 스크롤한다. viewWillAppear + async 디스패치로는 레이아웃이 아직 안 끝났을 수 있어 가끔
+        // 엉뚱한(0번) 페이지로 열리는 문제가 있었다. viewDidLayoutSubviews는 회전 등으로 이후에도
+        // 계속 호출될 수 있어서, 가드 없이 매번 스크롤하면 사용자가 이미 넘긴 위치를 초기 위치로
+        // 되돌리는 새 버그가 생긴다 — hasScrolledToInitialIndex로 최초 1회만 실행되게 막는다.
+        guard !hasScrolledToInitialIndex, collectionView.bounds.width > 0 else { return }
+        hasScrolledToInitialIndex = true
         scrollToInitialIndex()
     }
 
@@ -168,9 +176,7 @@ final class ImageViewerViewController: UIViewController {
     }
 
     private func scrollToInitialIndex() {
-        DispatchQueue.main.async {
-            self.collectionView.scrollToItem(at: IndexPath(item: self.currentIndex, section: 0), at: .centeredHorizontally, animated: false)
-        }
+        collectionView.scrollToItem(at: IndexPath(item: currentIndex, section: 0), at: .centeredHorizontally, animated: false)
     }
 
     private func bind() {

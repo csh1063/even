@@ -95,9 +95,7 @@ final class MyPageViewModel: BaseViewModel {
             switch data.type {
             case .allLibraryPhoto, .allPhoto, .unanalysisPhoto, .analyzedDate: break
             case .analysis: tabbarViewModel.send(.analysis)
-            case .travelAlbum: tabbarViewModel.send(.autoTravelAlbum)
             case .reAutoAlbum: tabbarViewModel.send(.reAutoAlbum)
-            case .reAnalysis: tabbarViewModel.send(.reanalysis)
             case .reset: tabbarViewModel.send(.clear)
             case .locationAnalysis, .locationAutoAlbum: break
             case .autoAnalysis: break // toggle
@@ -203,9 +201,7 @@ final class MyPageViewModel: BaseViewModel {
                 MyCellData(type: .analyzedDate, value: analyzedDate),
                 MyCellData(type: .analyzedData, value: analyzedDataSize),
                 MyCellData(type: .analysis),
-                MyCellData(type: .travelAlbum),
                 MyCellData(type: .reAutoAlbum)
-//                MyCellData(type: .reAnalysis)
             ]
         }
 
@@ -239,12 +235,15 @@ final class MyPageViewModel: BaseViewModel {
                 MyCellData(type: .feedback),
                 MyCellData(type: .version, value: version)
             ]
-            , MyCellHeader(name: "실험실", order: 60): [
-                MyCellData(type: .labels),
-                MyCellData(type: .test),
-                MyCellData(type: .addressCount)
-            ]
         ]
+        
+        #if DEBUG
+        self.cellTypes[MyCellHeader(name: "실험실", order: 60)] = [
+            MyCellData(type: .labels),
+            MyCellData(type: .test),
+            MyCellData(type: .addressCount)
+        ]
+        #endif
     }
 
     private func relativeDate(from dateString: String) -> String {

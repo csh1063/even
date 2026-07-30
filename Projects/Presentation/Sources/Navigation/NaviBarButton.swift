@@ -67,9 +67,10 @@ final class NaviBarButton: UIView {
         addSubview(dot)
 
         button.snp.makeConstraints { make in
-            make.edges.equalTo(self)
-            make.width.equalTo(44)
-            make.height.equalTo(44)
+            make.top.bottom.equalTo(self).inset(6)
+            make.leading.trailing.equalTo(self).inset(6)
+            make.width.equalTo(32)
+            make.height.equalTo(32)
         }
 
         dot.snp.makeConstraints { make in
@@ -86,9 +87,11 @@ final class NaviBarButton: UIView {
         if let text = type.text {
             self.button.setTitle(text, for: .normal)
             self.button.setTitleLabelFont(type.font)
+            self.button.setTitleLabelFont(UIFont.systemFont(ofSize: 12))
 
             button.snp.updateConstraints { make in
-                make.width.equalTo(80)
+                make.width.equalTo(44)
+                make.leading.trailing.equalTo(self)
             }
         }
 
@@ -97,10 +100,10 @@ final class NaviBarButton: UIView {
 
         if let backgroundColor = type.backgroundColor {
             self.button.backgroundColor = backgroundColor
-            if type.text == nil {
+//            if type.text == nil {
                 self.button.addBorder(color: Theme.strokeSoft, borderWidth: 1)
-            }
-            button.layer.cornerRadius = 22
+//            }
+            button.layer.cornerRadius = 16
         }
     }
 }

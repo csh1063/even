@@ -348,7 +348,7 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
             }
         }
         let vc = ImageViewerViewController(viewModel: vm)
-        navigationController.present(vc, animated: true)
+        pickerVC.present(vc, animated: true)
     }
 
 //    func showDetail(_ photoDetails: [PhotoDetail], index: Int) {

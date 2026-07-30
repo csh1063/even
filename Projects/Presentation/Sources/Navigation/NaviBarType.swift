@@ -22,14 +22,17 @@ enum NaviBarButtonType: Equatable {
     case none
     case back
     case cancel
-    // 아무 데서도 안 쓰임 (LeftButton/RightButton으로 생성되는 곳도, 도달 가능한 switch에서 매치되는 곳도 없음)
+    case next
+    case confirm
+    case more
+    case add
+    case close
+    case select
 //    case filter
 //    case report
-    case next
 //    case finder
 //    case clearText
 //    case toggleList
-    case confirm
 //    case setting
 //    case write
 //    case analysis
@@ -37,25 +40,25 @@ enum NaviBarButtonType: Equatable {
 //    case text(String)
 //    case sectionGrid
 //    case grid
-    case more
 //    case edit
 //    case delete
-    case add
-    case close
-    case select
 
     var imageName: String {
         switch self {
         case .none: return ""
         case .back: return "chevron.backward"
         case .cancel: return "xmark"
+        case .next: return "chevron.forward"
+        case .confirm: return "checkmark"
+        case .more: return "ellipsis"
+        case .add: return "plus"
+        case .close: return "xmark"
+        case .select: return ""
 //        case .filter: return "line.3.horizontal.decrease"
 //        case .report: return "exclamationmark.bubble"
-        case .next: return "chevron.forward"
 //        case .finder: return "magnifyingglass"
 //        case .clearText: return "xmark.circle"
 //        case .toggleList: return "list.dash.header.rectangle"
-        case .confirm: return "checkmark"
 //        case .setting: return "gearshape"
 //        case .write: return "pencil"
 //        case .analysis: return "sparkles"
@@ -63,12 +66,8 @@ enum NaviBarButtonType: Equatable {
 //        case .text: return ""
 //        case .sectionGrid: return "square.grid.3x1.below.line.grid.1x2"
 //        case .grid: return "square.grid.3x3"
-        case .more: return "ellipsis.circle"
 //        case .edit: return "pencil.line"
 //        case .delete: return "trash"
-        case .add: return "plus"
-        case .close: return "xmark"
-        case .select: return ""
         }
     }
 
@@ -84,7 +83,7 @@ enum NaviBarButtonType: Equatable {
     var backgroundColor: UIColor? {
         switch self {
 //        case .analysis: return Theme.primary
-        case .more, .cancel: return Theme.surface.withAlphaComponent(0.95)
+        case .more, .cancel, .add, .select: return Theme.surface.withAlphaComponent(0.95)
         default: return nil
         }
     }
@@ -92,6 +91,7 @@ enum NaviBarButtonType: Equatable {
     var foregroundColor: UIColor {
         switch self {
 //        case .analysis: return .white
+//        case .add: return Theme.primary
         default: return Theme.textPrimary
         }
     }

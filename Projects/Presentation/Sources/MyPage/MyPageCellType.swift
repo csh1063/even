@@ -76,9 +76,7 @@ enum MyPageCellType {
     case analyzedDate
     case analyzedData
     case analysis
-    case travelAlbum
     case reAutoAlbum
-    case reAnalysis
     case reset
 
     // background
@@ -112,9 +110,7 @@ enum MyPageCellType {
         case .analyzedDate: return "clock.arrow.circlepath"
         case .analysis: return "sparkles"
         case .analyzedData: return "cylinder.split.1x2"
-        case .travelAlbum: return "globe.desk"
         case .reAutoAlbum: return "arrow.clockwise"
-        case .reAnalysis: return "arrow.clockwise"
         case .reset: return "eraser"
         case .locationAnalysis: return "location.fill.viewfinder"
         case .locationAutoAlbum: return "map.fill"
@@ -141,9 +137,7 @@ enum MyPageCellType {
         case .analyzedDate: return "최근 분석"
         case .analyzedData: return "분석 용량"
         case .analysis: return "분석하기"
-        case .travelAlbum: return "여행 앨범 만들기"
         case .reAutoAlbum: return "자동 앨범 재생성"
-        case .reAnalysis: return "처음부터 분석하기"
         case .reset: return "분석 정보 삭제하기"
         case .locationAnalysis: return "사진 좌표를 주소로 변환"
         case .locationAutoAlbum: return "장소 기반 앨범 생성"
@@ -174,7 +168,7 @@ enum MyPageCellType {
         switch self {
         case .allLibraryPhoto, .allPhoto, .unanalysisPhoto, .analyzedDate, .analyzedData:
             return .info
-        case .analysis, .travelAlbum, .reAnalysis, .reset, .displayMode, .reAutoAlbum:
+        case .analysis, .reset, .displayMode, .reAutoAlbum:
             return .button
         case .locationAnalysis, .locationAutoAlbum:
             return .info
