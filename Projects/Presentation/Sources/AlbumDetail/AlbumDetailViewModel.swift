@@ -86,9 +86,9 @@ public final class AlbumDetailViewModel: BaseViewModel {
     private var tripSuffix: String {
         guard let start = album.startDate, let end = album.endDate,
               Calendar.current.isDate(start, inSameDayAs: end) else {
-            return "여행"
+            return String(localized: "여행", bundle: .module)
         }
-        return "나들이"
+        return String(localized: "나들이", bundle: .module)
     }
 
     public init(album: Album,
@@ -202,30 +202,30 @@ public final class AlbumDetailViewModel: BaseViewModel {
 
         case .deleteSelected(let ids):
             showAlert(
-                title: "사진 삭제",
-                message: "선택한 사진을 삭제하시겠습니까?",
+                title: String(localized: "사진 삭제", bundle: .module),
+                message: String(localized: "선택한 사진을 삭제할까요?", bundle: .module),
                 buttons: [
-                    AlertButtonConfig(title: "이 앨범에서만 삭제", style: .default) { [weak self] in
+                    AlertButtonConfig(title: String(localized: "이 앨범에서만 삭제", bundle: .module), style: .default) { [weak self] in
                         Task {
                             await self?.deleteSelected(ids: ids)
                         }
                     },
-                    AlertButtonConfig(title: "애플 사진 앱에서도 삭제", style: .default) { [weak self] in
+                    AlertButtonConfig(title: String(localized: "애플 사진 앱에서도 삭제", bundle: .module), style: .default) { [weak self] in
                         Task {
                             await self?.deleteSelected(ids: ids, deleteInLibrary: true)
                         }
                     },
-                    AlertButtonConfig(title: "취소", style: .cancel, action: nil)
+                    AlertButtonConfig(title: String(localized: "취소", bundle: .module), style: .cancel, action: nil)
                 ]
             )
 
         case .excludeSelected(let ids):
             showAlert(
-                title: "다른 사람 인가요?",
-                message: "선택한 사진을 앨범에서 제외하고, 다시 묶이지 않게 할게요",
+                title: String(localized: "다른 사람 인가요?", bundle: .module),
+                message: String(localized: "선택한 사진을 앨범에서 제외하고, 다시 묶이지 않게 할게요", bundle: .module),
                 buttons: [
-                    AlertButtonConfig(title: "취소", style: .cancel, action: nil),
-                    AlertButtonConfig(title: "제외", style: .destructive) { [weak self] in
+                    AlertButtonConfig(title: String(localized: "취소", bundle: .module), style: .cancel, action: nil),
+                    AlertButtonConfig(title: String(localized: "제외", bundle: .module), style: .destructive) { [weak self] in
                         Task { await self?.excludeSelected(ids: ids) }
                     }
                 ]
@@ -271,18 +271,18 @@ public final class AlbumDetailViewModel: BaseViewModel {
 
         let names = linkedAlbums.map { album -> String in
             if album.isRenamed { return album.displayName }
-            return album.from == "animal" ? "반려동물" : "사람"
+            return album.from == "animal" ? String(localized: "반려동물", bundle: .module) : String(localized: "사람", bundle: .module)
         }
         let suffix = tripSuffix
 
         let name: String
         if names.count > 1 {
             let joinedPrefix = names.dropLast()
-                .map { "\($0)\($0.josa ? "과" : "와")" }
+                .map { String(localized: "\($0)\($0.josa ? "과" : "와")", bundle: .module) }
                 .joined(separator: " ")
-            name = "\(joinedPrefix) \(names.last!)의 \(suffix)"
+            name = String(localized: "\(joinedPrefix) \(names.last!)의 \(suffix)", bundle: .module)
         } else {
-            name = "\(names[0])의 \(suffix)"
+            name = String(localized: "\(names[0])의 \(suffix)", bundle: .module)
         }
 
         return TravelerInfo(name: name, count: names.count)
@@ -402,11 +402,11 @@ extension AlbumDetailViewModel: AlbumDetailViewModelDelegate {
 
     func deleteAlert() {
         showAlert(
-            title: "앨범 삭제",
-            message: "앨범을 삭제 할까요?\n사진은 삭제되지 않아요",
+            title: String(localized: "앨범 삭제", bundle: .module),
+            message: String(localized: "앨범을 삭제 할까요?\n사진은 삭제하지 않아요", bundle: .module),
             buttons: [
-                AlertButtonConfig(title: "취소", style: .default, action: {}),
-                AlertButtonConfig(title: "삭제", style: .destructive, action: { self.deleteAlbum() })
+                AlertButtonConfig(title: String(localized: "취소", bundle: .module), style: .default, action: {}),
+                AlertButtonConfig(title: String(localized: "삭제", bundle: .module), style: .destructive, action: { self.deleteAlbum() })
             ]
         )
     }

@@ -26,9 +26,7 @@ public final class TabbarViewModel: BaseViewModel {
 
     enum Input {
         case analysis
-        case autoTravelAlbum
         case reAutoAlbum
-        case reanalysis
         case clear
         case permission
         case showConsent
@@ -125,11 +123,11 @@ public final class TabbarViewModel: BaseViewModel {
             await onboardingComplete()
         case .analysis:
             showAlert(
-                title: "사진 분석",
-                message: "분석하지 않은 사진을 분석합니다.\n분석할까요?",
+                title: String(localized: "사진 분석", bundle: .module),
+                message: String(localized: "분석하지 않은 사진을 분석해요.\n분석 시작할까요?", bundle: .module),
                 buttons: [
-                    AlertButtonConfig(title: "취소", style: .cancel, action: nil),
-                    AlertButtonConfig(title: "분석하기", style: .default) { [weak self] in
+                    AlertButtonConfig(title: String(localized: "취소", bundle: .module), style: .cancel, action: nil),
+                    AlertButtonConfig(title: String(localized: "분석하기", bundle: .module), style: .default) { [weak self] in
                         Task {
                             guard let self else {return}
                             // 이전 분석/생성이 에러로 끝난 경우 progressRatio가 1.0에 멈춰있을 수 있어서,
@@ -143,27 +141,13 @@ public final class TabbarViewModel: BaseViewModel {
                     }
                 ]
             )
-        case .autoTravelAlbum:
-            showAlert(
-                title: "여행 사진",
-                message: "여행 앨범을 만들어 볼까요",
-                buttons: [
-                    AlertButtonConfig(title: "취소", style: .cancel, action: nil),
-                    AlertButtonConfig(title: "만들어줘", style: .default) { [weak self] in
-                        Task {
-                            guard let self else {return}
-                            await self.createTravelAutoAlbum()
-                        }
-                    }
-                ]
-            )
         case .reAutoAlbum:
             showAlert(
-                title: "앨범 재생성",
-                message: "앨범들을 삭제 후 다시 생성합니다.\n다시 생성할까요?",
+                title: String(localized: "앨범 재생성", bundle: .module),
+                message: String(localized: "앨범들을 삭제 후 다시 생성해요.\n어떤 앨범을 다시 생성할까요?", bundle: .module),
                 buttons: [
-                    AlertButtonConfig(title: "취소", style: .cancel, action: nil),
-                    AlertButtonConfig(title: "자동 앨범", style: .default) { [weak self] in
+                    AlertButtonConfig(title: String(localized: "취소", bundle: .module), style: .cancel, action: nil),
+                    AlertButtonConfig(title: String(localized: "자동 앨범", bundle: .module), style: .default) { [weak self] in
                         Task {
                             guard let self else {return}
                             self.isLoading = true
@@ -179,43 +163,43 @@ public final class TabbarViewModel: BaseViewModel {
                             await self.runAlbumGeneration(fullRegenerate: true)
                         }
                     },
-                    AlertButtonConfig(title: "날짜 앨범", style: .default) { [weak self] in
+                    AlertButtonConfig(title: String(localized: "날짜 앨범", bundle: .module), style: .default) { [weak self] in
                         Task {
                             guard let self else {return}
                             await self.createDateAutoAlbum()
                         }
                     },
-                    AlertButtonConfig(title: "주소 앨범", style: .default) { [weak self] in
+                    AlertButtonConfig(title: String(localized: "주소 앨범", bundle: .module), style: .default) { [weak self] in
                         Task {
                             guard let self else {return}
                             await self.createLocationAutoAlbum()
                         }
                     },
-                    AlertButtonConfig(title: "카테고리 앨범", style: .default) { [weak self] in
+                    AlertButtonConfig(title: String(localized: "카테고리 앨범", bundle: .module), style: .default) { [weak self] in
                         Task {
                             guard let self else {return}
                             await self.createCategoryAutoAlbum()
                         }
                     },
-                    AlertButtonConfig(title: "얼굴 앨범", style: .default) { [weak self] in
+                    AlertButtonConfig(title: String(localized: "얼굴 앨범", bundle: .module), style: .default) { [weak self] in
                         Task {
                             guard let self else {return}
                             await self.createFaceAutoAlbum()
                         }
                     },
-                    AlertButtonConfig(title: "동물 앨범", style: .default) { [weak self] in
+                    AlertButtonConfig(title: String(localized: "동물 앨범", bundle: .module), style: .default) { [weak self] in
                         Task {
                             guard let self else {return}
                             await self.createAnimalAutoAlbum()
                         }
                     },
-                    AlertButtonConfig(title: "여행 앨범", style: .default) { [weak self] in
+                    AlertButtonConfig(title: String(localized: "여행 앨범", bundle: .module), style: .default) { [weak self] in
                         Task {
                             guard let self else {return}
                             await self.createTravelAutoAlbum()
                         }
                     },
-                    AlertButtonConfig(title: "비슷한 사진 앨범", style: .default) { [weak self] in
+                    AlertButtonConfig(title: String(localized: "비슷한 사진 앨범", bundle: .module), style: .default) { [weak self] in
                         Task {
                             guard let self else {return}
                             await self.createSimilarAutoAlbum()
@@ -223,34 +207,13 @@ public final class TabbarViewModel: BaseViewModel {
                     }
                 ]
             )
-        case .reanalysis:
-            showAlert(
-                title: "처음부터 분석하기",
-                message: "저장된 사진 및 앨범을\n삭제 후 다시 분석합니다.\n다시 분석할까요?",
-                buttons: [
-                    AlertButtonConfig(title: "취소", style: .cancel, action: nil),
-                    AlertButtonConfig(title: "재분석하기", style: .default) { [weak self] in
-                        Task {
-                            guard let self else {return}
-                            self.isLoading = true
-                            await self.clear()
-                            self.isLoading = false
-
-                            self.progressRatio = 0
-                            self.autoAlbumProgressRatio = 0
-                            self.onAction?(.progressSheet(self.makeAnalyzeProgress()))
-                            await self.analysis()
-                        }
-                    }
-                ]
-            )
         case .clear:
             showAlert(
-                title: "초기화",
-                message: "저장된 사진 및 앨범을 모두 삭제하시겠습니까?",
+                title: String(localized: "초기화", bundle: .module),
+                message: String(localized: "저장된 사진 및 앨범을 모두 삭제할까요?", bundle: .module),
                 buttons: [
-                    AlertButtonConfig(title: "취소", style: .cancel, action: nil),
-                    AlertButtonConfig(title: "삭제", style: .destructive) { [weak self] in
+                    AlertButtonConfig(title: String(localized: "취소", bundle: .module), style: .cancel, action: nil),
+                    AlertButtonConfig(title: String(localized: "삭제", bundle: .module), style: .destructive) { [weak self] in
                         Task {
                             LoadingManager.shared.show(allowDismiss: false)
                             await self?.clear()

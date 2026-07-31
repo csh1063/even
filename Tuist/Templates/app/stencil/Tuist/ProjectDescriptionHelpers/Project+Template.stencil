@@ -45,8 +45,8 @@ extension Project {
                 organizationName: "{{org}}",
                 settings: .settings(
                     configurations: [
-                        .debug(name: "dev"),
-                        .release(name: "prod")
+                        .debug(name: "Debug"),
+                        .release(name: "Release")
                     ]),
                 targets: [
                     makeTarget(

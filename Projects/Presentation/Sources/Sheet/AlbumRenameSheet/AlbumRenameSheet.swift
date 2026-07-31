@@ -40,7 +40,7 @@ final class AlbumRenameSheet: UIViewController {
 
     private let fieldLabel: UILabel = {
         let fieldLabel = UILabel()
-        fieldLabel.text = "앨범 이름"
+        fieldLabel.text = String(localized: "앨범 이름", bundle: .module)
         fieldLabel.font = .systemFont(ofSize: 13, weight: .semibold)
         fieldLabel.textColor = Theme.textSecondary
         return fieldLabel
@@ -48,7 +48,7 @@ final class AlbumRenameSheet: UIViewController {
 
     private lazy var textField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "앨범 이름 입력"
+        textField.placeholder = String(localized: "앨범 이름 입력", bundle: .module)
         textField.font = .systemFont(ofSize: 16, weight: .regular)
         textField.textColor = Theme.textPrimary
         textField.text = albumName
@@ -66,7 +66,7 @@ final class AlbumRenameSheet: UIViewController {
 
     private lazy var cancelButton: UIButton = {
         var config = UIButton.Configuration.plain()
-        config.title = "취소"
+        config.title = String(localized: "취소", bundle: .module)
         config.baseForegroundColor = Theme.textPrimary
         config.background.backgroundColor = Theme.surface
         config.background.strokeColor = Theme.strokeSoft
@@ -78,7 +78,7 @@ final class AlbumRenameSheet: UIViewController {
 
     private lazy var saveButton: UIButton = {
         var config = UIButton.Configuration.filled()
-        config.title = "저장"
+        config.title = String(localized: "저장", bundle: .module)
         config.baseForegroundColor = .white
         config.baseBackgroundColor = Theme.primary
         config.background.cornerRadius = 18
@@ -87,8 +87,8 @@ final class AlbumRenameSheet: UIViewController {
     }()
 
     init(albumName: String,
-         title: String = "앨범명 변경",
-         subtitle: String = "자동 생성된 앨범 이름을 원하는 이름으로 바꿀 수 있어요") {
+         title: String = String(localized: "앨범명 변경", bundle: .module),
+         subtitle: String = String(localized: "자동 생성된 앨범 이름을 원하는 이름으로 바꿀 수 있어요", bundle: .module)) {
         self.albumName = albumName
         super.init(nibName: nil, bundle: nil)
         self.titleLabel.text = title

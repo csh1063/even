@@ -58,7 +58,7 @@ final class MyPageViewController: BaseViewController {
 
     private func setupView() {
 
-        naviView.setTitle("설정",
+        naviView.setTitle(String(localized: "설정", bundle: .module),
                           color: Theme.textPrimary,
                           font: .systemFont(ofSize: 32, weight: .bold))
 

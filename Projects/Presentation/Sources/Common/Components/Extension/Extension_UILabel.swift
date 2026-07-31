@@ -89,7 +89,7 @@ extension UILabel {
         return self
     }
 
-    func setUnderlineText(_ title: String, partition: String = "과 ", kern: CGFloat = 1.0) {
+    func setUnderlineText(_ title: String, partition: String = ", ", kern: CGFloat = 1.0) {
 //        let separate = ViewUtility.getPrevAndNextString(title, partition: partition)
 //        let font = self.font ?? UIFont.regularLocalizedFont(ofSize: 12)
 //        let color = self.textColor ?? UIColor.black

@@ -173,7 +173,7 @@ final class CategoryAlbumCell: UICollectionViewCell {
         iconView.image = UIImage(systemName: viewModel.systemIconName)?.withRenderingMode(.alwaysTemplate)
         iconWrapView.backgroundColor = viewModel.iconColor
         nameLabel.text  = viewModel.displayName
-        countLabel.text = "사진 \(viewModel.photoCount.formatted())장"
+        countLabel.text = String(localized: "사진 \(viewModel.photoCount.formatted())장", bundle: .module)
 
         task = Task {
             let size = CGSize(width: 88, height: 88)

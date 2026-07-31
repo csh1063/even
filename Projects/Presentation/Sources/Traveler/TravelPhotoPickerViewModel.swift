@@ -17,8 +17,8 @@ enum TravelPhotoPickerDirection {
     /// 헤더 토글 버튼에 쓰이는 문구
     var headerText: String {
         switch self {
-        case .before: return "여행 기간 이전"
-        case .after: return "여행 기간 이후"
+        case .before: return String(localized: "여행 기간 이전", bundle: .module)
+        case .after: return String(localized: "여행 기간 이후", bundle: .module)
         }
     }
 }

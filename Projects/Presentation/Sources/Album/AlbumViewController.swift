@@ -54,10 +54,10 @@ final class AlbumViewController: BaseViewController {
 
     private func setupView() {
 
-        naviView.setTitle("앨범",
+        naviView.setTitle(String(localized: "앨범", bundle: .module),
                           color: Theme.textPrimary,
                           font: .systemFont(ofSize: 32, weight: .bold))
-        naviView.setMessage("사진이 개 앨범으로 정리되었어요",
+        naviView.setMessage(String(localized: "사진이 0개 앨범으로 정리했어요", bundle: .module),
                             color: Theme.textPrimary,
                             font: .systemFont(ofSize: 14, weight: .regular))
 
@@ -110,7 +110,7 @@ final class AlbumViewController: BaseViewController {
                     self.emptyView.isHidden = true
                     self.naviView.isHidden = false
                     self.naviView.setMessage(
-                        "\(data.totalCount)개 앨범으로 정리되었어요",
+                        String(localized: "\(data.totalCount)개 앨범으로 정리했어요", bundle: .module),
                         color: Theme.textPrimary,
                         font: .systemFont(ofSize: 14, weight: .regular))
                 }
@@ -138,8 +138,8 @@ final class AlbumViewController: BaseViewController {
             guard let section = self?.dataSource.snapshot().sectionIdentifiers[sectionIndex] else { return nil }
             switch section {
             case .date:     return self?.makeDateSection()
-            case .travel:     return self?.makeTravelSection()
-            case .location:  return self?.makeLocationSection(environment: environment)
+            case .travel:   return self?.makeTravelSection()
+            case .location: return self?.makeLocationSection(environment: environment)
             case .category: return self?.makeCategorySection()
             case .face:     return self?.makeFaceSection()
             case .similar:  return self?.makeSimilarSection()

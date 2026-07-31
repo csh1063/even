@@ -20,7 +20,7 @@ final class FeedbackViewController: UIViewController {
     // MARK: - UI
     private let naviView: NaviBarView = {
         let naviView = NaviBarView()
-        naviView.setTitle("문의 / 피드백")
+        naviView.setTitle(String(localized: "문의 / 피드백", bundle: .module))
         naviView.addButtons([
             LeftButton(type: .back)
         ])
@@ -60,7 +60,7 @@ final class FeedbackViewController: UIViewController {
 
     private let placeholderLabel: UILabel = {
         let label = UILabel()
-        label.text = "문의하실 내용을 입력해주세요"
+        label.text = String(localized: "문의하실 내용을 입력해주세요", bundle: .module)
         label.font = .systemFont(ofSize: 15)
         label.textColor = Theme.textTertiary
         label.numberOfLines = 0
@@ -78,7 +78,7 @@ final class FeedbackViewController: UIViewController {
 
     private let infoLabel: UILabel = {
         let label = UILabel()
-        label.text = "앱 버전, 기기 정보가 함께 전송돼요"
+        label.text = String(localized: "앱 버전, 기기 정보가 함께 전송돼요", bundle: .module)
         label.font = .systemFont(ofSize: 12)
         label.textColor = Theme.textTertiary
         return label
@@ -100,7 +100,7 @@ final class FeedbackViewController: UIViewController {
 
     private let submitButton: UIButton = {
         var config = UIButton.Configuration.filled()
-        config.title = "제출하기"
+        config.title = String(localized: "제출하기", bundle: .module)
         config.baseForegroundColor = .white
         config.baseBackgroundColor = Theme.primary
         config.cornerStyle = .large
@@ -259,7 +259,7 @@ final class FeedbackViewController: UIViewController {
                     self?.submitButton.configuration?.title = nil
                 } else {
                     self?.loadingIndicator.stopAnimating()
-                    self?.submitButton.configuration?.title = "제출하기"
+                    self?.submitButton.configuration?.title = String(localized: "제출하기", bundle: .module)
                 }
                 self?.submitButton.isUserInteractionEnabled = !loading
             }
@@ -294,9 +294,9 @@ final class FeedbackViewController: UIViewController {
             .sink { [weak self] index in
                 let type = FeedbackType.allCases[index]
                 switch type {
-                case .contact: self?.placeholderLabel.text = "문의하실 내용을 입력해주세요"
-                case .feature: self?.placeholderLabel.text = "제안하실 기능을 입력해주세요"
-                case .bug:     self?.placeholderLabel.text = "발생한 문제를 자세히 설명해주세요"
+                case .contact: self?.placeholderLabel.text = String(localized: "문의하실 내용을 입력해주세요", bundle: .module)
+                case .feature: self?.placeholderLabel.text = String(localized: "제안하실 기능을 입력해주세요", bundle: .module)
+                case .bug:     self?.placeholderLabel.text = String(localized: "발생한 문제를 자세히 설명해주세요", bundle: .module)
                 }
 
                 self?.viewModel.send(.changeSegment(type))
@@ -370,16 +370,16 @@ final class FeedbackViewController: UIViewController {
 //    }
 
     private func showSuccess() {
-        let alert = UIAlertController(title: "제출 완료", message: "소중한 의견 감사해요 😊\n빠르게 검토할게요", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "확인", style: .default) { [weak self] _ in
+        let alert = UIAlertController(title: String(localized: "제출 완료", bundle: .module), message: String(localized: "소중한 의견 감사해요 😊\n빠르게 검토할게요", bundle: .module), preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: String(localized: "확인", bundle: .module), style: .default) { [weak self] _ in
             self?.navigationController?.popViewController(animated: true)
         })
         present(alert, animated: true)
     }
 
     private func showError() {
-        let alert = UIAlertController(title: "제출 실패", message: "잠시 후 다시 시도해주세요", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "확인", style: .default))
+        let alert = UIAlertController(title: String(localized: "제출 실패", bundle: .module), message: String(localized: "잠시 후 다시 시도해주세요", bundle: .module), preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: String(localized: "확인", bundle: .module), style: .default))
         present(alert, animated: true)
     }
 }

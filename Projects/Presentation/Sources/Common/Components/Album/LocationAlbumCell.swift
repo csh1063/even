@@ -113,7 +113,7 @@ final class LocationAlbumCell: UICollectionViewCell {
         subLabel.font = .systemFont(ofSize: 12, weight: .regular)
         subLabel.numberOfLines = 1
 
-        countLabel.text = "사진 \(viewModel.photoCount.formatted())장"
+        countLabel.text = String(localized: "사진 \(viewModel.photoCount.formatted())장", bundle: .module)
 //        countLabel.textColor = Theme.textTertiary
         countLabel.textColor = .white.withAlphaComponent(0.75) // Theme.textTertiary
         countLabel.font = .systemFont(ofSize: 11, weight: .regular)

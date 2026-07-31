@@ -75,7 +75,7 @@ enum NaviBarButtonType: Equatable {
         switch self {
 //        case .analysis: return "분석"
 //        case .text(let text): return text
-        case .select: return "선택"
+        case .select: return String(localized: "선택", bundle: .module)
         default: return nil
         }
     }

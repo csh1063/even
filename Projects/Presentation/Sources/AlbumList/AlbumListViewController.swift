@@ -60,7 +60,7 @@ final class AlbumListViewController: BaseViewController {
 
     private func setupView() {
 
-        self.naviView.setTitle("여행")
+        self.naviView.setTitle(String(localized: "여행", bundle: .module))
         self.naviView.addButtons([LeftButton(type: .back), RightButton(type: .select)])
 
         collectionView.contentInset = UIEdgeInsets(top: 20, left: 0, bottom: 80, right: 0)

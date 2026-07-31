@@ -18,9 +18,9 @@ enum FeedbackType: String, CaseIterable {
 
     var title: String {
         switch self {
-        case .contact: return "문의하기"
-        case .feature: return "기능 제안"
-        case .bug: return "버그 신고"
+        case .contact: return String(localized: "문의하기", bundle: .module)
+        case .feature: return String(localized: "기능 제안", bundle: .module)
+        case .bug: return String(localized: "버그 신고", bundle: .module)
         }
     }
 }

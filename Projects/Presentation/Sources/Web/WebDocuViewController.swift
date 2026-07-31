@@ -16,8 +16,8 @@ enum DocuType {
 
     var title: String {
         switch self {
-        case .terms: return "서비스 이용약관"
-        case .privacy: return "개인정보 처리방침"
+        case .terms: return String(localized: "서비스 이용약관", bundle: .module)
+        case .privacy: return String(localized: "개인정보 처리방침", bundle: .module)
         }
     }
 

@@ -64,7 +64,7 @@ final class AlbumMergeSheet: UIViewController {
 
     private let subtitleLabel: UILabel = {
         let lb = UILabel()
-        lb.text = "선택하는 앨범들을 현재 앨범과 한 번에 합쳐요"
+        lb.text = String(localized: "선택하는 앨범들을 현재 앨범과 한 번에 합쳐요", bundle: .module)
         lb.font = .systemFont(ofSize: 14, weight: .regular)
         lb.textColor = Theme.textSecondary
         lb.numberOfLines = 0
@@ -108,7 +108,7 @@ final class AlbumMergeSheet: UIViewController {
 
     private let confirmButton: UIButton = {
         var config = UIButton.Configuration.filled()
-        config.title = "선택한 앨범 합치기"
+        config.title = String(localized: "선택한 앨범 합치기", bundle: .module)
         config.baseForegroundColor = .white
         config.baseBackgroundColor = Theme.primary
         config.cornerStyle = .medium
@@ -120,7 +120,7 @@ final class AlbumMergeSheet: UIViewController {
 
     init(
         candidates: [AlbumMergeCandidate],
-        title: String = "동일 인물 앨범 선택",
+        title: String = String(localized: "동일 인물 앨범 선택", bundle: .module),
         subtitle: String? = nil,
         sectionHeaderText: String? = nil,
         isTravel: Bool = false,
@@ -132,7 +132,7 @@ final class AlbumMergeSheet: UIViewController {
 
         var sections: [MergeSection] = []
         if !similar.isEmpty {
-            sections.append(MergeSection(title: "닮은 사람", items: similar, showsFooterDivider: !others.isEmpty))
+            sections.append(MergeSection(title: String(localized: "닮은 사람", bundle: .module), items: similar, showsFooterDivider: !others.isEmpty))
         }
         if !others.isEmpty {
             sections.append(MergeSection(title: sectionHeaderText, items: others, showsFooterDivider: false))
@@ -203,7 +203,7 @@ final class AlbumMergeSheet: UIViewController {
         let count = selectedIds.count
         confirmButton.isEnabled = count > 0
         confirmButton.alpha = count > 0 ? 1.0 : 0.4
-        confirmButton.configuration?.title = count > 0 ? "선택한 앨범 합치기 (\(count))" : "선택한 앨범 합치기"
+        confirmButton.configuration?.title = count > 0 ? String(localized: "선택한 앨범 합치기 (\(count))", bundle: .module) : String(localized: "선택한 앨범 합치기", bundle: .module)
     }
 
     // MARK: - Actions

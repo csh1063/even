@@ -4,7 +4,7 @@ extension Project {
 
     static let bundleId = "com.baci.moa"
     static let iosVersion = "17.0"
-    static let developmentTeam = "CPA9XG2727"
+    static let developmentTeam = "6P4X6KH3P8"
 
     /// Helper function to create the Project for this ExampleApp
     public static func app(
@@ -50,8 +50,8 @@ extension Project {
                 organizationName: "sanghyeon",
                 settings: .settings(
                     configurations: [
-                        .debug(name: "dev"),
-                        .release(name: "prod")
+                        .debug(name: "Debug"),
+                        .release(name: "Release")
                     ]),
                 targets: [
                     makeTarget(

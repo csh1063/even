@@ -24,7 +24,7 @@ final class PhotoSectionHeaderView: UICollectionReusableView {
 
     func configure(with data: PhotoHeader) {
         titleLabel.text = data.title
-        countLabel.text = "\(data.count)장"
+        countLabel.text = String(localized: "\(data.count)장", bundle: .module)
     }
 
     private func setupView() {

@@ -16,20 +16,20 @@ final class OnboardingViewController: UIViewController {
         OnboardingPage(
             imageName: "onboarding_01",
             accentColor: Theme.background,
-            title: "사진을 스스로 이해해요",
-            description: "사진 속 장면, 피사체, 텍스트를\n직접 분석해요"
+            title: String(localized: "사진을 스스로 이해해요", bundle: .module),
+            description: String(localized: "사진 속 장면, 피사체, 텍스트를\n직접 분석해요", bundle: .module)
         ),
         OnboardingPage(
             imageName: "onboarding_02",
             accentColor: Theme.background,
-            title: "날짜와 좌표로 정리해요",
-            description: "촬영 시간과 위치를 기반으로\n사진을 자동으로 분류해요"
+            title: String(localized: "날짜와 좌표로 정리해요", bundle: .module),
+            description: String(localized: "촬영 시간과 위치를 기반으로\n사진을 자동으로 분류해요", bundle: .module)
         ),
         OnboardingPage(
             imageName: "onboarding_03",
             accentColor: Theme.background,
-            title: "나만의 앨범이 완성돼요",
-            description: "분석 결과로\n앨범이 자동으로 만들어져요"
+            title: String(localized: "나만의 앨범이 완성돼요", bundle: .module),
+            description: String(localized: "분석 결과로\n앨범이 자동으로 만들어져요", bundle: .module)
         )
     ]
 
@@ -53,7 +53,7 @@ final class OnboardingViewController: UIViewController {
 
     private lazy var nextButton: UIButton = {
         var config = UIButton.Configuration.filled()
-        config.title = "다음"
+        config.title = String(localized: "다음", bundle: .module)
         config.baseForegroundColor = Theme.primary
         config.baseBackgroundColor = UIColor.white.withAlphaComponent(0.25)
         config.cornerStyle = .capsule
@@ -65,7 +65,7 @@ final class OnboardingViewController: UIViewController {
 
     private lazy var startButton: UIButton = {
         var config = UIButton.Configuration.filled()
-        config.title = "시작하기"
+        config.title = String(localized: "시작하기", bundle: .module)
         config.baseForegroundColor = .white
         config.baseBackgroundColor = Theme.primary
         config.cornerStyle = .capsule

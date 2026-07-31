@@ -147,7 +147,7 @@ final class DateAlbumCell: UICollectionViewCell {
 
         currentIdentifier = viewModel.localIdentifier
         yearLabel.text  = viewModel.displayName
-        countLabel.text = "사진 \(viewModel.photoCount.formatted())장"
+        countLabel.text = String(localized: "사진 \(viewModel.photoCount.formatted())장", bundle: .module)
 
         // 커버 1장을 3분할 위치 모두에 동일하게 사용
         // 실제로 여러 장 커버가 생기면 photos 배열에서 추가 identifier 받아 확장

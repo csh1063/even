@@ -124,7 +124,7 @@ final class TravelPhotoPickerViewController: UIViewController {
     }
 
     private func setupTopBar() {
-        naviView.setTitle("사진 추가")
+        naviView.setTitle(String(localized: "사진 추가", bundle: .module))
         naviView.addButtons([LeftButton(type: .close), RightButton(type: .add)])
 
         naviView.publisher

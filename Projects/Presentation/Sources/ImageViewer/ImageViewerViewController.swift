@@ -263,9 +263,9 @@ final class ImageViewerViewController: UIViewController {
 
     private func updateInfo(with photoDetail: PhotoDetail) {
         let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy년 M월 d일"
+        formatter.dateFormat = String(localized: "yyyy년 M월 d일", bundle: .module)
         formatter.locale = Locale(identifier: "ko_KR")
-        dateLabel.text = photoDetail.createdDate.map { formatter.string(from: $0) } ?? "날짜 정보 없음"
+        dateLabel.text = photoDetail.createdDate.map { formatter.string(from: $0) } ?? String(localized: "날짜 정보 없음", bundle: .module)
 
         if let photo = photoDetail.photo {
             albumBadge.isHidden = true
@@ -279,7 +279,7 @@ final class ImageViewerViewController: UIViewController {
             if components.isEmpty {
                 locationIcon.image = UIImage(systemName: "location.slash")
                 locationIcon.tintColor = .white.withAlphaComponent(0.72)
-                locationLabel.text = "위치 정보 없음"
+                locationLabel.text = String(localized: "위치 정보 없음", bundle: .module)
                 locationLabel.textColor = .white.withAlphaComponent(0.82)
             } else {
                 locationIcon.image = UIImage(systemName: "location.fill")
@@ -290,10 +290,10 @@ final class ImageViewerViewController: UIViewController {
             label.text = photoDetail.id + "\n" + photoDetail.labels.map { "\($0.name): \($0.confidence)" }.joined(separator: ", ")
         } else {
             albumBadge.isHidden = false
-            albumBadgeLabel.text = "미분석"
+            albumBadgeLabel.text = String(localized: "미분석", bundle: .module)
             locationIcon.image = UIImage(systemName: "location.slash")
             locationIcon.tintColor = .white.withAlphaComponent(0.72)
-            locationLabel.text = "분석되지 않은 사진이에요"
+            locationLabel.text = String(localized: "아직 분석하지 않은 사진이에요", bundle: .module)
             locationLabel.textColor = .white.withAlphaComponent(0.82)
         }
     }

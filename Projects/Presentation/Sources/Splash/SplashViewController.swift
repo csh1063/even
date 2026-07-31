@@ -68,7 +68,7 @@ final class SplashViewController: BaseViewController {
 
     private let subtitleLabel: UILabel = {
         let label = UILabel()
-        label.text = "당신의 순간을 모으다"
+        label.text = String(localized: "당신의 순간을 모으다", bundle: .module)
         label.font = UIFont.systemFont(ofSize: 16, weight: .regular)
         label.textColor = Theme.textSecondary
         label.alpha = 0

@@ -72,10 +72,10 @@ final class PhotoLibraryViewController: BaseViewController {
         collectionView.refreshControl = refreshControl
         refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
 
-        naviView.setTitle("전체 사진첩",
+        naviView.setTitle(String(localized: "전체 사진첩", bundle: .module),
                           color: Theme.textPrimary,
                           font: .systemFont(ofSize: 32, weight: .bold))
-        naviView.setMessage("최근 사진부터 빠르게 확인할 수 있어요",
+        naviView.setMessage(String(localized: "최근 사진부터 빠르게 확인할 수 있어요", bundle: .module),
                             color: Theme.textSecondary,
                             font: .systemFont(ofSize: 14, weight: .regular))
 
@@ -115,7 +115,7 @@ final class PhotoLibraryViewController: BaseViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] totalCount in
 
-                self?.naviView.setMessage("사진 \(totalCount.formatted())장이 정렬되었습니다.",
+                self?.naviView.setMessage(String(localized: "사진 \(totalCount.formatted())장 정렬했어요.", bundle: .module),
                                           color: Theme.textSecondary,
                       font: .systemFont(ofSize: 14, weight: .regular))
             }

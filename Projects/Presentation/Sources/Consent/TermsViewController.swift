@@ -29,13 +29,13 @@ final class TermsViewController: UIViewController {
     private var items: [TermsItem] = [
         TermsItem(
             id: "terms",
-            title: "서비스 이용약관",
+            title: String(localized: "서비스 이용약관", bundle: .module),
             isRequired: true,
             url: URL(string: "https://csh1063.github.io/moa-web/terms-of-service.html")!
         ),
         TermsItem(
             id: "privacy",
-            title: "개인정보처리방침",
+            title: String(localized: "개인정보 처리방침", bundle: .module),
             isRequired: true,
             url: URL(string: "https://csh1063.github.io/moa-web/privacy-policy.html")!
         )
@@ -52,7 +52,7 @@ final class TermsViewController: UIViewController {
 
     private let appNameLabel: UILabel = {
         let label = UILabel()
-        label.text = "모아 시작하기"
+        label.text = String(localized: "모아 시작하기", bundle: .module)
         label.font = .systemFont(ofSize: 20, weight: .bold)
         label.textColor = Theme.primary
         return label
@@ -60,7 +60,7 @@ final class TermsViewController: UIViewController {
 
     private let subHeaderLabel: UILabel = {
         let label = UILabel()
-        label.text = "서비스 이용을 위해\n약관에 동의해주세요"
+        label.text = String(localized: "서비스 이용을 위해\n약관에 동의해주세요", bundle: .module)
         label.font = .systemFont(ofSize: 28)
         label.textColor = Theme.textSecondary
         label.numberOfLines = 2
@@ -78,7 +78,7 @@ final class TermsViewController: UIViewController {
 
     private let allAgreeTitleLabel: UILabel = {
         let label = UILabel()
-        label.text = "전체 동의"
+        label.text = String(localized: "전체 동의", bundle: .module)
         label.font = .systemFont(ofSize: 16, weight: .semibold)
         label.textColor = Theme.textPrimary
         return label
@@ -86,7 +86,7 @@ final class TermsViewController: UIViewController {
 
     private let allAgreeSubLabel: UILabel = {
         let label = UILabel()
-        label.text = "필수 항목에 모두 동의합니다"
+        label.text = String(localized: "필수 항목에 모두 동의합니다", bundle: .module)
         label.font = .systemFont(ofSize: 13)
         label.textColor = Theme.textTertiary
         return label
@@ -107,7 +107,7 @@ final class TermsViewController: UIViewController {
 
     private let confirmButton: UIButton = {
         var config = UIButton.Configuration.filled()
-        config.title = "동의하고 시작하기"
+        config.title = String(localized: "동의하고 시작하기", bundle: .module)
         config.baseForegroundColor = .white
         config.baseBackgroundColor = Theme.primary
         config.cornerStyle = .large
@@ -296,7 +296,7 @@ final class TermsRowView: UIView {
         let label = UILabel()
         label.font = .systemFont(ofSize: 11, weight: .semibold)
         label.textColor = Theme.primary
-        label.text = "필수"
+        label.text = String(localized: "필수", bundle: .module)
         return label
     }()
 

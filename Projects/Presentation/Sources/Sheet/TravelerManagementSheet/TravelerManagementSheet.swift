@@ -30,7 +30,7 @@ final class TravelerManagementSheet: UIViewController {
 
     private let closeButton: UIButton = {
         var config = UIButton.Configuration.plain()
-        config.title = "닫기"
+        config.title = String(localized: "닫기", bundle: .module)
         config.baseForegroundColor = Theme.textSecondary
         let btn = UIButton(configuration: config)
         return btn
@@ -38,7 +38,7 @@ final class TravelerManagementSheet: UIViewController {
 
     private let titleLabel: UILabel = {
         let lb = UILabel()
-        lb.text = "여행자 관리"
+        lb.text = String(localized: "여행자 관리", bundle: .module)
         lb.font = .systemFont(ofSize: 17, weight: .semibold)
         lb.textColor = Theme.textPrimary
         return lb
@@ -49,7 +49,7 @@ final class TravelerManagementSheet: UIViewController {
         config.baseForegroundColor = Theme.primary
         var titleAttr = AttributeContainer()
         titleAttr.font = .systemFont(ofSize: 16, weight: .bold)
-        config.attributedTitle = AttributedString("결정", attributes: titleAttr)
+        config.attributedTitle = AttributedString(String(localized: "결정", bundle: .module), attributes: titleAttr)
         let btn = UIButton(configuration: config)
         return btn
     }()
@@ -177,8 +177,8 @@ final class TravelerManagementSheet: UIViewController {
     private func presentRename(for person: Album, section: Int, index: Int) {
         let renameSheet = AlbumRenameSheet(
             albumName: person.isRenamed ? person.displayName : "",
-            title: "이름 변경",
-            subtitle: "이름을 정해주세요"
+            title: String(localized: "이름 변경", bundle: .module),
+            subtitle: String(localized: "이름을 정해주세요", bundle: .module)
         )
         renameSheet.onSave = { [weak self] newName in
             guard let self, !newName.isEmpty else { return }
@@ -254,7 +254,7 @@ extension TravelerManagementSheet: UICollectionViewDataSource {
               ) as? TravelerSectionHeaderView else {
             return UICollectionReusableView()
         }
-        header.configure(title: indexPath.section == 0 ? "여행자" : "후보")
+        header.configure(title: indexPath.section == 0 ? String(localized: "여행자", bundle: .module) : String(localized: "후보", bundle: .module))
         return header
     }
 }
@@ -361,7 +361,7 @@ private final class TravelerManagementCell: UICollectionViewCell {
             faceCellView.configure(with: viewModel)
         }
 
-        nameLabel.text = isRenamed ? name : "미정"
+        nameLabel.text = isRenamed ? name : String(localized: "미정", bundle: .module)
         nameLabel.textColor = isRenamed ? Theme.textPrimary : Theme.textTertiary
     }
 

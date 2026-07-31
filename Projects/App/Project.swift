@@ -8,4 +8,7 @@ let project = Project.app(module: Module.app,
                             Module.presentation
                           ].map(\.project)
                           + [.firebaseCore],
-                          resources: .added(paths: ["SupportingFiles/GoogleService-Info.plist"]))
+                          resources: .added(paths: [
+                            "SupportingFiles/GoogleService-Info.plist",
+                            "SupportingFiles/InfoPlist.xcstrings"
+                          ]))

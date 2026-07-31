@@ -37,7 +37,7 @@ struct FaceAlbumCellViewModel: AlbumCellViewModel {
         self.albumUseCase = albumUseCase
 
         self.isNamed       = album.isRenamed
-        self.isHighlighted = album.displayName == "나"
+        self.isHighlighted = album.displayName == String(localized: "나", bundle: .module)
     }
 
     var faceCellViewModel: FaceCellViewModel {

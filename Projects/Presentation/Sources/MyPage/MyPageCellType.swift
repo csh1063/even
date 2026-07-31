@@ -23,9 +23,9 @@ enum DisplayMode: String, CaseIterable {
 
     var text: String {
         switch self {
-        case .light: return "라이트"
-        case .dark: return "다크"
-        default: return "시스템"
+        case .light: return String(localized: "라이트", bundle: .module)
+        case .dark: return String(localized: "다크", bundle: .module)
+        default: return String(localized: "시스템", bundle: .module)
         }
     }
 
@@ -131,25 +131,25 @@ enum MyPageCellType {
 
     var text: String {
         switch self {
-        case .allLibraryPhoto: return "사진첩 사진 수"
-        case .allPhoto: return "분석한 사진 수"
-        case .unanalysisPhoto: return "미분석 사진 수"
-        case .analyzedDate: return "최근 분석"
-        case .analyzedData: return "분석 용량"
-        case .analysis: return "분석하기"
-        case .reAutoAlbum: return "자동 앨범 재생성"
-        case .reset: return "분석 정보 삭제하기"
-        case .locationAnalysis: return "사진 좌표를 주소로 변환"
-        case .locationAutoAlbum: return "장소 기반 앨범 생성"
-        case .autoAnalysis: return "새 사진 자동 분석"
-        case .continueLocation: return "사진 좌표 이어서 분석"
-        case .terms: return "이용 약관"
-        case .privacy: return "개인 정보 처리 방침"
-        case .openSource: return "오픈소스 라이선스"
-        case .photoPermission: return "사진 접근 범위"
-        case .displayMode: return "디스플레이 모드"
-        case .feedback: return "문의 / 피드백"
-        case .version: return "앱 버전"
+        case .allLibraryPhoto: return String(localized: "사진첩 사진 수", bundle: .module)
+        case .allPhoto: return String(localized: "분석한 사진 수", bundle: .module)
+        case .unanalysisPhoto: return String(localized: "미분석 사진 수", bundle: .module)
+        case .analyzedDate: return String(localized: "최근 분석", bundle: .module)
+        case .analyzedData: return String(localized: "분석 용량", bundle: .module)
+        case .analysis: return String(localized: "분석하기", bundle: .module)
+        case .reAutoAlbum: return String(localized: "자동 앨범 재생성", bundle: .module)
+        case .reset: return String(localized: "분석 정보 삭제하기", bundle: .module)
+        case .locationAnalysis: return String(localized: "사진 좌표를 주소로 변환", bundle: .module)
+        case .locationAutoAlbum: return String(localized: "장소 기반 앨범 생성", bundle: .module)
+        case .autoAnalysis: return String(localized: "새 사진 자동 분석", bundle: .module)
+        case .continueLocation: return String(localized: "사진 좌표 이어서 분석", bundle: .module)
+        case .terms: return String(localized: "서비스 이용약관", bundle: .module)
+        case .privacy: return String(localized: "개인정보 처리방침", bundle: .module)
+        case .openSource: return String(localized: "오픈소스 라이선스", bundle: .module)
+        case .photoPermission: return String(localized: "사진 접근 범위", bundle: .module)
+        case .displayMode: return String(localized: "디스플레이 모드", bundle: .module)
+        case .feedback: return String(localized: "문의 / 피드백", bundle: .module)
+        case .version: return String(localized: "앱 버전", bundle: .module)
         case .labels: return "사진 라벨 목록"
         case .test: return "연구소"
         case .addressCount: return "주소별 사진 수"

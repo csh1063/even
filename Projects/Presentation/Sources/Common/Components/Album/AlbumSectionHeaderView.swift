@@ -38,7 +38,7 @@ final class AlbumSectionHeaderView: UICollectionReusableView {
         titleLabel.font = .systemFont(ofSize: 20, weight: .semibold)
         addSubview(titleLabel)
 
-        moreButton.setTitle("모두 보기", for: .normal)
+        moreButton.setTitle(String(localized: "모두 보기", bundle: .module), for: .normal)
         moreButton.setTitleColor(Theme.primary, for: .normal)
         moreButton.titleLabel?.font = .systemFont(ofSize: 15, weight: .medium)
         moreButton.addTarget(self, action: #selector(moreTapped), for: .touchUpInside)

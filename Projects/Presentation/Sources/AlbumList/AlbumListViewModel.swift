@@ -101,14 +101,14 @@ final class AlbumListViewModel: BaseViewModel {
 
     private func confirmDeleteAlbums(_ albums: [Album]) {
         let message = albums.count > 1
-            ? "선택한 \(albums.count)개 앨범을 삭제할까요?\n사진은 삭제되지 않아요"
-            : "앨범을 삭제 할까요?\n사진은 삭제되지 않아요"
+            ? String(localized: "선택한 \(albums.count)개 앨범을 삭제할까요?\n사진은 삭제하지 않아요", bundle: .module)
+            : String(localized: "앨범을 삭제 할까요?\n사진은 삭제하지 않아요", bundle: .module)
         showAlert(
-            title: "앨범 삭제",
+            title: String(localized: "앨범 삭제", bundle: .module),
             message: message,
             buttons: [
-                AlertButtonConfig(title: "취소", style: .default, action: {}),
-                AlertButtonConfig(title: "삭제", style: .destructive) { [weak self] in
+                AlertButtonConfig(title: String(localized: "취소", bundle: .module), style: .default, action: {}),
+                AlertButtonConfig(title: String(localized: "삭제", bundle: .module), style: .destructive) { [weak self] in
                     Task { await self?.deleteAlbums(albums) }
                 }
             ]

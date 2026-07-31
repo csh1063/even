@@ -32,7 +32,7 @@ final class ClusterSplitSheet: UIViewController {
 
     private let titleLabel: UILabel = {
         let lb = UILabel()
-        lb.text = "앨범 분리"
+        lb.text = String(localized: "앨범 분리", bundle: .module)
         lb.font = .systemFont(ofSize: 20, weight: .bold)
         lb.textColor = Theme.textPrimary
         return lb
@@ -40,7 +40,7 @@ final class ClusterSplitSheet: UIViewController {
 
     private let subtitleLabel: UILabel = {
         let lb = UILabel()
-        lb.text = "떼어낼 그룹을 선택하세요 — 선택한 그룹은 새 앨범으로 분리돼요"
+        lb.text = String(localized: "떼어낼 그룹을 선택하세요 — 선택한 그룹은 새 앨범으로 분리돼요", bundle: .module)
         lb.font = .systemFont(ofSize: 14, weight: .regular)
         lb.textColor = Theme.textSecondary
         lb.numberOfLines = 0
@@ -62,7 +62,7 @@ final class ClusterSplitSheet: UIViewController {
 
     private let confirmButton: UIButton = {
         var config = UIButton.Configuration.filled()
-        config.title = "선택한 그룹 분리하기"
+        config.title = String(localized: "선택한 그룹 분리하기", bundle: .module)
         config.baseForegroundColor = .white
         config.baseBackgroundColor = Theme.primary
         config.cornerStyle = .medium
@@ -220,7 +220,7 @@ private final class ClusterSplitRow: UIControl {
         self.clusterId = cluster.id
         super.init(frame: .zero)
 
-        countLabel.text = "\(cluster.photoCount)장"
+        countLabel.text = String(localized: "\(cluster.photoCount)장", bundle: .module)
         setupLayout()
 
         backgroundColor = Theme.surface

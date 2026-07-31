@@ -79,7 +79,7 @@ final class AlbumDetailViewController: BaseViewController {
         let lb = UILabel()
         lb.textColor = Theme.textSecondary
         lb.font = .systemFont(ofSize: 14, weight: .regular)
-        lb.text = "0개 선택"
+        lb.text = String(localized: "0개 선택", bundle: .module)
         return lb
     }()
 
@@ -284,7 +284,7 @@ final class AlbumDetailViewController: BaseViewController {
 
     private func updateSelectedCount() {
         let count = selectedIdentifiers.count
-        selectedCountLabel.text = "\(count)개 선택"
+        selectedCountLabel.text = String(localized: "\(count)개 선택", bundle: .module)
         deleteButton.isEnabled = count > 0
         deleteButton.alpha = count > 0 ? 1.0 : 0.4
         excludeButton.isEnabled = count > 0

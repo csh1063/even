@@ -145,10 +145,10 @@ public final class PhotoLibraryViewModel: BaseViewModel {
             }
 //            self.photoMap = Dictionary(uniqueKeysWithValues: photoList.photos.compactMap{$0.photo}.map { ($0.localIdentifier, $0) })
             let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy년 MM월"
+            formatter.dateFormat = String(localized: "yyyy년 MM월", bundle: .module)
             formatter.locale = Locale(identifier: "ko_KR")
             let grouped = Dictionary(grouping: photoList.photos) { photo in
-                photo.createdDate.map { formatter.string(from: $0) } ?? "날짜 없음"
+                photo.createdDate.map { formatter.string(from: $0) } ?? String(localized: "날짜 없음", bundle: .module)
             }
             self.totalCount = photoList.totalCount
             self.photos = Dictionary(uniqueKeysWithValues: grouped.map { key, values in

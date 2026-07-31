@@ -18,12 +18,12 @@ enum AlbumSection: Int, CaseIterable {
 
     var title: String {
         switch self {
-        case .date:     return "시간"
-        case .travel:     return "여행"
-        case .location:  return "장소"
-        case .category: return "분류"
-        case .face:     return "인물"
-        case .similar: return "중복"
+        case .date:     return String(localized: "시간", bundle: .module)
+        case .travel:     return String(localized: "여행", bundle: .module)
+        case .location:  return String(localized: "장소", bundle: .module)
+        case .category: return String(localized: "분류", bundle: .module)
+        case .face:     return String(localized: "인물", bundle: .module)
+        case .similar: return String(localized: "중복", bundle: .module)
         }
     }
 

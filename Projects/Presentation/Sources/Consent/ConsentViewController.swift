@@ -48,7 +48,7 @@ final class ConsentViewController: UIViewController {
 
     private lazy var appNameLabel: UILabel = {
         let label = UILabel()
-        label.text = "모아"
+        label.text = String(localized: "모아", bundle: .module)
         label.font = .systemFont(ofSize: 22, weight: .semibold)
         label.textColor = Theme.textPrimary
         label.textAlignment = .center
@@ -57,7 +57,7 @@ final class ConsentViewController: UIViewController {
 
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "서비스 이용을 위해\n아래 내용에 동의해 주세요"
+        label.text = String(localized: "서비스 이용을 위해\n아래 내용에 동의해 주세요", bundle: .module)
         label.font = .systemFont(ofSize: 17, weight: .medium)
         label.textColor = Theme.textPrimary
         label.textAlignment = .center
@@ -67,7 +67,7 @@ final class ConsentViewController: UIViewController {
 
     private lazy var subtitleLabel: UILabel = {
         let label = UILabel()
-        label.text = "모아 앱 사용을 위하여 필수 약관에 동의해 주세요"
+        label.text = String(localized: "모아 앱 사용을 위하여 필수 약관에 동의해 주세요", bundle: .module)
 //        label.text = "동의하지 않아도 일부 기능을 사용할 수 있습니다"
         label.font = .systemFont(ofSize: 13)
         label.textColor = Theme.textSecondary
@@ -86,7 +86,7 @@ final class ConsentViewController: UIViewController {
 
     private lazy var allAgreeLabel: UILabel = {
         let label = UILabel()
-        label.text = "전체 동의"
+        label.text = String(localized: "전체 동의", bundle: .module)
         label.font = .systemFont(ofSize: 15, weight: .semibold)
         label.textColor = Theme.textPrimary
         return label
@@ -99,13 +99,13 @@ final class ConsentViewController: UIViewController {
     }()
 
     private lazy var termsRow = makeConsentRow(
-        title: "(필수) 이용약관",
-        urlText: "전문 보기"
+        title: String(localized: "(필수) 서비스 이용약관", bundle: .module),
+        urlText: String(localized: "전문 보기", bundle: .module)
     )
 
     private lazy var privacyRow = makeConsentRow(
-        title: "(필수) 개인정보처리방침",
-        urlText: "전문 보기"
+        title: String(localized: "(필수) 개인정보 처리방침", bundle: .module),
+        urlText: String(localized: "전문 보기", bundle: .module)
     )
 
     private lazy var termsCheckbox = makeCheckbox()
@@ -113,7 +113,7 @@ final class ConsentViewController: UIViewController {
 
     private lazy var confirmButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("확인", for: .normal)
+        button.setTitle(String(localized: "확인", bundle: .module), for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = Theme.primary.withAlphaComponent(0.4)

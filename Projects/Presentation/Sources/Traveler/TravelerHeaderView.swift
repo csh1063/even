@@ -61,7 +61,7 @@ final class TravelerHeaderView: UICollectionReusableView {
 
     func configure(name: String, count: Int) {
         nameLabel.text = name
-        countLabel.text = "\(count)명"
+        countLabel.text = String(localized: "\(count)명", bundle: .module)
     }
 
     static func height(for name: String, width: CGFloat) -> CGFloat {

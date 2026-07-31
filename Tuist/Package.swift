@@ -9,22 +9,22 @@ import PackageDescription
         // Default is .staticFramework
         // productTypes: ["Alamofire": .framework,]
         productTypes: [
-//            "Alamofire": .framework,
-                       "Moya": .framework,
-                       "CombineMoya": .framework,
-                       "SnapKit": .framework,
-//                       "Kingfisher": .framework,
-//                       "Lottie": .framework
-                       "FirebaseCore": .framework,
-                       "FirebaseCoreInternal": .framework,
-                       "FirebaseCoreExtension": .framework,
-                       "GoogleUtilities": .framework
+            "Alamofire": .framework,
+            "Moya": .framework,
+            "CombineMoya": .framework,
+            "SnapKit": .framework,
+//            "Kingfisher": .framework,
+//            "Lottie": .framework
+            "FirebaseCore": .framework,
+            "FirebaseCoreInternal": .framework,
+            "FirebaseCoreExtension": .framework,
+            "GoogleUtilities": .framework
         ]
         ,
         baseSettings: .settings(
             configurations: [
-                .debug(name: "dev"),
-                .release(name: "prod")
+                .debug(name: "Debug"),
+                .release(name: "Release")
             ])
     )
 #endif

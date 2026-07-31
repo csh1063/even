@@ -36,7 +36,7 @@ final class AlbumAnalysisSheet: UIViewController {
 
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "새 앨범 만드는 중"
+        label.text = String(localized: "새 앨범 만드는 중", bundle: .module)
         label.font = .systemFont(ofSize: 22, weight: .bold)
         label.textColor = Theme.textPrimary
         label.textAlignment = .center
@@ -45,7 +45,7 @@ final class AlbumAnalysisSheet: UIViewController {
 
     private let subtitleLabel: UILabel = {
         let label = UILabel()
-        label.text = "사진과 얼굴, 위치를 분석하고\n관련 앨범을 만들고 있어요\n완료될 때까지 조금만 기다려주세요"
+        label.text = String(localized: "사진과 얼굴, 위치를 분석하고\n관련 앨범을 만들고 있어요\n완료될 때까지 조금만 기다려주세요", bundle: .module)
         label.font = .systemFont(ofSize: 14, weight: .regular)
         label.textColor = Theme.textSecondary
         label.textAlignment = .center
@@ -53,8 +53,8 @@ final class AlbumAnalysisSheet: UIViewController {
         return label
     }()
 
-    private let photoRow = ProgressRow(icon: "photo.badge.plus", title: "사진 분석 중")
-    private let albumRow = ProgressRow(icon: "square.stack.3d.up.fill", title: "앨범 생성 중")
+    private let photoRow = ProgressRow(icon: "photo.badge.plus", title: String(localized: "사진 분석 중", bundle: .module))
+    private let albumRow = ProgressRow(icon: "square.stack.3d.up.fill", title: String(localized: "앨범 생성 중", bundle: .module))
 
     private let progressPublisher: AnyPublisher<Double, Never>
     private let photoCompletedPublisher: AnyPublisher<Void, Never>
@@ -153,7 +153,7 @@ final class AlbumAnalysisSheet: UIViewController {
     private func setupBindings() {
         // 사진 분석이 끝나기 전까지는 앨범 생성은 아직 시작 전이니 "대기" 상태로 보여준다
         photoRow.startSpinner()
-        albumRow.setTitle("앨범 생성 대기")
+        albumRow.setTitle(String(localized: "앨범 생성 대기", bundle: .module))
         albumRow.stopSpinner()
 
         // progress 값(0~1)은 오직 진행률 바 표시용 — @Published라 구독 시점 현재값을 리플레이하기 때문에
@@ -186,7 +186,7 @@ final class AlbumAnalysisSheet: UIViewController {
                 guard let self else { return }
                 self.startAlbumGenerationIfNeeded()
                 self.albumRow.updateProgress(1.0)
-                self.albumRow.setTitle("앨범 생성 완료")
+                self.albumRow.setTitle(String(localized: "앨범 생성 완료", bundle: .module))
                 self.albumRow.stopSpinner()
                 self.endPage()
             }
@@ -197,10 +197,10 @@ final class AlbumAnalysisSheet: UIViewController {
         guard !didStartAlbumGeneration else { return }
         didStartAlbumGeneration = true
 
-        photoRow.setTitle("사진 분석 완료")
+        photoRow.setTitle(String(localized: "사진 분석 완료", bundle: .module))
         photoRow.stopSpinner()
 
-        albumRow.setTitle("앨범 생성 중")
+        albumRow.setTitle(String(localized: "앨범 생성 중", bundle: .module))
         albumRow.startSpinner()
     }
 

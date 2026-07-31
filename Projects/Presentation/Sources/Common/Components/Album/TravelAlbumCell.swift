@@ -143,7 +143,7 @@ final class TravelAlbumCell: UICollectionViewCell {
         assetIdentifier = viewModel.localIdentifier
         nameLabel.text = viewModel.displayName
         dateLabel.text = viewModel.dateRangeText
-        countLabel.text = "\(viewModel.photoCount.formatted())장"
+        countLabel.text = String(localized: "\(viewModel.photoCount.formatted())장", bundle: .module)
 
         task = Task {
             let size = CGSize(width: 400, height: 400)

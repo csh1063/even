@@ -56,9 +56,9 @@ final class TabbarCoordinator: BaseCoordinator {
         let album = albumCoordinator.startAndReturn()
         let myPage = myPageCoordinator.startAndReturn()
 
-        self.tabbarViewController?.setTabBarItem("photo.on.rectangle.angled", vc: photo, title: "사진첩")
-        self.tabbarViewController?.setTabBarItem("square.stack", vc: album, title: "앨범")
-        self.tabbarViewController?.setTabBarItem("gearshape", vc: myPage, title: "설정")
+        self.tabbarViewController?.setTabBarItem("photo.on.rectangle.angled", vc: photo, title: String(localized: "사진첩", bundle: .module))
+        self.tabbarViewController?.setTabBarItem("square.stack", vc: album, title: String(localized: "앨범", bundle: .module))
+        self.tabbarViewController?.setTabBarItem("gearshape", vc: myPage, title: String(localized: "설정", bundle: .module))
 
         let controllers = [photo,
                            album,

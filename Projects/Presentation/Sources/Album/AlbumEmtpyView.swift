@@ -21,7 +21,7 @@ final class AlbumEmtpyView: UIView {
     private var analysisView = GradientCardView()
     private var titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "자동 분류 앨범"
+        label.text = String(localized: "자동 분류 앨범", bundle: .module)
         label.font = .systemFont(ofSize: 30, weight: .bold)
         label.textColor = .white
         return label
@@ -29,7 +29,7 @@ final class AlbumEmtpyView: UIView {
 
     private var messageLabel: UILabel = {
         let label = UILabel()
-        label.text = "전체 사진을 분석해 관련된 사진끼리 앨범으로 정리해요"
+        label.text = String(localized: "전체 사진을 분석해 관련된 사진끼리 앨범으로 정리해요", bundle: .module)
         label.font = .systemFont(ofSize: 15, weight: .medium)
         label.textColor = .white.withAlphaComponent(0.92)
         label.numberOfLines = 2
@@ -41,11 +41,11 @@ final class AlbumEmtpyView: UIView {
         config.baseBackgroundColor = .white
         config.baseForegroundColor = Theme.primary
         config.image = UIImage(systemName: "sparkles")
-        config.title = "분석 시작"
+        config.title = String(localized: "분석 시작", bundle: .module)
         config.imagePadding = 8
         config.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 18, bottom: 0, trailing: 18)
 
-        var titleAttr = AttributedString("분석 시작")
+        var titleAttr = AttributedString(String(localized: "분석 시작", bundle: .module))
         titleAttr.font = .systemFont(ofSize: 15, weight: .semibold)
         config.attributedTitle = titleAttr
 
@@ -65,14 +65,14 @@ final class AlbumEmtpyView: UIView {
     }()
     private var locationTitleLabel: UILabel = {
         let label = UILabel()
-        label.text = "좌표 분석은 백그라운드에서 진행돼요"
+        label.text = String(localized: "좌표 분석은 백그라운드에서 진행돼요", bundle: .module)
         label.font = .systemFont(ofSize: 15, weight: .semibold)
         label.textColor = Theme.textPrimary
         return label
     }()
     private var locationMessageLabel: UILabel = {
         let label = UILabel()
-        label.text = "사진에 저장된 좌표를 주소로 변환하고 관련 앨범을 생성해요"
+        label.text = String(localized: "사진에 저장된 좌표를 주소로 변환하고 관련 앨범을 생성해요", bundle: .module)
         label.font = .systemFont(ofSize: 13, weight: .regular)
         label.textColor = Theme.textSecondary
         label.numberOfLines = 2

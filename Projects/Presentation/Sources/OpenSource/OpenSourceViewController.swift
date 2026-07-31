@@ -41,10 +41,10 @@ final class OpenSourceViewController: UIViewController {
 
     // MARK: - Setup
     private func setupUI() {
-        title = "오픈소스 라이선스"
+        title = String(localized: "오픈소스 라이선스", bundle: .module)
         view.backgroundColor = Theme.background
 
-        naviView.setTitle("오픈소스 라이선스")
+        naviView.setTitle(String(localized: "오픈소스 라이선스", bundle: .module))
         naviView.addButtons([LeftButton(type: .back)])
 
         view.addSubview(tableView)

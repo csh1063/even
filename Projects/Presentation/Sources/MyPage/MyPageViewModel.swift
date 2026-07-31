@@ -101,11 +101,11 @@ final class MyPageViewModel: BaseViewModel {
             case .autoAnalysis: break // toggle
             case .photoPermission:
                 showAlert(
-                    title: "사진 접근 권한",
-                    message: "설정에서 사진 접근 권한을 변경할 수 있어요.",
+                    title: String(localized: "사진 접근 권한", bundle: .module),
+                    message: String(localized: "설정에서 사진 접근 권한을 변경할 수 있어요.", bundle: .module),
                     buttons: [
-                        AlertButtonConfig(title: "취소", style: .cancel, action: nil),
-                        AlertButtonConfig(title: "설정으로 이동", style: .default) {
+                        AlertButtonConfig(title: String(localized: "취소", bundle: .module), style: .cancel, action: nil),
+                        AlertButtonConfig(title: String(localized: "설정으로 이동", bundle: .module), style: .default) {
                             guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
                             UIApplication.shared.open(url)
                         }
@@ -170,11 +170,11 @@ final class MyPageViewModel: BaseViewModel {
 
             switch try await permission {
             case .fullAccess:
-                self.photoPermission = "전체 허용"
+                self.photoPermission = String(localized: "전체 허용", bundle: .module)
             case .limitedAccess:
-                self.photoPermission = "일부 허용"
+                self.photoPermission = String(localized: "일부 허용", bundle: .module)
             default:
-                self.photoPermission = "거부"
+                self.photoPermission = String(localized: "거부", bundle: .module)
             }
 
             self.displayMode = DisplayMode(try await displayMode).text
@@ -211,11 +211,11 @@ final class MyPageViewModel: BaseViewModel {
         }
 
         self.cellTypes = [
-            MyCellHeader(name: "내 라이브러리", order: 0): [
-                MyCellData(type: .allPhoto, value: "\(photoCount.formatted())장"),
-                MyCellData(type: .unanalysisPhoto, value: "\(unanalysisCount.formatted())장")
+            MyCellHeader(name: String(localized: "내 라이브러리", bundle: .module), order: 0): [
+                MyCellData(type: .allPhoto, value: String(localized: "\(photoCount.formatted())장", bundle: .module)),
+                MyCellData(type: .unanalysisPhoto, value: String(localized: "\(unanalysisCount.formatted())장", bundle: .module))
             ],
-            MyCellHeader(name: "사진 분석", order: 10): analyzedItems,
+            MyCellHeader(name: String(localized: "사진 분석", bundle: .module), order: 10): analyzedItems,
 //            MyCellHeader(name: "백 그라운드 작업", order: 20): [
 //                MyCellData(type: .locationAnalysis, value: "-", isOn: false),
 //                MyCellData(type: .locationAutoAlbum, value: "-", isOn: false)
@@ -224,13 +224,13 @@ final class MyPageViewModel: BaseViewModel {
 //                MyCellData(type: .autoAnalysis, isOn: false, isPrimary: false),
 //                MyCellData(type: .continueLocation, isOn: false, isPrimary: false),
 //            ],
-            MyCellHeader(name: "접근 및 권한", order: 40): [
+            MyCellHeader(name: String(localized: "접근 및 권한", bundle: .module), order: 40): [
                 MyCellData(type: .terms),
                 MyCellData(type: .privacy),
                 MyCellData(type: .openSource),
                 MyCellData(type: .photoPermission, value: self.photoPermission)
             ],
-            MyCellHeader(name: "앱 설정", order: 50): [
+            MyCellHeader(name: String(localized: "앱 설정", bundle: .module), order: 50): [
                 MyCellData(type: .displayMode, value: displayMode),
                 MyCellData(type: .feedback),
                 MyCellData(type: .version, value: version)
@@ -258,11 +258,11 @@ final class MyPageViewModel: BaseViewModel {
         let weeks = days / 7
 
         switch days {
-        case 0: return "오늘"
-        case 1: return "어제"
-        case 2...6: return "\(days)일 전"
+        case 0: return String(localized: "오늘", bundle: .module)
+        case 1: return String(localized: "어제", bundle: .module)
+        case 2...6: return String(localized: "\(days)일 전", bundle: .module)
         case 7...27:
-            return weeks == 1 ? "1주 전" : "\(weeks)주 전"
+            return weeks == 1 ? String(localized: "1주 전", bundle: .module) : String(localized: "\(weeks)주 전", bundle: .module)
         default:
             let output = DateFormatter()
             output.dateFormat = "yyyy.MM.dd"

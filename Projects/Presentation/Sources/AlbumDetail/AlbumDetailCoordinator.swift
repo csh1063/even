@@ -87,8 +87,8 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
         if album.from == "face" || album.from == "animal" {
             sheet = AlbumRenameSheet(
                 albumName: album.isRenamed ? album.displayName : "",
-                title: "이름 변경",
-                subtitle: "이름을 정해주세요"
+                title: String(localized: "이름 변경", bundle: .module),
+                subtitle: String(localized: "이름을 정해주세요", bundle: .module)
             )
         } else {
             // 인물/동물이 아닌 타입(날짜/장소/카테고리/여행/중복)은 자동 생성된 이름도 그 자체로
@@ -116,7 +116,7 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
         let renameableTypes: Set<String> = ["face", "animal", "travel"]
         if renameableTypes.contains(album.from) {
             options.append(
-                OptionRowConfig(icon: "pencil.line", title: "앨범명 변경", style: .normal) { [weak self] in
+                OptionRowConfig(icon: "pencil.line", title: String(localized: "앨범명 변경", bundle: .module), style: .normal) { [weak self] in
                     self?.showAlbumRenameSheet(album: album)
                 }
             )
@@ -124,12 +124,12 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
 
         if album.from == "face" || album.from == "animal" {
             options.append(
-                OptionRowConfig(icon: "person.2.crop.square.stack", title: "앨범 합치기", style: .normal) { [weak self] in
+                OptionRowConfig(icon: "person.2.crop.square.stack", title: String(localized: "앨범 합치기", bundle: .module), style: .normal) { [weak self] in
                     self?.delegate?.mergeTapped()
                 }
             )
             options.append(
-                OptionRowConfig(icon: "square.on.square.dashed", title: "앨범 분리", style: .normal) { [weak self] in
+                OptionRowConfig(icon: "square.on.square.dashed", title: String(localized: "앨범 분리", bundle: .module), style: .normal) { [weak self] in
                     self?.delegate?.splitTapped()
                 }
             )
@@ -137,17 +137,17 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
 
         if album.from == "travel" {
             options.append(
-                OptionRowConfig(icon: "photo.badge.plus", title: "사진 추가", style: .normal) { [weak self] in
+                OptionRowConfig(icon: "photo.badge.plus", title: String(localized: "사진 추가", bundle: .module), style: .normal) { [weak self] in
                     self?.showAddPhotos(album: album)
                 }
             )
             options.append(
-                OptionRowConfig(icon: "person.2.fill", title: "여행자 관리", style: .normal) { [weak self] in
+                OptionRowConfig(icon: "person.2.fill", title: String(localized: "여행자 관리", bundle: .module), style: .normal) { [weak self] in
                     self?.delegate?.travelerManagementTapped()
                 }
             )
             options.append(
-                OptionRowConfig(icon: "arrow.triangle.merge", title: "여행 합치기", style: .normal) { [weak self] in
+                OptionRowConfig(icon: "arrow.triangle.merge", title: String(localized: "여행 합치기", bundle: .module), style: .normal) { [weak self] in
                     self?.delegate?.mergeTapped()
                 }
             )
@@ -155,13 +155,13 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
 
         if album.from == "similar" {
             options.append(
-                OptionRowConfig(icon: "trash", title: "정리 완료", style: .destructive) { [weak self] in
+                OptionRowConfig(icon: "trash", title: String(localized: "정리 완료", bundle: .module), style: .destructive) { [weak self] in
                     self?.delegate?.deleteAlert()
                 }
             )
         } else {
             options.append(
-                OptionRowConfig(icon: "trash", title: "앨범 삭제", style: .destructive) { [weak self] in
+                OptionRowConfig(icon: "trash", title: String(localized: "앨범 삭제", bundle: .module), style: .destructive) { [weak self] in
                     self?.delegate?.deleteAlert()
                 }
             )
@@ -183,14 +183,14 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
         guard !candidates.isEmpty else {
             let message: String
             if isTravel {
-                message = "합칠 수 있는 다른 여행 앨범이 없어요"
+                message = String(localized: "합칠 수 있는 다른 여행 앨범이 없어요", bundle: .module)
             } else if isAnimal {
-                message = "합칠 수 있는 다른 동물 앨범이 없어요"
+                message = String(localized: "합칠 수 있는 다른 동물 앨범이 없어요", bundle: .module)
             } else {
-                message = "합칠 수 있는 다른 인물 앨범이 없어요"
+                message = String(localized: "합칠 수 있는 다른 인물 앨범이 없어요", bundle: .module)
             }
-            let alert = UIAlertController(title: "합칠 앨범 없음", message: message, preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "확인", style: .default))
+            let alert = UIAlertController(title: String(localized: "합칠 앨범 없음", bundle: .module), message: message, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: String(localized: "확인", bundle: .module), style: .default))
             navigationController.present(alert, animated: true)
             return
         }
@@ -202,18 +202,18 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
 
         let title: String
         if isTravel {
-            title = "합칠 여행 선택"
+            title = String(localized: "합칠 여행 선택", bundle: .module)
         } else if isAnimal {
-            title = "동일 개체 앨범 선택"
+            title = String(localized: "같은 반려동물 앨범 선택", bundle: .module)
         } else {
-            title = "동일 인물 앨범 선택"
+            title = String(localized: "동일 인물 앨범 선택", bundle: .module)
         }
 
         let sheet = AlbumMergeSheet(
             candidates: candidates,
             title: title,
-            subtitle: isTravel ? "끊어진 두 여행을 연결해요" : nil,
-            sectionHeaderText: isTravel ? currentDateRangeText.map { "현재 여행 날짜 : \($0)" } : nil,
+            subtitle: isTravel ? String(localized: "끊어진 두 여행을 연결해요", bundle: .module) : nil,
+            sectionHeaderText: isTravel ? currentDateRangeText.map { String(localized: "현재 여행 날짜 : \($0)", bundle: .module) } : nil,
             isTravel: isTravel,
             imageUseCase: diContainer.makeImageUseCase(),
             albumUseCase: diContainer.makeAlbumUseCase()
@@ -234,11 +234,11 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
     func showClusterSplitPicker(clusters: [FaceClusterSummary]) {
         guard clusters.count > 1 else {
             let alert = UIAlertController(
-                title: "분리할 그룹 없음",
-                message: "이 앨범은 병합된 적이 없어서 분리할 그룹이 없어요",
+                title: String(localized: "분리할 그룹 없음", bundle: .module),
+                message: String(localized: "이 앨범은 병합된 적이 없어서 분리할 그룹이 없어요", bundle: .module),
                 preferredStyle: .alert
             )
-            alert.addAction(UIAlertAction(title: "확인", style: .default))
+            alert.addAction(UIAlertAction(title: String(localized: "확인", bundle: .module), style: .default))
             navigationController.present(alert, animated: true)
             return
         }
