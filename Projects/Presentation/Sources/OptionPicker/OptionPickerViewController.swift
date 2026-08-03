@@ -55,6 +55,11 @@ final class OptionPickerViewController: UIViewController {
         binding()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsTracker.shared.logScreenView("옵션 선택 - \(pageTitle)")
+    }
+
     // MARK: - Setup
 
     private func setupViews() {

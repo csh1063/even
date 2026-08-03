@@ -23,21 +23,20 @@ struct TermsItem {
 // MARK: - TermsViewController
 
 final class TermsViewController: UIViewController {
-
+    
     // MARK: - Properties
-
     private var items: [TermsItem] = [
         TermsItem(
             id: "terms",
             title: String(localized: "서비스 이용약관", bundle: .module),
             isRequired: true,
-            url: URL(string: "https://csh1063.github.io/moa-web/terms-of-service.html")!
+            url: URL(string: DocuType.terms.urlString)!
         ),
         TermsItem(
             id: "privacy",
             title: String(localized: "개인정보 처리방침", bundle: .module),
             isRequired: true,
-            url: URL(string: "https://csh1063.github.io/moa-web/privacy-policy.html")!
+            url: URL(string: DocuType.privacy.urlString)!
         )
     ]
 
@@ -132,6 +131,11 @@ final class TermsViewController: UIViewController {
         setupUI()
         setupConstraints()
         setupActions()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsTracker.shared.logScreenView("이용약관 상세")
     }
 
     // MARK: - Setup

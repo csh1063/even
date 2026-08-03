@@ -110,6 +110,11 @@ final class ImageViewerViewController: UIViewController {
         viewModel.send(.appear)
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsTracker.shared.logScreenView("사진 뷰어")
+    }
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         // present 애니메이션이 시작되기 전, collectionView bounds가 확정되는 시점에 딱 한 번만

@@ -26,6 +26,8 @@ final class PhotoLibraryViewController: BaseViewController {
 
     private var cancellables = Set<AnyCancellable>()
 
+    override var pageTitle: String? { "전체 사진첩" }
+
     init(viewModel: PhotoLibraryViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)

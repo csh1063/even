@@ -85,6 +85,11 @@ final class OnboardingViewController: UIViewController {
         setScrollViewDelegate()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsTracker.shared.logScreenView("온보딩")
+    }
+
     // MARK: - Setup
 
     private func setupPageViewController() {

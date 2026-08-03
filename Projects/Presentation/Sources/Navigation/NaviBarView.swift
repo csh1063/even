@@ -22,7 +22,7 @@ final class NaviBarView: UIView {
         let stackView = UIStackView()
 
         stackView.axis = .horizontal
-        stackView.distribution = .fillProportionally
+        stackView.distribution = .fill
         stackView.spacing = 4
 
         return stackView
@@ -65,6 +65,8 @@ final class NaviBarView: UIView {
         self.titleLabel.text = title
         self.titleLabel.textColor = color
         self.titleLabel.font = font
+        self.titleLabel.numberOfLines = 1
+        self.titleLabel.lineBreakMode = .byTruncatingTail
     }
 
     public func setMessage(_ message: String,

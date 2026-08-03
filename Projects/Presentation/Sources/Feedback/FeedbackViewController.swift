@@ -144,6 +144,7 @@ final class FeedbackViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        AnalyticsTracker.shared.logScreenView("문의 / 피드백")
 
         self.textView.becomeFirstResponder()
     }

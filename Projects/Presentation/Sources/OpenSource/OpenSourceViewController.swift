@@ -39,6 +39,11 @@ final class OpenSourceViewController: UIViewController {
         binding()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsTracker.shared.logScreenView("오픈소스 라이선스")
+    }
+
     // MARK: - Setup
     private func setupUI() {
         title = String(localized: "오픈소스 라이선스", bundle: .module)

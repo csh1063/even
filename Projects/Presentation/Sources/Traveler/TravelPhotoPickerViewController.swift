@@ -81,6 +81,11 @@ final class TravelPhotoPickerViewController: UIViewController {
         updateAddButtonState()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsTracker.shared.logScreenView("사진 추가")
+    }
+
     // MARK: - Setup
 
     private func setupLayout() {

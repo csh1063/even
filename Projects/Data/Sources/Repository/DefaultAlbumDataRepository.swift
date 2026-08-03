@@ -110,7 +110,7 @@ public final class DefaultAlbumDataRepository: AlbumDataRepository {
 
         let context = ModelContext(container)
         // PhotoEntity를 관계 predicate(photo.albums.contains)로 직접 조회하면, 다른 컨텍스트에서 방금
-        // 추가한 관계가 앱을 재시작하기 전까진 반영이 안 되는 경우가 있었다(SwiftData의 to-many 관계
+        // 추가한 관계가 앱을 재시작하기 전까진 반영이 안 되는 경우가 있었다(SwiftData의 to-many 관계/com
         // predicate 관련 알려진 문제). AlbumEntity를 id로 먼저 찾아 album.photos로 읽으면 관계 폴팅이
         // 정상적으로 최신 상태를 반영한다.
         let albumDescriptor = FetchDescriptor<AlbumEntity>(

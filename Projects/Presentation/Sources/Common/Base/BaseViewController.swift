@@ -15,6 +15,9 @@ open class BaseViewController: UIViewController {
         return "\(Self.self) does not support NSCoding"
     }
 
+    /// 분석 도구에 기록할 화면 이름 — 서브클래스가 오버라이드. nil이면 트래킹하지 않는다.
+    open var pageTitle: String? { nil }
+
     open override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -28,6 +31,9 @@ open class BaseViewController: UIViewController {
 
     open override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        if let pageTitle {
+            AnalyticsTracker.shared.logScreenView(pageTitle)
+        }
     }
 
     open override func viewWillDisappear(_ animated: Bool) {

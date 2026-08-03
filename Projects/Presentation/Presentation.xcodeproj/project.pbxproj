@@ -73,6 +73,7 @@
 		60B1A9C19CF5718CE911F110 /* PhotoLibraryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80FC95C27373D8DD1543F125 /* PhotoLibraryViewModel.swift */; };
 		633196953593398A7090354A /* AlbumListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B60D24A9AF2A390B1B3B536A /* AlbumListViewController.swift */; };
 		68F7B92E595CE29E2B5D931A /* AlbumDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B5DDF86843F2E3695365DF /* AlbumDetailViewModel.swift */; };
+		69D039CFB7779BCF9D8D7D75 /* AnalyticsTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = E80ABCE343B8363B4B538628 /* AnalyticsTracker.swift */; };
 		6B21C00E402B89F04AC73A81 /* Extension_UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D42EEB1F9EB444EE42BCE28 /* Extension_UIImage.swift */; };
 		6DFE320F438EC6EADEAB239B /* NaviBarType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C18C417DC62917A6F8651BD /* NaviBarType.swift */; };
 		7157D7BA625AF2649C9DD85A /* TravelerManagementSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D8FC4DDF2869B6DD2972EB1 /* TravelerManagementSheet.swift */; };
@@ -329,6 +330,7 @@
 		E40A6C338B0BC01EC436E06E /* Extension_Sequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension_Sequence.swift; sourceTree = "<group>"; };
 		E474256CB4A9464026CD7F10 /* BaseCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseCoordinator.swift; sourceTree = "<group>"; };
 		E6E47C332389E708A696E253 /* AlertViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertViewController.swift; sourceTree = "<group>"; };
+		E80ABCE343B8363B4B538628 /* AnalyticsTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsTracker.swift; sourceTree = "<group>"; };
 		EADC85A61F46BF0C87AB56FC /* AlbumSectionHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumSectionHeaderView.swift; sourceTree = "<group>"; };
 		EDC7E8CD06B312A92C2C3101 /* Extension_UITextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension_UITextField.swift; sourceTree = "<group>"; };
 		EEEC0A4D906E34A5261579DB /* FeedbackViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackViewModel.swift; sourceTree = "<group>"; };
@@ -408,6 +410,7 @@
 		1009B98B90CE1A80040E5A44 /* Common */ = {
 			isa = PBXGroup;
 			children = (
+				C084F4C74A0717B91AD0FC1B /* Analytics */,
 				2EAA0AE8D17F6832885302E3 /* Base */,
 				B18E3960CEEA5B6DBA69504B /* Components */,
 				3EF02DC3D9F1AA9278D00F45 /* DI */,
@@ -783,6 +786,14 @@
 			name = Project;
 			sourceTree = "<group>";
 		};
+		C084F4C74A0717B91AD0FC1B /* Analytics */ = {
+			isa = PBXGroup;
+			children = (
+				E80ABCE343B8363B4B538628 /* AnalyticsTracker.swift */,
+			);
+			path = Analytics;
+			sourceTree = "<group>";
+		};
 		C086964BB7EBA7D39310EB89 /* Splash */ = {
 			isa = PBXGroup;
 			children = (
@@ -998,6 +1009,7 @@
 				C4BE009C6D3DBA05FF0FC75E /* AlertManager.swift in Sources */,
 				36520B8A29E9F5ECFFF88753 /* AlertViewController.swift in Sources */,
 				4389F098097A9E30C07AEC7E /* AlertViewModel.swift in Sources */,
+				69D039CFB7779BCF9D8D7D75 /* AnalyticsTracker.swift in Sources */,
 				AD90B623AC1F4BE0A892F9C4 /* BaseCoordinator.swift in Sources */,
 				415FC59E52A77D8CF12C8565 /* BaseEventRouter.swift in Sources */,
 				36AA397C26610437D42082A8 /* BaseViewController.swift in Sources */,

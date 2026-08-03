@@ -20,11 +20,11 @@ enum DocuType {
         case .privacy: return String(localized: "개인정보 처리방침", bundle: .module)
         }
     }
-
+    
     var urlString: String {
         switch self {
-        case .terms: return "https://csh1063.github.io/moa-web/terms-of-service"
-        case .privacy: return "https://csh1063.github.io/moa-web/privacy-policy.html"
+        case .terms: return "https://baciweb.vercel.app/moa/terms-of-service"
+        case .privacy: return "https://baciweb.vercel.app/moa/privacy-policy"
         }
     }
 }
@@ -37,6 +37,13 @@ final class WebDocuViewController: BaseViewController {
     private let type: DocuType
 
     private var cancellables = Set<AnyCancellable>()
+
+    override var pageTitle: String? {
+        switch type {
+        case .terms: return "서비스 이용약관 웹뷰"
+        case .privacy: return "개인정보 처리방침 웹뷰"
+        }
+    }
 
     init(type: DocuType) {
         self.type = type

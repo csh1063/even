@@ -37,6 +37,8 @@ final class MyPageViewController: BaseViewController {
 
     private var cancellables = Set<AnyCancellable>()
 
+    override var pageTitle: String? { "설정" }
+
     init(viewModel: MyPageViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)

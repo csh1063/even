@@ -112,6 +112,7 @@ public extension TargetDependency {
     static let combineMoya: TargetDependency     = .external(name: "CombineMoya")
     static let snapKit: TargetDependency         = .external(name: "SnapKit")
     static let firebaseCore: TargetDependency = .external(name: "FirebaseCore")
+    static let firebaseAnalytics: TargetDependency = .external(name: "FirebaseAnalytics")
 //    "FirebaseAuth": .framework,
 //    "FirebaseFirestore": .framework,
 //    "FirebaseFirestoreInternal": .framework,

@@ -130,6 +130,11 @@ final class ConsentViewController: UIViewController {
         setupActions()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsTracker.shared.logScreenView("약관 동의")
+    }
+
     // MARK: - Setup
     private func setupUI() {
         view.backgroundColor = Theme.background
@@ -383,8 +388,8 @@ final class ConsentViewController: UIViewController {
     @objc private func linkTapped(_ sender: UIButton) {
         // GitHub Pages URL로 교체
         let urlString = sender.tag == 0
-            ? "https://csh1063.github.io/moa-web/terms-of-service.html"
-            : "https://csh1063.github.io/moa-web/privacy-policy.html"
+            ? DocuType.terms.urlString
+            : DocuType.privacy.urlString
         guard let url = URL(string: urlString) else { return }
 
         let safariVC = SFSafariViewController(url: url)  // import SafariServices 필요

@@ -18,7 +18,19 @@ import PackageDescription
             "FirebaseCore": .framework,
             "FirebaseCoreInternal": .framework,
             "FirebaseCoreExtension": .framework,
-            "GoogleUtilities": .framework
+            "GoogleUtilities": .framework,
+            // GoogleUtilities는 세부 기능별로 별도 SPM 프로덕트("GoogleUtilities-XXX")로
+            // 쪼개져 있어서, 위 "GoogleUtilities" 하나만 지정해서는 안 먹힌다 — App과
+            // FirebaseCoreInternal 양쪽에서 정적으로 각각 링크되면서 카테고리(NSData+gzip 등)
+            // 등록이 유실돼 실기기에서 "unrecognized selector" 크래시가 났다. 전부 동적으로 강제.
+            "GoogleUtilities-AppDelegateSwizzler": .framework,
+            "GoogleUtilities-Environment": .framework,
+            "GoogleUtilities-Logger": .framework,
+            "GoogleUtilities-MethodSwizzler": .framework,
+            "GoogleUtilities-Network": .framework,
+            "GoogleUtilities-NSData": .framework,
+            "GoogleUtilities-Reachability": .framework,
+            "GoogleUtilities-UserDefaults": .framework
         ]
         ,
         baseSettings: .settings(

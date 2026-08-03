@@ -34,6 +34,8 @@ final class AlbumListViewController: BaseViewController {
 
     private var cancellables = Set<AnyCancellable>()
 
+    override var pageTitle: String? { "여행 목록" }
+
     private var isSelectionMode = false {
         didSet { updateSelectionUI() }
     }

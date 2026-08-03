@@ -85,6 +85,8 @@ final class SplashViewController: BaseViewController {
 
     private let viewModel: SplashViewModel
 
+    override var pageTitle: String? { "스플래시" }
+
     init(viewModel: SplashViewModel) {
         self.viewModel = viewModel
 

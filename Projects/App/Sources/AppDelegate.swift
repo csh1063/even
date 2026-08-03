@@ -1,12 +1,23 @@
 import UIKit
 import FirebaseCore
+import FirebaseAnalytics
+import Presentation
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+
         FirebaseApp.configure()
+        Analytics.setAnalyticsCollectionEnabled(true)
+
+        AnalyticsTracker.shared.logHandler = { pageTitle in
+            Analytics.logEvent(AnalyticsEventScreenView, parameters: [
+                AnalyticsParameterScreenName: pageTitle,
+                AnalyticsParameterScreenClass: pageTitle
+            ])
+        }
+
         return true
     }
 

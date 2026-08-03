@@ -34,6 +34,8 @@ final class AlbumViewController: BaseViewController {
 
     private var cancellables = Set<AnyCancellable>()
 
+    override var pageTitle: String? { "앨범" }
+
     init(viewModel: AlbumViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)

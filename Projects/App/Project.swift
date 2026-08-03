@@ -7,7 +7,7 @@ let project = Project.app(module: Module.app,
                             Module.domain,
                             Module.presentation
                           ].map(\.project)
-                          + [.firebaseCore],
+                          + [.firebaseCore, .firebaseAnalytics],
                           resources: .added(paths: [
                             "SupportingFiles/GoogleService-Info.plist",
                             "SupportingFiles/InfoPlist.xcstrings"
