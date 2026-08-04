@@ -98,4 +98,8 @@ public final class RepositoryFactory {
     public lazy var remoteConfigRepository: RemoteConfigRepository = {
         DefaultRemoteConfigRepository(service: serviceFactory.remoteConfigService)
     }()
+
+    public lazy var legacyAccessRepository: LegacyAccessRepository = {
+        DefaultLegacyAccessRepository(service: serviceFactory.keychainService)
+    }()
 }

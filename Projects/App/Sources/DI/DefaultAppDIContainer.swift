@@ -81,6 +81,10 @@ final class DefaultAppDIContainer: AppDIContainer {
         repositoryFactory.remoteConfigRepository
     }
 
+    var legacyAccessRepository: LegacyAccessRepository {
+        repositoryFactory.legacyAccessRepository
+    }
+
     private let providerFactory: ProviderFactory
     private lazy var executor: NetworkExecutor = {
         DefaultNetworkExecutor(providerFactory: providerFactory)

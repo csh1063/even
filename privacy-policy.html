@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=0.8">
+  <title>개인정보처리방침 — 모아</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div><img class="logo" src="moa_icon.png"></div>
+  <h1>모아 · moa</h1>
+  <p>사진 정리 앱</p>
+</header>
+
+<div class="container">
+  <div class="doc-title">개인정보처리방침</div>
+  <div class="doc-meta">시행일: 2026년 8월 4일 &nbsp;·&nbsp; 최종 수정: 2026년 8월 4일</div>
+
+  <section>
+    <p>모아(moa)(이하 "앱")는 개인 개발자가 운영하는 서비스로, 이용자의 개인정보를 소중히 여기며 「개인정보 보호법」 및 관련 법령을 준수합니다. 본 방침을 통해 수집하는 정보와 그 이용·처리위탁 방법을 투명하게 안내합니다.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">제1조</span> 수집하는 개인정보 항목 및 수집 방법</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>항목</th>
+          <th>수집 방법</th>
+          <th>수집 목적</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>사진 라이브러리 접근 권한</td>
+          <td>이용자 직접 허용</td>
+          <td>사진 분류 및 앨범 생성</td>
+        </tr>
+        <tr>
+          <td>사진 메타데이터 (EXIF: 촬영 날짜, GPS 좌표 등)</td>
+          <td>사진 라이브러리에서 자동 읽기</td>
+          <td>날짜·위치 기반 자동 분류</td>
+        </tr>
+        <tr>
+          <td>GPS 좌표 및 사진 식별자 (사진에 포함된 위치 정보, 국내·해외 모두 포함)</td>
+          <td>사진 EXIF 데이터에서 추출</td>
+          <td>행정구역 기반 지역·여행 앨범 생성</td>
+        </tr>
+        <tr>
+          <td>얼굴 특징값(임베딩) — 사진 속 인물의 동일 여부 판별용 수치 데이터</td>
+          <td>기기 내 AI 모델로 자동 추출</td>
+          <td>같은 인물이 나온 사진끼리 자동 그룹핑</td>
+        </tr>
+        <tr>
+          <td>앱 사용 이벤트 (화면 조회 등), 익명 기기 식별자</td>
+          <td>Firebase SDK를 통해 자동 수집</td>
+          <td>서비스 이용 통계 분석, 앱 버전 안내</td>
+        </tr>
+        <tr>
+          <td>기기 정보 (기기 모델, OS 버전), 앱 버전, 언어 설정</td>
+          <td>기기 API를 통해 자동 수집</td>
+          <td>업데이트 안내, 오류 대응, 문의 처리</td>
+        </tr>
+        <tr>
+          <td>피드백 문의 내용 (이용자가 직접 작성한 텍스트)</td>
+          <td>이용자 직접 입력</td>
+          <td>문의·피드백 응대</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="highlight-box">
+      <p>앱은 이용자의 현재 위치(실시간 GPS)를 별도로 수집하지 않습니다. 사진에 이미 기록된 위치 정보만 사용합니다.</p>
+      <p>사진 분석(장면 인식, 얼굴 특징값 추출, 텍스트 인식, 동물 개체 판별)은 모두 기기 내(On-device)에서 처리되며, 사진 원본과 얼굴 특징값은 외부로 전송되지 않습니다.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">제2조</span> 개인정보의 이용 목적</h2>
+    <p>수집한 개인정보는 다음의 목적 이외에 사용하지 않습니다.</p>
+    <ul>
+      <li>사진을 날짜, 위치, 내용, 인물별로 자동 분류하여 앨범 생성</li>
+      <li>행정구역 단위 지역·여행 앨범 생성을 위한 주소 변환</li>
+      <li>앱 내 분석 결과 표시 및 사용자 경험 개선</li>
+      <li>서비스 이용 통계 분석 및 앱 안정성 개선</li>
+      <li>강제·권장 업데이트 여부 안내</li>
+      <li>이용자 문의 및 피드백 응대</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="num">제3조</span> 얼굴인식 관련 정보(민감정보)에 관한 특칙</h2>
+    <p>앱은 "비슷한 인물이 나온 사진끼리 모아주는" 기능을 위해 사진 속 얼굴의 특징값(임베딩)을 추출합니다. 이는 「개인정보 보호법」상 민감정보로 취급될 수 있는 정보로, 앱은 다음 원칙에 따라 이를 신중하게 처리합니다.</p>
+    <ul>
+      <li>얼굴 특징값 추출은 사진 라이브러리 접근을 허용한 이용자의 기기 내에서만 이루어지며, 외부 서버로 전송되거나 제3자에게 제공되지 않습니다.</li>
+      <li>추출된 특징값은 실명, 연락처 등 신원 정보와 연결되지 않으며, 이용자 본인의 기기를 벗어나지 않습니다.</li>
+      <li>이 처리는 사진을 인물별로 그룹핑하는 목적에 한정되며, 외부의 얼굴 데이터베이스와 대조하거나 특정 개인을 실제로 식별하는 데 사용되지 않습니다.</li>
+      <li>사진 라이브러리 접근 권한을 철회하시면 신규 얼굴 특징값 추출이 중단되며, 앱을 삭제하면 기기에 저장된 특징값도 함께 삭제됩니다.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="num">제4조</span> 개인정보의 처리위탁</h2>
+    <p>앱은 안정적인 서비스 제공을 위해 아래와 같이 개인정보 처리업무를 외부 업체에 위탁하고 있습니다. 위탁받은 업체는 위탁 목적 범위를 초과하여 개인정보를 이용하지 않습니다.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>수탁업체</th>
+          <th>위탁업무 내용</th>
+          <th>처리 항목</th>
+          <th>보유·이용 기간</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Google LLC<br><small>(Firebase Analytics / Installations / Remote Config)</small></td>
+          <td>앱 사용 통계 분석, 익명 설치 식별, 강제·권장 업데이트 여부 확인</td>
+          <td>익명 기기 식별자, 화면 조회 등 사용 이벤트, 앱 번들ID·버전, OS 버전</td>
+          <td>Google의 자체 정책에 따름 (개발자는 별도 보관하지 않음)</td>
+        </tr>
+        <tr>
+          <td>Vercel Inc.<br><small>(개발자가 직접 운영하는 서버리스 함수)</small></td>
+          <td>위치 기반 지역·여행 앨범명 생성을 위한 주소 변환(역지오코딩), 피드백 접수</td>
+          <td>사진의 GPS 좌표, 사진 로컬 식별자, 피드백 문의 내용, 앱버전·기기모델·OS버전·언어설정</td>
+          <td>주소 변환 요청: 처리 후 즉시 삭제(로그 미저장)<br>피드백 문의: 응대 완료 후 합리적인 기간 내 파기</td>
+        </tr>
+        <tr>
+          <td>Apple Inc.<br><small>(iOS 표준 위치 변환 API)</small></td>
+          <td>여행 앨범 클러스터링을 위한 보조적 주소 변환</td>
+          <td>사진의 GPS 좌표</td>
+          <td>Apple의 자체 정책에 따름</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="alert-box">
+      <p>위 업체로 전송되는 정보에는 사진 원본이나 얼굴 특징값이 포함되지 않습니다. Vercel 서버로 전송되는 주소 변환용 데이터는 처리 즉시 삭제되며 별도 저장되지 않습니다.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">제5조</span> 개인정보의 보유 및 이용 기간</h2>
+    <p>앱이 처리하는 데이터(앨범 정보, 분류 결과, 얼굴 특징값 등)는 모두 이용자의 기기 내에 저장됩니다. 앱을 삭제하면 앱이 생성한 모든 데이터가 함께 삭제됩니다. 외부 업체로 전송된 데이터의 보유 기간은 제4조를 따릅니다.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">제6조</span> 개인정보의 안전성 확보 조치</h2>
+    <ul>
+      <li>사진 원본 및 얼굴 특징값은 기기 밖으로 전송되지 않습니다.</li>
+      <li>외부 서버로의 모든 데이터 전송 시 HTTPS 암호화 통신을 사용합니다.</li>
+      <li>Vercel 서버는 주소 변환용으로 전송된 좌표를 별도로 저장하거나 로깅하지 않습니다.</li>
+      <li>사진 라이브러리 접근은 이용자가 명시적으로 허용한 경우에만 이루어집니다.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="num">제7조</span> 이용자의 권리</h2>
+    <p>이용자는 언제든지 다음의 권리를 행사할 수 있습니다.</p>
+    <ul>
+      <li><strong>접근 권한 철회:</strong> iOS 설정 → 개인 정보 보호 → 사진에서 모아의 접근 권한을 제한하거나 철회할 수 있습니다. 철회 시 얼굴 특징값 추출을 포함한 모든 사진 분석이 중단됩니다.</li>
+      <li><strong>데이터 삭제:</strong> 앱을 삭제하면 앱이 기기에 저장한 모든 데이터가 삭제됩니다.</li>
+      <li><strong>앱 사용 통계 수집 제한:</strong> iOS 설정에서 앱의 추적 관련 권한을 제한하여 분석 데이터 수집 범위를 줄일 수 있습니다.</li>
+      <li><strong>개인정보 열람·정정·삭제 요구:</strong> 아래 문의처를 통해 요청하실 수 있습니다.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="num">제8조</span> 만 14세 미만 아동의 개인정보</h2>
+    <p>앱은 만 14세 미만 아동을 대상으로 하지 않으며, 아동의 개인정보를 의도적으로 수집하지 않습니다.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">제9조</span> 개인정보처리방침의 변경</h2>
+    <p>본 방침은 법령 또는 서비스 변경에 따라 수정될 수 있습니다. 변경 시 앱 내 공지 또는 본 페이지를 통해 사전 안내합니다. 변경된 방침은 공지한 날로부터 7일 후 효력이 발생합니다.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">제10조</span> 개인정보 보호 책임자 및 문의</h2>
+    <p>개인정보 처리에 관한 문의 및 불만 사항은 아래로 연락 주시기 바랍니다.</p>
+    <ul>
+      <li><strong>이메일:</strong> <a href="mailto:baci.moa@gmail.com" style="color: var(--dusty-rose);">baci.moa@gmail.com</a></li>
+    </ul>
+    <p style="margin-top: 0.8rem;">개인정보 침해에 관한 신고나 상담은 아래 기관에 문의하실 수 있습니다.</p>
+    <ul>
+      <li>개인정보 침해신고센터: <a href="https://privacy.kisa.or.kr" style="color: var(--dusty-rose);">privacy.kisa.or.kr</a> (국번 없이 118)</li>
+      <li>개인정보 분쟁조정위원회: <a href="https://www.kopico.go.kr" style="color: var(--dusty-rose);">www.kopico.go.kr</a></li>
+      <li>대검찰청 사이버범죄수사단: <a href="https://www.spo.go.kr" style="color: var(--dusty-rose);">www.spo.go.kr</a> (국번 없이 1301)</li>
+      <li>경찰청 사이버안전국: <a href="https://cyberbureau.police.go.kr" style="color: var(--dusty-rose);">cyberbureau.police.go.kr</a> (국번 없이 182)</li>
+    </ul>
+  </section>
+</div>
+
+<footer>
+  © 2026 모아(moa). All rights reserved.
+</footer>
+
+</body>
+</html>

@@ -75,4 +75,8 @@ public final class ServiceFactory {
     public lazy var remoteConfigService: RemoteConfigService = {
         RemoteConfigService()
     }()
+
+    public lazy var keychainService: KeychainService = {
+        KeychainService()
+    }()
 }

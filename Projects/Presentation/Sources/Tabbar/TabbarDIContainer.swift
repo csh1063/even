@@ -44,9 +44,14 @@ public final class TabbarDIContainer {
             similarRepository: appDiContainer.similarRepository
         )
 
+        let legacyAccessUseCase = DefaultLegacyAccessUseCase(
+            repository: appDiContainer.legacyAccessRepository
+        )
+
         return TabbarViewModel(permissionUseCase: permissionUseCase,
                                analysisUseCase: analysisUseCase,
-                               autoAlbumUseCase: autoAlbumUseCase)
+                               autoAlbumUseCase: autoAlbumUseCase,
+                               legacyAccessUseCase: legacyAccessUseCase)
     }
 
     func makePhotoLibraryDIContainer() -> PhotoLibraryDIContainer {

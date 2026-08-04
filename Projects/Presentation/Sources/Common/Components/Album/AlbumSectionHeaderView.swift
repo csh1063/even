@@ -72,7 +72,7 @@ final class AlbumSectionHeaderView: UICollectionReusableView {
         case .category:
             self.moreButton.isHidden = true
         case .face:
-            self.moreButton.isHidden = true
+            self.moreButton.isHidden = itemCount < 20
         case .similar:
             self.moreButton.isHidden = false
         }

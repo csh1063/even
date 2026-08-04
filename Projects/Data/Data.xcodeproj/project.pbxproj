@@ -19,6 +19,7 @@
 		1A9938F2B9F9AD2825A0FC20 /* DefaultPhotoLabelDataRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76713B0DD0063DA264DCB484 /* DefaultPhotoLabelDataRepository.swift */; };
 		1F93F0012FE2FE74A4C4929A /* DefaultRemoteConfigRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE479F3785C45E481DE2590E /* DefaultRemoteConfigRepository.swift */; };
 		22AD151C6F8F526A63C49DF8 /* GeocoderService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34FC610C922DCAAD54F6B871 /* GeocoderService.swift */; };
+		2860537EF7A4CA2043066EE3 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29EF029A6B30807D731688F4 /* KeychainService.swift */; };
 		29F17D8FCC15815FBBF23885 /* DefaultGeoRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50473B34690C858CBCC7B415 /* DefaultGeoRepository.swift */; };
 		2DF16EC5265A8383C0309F99 /* AnimalEmbeddingEntityMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5F1B4F35516C5C0AD4BCD5A /* AnimalEmbeddingEntityMapper.swift */; };
 		3068D91FD14FA050FD91EED0 /* FirebaseInstallations.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C63ADF891990358F76F14D0 /* FirebaseInstallations.framework */; };
@@ -61,6 +62,7 @@
 		A552074A128ED62C06929541 /* FaceClusterService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B5878ED03189279E50B0AC1 /* FaceClusterService.swift */; };
 		A5F7FA77057667FD75E8EA0F /* DefaultFaceClusterRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A31A4B6A99AA268BBD96B2 /* DefaultFaceClusterRepository.swift */; };
 		A8E0F6DBCA9288D401563451 /* AlbumEntityMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16740A9D26F7F47AE40CEDE9 /* AlbumEntityMapper.swift */; };
+		A995103C204EDD7A55F4D2C4 /* DefaultLegacyAccessRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEAA1AC6205E4DF7B7D79D6F /* DefaultLegacyAccessRepository.swift */; };
 		AA60DCAB95710FCA4B263E78 /* AnimalClusterBlacklistEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F0055783E23C6E049DD0832 /* AnimalClusterBlacklistEntity.swift */; };
 		AD69ED776BF945A29DC4CBC1 /* PhotoAnalysisService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A17E0B5CA585E3F519C606 /* PhotoAnalysisService.swift */; };
 		AD861DF5503B4403B94CBB97 /* GeoJsonAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59ACAB8AA8E582CA0A62794 /* GeoJsonAPI.swift */; };
@@ -113,6 +115,7 @@
 		1D6BD6C0BFFB08B0574D32AF /* PhotoCategoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCategoryService.swift; sourceTree = "<group>"; };
 		1E0A1E65D202F027E3B90C53 /* PhotoLabelEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLabelEntity.swift; sourceTree = "<group>"; };
 		22D00CECFC40ACA66E15A488 /* UserDefaultsKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsKey.swift; sourceTree = "<group>"; };
+		29EF029A6B30807D731688F4 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		34FC610C922DCAAD54F6B871 /* GeocoderService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeocoderService.swift; sourceTree = "<group>"; };
 		35D810417D088186C5EF9D88 /* AlbumEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumEntity.swift; sourceTree = "<group>"; };
 		391D9EF4E53B02B4BB2BD961 /* NetworkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkService.swift; sourceTree = "<group>"; };
@@ -185,6 +188,7 @@
 		FAC6018B2D57F22AA80B35CA /* SimilarPhotoClusterService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimilarPhotoClusterService.swift; sourceTree = "<group>"; };
 		FCB794BCBB1B82FF5F9C0096 /* AnimalClusterService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimalClusterService.swift; sourceTree = "<group>"; };
 		FE479F3785C45E481DE2590E /* DefaultRemoteConfigRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultRemoteConfigRepository.swift; sourceTree = "<group>"; };
+		FEAA1AC6205E4DF7B7D79D6F /* DefaultLegacyAccessRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultLegacyAccessRepository.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -259,6 +263,7 @@
 				E1A31A4B6A99AA268BBD96B2 /* DefaultFaceClusterRepository.swift */,
 				50473B34690C858CBCC7B415 /* DefaultGeoRepository.swift */,
 				02AE428C933DAFD8543626EC /* DefaultHomeZoneRepository.swift */,
+				FEAA1AC6205E4DF7B7D79D6F /* DefaultLegacyAccessRepository.swift */,
 				C5BB43C3502E1F2522A1D3BC /* DefaultPermissionRepository.swift */,
 				C189B2600E5ECFA19EE3FD77 /* DefaultPhotoAnalysisRepository.swift */,
 				8DCBF7BE06BF66575482FBC4 /* DefaultPhotoCategoryRepository.swift */,
@@ -346,6 +351,7 @@
 				6B5878ED03189279E50B0AC1 /* FaceClusterService.swift */,
 				D3A9CB6FBE22EC2BCAA1BE04 /* FaceEmbeddingService.swift */,
 				34FC610C922DCAAD54F6B871 /* GeocoderService.swift */,
+				29EF029A6B30807D731688F4 /* KeychainService.swift */,
 				391D9EF4E53B02B4BB2BD961 /* NetworkService.swift */,
 				5070A6753C1BF6C98B7913FC /* PermissionService.swift */,
 				96A17E0B5CA585E3F519C606 /* PhotoAnalysisService.swift */,
@@ -503,6 +509,7 @@
 				A5F7FA77057667FD75E8EA0F /* DefaultFaceClusterRepository.swift in Sources */,
 				29F17D8FCC15815FBBF23885 /* DefaultGeoRepository.swift in Sources */,
 				3F55D2829D9763E62DB98826 /* DefaultHomeZoneRepository.swift in Sources */,
+				A995103C204EDD7A55F4D2C4 /* DefaultLegacyAccessRepository.swift in Sources */,
 				6142DF9D868EAF2589BF32B6 /* DefaultPermissionRepository.swift in Sources */,
 				43B044BA23904FB3BCE5C9BA /* DefaultPhotoAnalysisRepository.swift in Sources */,
 				33779191300038A12B9D3191 /* DefaultPhotoCategoryRepository.swift in Sources */,
@@ -521,6 +528,7 @@
 				A552074A128ED62C06929541 /* FaceClusterService.swift in Sources */,
 				F91C00E001945080C3CA6F31 /* FaceEmbeddingService.swift in Sources */,
 				22AD151C6F8F526A63C49DF8 /* GeocoderService.swift in Sources */,
+				2860537EF7A4CA2043066EE3 /* KeychainService.swift in Sources */,
 				F7AAE1ACF10F7F8ECF7A6538 /* NetworkService.swift in Sources */,
 				B5A3754A0C97B4B4F6603D4F /* PermissionService.swift in Sources */,
 				AD69ED776BF945A29DC4CBC1 /* PhotoAnalysisService.swift in Sources */,

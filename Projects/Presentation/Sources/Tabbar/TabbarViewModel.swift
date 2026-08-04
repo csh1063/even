@@ -64,15 +64,18 @@ public final class TabbarViewModel: BaseViewModel {
     private let permissionUseCase: PermissionUseCase
     private let analysisUseCase: PhotoAnalysisUseCase
     private let autoAlbumUseCase: AutoAlbumUseCase
+    private let legacyAccessUseCase: LegacyAccessUseCase
 
     private var cancellables = Set<AnyCancellable>()
 
     init(permissionUseCase: PermissionUseCase,
          analysisUseCase: PhotoAnalysisUseCase,
-         autoAlbumUseCase: AutoAlbumUseCase) {
+         autoAlbumUseCase: AutoAlbumUseCase,
+         legacyAccessUseCase: LegacyAccessUseCase) {
         self.permissionUseCase = permissionUseCase
         self.analysisUseCase = analysisUseCase
         self.autoAlbumUseCase = autoAlbumUseCase
+        self.legacyAccessUseCase = legacyAccessUseCase
 
         super.init()
 
@@ -249,6 +252,7 @@ public final class TabbarViewModel: BaseViewModel {
             }
             self.progressRatio = 1.0
             self.photoCompletedSubject.send(())
+            try? await legacyAccessUseCase.markLegacyFreeAccess()
 
             await runAlbumGeneration()
         } catch {

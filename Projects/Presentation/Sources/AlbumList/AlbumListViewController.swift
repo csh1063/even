@@ -305,13 +305,13 @@ final class AlbumListViewController: BaseViewController {
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
         let groupSize = NSCollectionLayoutSize(
-            widthDimension: .absolute(80),
+            widthDimension: .fractionalWidth(1.0),
             heightDimension: .absolute(96)
         )
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
 
         let section = NSCollectionLayoutSection(group: group)
-        section.orthogonalScrollingBehavior = .continuous
+//        section.orthogonalScrollingBehavior = .continuous
         section.interGroupSpacing = 16
         section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 28, trailing: 20)
         return section
