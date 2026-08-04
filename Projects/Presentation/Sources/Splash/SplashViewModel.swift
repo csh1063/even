@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 import Combine
 import Domain
 
@@ -29,11 +30,13 @@ public final class SplashViewModel: BaseViewModel {
     private let animDoneSubject = PassthroughSubject<Void, Never>()
 
     private let useCase: PhotoCheckUseCase
+    private let versionCheckUseCase: AppVersionCheckUseCase
 
     private var cancellables = Set<AnyCancellable>()
 
-    public init(useCase: PhotoCheckUseCase) {
+    public init(useCase: PhotoCheckUseCase, versionCheckUseCase: AppVersionCheckUseCase) {
         self.useCase = useCase
+        self.versionCheckUseCase = versionCheckUseCase
 
         super.init()
 
@@ -70,10 +73,58 @@ public final class SplashViewModel: BaseViewModel {
     private func handle(_ input: Input) async {
         switch input {
         case .appear:
-            await self.checkDeletedPhoto()
+            await self.checkVersion()
         case .endAnim:
             self.animDoneSubject.send()
         }
+    }
+
+    private func checkVersion() async {
+        switch await versionCheckUseCase.check() {
+        case .forceUpdate:
+            showForceUpdateAlert()
+        case .recommendUpdate:
+            showRecommendUpdateAlert()
+        case .upToDate:
+            await self.checkDeletedPhoto()
+        }
+    }
+
+    private func showForceUpdateAlert() {
+        showAlert(
+            title: String(localized: "업데이트 필요", bundle: .module),
+            message: String(localized: "새로운 버전으로 업데이트해야 계속 이용할 수 있어요.", bundle: .module),
+            buttons: [
+                AlertButtonConfig(title: String(localized: "종료", bundle: .module), style: .destructive) {
+                    exit(0)
+                },
+                AlertButtonConfig(title: String(localized: "업데이트", bundle: .module), style: .default) {
+                    self.openAppStore()
+                }
+            ]
+        )
+    }
+
+    private func showRecommendUpdateAlert() {
+        showAlert(
+            title: String(localized: "업데이트 안내", bundle: .module),
+            message: String(localized: "새로운 버전이 있어요. 업데이트하시겠어요?", bundle: .module),
+            buttons: [
+                AlertButtonConfig(title: String(localized: "나중에", bundle: .module), style: .cancel) {
+                    Task {
+                        await self.checkDeletedPhoto()
+                    }
+                },
+                AlertButtonConfig(title: String(localized: "업데이트", bundle: .module), style: .default) {
+                    self.openAppStore()
+                }
+            ]
+        )
+    }
+
+    private func openAppStore() {
+        guard let url = URL(string: AppStoreInfo.urlString) else { return }
+        UIApplication.shared.open(url)
     }
 
     private func checkDeletedPhoto() async {

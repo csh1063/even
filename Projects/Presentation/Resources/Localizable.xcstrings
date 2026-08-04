@@ -1072,19 +1072,19 @@
         }
       }
     },
-    "분석하지 않은 사진을 분석해요.\\n분석 시작할까요?" : {
+    "iCloud에서 분석 용 사이즈를 받기 위해\\n데이터가 소모되요.\\nWi-Fi에서 진행하는 걸 권장해요.\\n분석 시작할까요?" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Analyze the photos that haven't been analyzed yet.\\nStart analysis?"
+            "value" : "Downloading analysis-sized images from iCloud\\ncan use data.\\nWe recommend doing this on Wi-Fi.\\nStart analysis?"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "분석하지 않은 사진을 분석해요.\\n분석 시작할까요?"
+            "value" : "iCloud에서 분석 용 사이즈를 받기 위해\\n데이터가 소모되요.\\nWi-Fi에서 진행하는 걸 권장해요.\\n분석 시작할까요?"
           }
         }
       }

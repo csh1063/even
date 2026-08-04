@@ -71,4 +71,8 @@ public final class ServiceFactory {
     public lazy var similarService: SimilarPhotoClusterService = {
         SimilarPhotoClusterService()
     }()
+
+    public lazy var remoteConfigService: RemoteConfigService = {
+        RemoteConfigService()
+    }()
 }

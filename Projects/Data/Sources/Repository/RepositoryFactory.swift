@@ -94,4 +94,8 @@ public final class RepositoryFactory {
     public lazy var similarRepository: SimilarPhotoClusterRepository = {
         DefaultSimilarPhotoClusterRepository(container: container)
     }()
+
+    public lazy var remoteConfigRepository: RemoteConfigRepository = {
+        DefaultRemoteConfigRepository(service: serviceFactory.remoteConfigService)
+    }()
 }

@@ -124,7 +124,7 @@ public final class TabbarViewModel: BaseViewModel {
         case .analysis:
             showAlert(
                 title: String(localized: "사진 분석", bundle: .module),
-                message: String(localized: "분석하지 않은 사진을 분석해요.\n분석 시작할까요?", bundle: .module),
+                message: String(localized: "iCloud에서 분석 용 사이즈를 받기 위해\n데이터가 소모되요.\nWi-Fi에서 진행하는 걸 권장해요.\n분석 시작할까요?", bundle: .module),
                 buttons: [
                     AlertButtonConfig(title: String(localized: "취소", bundle: .module), style: .cancel, action: nil),
                     AlertButtonConfig(title: String(localized: "분석하기", bundle: .module), style: .default) { [weak self] in

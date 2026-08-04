@@ -17,6 +17,7 @@ extension Project {
             module: module,
             product: .app,
             bundleId: bundleId,// + ".\(module.name)",
+            destinations: [.iPhone],
             dependencies: dependencies,
             resources: resources,
             coreDataModels: coreDataModels)
@@ -42,6 +43,7 @@ extension Project {
         product: Product,
         bundleId: String,
         schemes: [Scheme] = [],
+        destinations: Destinations = .iOS,
         dependencies: [TargetDependency] = [],
         resources: ProjectDescription.ResourceFileElements? = nil,
         coreDataModels: [CoreDataModel] = []) -> Project {
@@ -58,6 +60,7 @@ extension Project {
                         module: module,
                         product: product,
                         bundleId: bundleId,
+                        destinations: destinations,
                         sources: ["Sources/**"],
                         resources: resources,
                         dependencies: dependencies,
@@ -81,6 +84,7 @@ extension Project {
         module: Module,
         product: Product,
         bundleId: String,
+        destinations: Destinations = .iOS,
         sources: SourceFilesList?,
         resources: ProjectDescription.ResourceFileElements? = nil,
         dependencies: [TargetDependency] = [],
@@ -88,7 +92,7 @@ extension Project {
 
             return .target(
                 name: module.name,
-                destinations: .iOS,
+                destinations: destinations,
                 product: product,
                 productName: product == .app ? module.name:nil,
                 bundleId: bundleId,
@@ -113,6 +117,7 @@ public extension TargetDependency {
     static let snapKit: TargetDependency         = .external(name: "SnapKit")
     static let firebaseCore: TargetDependency = .external(name: "FirebaseCore")
     static let firebaseAnalytics: TargetDependency = .external(name: "FirebaseAnalytics")
+    static let firebaseInstallations: TargetDependency = .external(name: "FirebaseInstallations")
 //    "FirebaseAuth": .framework,
 //    "FirebaseFirestore": .framework,
 //    "FirebaseFirestoreInternal": .framework,

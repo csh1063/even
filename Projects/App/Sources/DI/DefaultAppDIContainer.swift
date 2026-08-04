@@ -77,6 +77,10 @@ final class DefaultAppDIContainer: AppDIContainer {
         repositoryFactory.similarRepository
     }
 
+    var remoteConfigRepository: RemoteConfigRepository {
+        repositoryFactory.remoteConfigRepository
+    }
+
     private let providerFactory: ProviderFactory
     private lazy var executor: NetworkExecutor = {
         DefaultNetworkExecutor(providerFactory: providerFactory)
@@ -111,8 +115,15 @@ final class DefaultAppDIContainer: AppDIContainer {
         )
     }
 
+    func makeAppVersionCheckUseCase() -> AppVersionCheckUseCase {
+        DefaultAppVersionCheckUseCase(repository: remoteConfigRepository)
+    }
+
     func makeSplashViewModel() -> SplashViewModel {
-        SplashViewModel(useCase: makePhotoCheckUseCase())
+        SplashViewModel(
+            useCase: makePhotoCheckUseCase(),
+            versionCheckUseCase: makeAppVersionCheckUseCase()
+        )
     }
 
     func makeMainUseCase() {

@@ -20,6 +20,7 @@
 		23256B68288713C6BC4F8131 /* PhotoDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1355A1C80E58E5B706A8A94 /* PhotoDetail.swift */; };
 		28F9FEDC1737DF3A5293471B /* PhotoImageUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E022A18D48AE56CC19E3227 /* PhotoImageUseCase.swift */; };
 		2F6FD0A39E99DF4562479CEA /* FeaturePrintError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17AFAC4EA9E727ECF94BCFF6 /* FeaturePrintError.swift */; };
+		313C2C847B6E9E655A9B36A9 /* AppVersionCheckUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212EC395A2A5E67F89B7A386 /* AppVersionCheckUseCase.swift */; };
 		41CE5AF87EC51A4CAC05D152 /* PhotoAnalysisUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37FB8C508EC691855A938CFE /* PhotoAnalysisUseCase.swift */; };
 		425A627FD92E23079A69D073 /* AlbumUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8759FD13117F56AB59B133A4 /* AlbumUseCase.swift */; };
 		42E7C324C80031BB3F220867 /* NetworkError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33907658513B727A288D1CD3 /* NetworkError.swift */; };
@@ -34,6 +35,7 @@
 		6B218BF80805B485ECDEF27E /* PhotoCategoryRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EE8DBB298A173634556F6AC /* PhotoCategoryRepository.swift */; };
 		7D784D78AC5AF2A1469AB0E5 /* SettingsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 003B6396063BDDC21BFCA7F5 /* SettingsRepository.swift */; };
 		7F016300FAB47DC484558752 /* PhotoLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F409F1CF133B20CEC77CD1CB /* PhotoLocation.swift */; };
+		88F390F8BA6E89C7F949BA48 /* AppVersionStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = E660B9B80B847A8A4025B4BE /* AppVersionStatus.swift */; };
 		89B116F69496103FA351FB6A /* PhotoLabelUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA0ABF39B6AA13A0CCF1D02 /* PhotoLabelUseCase.swift */; };
 		8B104383DEAD1B0406DB1051 /* MyPageUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62A4711A7C08A7C98E2ECBDD /* MyPageUseCase.swift */; };
 		94022A570883891C94A3946C /* DebugLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E34550D276D44CCF2FD6C50 /* DebugLog.swift */; };
@@ -41,10 +43,12 @@
 		9971C69879CDBB150B3EE196 /* AlbumRepositoryError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F019754B300A8A9CAC5FBF9 /* AlbumRepositoryError.swift */; };
 		9BEC08FD45D080F55F380CFE /* AlbumRule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13B370540F74BEBD1B93B8B0 /* AlbumRule.swift */; };
 		9FF0AD43BB95F92CAB504CE3 /* AlbumAsset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ACFFA051A424785FD3A6953 /* AlbumAsset.swift */; };
+		A44330D9A212E412BAD3ED0E /* AppVersionPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7307C5233DB3BD7CBA3ACC5E /* AppVersionPolicy.swift */; };
 		A7F5EF99D29D1D4545590351 /* AnimalClusterRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2658E4FE91F6AC3791B2BEAF /* AnimalClusterRepository.swift */; };
 		A8DA2D60CCA77601209BD409 /* PhotoLibararyRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A1A054299145447B23B4DFA /* PhotoLibararyRepository.swift */; };
 		AEC975C1A979925A96498CE2 /* PermissionRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55D803B604D52134B00E3AB /* PermissionRepository.swift */; };
 		B19AA657A1045498CA40B5EE /* FaceClusterRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23D883D0E476A53A4957EF2D /* FaceClusterRepository.swift */; };
+		B34DF1FD71D2FC6984E41505 /* RemoteConfigRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C1845C433D10BEC92E61107 /* RemoteConfigRepository.swift */; };
 		B3AB78E693C84D21D02D7BFB /* Album.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C2A536EEEC26797464F5D4 /* Album.swift */; };
 		B5400DE2CF879DE2D0CB097B /* PhotoAnalysisRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = E254DA4A96027924005958BD /* PhotoAnalysisRepository.swift */; };
 		C160D2CDE1935203362D6E7B /* TravelAlbumNaming.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8463652A39A5D1B60C28F95 /* TravelAlbumNaming.swift */; };
@@ -86,6 +90,7 @@
 		1A738BCE2F1F1AEF9C6F0BB0 /* PhotoDataRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDataRepository.swift; sourceTree = "<group>"; };
 		1FBDB9057ABC5A6E261F9D7D /* FaceClusterSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceClusterSummary.swift; sourceTree = "<group>"; };
 		2128D078372FA40317ABAE86 /* AlbumMergeCandidate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumMergeCandidate.swift; sourceTree = "<group>"; };
+		212EC395A2A5E67F89B7A386 /* AppVersionCheckUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppVersionCheckUseCase.swift; sourceTree = "<group>"; };
 		214DE82FF09DA12FCF005DBB /* ImageData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageData.swift; sourceTree = "<group>"; };
 		23D883D0E476A53A4957EF2D /* FaceClusterRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceClusterRepository.swift; sourceTree = "<group>"; };
 		250EDCE08C02FC00DEAE8B3F /* PermissionUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionUseCase.swift; sourceTree = "<group>"; };
@@ -105,6 +110,7 @@
 		5FF4A18168F8A507A25B0229 /* AlbumDetailUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumDetailUseCase.swift; sourceTree = "<group>"; };
 		62A4711A7C08A7C98E2ECBDD /* MyPageUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPageUseCase.swift; sourceTree = "<group>"; };
 		6A1A054299145447B23B4DFA /* PhotoLibararyRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibararyRepository.swift; sourceTree = "<group>"; };
+		7307C5233DB3BD7CBA3ACC5E /* AppVersionPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppVersionPolicy.swift; sourceTree = "<group>"; };
 		75B2098F06894D2923C4E7A6 /* FeedbackUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackUseCase.swift; sourceTree = "<group>"; };
 		83E826C4E1DBF8E45A131604 /* ProgressState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressState.swift; sourceTree = "<group>"; };
 		8759FD13117F56AB59B133A4 /* AlbumUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumUseCase.swift; sourceTree = "<group>"; };
@@ -113,6 +119,7 @@
 		92359EE8267C945504EE1A21 /* PhotoInAlbum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoInAlbum.swift; sourceTree = "<group>"; };
 		96B4A983E5D6D2C19D2C1FE9 /* AnimalEmbedding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimalEmbedding.swift; sourceTree = "<group>"; };
 		9C02BDD361E5779EE7A12E9A /* ProgressAnalysis.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressAnalysis.swift; sourceTree = "<group>"; };
+		9C1845C433D10BEC92E61107 /* RemoteConfigRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteConfigRepository.swift; sourceTree = "<group>"; };
 		A55D803B604D52134B00E3AB /* PermissionRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionRepository.swift; sourceTree = "<group>"; };
 		A6BE7CC91C7946F2CCC13A49 /* PhotoLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLabel.swift; sourceTree = "<group>"; };
 		A8463652A39A5D1B60C28F95 /* TravelAlbumNaming.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TravelAlbumNaming.swift; sourceTree = "<group>"; };
@@ -130,6 +137,7 @@
 		E0E18CDA8B21CDEBF0C4F521 /* TravelDetectionRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TravelDetectionRepository.swift; sourceTree = "<group>"; };
 		E254DA4A96027924005958BD /* PhotoAnalysisRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoAnalysisRepository.swift; sourceTree = "<group>"; };
 		E51FE95C693D88FAE7A47588 /* UserDefaultRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultRepository.swift; sourceTree = "<group>"; };
+		E660B9B80B847A8A4025B4BE /* AppVersionStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppVersionStatus.swift; sourceTree = "<group>"; };
 		EE635D5CCFBD1A9AFFA8FAE6 /* PhotoCheckUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCheckUseCase.swift; sourceTree = "<group>"; };
 		EF4338B120DAA681FD44C489 /* PhotoLabelDataRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLabelDataRepository.swift; sourceTree = "<group>"; };
 		F409F1CF133B20CEC77CD1CB /* PhotoLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLocation.swift; sourceTree = "<group>"; };
@@ -170,6 +178,7 @@
 				1A738BCE2F1F1AEF9C6F0BB0 /* PhotoDataRepository.swift */,
 				EF4338B120DAA681FD44C489 /* PhotoLabelDataRepository.swift */,
 				6A1A054299145447B23B4DFA /* PhotoLibararyRepository.swift */,
+				9C1845C433D10BEC92E61107 /* RemoteConfigRepository.swift */,
 				003B6396063BDDC21BFCA7F5 /* SettingsRepository.swift */,
 				C9E15907DD7F317F451ED48D /* SimilarPhotoClusterRepository.swift */,
 				E0E18CDA8B21CDEBF0C4F521 /* TravelDetectionRepository.swift */,
@@ -202,6 +211,7 @@
 			children = (
 				5FF4A18168F8A507A25B0229 /* AlbumDetailUseCase.swift */,
 				8759FD13117F56AB59B133A4 /* AlbumUseCase.swift */,
+				212EC395A2A5E67F89B7A386 /* AppVersionCheckUseCase.swift */,
 				58A5920CFCFF37D613BE5F82 /* AutoAlbumUseCase.swift */,
 				75B2098F06894D2923C4E7A6 /* FeedbackUseCase.swift */,
 				09A33B7C4A0B983E17875B32 /* ImageViewerUseCase.swift */,
@@ -261,6 +271,8 @@
 				2F019754B300A8A9CAC5FBF9 /* AlbumRepositoryError.swift */,
 				13B370540F74BEBD1B93B8B0 /* AlbumRule.swift */,
 				96B4A983E5D6D2C19D2C1FE9 /* AnimalEmbedding.swift */,
+				7307C5233DB3BD7CBA3ACC5E /* AppVersionPolicy.swift */,
+				E660B9B80B847A8A4025B4BE /* AppVersionStatus.swift */,
 				2B76C60E9F11C4731974592C /* ClusterableEmbedding.swift */,
 				1FBDB9057ABC5A6E261F9D7D /* FaceClusterSummary.swift */,
 				FAFDF63AB574BAE0BE5B1ED8 /* FaceEmbedding.swift */,
@@ -360,6 +372,7 @@
 				1D32E7B4A891C68E824A1F11 /* PhotoDataRepository.swift in Sources */,
 				44005A011991E8A60BFEC6D6 /* PhotoLabelDataRepository.swift in Sources */,
 				A8DA2D60CCA77601209BD409 /* PhotoLibararyRepository.swift in Sources */,
+				B34DF1FD71D2FC6984E41505 /* RemoteConfigRepository.swift in Sources */,
 				7D784D78AC5AF2A1469AB0E5 /* SettingsRepository.swift in Sources */,
 				1CCF8EAE1F1C275EAD683CA1 /* SimilarPhotoClusterRepository.swift in Sources */,
 				06927B8690784A8F914A451A /* TravelDetectionRepository.swift in Sources */,
@@ -370,6 +383,8 @@
 				9971C69879CDBB150B3EE196 /* AlbumRepositoryError.swift in Sources */,
 				9BEC08FD45D080F55F380CFE /* AlbumRule.swift in Sources */,
 				F9EC8AD9C1AA297E0CBB0257 /* AnimalEmbedding.swift in Sources */,
+				A44330D9A212E412BAD3ED0E /* AppVersionPolicy.swift in Sources */,
+				88F390F8BA6E89C7F949BA48 /* AppVersionStatus.swift in Sources */,
 				5E8381A8B52E0ED5F62CBBD4 /* ClusterableEmbedding.swift in Sources */,
 				EE8E3C08C879D3EB3C6CAF6F /* FaceClusterSummary.swift in Sources */,
 				0E5CC7580811D6AC8F4A2A01 /* FaceEmbedding.swift in Sources */,
@@ -390,6 +405,7 @@
 				9877FD3084F434335C76EDBF /* TravelCluster.swift in Sources */,
 				133D151C2A9665F56525336E /* AlbumDetailUseCase.swift in Sources */,
 				425A627FD92E23079A69D073 /* AlbumUseCase.swift in Sources */,
+				313C2C847B6E9E655A9B36A9 /* AppVersionCheckUseCase.swift in Sources */,
 				FD08AFA98171E3BA250B86F4 /* AutoAlbumUseCase.swift in Sources */,
 				CFC0C894E6061039CB64D6A1 /* FeedbackUseCase.swift in Sources */,
 				559CD9D0A8548778FC2CAE14 /* ImageViewerUseCase.swift in Sources */,

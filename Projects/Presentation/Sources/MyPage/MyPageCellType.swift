@@ -97,6 +97,7 @@ enum MyPageCellType {
     case displayMode
     case feedback
     case version
+    case versionString
 
     case labels
     case test
@@ -123,6 +124,7 @@ enum MyPageCellType {
         case .displayMode: return "circle.lefthalf.filled.inverse"
         case .feedback: return "questionmark.circle"
         case .version: return "info.circle"
+        case .versionString: return "info.circle"
         case .labels: return "testtube.2"
         case .test: return "testtube.2"
         case .addressCount: return "testtube.2"
@@ -150,6 +152,7 @@ enum MyPageCellType {
         case .displayMode: return String(localized: "디스플레이 모드", bundle: .module)
         case .feedback: return String(localized: "문의 / 피드백", bundle: .module)
         case .version: return String(localized: "앱 버전", bundle: .module)
+        case .versionString: return String(localized: "앱 버전", bundle: .module)
         case .labels: return "사진 라벨 목록"
         case .test: return "연구소"
         case .addressCount: return "주소별 사진 수"
@@ -170,7 +173,7 @@ enum MyPageCellType {
             return .info
         case .analysis, .reset, .displayMode, .reAutoAlbum:
             return .button
-        case .locationAnalysis, .locationAutoAlbum:
+        case .locationAnalysis, .locationAutoAlbum, .versionString:
             return .info
         case .autoAnalysis, .continueLocation:
             return .toggle

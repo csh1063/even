@@ -17,9 +17,11 @@
 		113EC0295E5F35367F42DFB8 /* ProviderFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF420FD928A623DCD3CA5C99 /* ProviderFactory.swift */; };
 		1989135D2D6A2C2BA17A6B60 /* PhotoAssetEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1818CB29A1914B6416E20D3E /* PhotoAssetEntity.swift */; };
 		1A9938F2B9F9AD2825A0FC20 /* DefaultPhotoLabelDataRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76713B0DD0063DA264DCB484 /* DefaultPhotoLabelDataRepository.swift */; };
+		1F93F0012FE2FE74A4C4929A /* DefaultRemoteConfigRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE479F3785C45E481DE2590E /* DefaultRemoteConfigRepository.swift */; };
 		22AD151C6F8F526A63C49DF8 /* GeocoderService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34FC610C922DCAAD54F6B871 /* GeocoderService.swift */; };
 		29F17D8FCC15815FBBF23885 /* DefaultGeoRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50473B34690C858CBCC7B415 /* DefaultGeoRepository.swift */; };
 		2DF16EC5265A8383C0309F99 /* AnimalEmbeddingEntityMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5F1B4F35516C5C0AD4BCD5A /* AnimalEmbeddingEntityMapper.swift */; };
+		3068D91FD14FA050FD91EED0 /* FirebaseInstallations.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C63ADF891990358F76F14D0 /* FirebaseInstallations.framework */; };
 		320013F9F72DEA3296B89DFA /* ClusteringEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74F1C7C65D58641DC3861826 /* ClusteringEngine.swift */; };
 		33779191300038A12B9D3191 /* DefaultPhotoCategoryRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DCBF7BE06BF66575482FBC4 /* DefaultPhotoCategoryRepository.swift */; };
 		36394FAD34C4126494F89E32 /* MoaSchemaMigrationPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45B50EA33B6D758ECC5CAE94 /* MoaSchemaMigrationPlan.swift */; };
@@ -47,6 +49,7 @@
 		7BFC8F8D9EB52F550573BFEA /* ClusterEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DDC5E52CD491D7F26A8BAA0 /* ClusterEntity.swift */; };
 		7FB70958E7BF4019A5C80763 /* MoyaLoggingPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D08035744E740B19598B050 /* MoyaLoggingPlugin.swift */; };
 		859CF157EAE3D69D8D32CAAE /* BaseAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BC6624C7821755E8B610FA7 /* BaseAPI.swift */; };
+		85B3D503536F1ECDB337D698 /* FirebaseCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E3D3393DC12A40D40B2F8A24 /* FirebaseCore.framework */; };
 		88C3254258A9147BB32522D0 /* BaseProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9E50197DB829A87EBA37CC8 /* BaseProvider.swift */; };
 		8FEFDFB6A3E14CB6A276BC77 /* PhotoLabelEntityMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 950F4B56299547FDB2A684CF /* PhotoLabelEntityMapper.swift */; };
 		901ACA7B98089AB702ADA830 /* Domain.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06FAA1459D11CCE724C34195 /* Domain.framework */; };
@@ -79,6 +82,7 @@
 		EF7D8C7F5A4854DD5EE71F7D /* DefaultSimilarPhotoClusterRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 128368EC009916124428DD3C /* DefaultSimilarPhotoClusterRepository.swift */; };
 		F074A0B6E299B688A708BF0F /* PhotoEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5100ECC54324143D15048B08 /* PhotoEntity.swift */; };
 		F372CC7DBE5FFD28516D8AB7 /* UserDefaultsKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22D00CECFC40ACA66E15A488 /* UserDefaultsKey.swift */; };
+		F714E6051A80ADF0CF49C7A9 /* RemoteConfigService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E8EF953CC3787BDF03C44B /* RemoteConfigService.swift */; };
 		F7AAE1ACF10F7F8ECF7A6538 /* NetworkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 391D9EF4E53B02B4BB2BD961 /* NetworkService.swift */; };
 		F91C00E001945080C3CA6F31 /* FaceEmbeddingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A9CB6FBE22EC2BCAA1BE04 /* FaceEmbeddingService.swift */; };
 		F97E0C9E0E0CD6C91291FDB2 /* FaceEmbeddingEntityMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A8E34AB8A55E9239D4DDC0 /* FaceEmbeddingEntityMapper.swift */; };
@@ -116,6 +120,7 @@
 		459DC6E74B0FFED9987F1B4B /* MoaSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoaSchema.swift; sourceTree = "<group>"; };
 		45B50EA33B6D758ECC5CAE94 /* MoaSchemaMigrationPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoaSchemaMigrationPlan.swift; sourceTree = "<group>"; };
 		4BC6624C7821755E8B610FA7 /* BaseAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseAPI.swift; sourceTree = "<group>"; };
+		4C63ADF891990358F76F14D0 /* FirebaseInstallations.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FirebaseInstallations.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4D1CCABEC1645F0152B5B6D4 /* UserDefaultsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsService.swift; sourceTree = "<group>"; };
 		4D23287CAC9A15F1CD81389D /* PhotoModelMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoModelMapper.swift; sourceTree = "<group>"; };
 		4E75197C294DE74F5162FAA7 /* Data.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Data.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -157,6 +162,7 @@
 		AD8063F1308ED5DAF4F79715 /* PhotoCategoriesRule.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = PhotoCategoriesRule.json; sourceTree = "<group>"; };
 		AE89F7482442DA1D567520B0 /* SettingAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingAPI.swift; sourceTree = "<group>"; };
 		B2319C2201DBC66BAC5D1358 /* FeedbackParam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackParam.swift; sourceTree = "<group>"; };
+		B9E8EF953CC3787BDF03C44B /* RemoteConfigService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteConfigService.swift; sourceTree = "<group>"; };
 		BA755235187FDC8A07A62C3C /* ServerType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerType.swift; sourceTree = "<group>"; };
 		BF420FD928A623DCD3CA5C99 /* ProviderFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderFactory.swift; sourceTree = "<group>"; };
 		C189B2600E5ECFA19EE3FD77 /* DefaultPhotoAnalysisRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultPhotoAnalysisRepository.swift; sourceTree = "<group>"; };
@@ -172,11 +178,13 @@
 		E33F6688B6A751C4C72CD11E /* PhotoEntityMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoEntityMapper.swift; sourceTree = "<group>"; };
 		E38D43CEE696BFEF020903BE /* Moya.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Moya.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E3B2A9DF9F6AA3BD597B2930 /* AnimalReID_DINOv2.mlpackage */ = {isa = PBXFileReference; path = AnimalReID_DINOv2.mlpackage; sourceTree = "<group>"; };
+		E3D3393DC12A40D40B2F8A24 /* FirebaseCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FirebaseCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E5344C50DA80E761F09B49D0 /* ClusterBlacklistEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusterBlacklistEntity.swift; sourceTree = "<group>"; };
 		E59ACAB8AA8E582CA0A62794 /* GeoJsonAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeoJsonAPI.swift; sourceTree = "<group>"; };
 		FA2C733233FE6C2AD8240B99 /* BaseDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseDTO.swift; sourceTree = "<group>"; };
 		FAC6018B2D57F22AA80B35CA /* SimilarPhotoClusterService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimilarPhotoClusterService.swift; sourceTree = "<group>"; };
 		FCB794BCBB1B82FF5F9C0096 /* AnimalClusterService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimalClusterService.swift; sourceTree = "<group>"; };
+		FE479F3785C45E481DE2590E /* DefaultRemoteConfigRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultRemoteConfigRepository.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -186,6 +194,8 @@
 			files = (
 				5EA569B0768E5AD816A9A987 /* CombineMoya.framework in Frameworks */,
 				901ACA7B98089AB702ADA830 /* Domain.framework in Frameworks */,
+				85B3D503536F1ECDB337D698 /* FirebaseCore.framework in Frameworks */,
+				3068D91FD14FA050FD91EED0 /* FirebaseInstallations.framework in Frameworks */,
 				01309DA478AC22159D054601 /* Moya.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -199,6 +209,8 @@
 				742288D39DB3A440246920F5 /* CombineMoya.framework */,
 				4E75197C294DE74F5162FAA7 /* Data.framework */,
 				06FAA1459D11CCE724C34195 /* Domain.framework */,
+				E3D3393DC12A40D40B2F8A24 /* FirebaseCore.framework */,
+				4C63ADF891990358F76F14D0 /* FirebaseInstallations.framework */,
 				E38D43CEE696BFEF020903BE /* Moya.framework */,
 			);
 			name = Products;
@@ -253,6 +265,7 @@
 				6276A561BC623AC921892190 /* DefaultPhotoDataRepository.swift */,
 				76713B0DD0063DA264DCB484 /* DefaultPhotoLabelDataRepository.swift */,
 				C6A8AB3F6B0730FFBB675B3D /* DefaultPhotoLibararyRepository.swift */,
+				FE479F3785C45E481DE2590E /* DefaultRemoteConfigRepository.swift */,
 				C87D3DC59E24DD0DF2B3F452 /* DefaultSettingsRepository.swift */,
 				128368EC009916124428DD3C /* DefaultSimilarPhotoClusterRepository.swift */,
 				74C0ACB764FFF7C6658FB239 /* DefaultTravelDetectionRepository.swift */,
@@ -338,6 +351,7 @@
 				96A17E0B5CA585E3F519C606 /* PhotoAnalysisService.swift */,
 				1D6BD6C0BFFB08B0574D32AF /* PhotoCategoryService.swift */,
 				69864E8955090C5B3C4E7CF2 /* PhotoLibararyService.swift */,
+				B9E8EF953CC3787BDF03C44B /* RemoteConfigService.swift */,
 				90F6C7ACBF6ED2FAD561E78D /* ServiceFactory.swift */,
 				FAC6018B2D57F22AA80B35CA /* SimilarPhotoClusterService.swift */,
 				4D1CCABEC1645F0152B5B6D4 /* UserDefaultsService.swift */,
@@ -495,6 +509,7 @@
 				67B51411B975AD891A559CDE /* DefaultPhotoDataRepository.swift in Sources */,
 				1A9938F2B9F9AD2825A0FC20 /* DefaultPhotoLabelDataRepository.swift in Sources */,
 				9213BC1672F5ED20BE34BFAC /* DefaultPhotoLibararyRepository.swift in Sources */,
+				1F93F0012FE2FE74A4C4929A /* DefaultRemoteConfigRepository.swift in Sources */,
 				599CC5CF9769EC145EBCCBA9 /* DefaultSettingsRepository.swift in Sources */,
 				EF7D8C7F5A4854DD5EE71F7D /* DefaultSimilarPhotoClusterRepository.swift in Sources */,
 				BB71F86F30B41768151215F2 /* DefaultTravelDetectionRepository.swift in Sources */,
@@ -511,6 +526,7 @@
 				AD69ED776BF945A29DC4CBC1 /* PhotoAnalysisService.swift in Sources */,
 				96A50F032D49210391F99B80 /* PhotoCategoryService.swift in Sources */,
 				C5E3901016A28982EE6D8EC0 /* PhotoLibararyService.swift in Sources */,
+				F714E6051A80ADF0CF49C7A9 /* RemoteConfigService.swift in Sources */,
 				63D44D51A5150AE02FB8D98E /* ServiceFactory.swift in Sources */,
 				0E3CFA737ED1D1EDB6FD7C0B /* SimilarPhotoClusterService.swift in Sources */,
 				565C1DBED68ECA6870BD0038 /* UserDefaultsService.swift in Sources */,
@@ -542,6 +558,20 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../../Tuist/.build/checkouts/GoogleUtilities",
+					"$(SRCROOT)/../../Tuist/.build/checkouts/GoogleUtilities/GoogleUtilities/Environment/Public",
+					"$(SRCROOT)/../../Tuist/.build/checkouts/GoogleUtilities/GoogleUtilities/Logger/Public",
+					"$(SRCROOT)/../../Tuist/.build/checkouts/GoogleUtilities/GoogleUtilities/NSData+zlib/Public",
+					"$(SRCROOT)/../../Tuist/.build/checkouts/GoogleUtilities/GoogleUtilities/UserDefaults/Public",
+					"$(SRCROOT)/../../Tuist/.build/checkouts/GoogleUtilities/third_party/IsAppEncrypted/Public",
+					"$(SRCROOT)/../../Tuist/.build/checkouts/firebase-ios-sdk",
+					"$(SRCROOT)/../../Tuist/.build/checkouts/firebase-ios-sdk/CoreOnly/Sources",
+					"$(SRCROOT)/../../Tuist/.build/checkouts/firebase-ios-sdk/FirebaseCore/Sources/Public",
+					"$(SRCROOT)/../../Tuist/.build/checkouts/firebase-ios-sdk/FirebaseInstallations/Source/Library/Public",
+					"$(SRCROOT)/../../Tuist/.build/checkouts/promises/Sources/FBLPromises/include",
+				);
 				INFOPLIST_FILE = "Derived/InfoPlists/Data-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -549,6 +579,39 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
+				);
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/checkouts/firebase-ios-sdk/CoreOnly/Sources/module.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/checkouts/promises/Sources/FBLPromises/include/module.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/tuist-derived/FirebaseCore/FirebaseCore.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/tuist-derived/FirebaseInstallations/FirebaseInstallations.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/tuist-derived/GoogleUtilities_Environment/GoogleUtilities_Environment.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/tuist-derived/GoogleUtilities_Logger/GoogleUtilities_Logger.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/tuist-derived/GoogleUtilities_NSData/GoogleUtilities_NSData.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/tuist-derived/GoogleUtilities_UserDefaults/GoogleUtilities_UserDefaults.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/tuist-derived/third_party_IsAppEncrypted/third_party_IsAppEncrypted.modulemap",
+				);
+				OTHER_SWIFT_FLAGS = (
+					"$(inherited)",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/checkouts/firebase-ios-sdk/CoreOnly/Sources/module.modulemap",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/checkouts/promises/Sources/FBLPromises/include/module.modulemap",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/tuist-derived/FirebaseCore/FirebaseCore.modulemap",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/tuist-derived/FirebaseInstallations/FirebaseInstallations.modulemap",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/tuist-derived/GoogleUtilities_Environment/GoogleUtilities_Environment.modulemap",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/tuist-derived/GoogleUtilities_Logger/GoogleUtilities_Logger.modulemap",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/tuist-derived/GoogleUtilities_NSData/GoogleUtilities_NSData.modulemap",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/tuist-derived/GoogleUtilities_UserDefaults/GoogleUtilities_UserDefaults.modulemap",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/tuist-derived/third_party_IsAppEncrypted/third_party_IsAppEncrypted.modulemap",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.baci.moa.Data;
 				PRODUCT_NAME = Data;
@@ -579,6 +642,20 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../../Tuist/.build/checkouts/GoogleUtilities",
+					"$(SRCROOT)/../../Tuist/.build/checkouts/GoogleUtilities/GoogleUtilities/Environment/Public",
+					"$(SRCROOT)/../../Tuist/.build/checkouts/GoogleUtilities/GoogleUtilities/Logger/Public",
+					"$(SRCROOT)/../../Tuist/.build/checkouts/GoogleUtilities/GoogleUtilities/NSData+zlib/Public",
+					"$(SRCROOT)/../../Tuist/.build/checkouts/GoogleUtilities/GoogleUtilities/UserDefaults/Public",
+					"$(SRCROOT)/../../Tuist/.build/checkouts/GoogleUtilities/third_party/IsAppEncrypted/Public",
+					"$(SRCROOT)/../../Tuist/.build/checkouts/firebase-ios-sdk",
+					"$(SRCROOT)/../../Tuist/.build/checkouts/firebase-ios-sdk/CoreOnly/Sources",
+					"$(SRCROOT)/../../Tuist/.build/checkouts/firebase-ios-sdk/FirebaseCore/Sources/Public",
+					"$(SRCROOT)/../../Tuist/.build/checkouts/firebase-ios-sdk/FirebaseInstallations/Source/Library/Public",
+					"$(SRCROOT)/../../Tuist/.build/checkouts/promises/Sources/FBLPromises/include",
+				);
 				INFOPLIST_FILE = "Derived/InfoPlists/Data-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -586,6 +663,39 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
+				);
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/checkouts/firebase-ios-sdk/CoreOnly/Sources/module.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/checkouts/promises/Sources/FBLPromises/include/module.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/tuist-derived/FirebaseCore/FirebaseCore.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/tuist-derived/FirebaseInstallations/FirebaseInstallations.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/tuist-derived/GoogleUtilities_Environment/GoogleUtilities_Environment.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/tuist-derived/GoogleUtilities_Logger/GoogleUtilities_Logger.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/tuist-derived/GoogleUtilities_NSData/GoogleUtilities_NSData.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/tuist-derived/GoogleUtilities_UserDefaults/GoogleUtilities_UserDefaults.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/tuist-derived/third_party_IsAppEncrypted/third_party_IsAppEncrypted.modulemap",
+				);
+				OTHER_SWIFT_FLAGS = (
+					"$(inherited)",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/checkouts/firebase-ios-sdk/CoreOnly/Sources/module.modulemap",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/checkouts/promises/Sources/FBLPromises/include/module.modulemap",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/tuist-derived/FirebaseCore/FirebaseCore.modulemap",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/tuist-derived/FirebaseInstallations/FirebaseInstallations.modulemap",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/tuist-derived/GoogleUtilities_Environment/GoogleUtilities_Environment.modulemap",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/tuist-derived/GoogleUtilities_Logger/GoogleUtilities_Logger.modulemap",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/tuist-derived/GoogleUtilities_NSData/GoogleUtilities_NSData.modulemap",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/tuist-derived/GoogleUtilities_UserDefaults/GoogleUtilities_UserDefaults.modulemap",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../../Tuist/.build/tuist-derived/third_party_IsAppEncrypted/third_party_IsAppEncrypted.modulemap",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.baci.moa.Data;
 				PRODUCT_NAME = Data;

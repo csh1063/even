@@ -32,8 +32,16 @@ public class DefaultPhotoCheckUseCase: PhotoCheckUseCase {
             Task {
                 do {
 
-                    let libraryIds = Set(try await photoLibraryRepository.fetchPhotos().photos.map {$0.localIdentifier})
                     let photoCount = try photoDataRepository.fetchPhotoCount()
+                    guard photoCount > 0 else {
+                        // 로컬에 저장된 분석 이력이 없으면(최초 실행) 비교할 대상이 없어
+                        // 삭제된 사진을 체크할 필요 자체가 없다 — 사진첩 접근(권한 팝업)도 불필요.
+                        continuation.yield(.completed)
+                        continuation.finish()
+                        return
+                    }
+
+                    let libraryIds = Set(try await photoLibraryRepository.fetchPhotos().photos.map {$0.localIdentifier})
                     let countPerPage = 1000
                     let maxPage = Double(photoCount) / Double(countPerPage)
 

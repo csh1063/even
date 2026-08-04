@@ -112,8 +112,7 @@ final class MyPageViewModel: BaseViewModel {
                     ]
                 )
             case .version:
-                let appID = "6797488415"
-                if let url = URL(string: "https://apps.apple.com/app/id\(appID)") {
+                if let url = URL(string: AppStoreInfo.urlString) {
                     await UIApplication.shared.open(url)
                 }
             case .displayMode:
@@ -234,7 +233,7 @@ final class MyPageViewModel: BaseViewModel {
             MyCellHeader(name: String(localized: "앱 설정", bundle: .module), order: 50): [
                 MyCellData(type: .displayMode, value: displayMode),
                 MyCellData(type: .feedback),
-                MyCellData(type: .version, value: version)
+                MyCellData(type: .versionString, value: version)
             ]
         ]
         

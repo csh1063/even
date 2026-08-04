@@ -27,6 +27,7 @@ public protocol AppDIContainer {
     var faceClusterRepository: FaceClusterRepository {get}
     var animalClusterRepository: AnimalClusterRepository {get}
     var similarRepository: SimilarPhotoClusterRepository {get}
+    var remoteConfigRepository: RemoteConfigRepository {get}
 
     func makeSplashViewModel() -> SplashViewModel
 }

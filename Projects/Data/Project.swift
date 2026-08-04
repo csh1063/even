@@ -3,7 +3,7 @@ import ProjectDescriptionHelpers
 
 let project = Project.framework(module: Module.data,
                                 dependencies: [Module.domain.project]
-                                + [.moya, .combineMoya],
+                                + [.moya, .combineMoya, .firebaseCore, .firebaseInstallations],
                                 resources: [
                                     .glob(pattern: "Resources/**", excluding: [
                                         "Resources/AdaFace_IR50.mlpackage/**",
