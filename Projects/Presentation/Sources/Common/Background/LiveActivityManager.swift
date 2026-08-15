@@ -21,6 +21,11 @@ public final class LiveActivityManager {
 
     private var activity: Activity<PhotoAnalysisActivityAttributes>?
 
+    // 화면(진행률 바 2개)은 그대로 두고, Live Activity에서만 사진 분석+앨범 생성을 하나의 0~100%로 합쳐 보여준다.
+    // 사진 분석(Vision/CoreML/지오코딩)이 앨범 생성(로컬 DB 작업)보다 훨씬 오래 걸리는 걸 감안한 가중치.
+    private static let photoWeight: Double = 0.7
+    private static let albumWeight: Double = 0.3
+
     public func start() {
         guard activity == nil else { return }
 
@@ -47,6 +52,12 @@ public final class LiveActivityManager {
     public func update(progress: Double) async {
         guard let activity else { return }
         await activity.update(.init(state: .init(progress: progress), staleDate: nil))
+    }
+
+    /// 사진 분석 진행률(photoRatio)과 앨범 생성 진행률(albumRatio, 아직 시작 전이면 0)을 가중합해서
+    /// 하나의 0~100%로 갱신한다.
+    public func updateCombined(photoRatio: Double, albumRatio: Double) async {
+        await update(progress: photoRatio * Self.photoWeight + albumRatio * Self.albumWeight)
     }
 
     public func end() async {

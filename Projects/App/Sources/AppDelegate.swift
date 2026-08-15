@@ -33,7 +33,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             geoRepository: diContainer.geoRepository,
             userDefaultRepository: diContainer.userDefaultRepository
         )
-        BackgroundProcessingScheduler.shared.configure(analysisUseCase: analysisUseCase)
+        let autoAlbumUseCase = DefaultAutoAlbumUseCase(
+            photoDataRepository: diContainer.photoDataRepository,
+            albumDataRepository: diContainer.albumDataRepository,
+            photoCategoryRepository: diContainer.photoCategoryRepository,
+            userDefaultRepository: diContainer.userDefaultRepository,
+            travelRepository: diContainer.travelRepository,
+            homeZoneRepository: diContainer.homeZoneRepository,
+            faceClusterRepository: diContainer.faceClusterRepository,
+            animalClusterRepository: diContainer.animalClusterRepository,
+            similarRepository: diContainer.similarRepository
+        )
+        let legacyAccessUseCase = DefaultLegacyAccessUseCase(
+            repository: diContainer.legacyAccessRepository
+        )
+        BackgroundProcessingScheduler.shared.configure(
+            analysisUseCase: analysisUseCase,
+            autoAlbumUseCase: autoAlbumUseCase,
+            legacyAccessUseCase: legacyAccessUseCase
+        )
         BackgroundProcessingScheduler.shared.register()
 
         return true

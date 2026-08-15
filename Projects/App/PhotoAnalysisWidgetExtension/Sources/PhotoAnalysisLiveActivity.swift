@@ -20,8 +20,7 @@ struct PhotoAnalysisLiveActivity: Widget {
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    Image(systemName: "photo.stack")
-                        .foregroundStyle(.white)
+                    LogoImage(size: 24, forceLight: true)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
                     Text("\(Int(context.state.progress * 100))%")
@@ -33,13 +32,34 @@ struct PhotoAnalysisLiveActivity: Widget {
                         .tint(.white)
                 }
             } compactLeading: {
-                Image(systemName: "photo.stack")
+                LogoImage(size: 20, forceLight: true)
             } compactTrailing: {
                 Text("\(Int(context.state.progress * 100))%")
                     .font(.caption2)
             } minimal: {
-                Image(systemName: "photo.stack")
+                LogoImage(size: 20, forceLight: true)
             }
+        }
+    }
+}
+
+private struct LogoImage: View {
+    let size: CGFloat
+    // 다이나믹 아일랜드는 항상 검정 배경이라, 크림색 배경의 라이트 버전이 또렷하게 보인다.
+    // 다크 버전(배경이 거의 검정)을 쓰면 아일랜드 배경에 묻혀 경계가 안 보인다.
+    var forceLight: Bool = false
+
+    var body: some View {
+        let image = Image("AppLogo")
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(width: size, height: size)
+            .clipShape(RoundedRectangle(cornerRadius: size * 0.22))
+
+        if forceLight {
+            image.environment(\.colorScheme, .light)
+        } else {
+            image
         }
     }
 }
@@ -50,7 +70,7 @@ private struct LockScreenView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
-                Image(systemName: "photo.stack")
+                LogoImage(size: 24)
                 Text("사진 분석 중")
                     .font(.headline)
                 Spacer()

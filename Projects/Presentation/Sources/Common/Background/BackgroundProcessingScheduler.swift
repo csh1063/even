@@ -21,9 +21,17 @@ public final class BackgroundProcessingScheduler {
     public static let taskIdentifier = "com.moa.photoAnalysis"
 
     private var analysisUseCase: PhotoAnalysisUseCase?
+    private var autoAlbumUseCase: AutoAlbumUseCase?
+    private var legacyAccessUseCase: LegacyAccessUseCase?
 
-    public func configure(analysisUseCase: PhotoAnalysisUseCase) {
+    public func configure(
+        analysisUseCase: PhotoAnalysisUseCase,
+        autoAlbumUseCase: AutoAlbumUseCase,
+        legacyAccessUseCase: LegacyAccessUseCase
+    ) {
         self.analysisUseCase = analysisUseCase
+        self.autoAlbumUseCase = autoAlbumUseCase
+        self.legacyAccessUseCase = legacyAccessUseCase
     }
 
     /// AppDelegate의 didFinishLaunchingWithOptions에서 앱이 완전히 launch를 끝내기 전에 호출돼야 한다.
@@ -49,7 +57,7 @@ public final class BackgroundProcessingScheduler {
     }
 
     private func handle(_ task: BGProcessingTask) {
-        guard let analysisUseCase else {
+        guard let analysisUseCase, let autoAlbumUseCase else {
             task.setTaskCompleted(success: false)
             return
         }
@@ -67,11 +75,20 @@ public final class BackgroundProcessingScheduler {
                 for try await progress in analysisUseCase.analysis() {
                     try Task.checkCancellation()
                     if case .progress(let ratio) = progress.state {
-                        await LiveActivityManager.shared.update(progress: ratio)
+                        await LiveActivityManager.shared.updateCombined(photoRatio: ratio, albumRatio: 0)
                     }
                 }
 
+                try? await legacyAccessUseCase?.markLegacyFreeAccess()
                 try? await analysisUseCase.markAnalysisFinished()
+
+                // 사진 분석과 마찬가지로 앨범 생성도 화면 없이 이어서 끝낸다 — 그래야 Live Activity가
+                // "분석 끝, 앨범 생성 전"의 애매한 상태로 멈춰있지 않고 진짜 100%까지 간다.
+                for try await albumProgress in autoAlbumUseCase.generateAllAlbums(fullRegenerate: false) {
+                    try Task.checkCancellation()
+                    await LiveActivityManager.shared.updateCombined(photoRatio: 1.0, albumRatio: albumProgress.ratio)
+                }
+
                 await LiveActivityManager.shared.end()
                 task.setTaskCompleted(success: true)
                 AnalysisCompletionNotifier.notify()

@@ -11,6 +11,7 @@ let widgetExtensionTarget = Target.target(
     deploymentTargets: .iOS(Project.iosVersion),
     infoPlist: .file(path: "PhotoAnalysisWidgetExtension/Info.plist"),
     sources: ["PhotoAnalysisWidgetExtension/Sources/**"],
+    resources: ["PhotoAnalysisWidgetExtension/Resources/**"],
     dependencies: [
         Module.photoAnalysisActivity.project,
         .sdk(name: "WidgetKit", type: .framework),

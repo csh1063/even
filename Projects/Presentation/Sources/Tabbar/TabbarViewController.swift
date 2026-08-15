@@ -43,9 +43,9 @@ final class TabbarViewController: CustomTabBarController {
 //        self.setLayoutMargin(height: 68,
 //                             margin: .init(leading: 0, trailing: 0, bottom: 0),
 //                             padding: .init(leading: 12, trailing: 12))
-        
-        self.setLayoutMargin(height: 56,
-                             margin: .init(leading: 80, trailing: 80, bottom: 4),
+        self.setAlign(.center)
+        self.setLayoutMargin(height: 56, itemWidth: 80,
+                             margin: .init(bottom: 4),
                              padding: .zero, cornerRadius: 28)
 
         self.setShadow(color: .black, alpha: 0.1, x: 0, y: 4, blur: 16)

@@ -291,7 +291,7 @@ public final class TabbarViewModel: BaseViewModel {
                 switch progress.state {
                 case .progress(let ratio):
                     self.progressRatio = ratio
-                    await LiveActivityManager.shared.update(progress: ratio)
+                    await LiveActivityManager.shared.updateCombined(photoRatio: ratio, albumRatio: 0)
                 case .completed:
                     self.progressRatio = 1.0
                 case .unavailable:
@@ -302,8 +302,8 @@ public final class TabbarViewModel: BaseViewModel {
             self.photoCompletedSubject.send(())
             try? await legacyAccessUseCase.markLegacyFreeAccess()
             try? await analysisUseCase.markAnalysisFinished()
-            await LiveActivityManager.shared.end()
 
+            // Live Activity는 여기서 끝내지 않는다 — 앨범 생성까지 마쳐야 진짜 100%다.
             await runAlbumGeneration()
             AnalysisCompletionNotifier.notifyIfBackgrounded()
         } catch is CancellationError {
@@ -332,17 +332,20 @@ public final class TabbarViewModel: BaseViewModel {
         do {
             for try await progress in autoAlbumUseCase.generateAllAlbums(fullRegenerate: fullRegenerate) {
                 self.autoAlbumProgressRatio = progress.ratio
+                await LiveActivityManager.shared.updateCombined(photoRatio: self.progressRatio, albumRatio: progress.ratio)
                 if case .completed = progress.step {
                     self.autoAlbumProgressRatio = 1.0
                     self.isComplete = true
                     self.albumCompletedSubject.send(())
                     self.endAllProcess()
+                    await LiveActivityManager.shared.end()
                 }
             }
         } catch {
             self.autoAlbumProgressRatio = 1.0
             self.isComplete = true
             self.albumCompletedSubject.send(())
+            await LiveActivityManager.shared.end()
         }
     }
 
