@@ -280,6 +280,7 @@ public final class TabbarViewModel: BaseViewModel {
         self.isAnalyzing = true
         try? await analysisUseCase.markAnalysisStarted()
         AnalysisCompletionNotifier.requestAuthorizationIfNeeded()
+        LiveActivityManager.shared.start()
 
         let startedAt = Date()
         debugLog("⏱️ [분석] 시작: \(startedAt)")
@@ -290,6 +291,7 @@ public final class TabbarViewModel: BaseViewModel {
                 switch progress.state {
                 case .progress(let ratio):
                     self.progressRatio = ratio
+                    await LiveActivityManager.shared.update(progress: ratio)
                 case .completed:
                     self.progressRatio = 1.0
                 case .unavailable:
@@ -300,15 +302,18 @@ public final class TabbarViewModel: BaseViewModel {
             self.photoCompletedSubject.send(())
             try? await legacyAccessUseCase.markLegacyFreeAccess()
             try? await analysisUseCase.markAnalysisFinished()
+            await LiveActivityManager.shared.end()
 
             await runAlbumGeneration()
             AnalysisCompletionNotifier.notifyIfBackgrounded()
         } catch is CancellationError {
             // 백그라운드 유예시간 만료로 인한 정상적인 중단 — "완료"로 위장하지 않는다.
             // analysisInProgress 플래그는 true로 남겨두어 다음 포그라운드 복귀 시 자동 재개된다.
+            // Live Activity는 끝내지 않고 마지막 진행률에서 멈춰있게 둔다 — BGProcessingTask가 이어서 갱신한다.
             debugLog("⏸️ [분석] 백그라운드 만료로 중단 — 다음 포그라운드 복귀 시 자동 재개 예정")
         } catch {
             try? await analysisUseCase.markAnalysisFinished()
+            await LiveActivityManager.shared.end()
             self.progressRatio = 1.0
             self.autoAlbumProgressRatio = 1.0
             self.photoCompletedSubject.send(())

@@ -62,11 +62,17 @@ public final class BackgroundProcessingScheduler {
                     return
                 }
 
-                for try await _ in analysisUseCase.analysis() {
+                LiveActivityManager.shared.start()
+
+                for try await progress in analysisUseCase.analysis() {
                     try Task.checkCancellation()
+                    if case .progress(let ratio) = progress.state {
+                        await LiveActivityManager.shared.update(progress: ratio)
+                    }
                 }
 
                 try? await analysisUseCase.markAnalysisFinished()
+                await LiveActivityManager.shared.end()
                 task.setTaskCompleted(success: true)
                 AnalysisCompletionNotifier.notify()
             } catch {

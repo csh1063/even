@@ -25,6 +25,13 @@ final class PhotoCell: UICollectionViewCell {
         v.isHidden = true
         return v
     }()
+    
+    private let checkCoverView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .clear
+        view.isHidden = true
+        return view
+    }()
 
     private let checkView: UIView = {
         let v = UIView()
@@ -32,7 +39,7 @@ final class PhotoCell: UICollectionViewCell {
         v.layer.borderWidth = 2
         v.layer.borderColor = UIColor.white.cgColor
         v.backgroundColor = .clear
-        v.isHidden = true
+//        v.isHidden = true
         return v
     }()
 
@@ -84,7 +91,8 @@ final class PhotoCell: UICollectionViewCell {
         coverView.addSubview(noImageView)
         coverView.addSubview(mainImageView)
         coverView.addSubview(dimView)
-        coverView.addSubview(checkView)
+        coverView.addSubview(checkCoverView)
+        checkCoverView.addSubview(checkView)
         checkView.addSubview(checkImageView)
 
         coverView.snp.makeConstraints { make in make.edges.equalToSuperview() }
@@ -92,9 +100,12 @@ final class PhotoCell: UICollectionViewCell {
         noImageView.snp.makeConstraints { make in make.edges.equalToSuperview() }
         dimView.snp.makeConstraints { make in make.edges.equalToSuperview() }
 
+        checkCoverView.snp.makeConstraints { make in
+            make.top.trailing.equalToSuperview()
+        }
+        
         checkView.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(8)
-            make.trailing.equalToSuperview().inset(8)
+            make.edges.equalToSuperview().inset(8)
             make.width.height.equalTo(22)
         }
         checkImageView.snp.makeConstraints { make in
@@ -149,7 +160,7 @@ final class PhotoCell: UICollectionViewCell {
     // MARK: - Selection Mode
 
     func setSelectionMode(_ enabled: Bool) {
-        checkView.isHidden = !enabled
+        checkCoverView.isHidden = !enabled
         if !enabled {
             dimView.isHidden = true
             checkView.backgroundColor = .clear

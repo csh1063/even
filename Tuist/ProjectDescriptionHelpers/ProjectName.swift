@@ -11,6 +11,9 @@ public enum Module {
 
     // Design|UI|View
     case presentation
+
+    // 앱 <-> Live Activity 위젯 익스텐션이 공유하는 ActivityAttributes만 담는 초경량 모듈
+    case photoAnalysisActivity
 }
 
 extension Module {
@@ -24,6 +27,8 @@ extension Module {
             return "Domain"
         case .presentation:
             return "Presentation"
+        case .photoAnalysisActivity:
+            return "PhotoAnalysisActivity"
         }
     }
 

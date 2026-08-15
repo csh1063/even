@@ -35,6 +35,8 @@
 	<string>모아가 사진을 분석해 비슷한 사진, 인물, 여행 앨범으로 자동 정리해드려요.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>모아가 사진을 분석해 비슷한 사진, 인물, 여행 앨범으로 자동 정리해드려요.</string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>processing</string>

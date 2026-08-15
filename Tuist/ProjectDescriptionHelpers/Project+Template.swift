@@ -2,16 +2,17 @@ import ProjectDescription
 
 extension Project {
 
-    static let bundleId = "com.baci.moa"
-    static let iosVersion = "17.0"
-    static let developmentTeam = "6P4X6KH3P8"
+    public static let bundleId = "com.baci.moa"
+    public static let iosVersion = "17.0"
+    public static let developmentTeam = "6P4X6KH3P8"
 
     /// Helper function to create the Project for this ExampleApp
     public static func app(
         module: Module,
         dependencies: [TargetDependency] = [],
         resources: ProjectDescription.ResourceFileElements? = nil,
-        coreDataModels: [CoreDataModel] = []
+        coreDataModels: [CoreDataModel] = [],
+        extraTargets: [Target] = []
     ) -> Project {
         return makeProject(
             module: module,
@@ -20,7 +21,8 @@ extension Project {
             destinations: [.iPhone],
             dependencies: dependencies,
             resources: resources,
-            coreDataModels: coreDataModels)
+            coreDataModels: coreDataModels,
+            extraTargets: extraTargets)
     }
 
     public static func framework(module: Module,
@@ -46,7 +48,8 @@ extension Project {
         destinations: Destinations = .iOS,
         dependencies: [TargetDependency] = [],
         resources: ProjectDescription.ResourceFileElements? = nil,
-        coreDataModels: [CoreDataModel] = []) -> Project {
+        coreDataModels: [CoreDataModel] = [],
+        extraTargets: [Target] = []) -> Project {
             return Project(
                 name: module.name,
                 organizationName: "sanghyeon",
@@ -66,6 +69,7 @@ extension Project {
                         dependencies: dependencies,
                         coreDataModels: coreDataModels
                     )
+                ] + extraTargets + [
 //                    makeTarget(
 //                        name: "\(name)Tests",
 //                        product: .unitTests,

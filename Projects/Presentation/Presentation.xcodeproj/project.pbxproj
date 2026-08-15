@@ -78,11 +78,13 @@
 		69D039CFB7779BCF9D8D7D75 /* AnalyticsTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = E80ABCE343B8363B4B538628 /* AnalyticsTracker.swift */; };
 		6B21C00E402B89F04AC73A81 /* Extension_UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D42EEB1F9EB444EE42BCE28 /* Extension_UIImage.swift */; };
 		6DFE320F438EC6EADEAB239B /* NaviBarType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C18C417DC62917A6F8651BD /* NaviBarType.swift */; };
+		6E57FA7A7EAB2C6A873D11FC /* LiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C2EC041D3304BE6C522946A /* LiveActivityManager.swift */; };
 		7157D7BA625AF2649C9DD85A /* TravelerManagementSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D8FC4DDF2869B6DD2972EB1 /* TravelerManagementSheet.swift */; };
 		7289EFA4AFBD4C70FB862366 /* MyCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B17589FEE05ACDB5C24C1C19 /* MyCell.swift */; };
 		729B91FE44EF04E9EE610439 /* PhotoTestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89F76F166FDFEB0A004CE633 /* PhotoTestViewController.swift */; };
 		7632150ABEB9375FDDCCBF16 /* MyPageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3248007A1FE0B50132ED59EF /* MyPageCell.swift */; };
 		7763F0F5E130F3AA0217FC38 /* OnboardingPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F08E0812978BD2A3D1F61243 /* OnboardingPage.swift */; };
+		7AE0893C06C895CA49E17BA8 /* PhotoAnalysisActivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73BC39F6F3E567F47200A0AD /* PhotoAnalysisActivity.framework */; };
 		7B895DB10E84114CF303C8C5 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AE4EF10D324D138285AD48 /* LoadingView.swift */; };
 		7B8F2384F42C2803F7E26622 /* Extension_UITextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDC7E8CD06B312A92C2C3101 /* Extension_UITextField.swift */; };
 		7C0145556EBC1873AEB15550 /* AlbumMergeSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1065263FBE2A09504C7A2E3 /* AlbumMergeSheet.swift */; };
@@ -216,6 +218,7 @@
 		28674A9D914882E666DFF00E /* Extension_UIStackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension_UIStackView.swift; sourceTree = "<group>"; };
 		292D99FE10DAFB52CFAE73E0 /* FaceCellViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceCellViewModel.swift; sourceTree = "<group>"; };
 		2C1A7F457AF7CAC51AE3C6AB /* UIGestureRecognizer+Publisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIGestureRecognizer+Publisher.swift"; sourceTree = "<group>"; };
+		2C2EC041D3304BE6C522946A /* LiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManager.swift; sourceTree = "<group>"; };
 		2CAA8E278CF92B6C39831515 /* MyPageViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPageViewModel.swift; sourceTree = "<group>"; };
 		2D6906C48650682D5C704866 /* LeftAlignedFlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeftAlignedFlowLayout.swift; sourceTree = "<group>"; };
 		2FFB624763D30D54B86908DE /* FeedbackViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackViewController.swift; sourceTree = "<group>"; };
@@ -263,6 +266,7 @@
 		6E2CABAF8819D021ACBB6B23 /* HomeDIContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeDIContainer.swift; sourceTree = "<group>"; };
 		719A054EFAF30746BAE3782E /* Extension_UIColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension_UIColor.swift; sourceTree = "<group>"; };
 		72E455F4A6CBD1CA35864310 /* AlbumListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumListViewModel.swift; sourceTree = "<group>"; };
+		73BC39F6F3E567F47200A0AD /* PhotoAnalysisActivity.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PhotoAnalysisActivity.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		73D037E2C431D0650FE179B1 /* PhotoTestCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoTestCoordinator.swift; sourceTree = "<group>"; };
 		74FC4682D8878C658BA091EF /* TravelPhotoGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TravelPhotoGridView.swift; sourceTree = "<group>"; };
 		75D92F5115DB359614C13635 /* AlbumViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumViewModel.swift; sourceTree = "<group>"; };
@@ -363,6 +367,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9A38F45616541E23B2BD7536 /* Domain.framework in Frameworks */,
+				7AE0893C06C895CA49E17BA8 /* PhotoAnalysisActivity.framework in Frameworks */,
 				550A378C83436838E543D472 /* SnapKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -484,6 +489,7 @@
 				356C28677B4F63103A41C55A /* AnalysisCompletionNotifier.swift */,
 				D8E74CDCB7B6883C0C530066 /* BackgroundProcessingScheduler.swift */,
 				B5551AD05E571D4EE666FD3B /* BackgroundTaskManager.swift */,
+				2C2EC041D3304BE6C522946A /* LiveActivityManager.swift */,
 			);
 			path = Background;
 			sourceTree = "<group>";
@@ -900,6 +906,7 @@
 			isa = PBXGroup;
 			children = (
 				82F0720D9B464CF8F3E51AD1 /* Domain.framework */,
+				73BC39F6F3E567F47200A0AD /* PhotoAnalysisActivity.framework */,
 				342AE4EAEE40294F0A26F2B8 /* Presentation.framework */,
 				CEB9EB9C6C13C8F825E27E73 /* SnapKit.framework */,
 			);
@@ -1045,6 +1052,7 @@
 				D3EE4875939368402F1C02E8 /* AnalysisCompletionNotifier.swift in Sources */,
 				FBB48E259D22753E64E379AC /* BackgroundProcessingScheduler.swift in Sources */,
 				4CCCB092638B574AD0D86A3F /* BackgroundTaskManager.swift in Sources */,
+				6E57FA7A7EAB2C6A873D11FC /* LiveActivityManager.swift in Sources */,
 				AD90B623AC1F4BE0A892F9C4 /* BaseCoordinator.swift in Sources */,
 				415FC59E52A77D8CF12C8565 /* BaseEventRouter.swift in Sources */,
 				36AA397C26610437D42082A8 /* BaseViewController.swift in Sources */,
