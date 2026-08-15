@@ -13,4 +13,5 @@ public enum UserDefaultsKey {
     public static let autoNewAnalysis = "autoNewAnalysis"
     public static let showOnboarding = "showOnboarding"
     public static let showConsent = "showConsent"
+    public static let analysisInProgress = "analysisInProgress"
 }

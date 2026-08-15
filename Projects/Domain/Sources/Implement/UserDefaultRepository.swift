@@ -22,4 +22,6 @@ public protocol UserDefaultRepository {
     func showOnboarding() async throws -> Bool
     func saveConsent(isShown: Bool) async throws
     func showConsent() async throws -> Bool
+    func saveAnalysisInProgress(_ isOn: Bool) async throws
+    func fetchAnalysisInProgress() async throws -> Bool
 }

@@ -11,6 +11,9 @@ import Foundation
 public protocol PhotoAnalysisUseCase {
     func analysis() -> AsyncThrowingStream<ProgressAnalysis, Error>
     func locationAnalysis() -> AsyncThrowingStream<ProgressAnalysis, Error>
+    func markAnalysisStarted() async throws
+    func markAnalysisFinished() async throws
+    func isAnalysisInterrupted() async throws -> Bool
 }
 
 public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
@@ -19,6 +22,7 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
     private let analysisRepository: PhotoAnalysisRepository
     private let dataRepository: PhotoDataRepository
     private let geoRepository: GeoRepository
+    private let userDefaultRepository: UserDefaultRepository
 
     // 라벨+얼굴 분석과 주소 변환을 동시에 진행할 때의 진행률 가중치
     private let labelWeight: Double = 4.0 / 5.0
@@ -28,18 +32,32 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
         libraryRepository: PhotoLibraryRepository,
         analysisRepository: PhotoAnalysisRepository,
         dataRepository: PhotoDataRepository,
-        geoRepository: GeoRepository
+        geoRepository: GeoRepository,
+        userDefaultRepository: UserDefaultRepository
     ) {
         self.libraryRepository = libraryRepository
         self.analysisRepository = analysisRepository
         self.dataRepository = dataRepository
         self.geoRepository = geoRepository
+        self.userDefaultRepository = userDefaultRepository
+    }
+
+    public func markAnalysisStarted() async throws {
+        try await userDefaultRepository.saveAnalysisInProgress(true)
+    }
+
+    public func markAnalysisFinished() async throws {
+        try await userDefaultRepository.saveAnalysisInProgress(false)
+    }
+
+    public func isAnalysisInterrupted() async throws -> Bool {
+        try await userDefaultRepository.fetchAnalysisInProgress()
     }
 
     // 사진 기본 정보 저장 → 라벨+얼굴 분석과 주소 변환 동시 진행 (4:1 가중 진행률)
     public func analysis() -> AsyncThrowingStream<ProgressAnalysis, Error> {
         AsyncThrowingStream { continuation in
-            Task {
+            let task = Task {
                 do {
                     try await saveAllPhotosBase()
 
@@ -91,6 +109,7 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                     continuation.finish(throwing: error)
                 }
             }
+            continuation.onTermination = { @Sendable _ in task.cancel() }
         }
     }
 
@@ -132,7 +151,7 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
     private func addressStream() -> AsyncThrowingStream<ProgressAnalysis, Error> {
         execute { [weak self] in
             AsyncThrowingStream { continuation in
-                Task.detached(priority: .userInitiated) {
+                let task = Task.detached(priority: .userInitiated) {
                     do {
                         guard let self else { throw PhotoRepositoryError.photoNotFound }
 
@@ -235,6 +254,7 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                         }
 
                         for photo in noCodePhotos {
+                            try Task.checkCancellation()
 
                             guard let latitude = photo.latitude, let longitude = photo.longitude else {
                                 continue
@@ -265,8 +285,6 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                                     state: .progress(index / Double(total))
                                 )
                             )
-
-                            try await Task.sleep(nanoseconds: 1_500_000_000)
                         }
 
                         continuation.finish()
@@ -274,6 +292,7 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                         continuation.finish(throwing: error)
                     }
                 }
+                continuation.onTermination = { @Sendable _ in task.cancel() }
             }
         }
     }
@@ -282,7 +301,7 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
         stream: @escaping () async throws -> AsyncThrowingStream<ProgressAnalysis, Error>?
     ) -> AsyncThrowingStream<ProgressAnalysis, Error> {
         AsyncThrowingStream { continuation in
-            Task {
+            let task = Task {
                 do {
                     guard let analysisStream = try await stream() else {
                         continuation.finish()
@@ -301,6 +320,7 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                     continuation.finish(throwing: error)
                 }
             }
+            continuation.onTermination = { @Sendable _ in task.cancel() }
         }
     }
 

@@ -7,7 +7,6 @@
 
 import Foundation
 import UIKit
-import SnapKit
 
 open class CustomTabBarController: UIViewController {
 
@@ -44,7 +43,8 @@ open class CustomTabBarController: UIViewController {
     private var tabBarStackView = UIStackView()
 
     private var selectedBox: UIView?
-    private var selectedBoxCenter: Constraint?
+    private var selectedBoxLeading: NSLayoutConstraint?
+    private var selectedBoxTrailing: NSLayoutConstraint?
     private var isFirst: Bool = true
 
     private var viewControllers: [UIViewController] = []
@@ -231,10 +231,15 @@ open class CustomTabBarController: UIViewController {
                 if self.items.count > selectedIndex {
                     let item = self.items[selectedIndex]
 
-                    selectedBoxCenter?.deactivate()
-                    box.snp.makeConstraints { make in
-                        selectedBoxCenter = make.leading.trailing.equalTo(item).inset(8).constraint
-                    }
+                    selectedBoxLeading?.isActive = false
+                    selectedBoxTrailing?.isActive = false
+
+                    let leading = box.leadingAnchor.constraint(equalTo: item.leadingAnchor, constant: 8)
+                    let trailing = box.trailingAnchor.constraint(equalTo: item.trailingAnchor, constant: -8)
+                    NSLayoutConstraint.activate([leading, trailing])
+                    self.selectedBoxLeading = leading
+                    self.selectedBoxTrailing = trailing
+
                     if isFirst {
                         self.view.layoutIfNeeded()
                         self.isFirst = false
@@ -359,10 +364,11 @@ open class CustomTabBarController: UIViewController {
 
         self.tabBarView.insertSubview(box, belowSubview: tabBarStackView)
 
-        box.snp.makeConstraints { make in
-//            make.width.equalTo(60)
-            make.top.bottom.equalTo(self.tabBarView).inset(8)
-        }
+        box.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            box.topAnchor.constraint(equalTo: self.tabBarView.topAnchor, constant: 8),
+            box.bottomAnchor.constraint(equalTo: self.tabBarView.bottomAnchor, constant: -8)
+        ])
 
         self.selectedBox = box
     }

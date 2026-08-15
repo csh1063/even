@@ -67,6 +67,8 @@ public final class TabbarViewModel: BaseViewModel {
     private let legacyAccessUseCase: LegacyAccessUseCase
 
     private var cancellables = Set<AnyCancellable>()
+    private var analysisTask: Task<Void, Never>?
+    private var lifecycleObservers: [NSObjectProtocol] = []
 
     init(permissionUseCase: PermissionUseCase,
          analysisUseCase: PhotoAnalysisUseCase,
@@ -80,6 +82,14 @@ public final class TabbarViewModel: BaseViewModel {
         super.init()
 
         self.bind()
+        self.bindLifecycle()
+
+        // 콜드 스타트(앱이 완전히 꺼졌다가 다시 켜진 경우)에도 중단된 분석이 있었는지 확인해 이어간다
+        Task { @MainActor in await self.handleWillEnterForeground() }
+    }
+
+    deinit {
+        lifecycleObservers.forEach { NotificationCenter.default.removeObserver($0) }
     }
 
     public func transform() -> Output {
@@ -103,6 +113,39 @@ public final class TabbarViewModel: BaseViewModel {
             Task { @MainActor in await self.handle(input) }
         }
         .store(in: &cancellables)
+    }
+
+    private func bindLifecycle() {
+        let bg = NotificationCenter.default.addObserver(forName: .appDidEnterBackground, object: nil, queue: .main) { [weak self] _ in
+            self?.handleDidEnterBackground()
+        }
+        let fg = NotificationCenter.default.addObserver(forName: .appWillEnterForeground, object: nil, queue: .main) { [weak self] _ in
+            Task { @MainActor in await self?.handleWillEnterForeground() }
+        }
+        lifecycleObservers = [bg, fg]
+    }
+
+    private func handleDidEnterBackground() {
+        guard isAnalyzing else { return }
+        // 유예시간이 끝나면 진행 중인 분석을 취소하고, 시간 안에 못 끝난 경우를 대비해
+        // 시스템이 알아서 이어서 실행해줄 BGProcessingTask를 예약한다.
+        BackgroundTaskManager.shared.begin { [weak self] in
+            self?.analysisTask?.cancel()
+            BackgroundProcessingScheduler.shared.schedule()
+        }
+    }
+
+    private func handleWillEnterForeground() async {
+        BackgroundTaskManager.shared.end()
+
+        guard !isAnalyzing else { return }
+        guard (try? await analysisUseCase.isAnalysisInterrupted()) == true else { return }
+
+        // 백그라운드 만료로 중단됐던 분석 — 사용자 확인 알럿 없이 자동으로 이어간다
+        self.progressRatio = 0
+        self.autoAlbumProgressRatio = 0
+        self.onAction?(.progressSheet(self.makeAnalyzeProgress()))
+        self.analysisTask = Task { await self.analysis() }
     }
 
     private func makeAnalyzeProgress() -> AnalyzeProgress {
@@ -139,7 +182,7 @@ public final class TabbarViewModel: BaseViewModel {
                             self.progressRatio = 0
                             self.autoAlbumProgressRatio = 0
                             self.onAction?(.progressSheet(self.makeAnalyzeProgress()))
-                            await self.analysis()
+                            self.analysisTask = Task { await self.analysis() }
                         }
                     }
                 ]
@@ -235,12 +278,15 @@ public final class TabbarViewModel: BaseViewModel {
     private func analysis() async {
         guard !isAnalyzing else { return }
         self.isAnalyzing = true
+        try? await analysisUseCase.markAnalysisStarted()
+        AnalysisCompletionNotifier.requestAuthorizationIfNeeded()
 
         let startedAt = Date()
         debugLog("⏱️ [분석] 시작: \(startedAt)")
 
         do {
             for try await progress in analysisUseCase.analysis() {
+                if Task.isCancelled { throw CancellationError() }
                 switch progress.state {
                 case .progress(let ratio):
                     self.progressRatio = ratio
@@ -253,15 +299,23 @@ public final class TabbarViewModel: BaseViewModel {
             self.progressRatio = 1.0
             self.photoCompletedSubject.send(())
             try? await legacyAccessUseCase.markLegacyFreeAccess()
+            try? await analysisUseCase.markAnalysisFinished()
 
             await runAlbumGeneration()
+            AnalysisCompletionNotifier.notifyIfBackgrounded()
+        } catch is CancellationError {
+            // 백그라운드 유예시간 만료로 인한 정상적인 중단 — "완료"로 위장하지 않는다.
+            // analysisInProgress 플래그는 true로 남겨두어 다음 포그라운드 복귀 시 자동 재개된다.
+            debugLog("⏸️ [분석] 백그라운드 만료로 중단 — 다음 포그라운드 복귀 시 자동 재개 예정")
         } catch {
+            try? await analysisUseCase.markAnalysisFinished()
             self.progressRatio = 1.0
             self.autoAlbumProgressRatio = 1.0
             self.photoCompletedSubject.send(())
             self.albumCompletedSubject.send(())
         }
         self.isAnalyzing = false
+        BackgroundTaskManager.shared.end()
 
         let finishedAt = Date()
         let elapsedMinutes = finishedAt.timeIntervalSince(startedAt) / 60

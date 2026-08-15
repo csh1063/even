@@ -74,4 +74,12 @@ public final class DefaultUserDefaultRepository: UserDefaultRepository {
     public func showConsent() async throws -> Bool {
         service.bool(UserDefaultsKey.showConsent) ?? false
     }
+
+    public func saveAnalysisInProgress(_ isOn: Bool) async throws {
+        service.set(isOn, forK: UserDefaultsKey.analysisInProgress)
+    }
+
+    public func fetchAnalysisInProgress() async throws -> Bool {
+        service.bool(UserDefaultsKey.analysisInProgress) ?? false
+    }
 }

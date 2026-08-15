@@ -1,0 +1,925 @@
+<title>moa — Design Theme Reference</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root {
+    --primary: #FF7A6B;
+    --secondary: #6ECBF5;
+    --accent: #FFC96B;
+    --positive: #4FBF8F;
+    --warning: #F5A524;
+    --negative: #E85D75;
+    --background: #FFF9F5;
+    --surface: #FFFFFF;
+    --surface-elevated: #FFFFFF;
+    --surface-warm: #FFF4EE;
+    --surface-cool: #F3FAFF;
+    --text-primary: #2C2522;
+    --text-secondary: #7A706B;
+    --text-tertiary: #A2958E;
+    --stroke-soft: #E9DED5;
+    --stroke-strong: #D8CAC0;
+    --divider: #F0E7E0;
+    --viewer-background: #0D0D0D;
+  }
+
+  :root[data-theme="dark"] {
+    --primary: #FF8C80;
+    --secondary: #83D8FF;
+    --accent: #FFD37F;
+    --positive: #63D6A2;
+    --warning: #FFBE55;
+    --negative: #FF8095;
+    --background: #141110;
+    --surface: #1D1816;
+    --surface-elevated: #251F1C;
+    --surface-warm: #312522;
+    --surface-cool: #1C2931;
+    --text-primary: #F8F3EF;
+    --text-secondary: #CFC2BA;
+    --text-tertiary: #9E9088;
+    --stroke-soft: #332B28;
+    --stroke-strong: #463C38;
+    --divider: #2A2320;
+    --viewer-background: #050505;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --primary: #FF8C80;
+      --secondary: #83D8FF;
+      --accent: #FFD37F;
+      --positive: #63D6A2;
+      --warning: #FFBE55;
+      --negative: #FF8095;
+      --background: #141110;
+      --surface: #1D1816;
+      --surface-elevated: #251F1C;
+      --surface-warm: #312522;
+      --surface-cool: #1C2931;
+      --text-primary: #F8F3EF;
+      --text-secondary: #CFC2BA;
+      --text-tertiary: #9E9088;
+      --stroke-soft: #332B28;
+      --stroke-strong: #463C38;
+      --divider: #2A2320;
+      --viewer-background: #050505;
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--background);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Apple SD Gothic Neo", ui-sans-serif, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 64px 28px 120px;
+  }
+
+  header.hero {
+    margin-bottom: 56px;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: 14px;
+  }
+
+  .eyebrow::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--primary);
+  }
+
+  h1 {
+    font-size: 40px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 12px;
+    text-wrap: balance;
+  }
+
+  header.hero p {
+    font-size: 16px;
+    color: var(--text-secondary);
+    max-width: 66ch;
+    margin: 0 0 8px;
+  }
+
+  header.hero .verified {
+    font-size: 12.5px;
+    color: var(--text-tertiary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  nav.toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 28px;
+  }
+
+  nav.toc a {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-decoration: none;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--stroke-soft);
+    background: var(--surface);
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  nav.toc a:hover, nav.toc a:focus-visible {
+    border-color: var(--primary);
+    color: var(--primary);
+    outline: none;
+  }
+
+  section {
+    margin-top: 72px;
+    scroll-margin-top: 24px;
+  }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    border-bottom: 1px solid var(--divider);
+    padding-bottom: 14px;
+    margin-bottom: 28px;
+  }
+
+  .section-head h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .section-head .count {
+    font-size: 13px;
+    color: var(--text-tertiary);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .note {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: -14px 0 26px;
+    max-width: 70ch;
+  }
+
+  .note code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    background: var(--divider);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 12.5px;
+  }
+
+  /* Callouts */
+  .callout {
+    display: flex;
+    gap: 12px;
+    background: var(--surface-cool);
+    border: 1px solid var(--stroke-soft);
+    border-radius: 14px;
+    padding: 14px 18px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+  }
+
+  .callout.warn {
+    background: var(--surface-warm);
+  }
+
+  .callout b { color: var(--text-primary); }
+
+  .callout .tag {
+    flex: none;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--primary);
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--stroke-soft);
+    height: fit-content;
+  }
+
+  .callout.warn .tag { color: var(--negative); }
+
+  /* Colors */
+  .color-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 14px;
+  }
+
+  .swatch {
+    border: 1px solid var(--stroke-soft);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  .swatch-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: 64px;
+  }
+
+  .swatch-pair div {
+    position: relative;
+  }
+
+  .swatch-pair div span {
+    position: absolute;
+    bottom: 6px;
+    left: 8px;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgba(0,0,0,0.45);
+  }
+
+  .swatch-meta {
+    padding: 10px 12px 12px;
+  }
+
+  .swatch-name {
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .swatch-hex {
+    margin-top: 4px;
+    display: flex;
+    gap: 8px;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+
+  /* Typography */
+  .type-scale {
+    border: 1px solid var(--stroke-soft);
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  .type-row {
+    display: grid;
+    grid-template-columns: 90px 1fr 230px;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--divider);
+  }
+
+  .type-row:last-child { border-bottom: none; }
+
+  .type-row .spec {
+    font-size: 11px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    color: var(--primary);
+    font-weight: 700;
+  }
+
+  .type-row .sample {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .type-row .usage {
+    font-size: 11.5px;
+    color: var(--text-tertiary);
+    text-align: right;
+  }
+
+  .type-row .usage code {
+    display: block;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 10.5px;
+    margin-top: 2px;
+  }
+
+  /* Spacing */
+  .spacing-scale {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .spacing-row {
+    display: grid;
+    grid-template-columns: 60px 1fr auto;
+    align-items: center;
+    gap: 16px;
+    background: var(--surface);
+    border: 1px solid var(--stroke-soft);
+    border-radius: 12px;
+    padding: 12px 16px;
+  }
+
+  .spacing-val {
+    font-size: 14px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--primary);
+  }
+
+  .spacing-bar {
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+  }
+
+  .spacing-usage {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    text-align: right;
+    max-width: 46ch;
+  }
+
+  /* Radius */
+  .radius-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 14px;
+  }
+
+  .radius-item {
+    background: var(--surface);
+    border: 1px solid var(--stroke-soft);
+    border-radius: 16px;
+    padding: 16px 14px;
+    text-align: center;
+  }
+
+  .radius-box {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 10px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+  }
+
+  .radius-val {
+    font-size: 13px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .radius-usage {
+    font-size: 10.5px;
+    color: var(--text-tertiary);
+    margin-top: 3px;
+    line-height: 1.35;
+  }
+
+  .radius-highlight {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--surface-warm);
+    border: 1px solid var(--stroke-soft);
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+  }
+
+  .radius-highlight .radius-box {
+    width: 56px;
+    height: 56px;
+    border-radius: 28px;
+    margin: 0;
+    flex: none;
+  }
+
+  .radius-highlight-text b {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 3px;
+  }
+
+  .radius-highlight-text span {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+  }
+
+  .radius-highlight-text code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    background: var(--surface);
+    border: 1px solid var(--stroke-soft);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 11px;
+  }
+
+  /* Shadow */
+  .shadow-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 20px;
+  }
+
+  .shadow-item {
+    text-align: center;
+  }
+
+  .shadow-item.disabled {
+    opacity: 0.5;
+  }
+
+  .shadow-box {
+    height: 72px;
+    border-radius: 16px;
+    background: var(--surface);
+  }
+
+  .shadow-label {
+    margin-top: 12px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .shadow-label .badge {
+    display: inline-block;
+    margin-left: 6px;
+    font-size: 9.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--negative);
+    border: 1px solid var(--negative);
+    border-radius: 999px;
+    padding: 1px 6px;
+    vertical-align: middle;
+  }
+
+  .shadow-spec {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    margin-top: 3px;
+  }
+
+  .shadow-usage {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  @keyframes glowPulse {
+    0%, 100% { box-shadow: 0 0 2px 1px var(--primary); opacity: 0.4; }
+    50% { box-shadow: 0 0 8px 3px var(--primary); opacity: 0.9; }
+  }
+
+  .glow-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--primary);
+    margin: 30px auto;
+    animation: glowPulse 1.2s ease-in-out infinite;
+  }
+
+  /* Components */
+  .comp-groups {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .comp-group {
+    background: var(--surface);
+    border: 1px solid var(--stroke-soft);
+    border-radius: 16px;
+    padding: 18px 20px;
+  }
+
+  .comp-group h3 {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--primary);
+    margin: 0 0 4px;
+  }
+
+  .comp-group .comp-path {
+    font-size: 10.5px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    color: var(--text-tertiary);
+    margin-bottom: 12px;
+    word-break: break-all;
+  }
+
+  .comp-group ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .comp-group li {
+    font-size: 13px;
+    color: var(--text-primary);
+    padding-left: 14px;
+    position: relative;
+  }
+
+  .comp-group li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 7px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--stroke-strong);
+  }
+
+  .comp-group li b { font-weight: 600; }
+  .comp-group li span {
+    display: block;
+    color: var(--text-tertiary);
+    font-size: 11.5px;
+    margin-top: 2px;
+    line-height: 1.45;
+  }
+
+  .comp-group li code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 10.5px;
+  }
+
+  footer {
+    margin-top: 88px;
+    padding-top: 28px;
+    border-top: 1px solid var(--divider);
+    font-size: 12.5px;
+    color: var(--text-tertiary);
+  }
+
+  @media (max-width: 720px) {
+    .type-row { grid-template-columns: 1fr; row-gap: 6px; }
+    .type-row .usage { text-align: left; }
+    .spacing-row { grid-template-columns: 1fr; row-gap: 6px; }
+    .spacing-usage { text-align: left; }
+  }
+
+  @media (max-width: 480px) {
+    h1 { font-size: 30px; }
+    .radius-highlight { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">Design Theme Reference</div>
+    <h1>moa — 디자인 테마 전체 정리</h1>
+    <p>마케팅용 <code>moa_design_spec.html</code>과 달리, 이 문서는 실제 소스 코드(Assets.xcassets, Extension_UIColor/UIFont, Presentation 컴포넌트 전체)를 다시 훑어 색상·타이포·스페이싱·라운드·그림자·컴포넌트를 빠짐없이 검증한 디자인 시스템 레퍼런스입니다. 스크린샷 없이 토큰과 컴포넌트 카탈로그에 집중합니다.</p>
+    <p class="verified">2026-08-13 기준 소스 코드 대조 검증 · 최근 커밋: 무료이력 기록(Keychain), 탭바 리팩터링</p>
+
+    <nav class="toc">
+      <a href="#colors">Colors</a>
+      <a href="#typography">Typography</a>
+      <a href="#spacing">Spacing</a>
+      <a href="#radius">Radius</a>
+      <a href="#shadow">Shadow</a>
+      <a href="#components">Components</a>
+    </nav>
+  </header>
+
+  <section id="colors">
+    <div class="section-head">
+      <h2>Colors</h2>
+      <span class="count">18 tokens</span>
+    </div>
+    <p class="note">원본은 <code>Projects/Presentation/Resources/Assets.xcassets/color/*.colorset</code>이며, <code>Extension_UIColor.swift</code>의 <code>enum Theme</code>이 각 토큰을 <code>Theme.primary</code>처럼 static 프로퍼티로 노출합니다. 별도 Spacing/Radius enum과 달리 색상만은 유일하게 중앙화된 토큰입니다.</p>
+    <div class="color-grid" id="colorGrid"></div>
+  </section>
+
+  <section id="typography">
+    <div class="section-head">
+      <h2>Typography</h2>
+      <span class="count">시스템 폰트 · 12 steps</span>
+    </div>
+    <div class="callout">
+      <span class="tag">확인됨</span>
+      <div><b>커스텀 폰트 없음.</b> <code>Extension_UIFont.swift</code>에 Pretendard 계열 로더 함수(<code>boldLocalizedFont</code> 등)가 있지만 실제 매핑 코드는 주석 처리된 죽은 코드이며, 번들에 <code>.ttf</code>/<code>.otf</code> 파일도 없고 Info.plist에 <code>UIAppFonts</code> 등록도 없습니다. 결과적으로 전 화면이 <b>시스템 폰트</b>(SF Pro · 한글은 Apple SD Gothic Neo)로 렌더링됩니다. 별도 타입스케일 enum도 없이 화면마다 <code>UIFont.systemFont(ofSize:weight:)</code>를 직접 호출합니다.</div>
+    </div>
+    <div class="type-scale" id="typeScale"></div>
+  </section>
+
+  <section id="spacing">
+    <div class="section-head">
+      <h2>Spacing</h2>
+      <span class="count">비공식 스케일 · 7 steps</span>
+    </div>
+    <p class="note">전용 <code>Spacing</code>/<code>Metric</code> enum은 존재하지 않습니다(검색 결과 0건). SnapKit 제약과 <code>UIStackView.spacing</code>에 하드코딩된 값들을 모아 보면 대략 4/6/8/12/16/20/24pt의 비공식 스케일로 수렴합니다.</p>
+    <div class="spacing-scale" id="spacingScale"></div>
+  </section>
+
+  <section id="radius">
+    <div class="section-head">
+      <h2>Corner Radius</h2>
+      <span class="count">18 measured values</span>
+    </div>
+    <p class="note">전용 <code>Radius</code> enum 없이 컴포넌트별 <code>layer.cornerRadius</code> 리터럴이 흩어져 있습니다. 재사용 헬퍼로 <code>UIView/UIButton.withLayerCornerRadius(_:)</code>가 있지만 값 자체는 자유롭게 넘겨받습니다.</p>
+
+    <div class="radius-highlight">
+      <div class="radius-box"></div>
+      <div class="radius-highlight-text">
+        <b>Sheet Chrome Radius — 28pt</b>
+        <span>바텀시트 6종 전부가 <code>UISheetPresentationController.preferredCornerRadius = 28</code>을 공유합니다. 콘텐츠 뷰의 개별 <code>cornerRadius</code>와는 별개로, 시스템이 그리는 시트 외곽 라운드값입니다. (<code>TabbarCoordinator.swift</code>, <code>AlbumDetailCoordinator.swift</code> ×5, <code>TravelerManagementSheet.swift</code>)</span>
+      </div>
+    </div>
+
+    <div class="radius-grid" id="radiusGrid"></div>
+  </section>
+
+  <section id="shadow">
+    <div class="section-head">
+      <h2>Shadow Presets</h2>
+      <span class="count">4 static + 1 animated</span>
+    </div>
+    <p class="note"><code>Extension_UIView.swift</code>의 <code>addShadow(color:opacity:offset:radius:)</code> / <code>addInnerShadow(...)</code> 헬퍼 기반이며, <code>traitCollection</code>에 맞춰 색을 resolve하므로 라이트/다크 전환 시 그림자 색도 함께 바뀝니다.</p>
+    <div class="shadow-grid" id="shadowGrid"></div>
+  </section>
+
+  <section id="components">
+    <div class="section-head">
+      <h2>Components</h2>
+      <span class="count">14 groups</span>
+    </div>
+    <p class="note">Presentation 모듈 전체를 다시 훑어 실제 시각 디자인을 정리했습니다. 특히 탭바는 아래에서 가장 큰 정정 사항입니다.</p>
+    <div class="comp-groups" id="compGroups"></div>
+  </section>
+
+  <footer>
+    moa — Design Theme Reference · 소스: Projects/Presentation/Resources/Assets.xcassets, Projects/Presentation/Sources/**
+  </footer>
+
+</div>
+
+<script>
+  const colors = [
+    ["primary", "#FF7A6B", "#FF8C80"],
+    ["secondary", "#6ECBF5", "#83D8FF"],
+    ["accent", "#FFC96B", "#FFD37F"],
+    ["positive", "#4FBF8F", "#63D6A2"],
+    ["warning", "#F5A524", "#FFBE55"],
+    ["negative", "#E85D75", "#FF8095"],
+    ["background", "#FFF9F5", "#141110"],
+    ["surface", "#FFFFFF", "#1D1816"],
+    ["surfaceElevated", "#FFFFFF", "#251F1C"],
+    ["surfaceWarm", "#FFF4EE", "#312522"],
+    ["surfaceCool", "#F3FAFF", "#1C2931"],
+    ["textPrimary", "#2C2522", "#F8F3EF"],
+    ["textSecondary", "#7A706B", "#CFC2BA"],
+    ["textTertiary", "#A2958E", "#9E9088"],
+    ["strokeSoft", "#E9DED5", "#332B28"],
+    ["strokeStrong", "#D8CAC0", "#463C38"],
+    ["divider", "#F0E7E0", "#2A2320"],
+    ["viewerBackground", "#0D0D0D", "#050505"],
+  ];
+
+  const colorGrid = document.getElementById("colorGrid");
+  colors.forEach(([name, light, dark]) => {
+    const el = document.createElement("div");
+    el.className = "swatch";
+    el.innerHTML = `
+      <div class="swatch-pair">
+        <div style="background:${light}"><span>Light</span></div>
+        <div style="background:${dark}"><span>Dark</span></div>
+      </div>
+      <div class="swatch-meta">
+        <div class="swatch-name">${name}</div>
+        <div class="swatch-hex"><span>${light}</span><span>${dark}</span></div>
+      </div>`;
+    colorGrid.appendChild(el);
+  });
+
+  const typeRows = [
+    ["34 / 600", "moa 사진첩", "스플래시 히어로 타이틀", "SplashViewController.swift:63"],
+    ["32 / 700", "moa 사진첩", "사진첩 라지 타이틀", "PhotoLibraryViewController.swift:79"],
+    ["22 / 700", "2026년", "날짜 앨범 연도 라벨", "Album/DateAlbumCell.swift:101"],
+    ["20 / 600", "순간을 모으다", "스플래시/온보딩 서브타이틀", "SplashViewController.swift:53 · OnboardingPageViewController.swift:53"],
+    ["17 / 700", "정말 삭제할까요?", "얼럿 타이틀 · 여행 앨범 카드", "AlertViewController.swift:37 · Album/TravelAlbumCell.swift:41"],
+    ["16 / 600", "의견 보내기", "피드백 제출 버튼", "Feedback/FeedbackViewController.swift:109"],
+    ["16 / 400", "흩어진 사진을 모아드려요", "스플래시 본문", "SplashViewController.swift:72"],
+    ["15 / 600", "제주도", "위치 앨범 지명 라벨", "Album/LocationAlbumCell.swift:107"],
+    ["15 / 500", "인물", "카테고리 앨범 이름", "Album/CategoryAlbumCell.swift:89"],
+    ["14 / 400", "128장", "사진첩 서브타이틀 · 액션바", "PhotoLibraryViewController.swift:82 · Album/AlbumSelectionActionBar.swift:20"],
+    ["12 / 400", "24장", "카운트/캡션 라벨", "Album/DateAlbumCell.swift:105 · Album/CategoryAlbumCell.swift:93"],
+    ["10 / 700", "12", "원형 배지 숫자", "Album/SimilarAlbumCell.swift:66 · Album/AnimalAlbumCell.swift:70"],
+  ];
+
+  const typeScale = document.getElementById("typeScale");
+  typeRows.forEach(([spec, sample, usage, path]) => {
+    const [size, weight] = spec.split(" / ");
+    const el = document.createElement("div");
+    el.className = "type-row";
+    el.innerHTML = `
+      <div class="spec">${spec}</div>
+      <div class="sample" style="font-size:${size}px; font-weight:${weight};">${sample}</div>
+      <div class="usage">${usage}<code>${path}</code></div>`;
+    typeScale.appendChild(el);
+  });
+
+  const spacings = [
+    [4, "탭바 아이템 아이콘·라벨 간격, 배지 내부 여백, 텍스트 스택 간격"],
+    [6, "얼럿 타이틀·메시지 스택 간격, 스플래시 카드 내부 인셋"],
+    [8, "시트 그래버 주변 여백, 사진 셀 체크 배지 오프셋, 카테고리 아이콘 패딩"],
+    [12, "가장 흔한 컴팩트 인셋 — 내비바 버튼 히트 영역, 시트 필드 패딩, 탭바 좌우 패딩"],
+    [16, "가장 흔한 표준 인셋 — 화면 가장자리/카드 인셋, 내비바 커버뷰 좌우, 얼럿 텍스트 인셋"],
+    [20, "보조 표준 인셋 — 얼럿 컨테이너 인셋, 빈상태 카드 간격, 위치 카드 라벨"],
+    [24, "섹션 간 큰 간격 — 얼럿 상단 인셋, 시트 히어로 스페이싱"],
+  ];
+
+  const spacingScale = document.getElementById("spacingScale");
+  const maxSpacing = 24;
+  spacings.forEach(([val, usage]) => {
+    const el = document.createElement("div");
+    el.className = "spacing-row";
+    const pct = Math.max(14, Math.round((val / maxSpacing) * 100));
+    el.innerHTML = `
+      <div class="spacing-val">${val}</div>
+      <div class="spacing-bar" style="width:${pct}%"></div>
+      <div class="spacing-usage">${usage}</div>`;
+    spacingScale.appendChild(el);
+  });
+
+  const radii = [
+    ["2.5", "시트 그래버 핸들 (전 시트 공통)"],
+    ["6", "스플래시 카드 포인트 · 컨센트/오픈소스 소형 요소"],
+    ["8", "사진·얼굴·동물 개수 배지 · 카테고리 아이콘 랩"],
+    ["10", "스플래시 보조 카드 · 로딩뷰 닫기 버튼 · 유사사진 썸네일 · 지도 프리뷰"],
+    ["12", "사진 그리드 커버 · 컨센트 모달 · MyPage 리스트 행(BoxView) · 그라디언트 플레이스홀더"],
+    ["14", "위치 앨범 카드/썸네일/핀 · 컨센트 액션버튼 · 여행자 시트 칩"],
+    ["16", "날짜/라벨 앨범 카드 · 컨센트 아바타 · 피드백 모달 · 시트 텍스트필드"],
+    ["17", "MyPage 리스트 행 콘텐츠 컨테이너"],
+    ["18", "빈상태 아이콘 랩 · 시트 버튼(config.background) · 앨범옵션 아이콘 배경"],
+    ["20", "얼럿 모달 · 여행 앨범 카드 · 빈상태 커버뷰 · 내비바 버튼"],
+    ["21", "빈상태 “분석 시작” 필 버튼 (높이 42의 절반)"],
+    ["22", "이미지 뷰어 원형 버튼"],
+    ["28", "빈상태 히어로 그라디언트 카드"],
+    ["34", "얼굴/동물 클러스터 원형 아바타"],
+    ["36", "MiniProgressView 플로팅 원형 진행 버튼"],
+    ["42", "앨범 분석 시트 히어로 아이콘 원"],
+  ];
+
+  const radiusGrid = document.getElementById("radiusGrid");
+  radii.forEach(([val, usage]) => {
+    const el = document.createElement("div");
+    el.className = "radius-item";
+    const px = Math.min(parseFloat(val), 24);
+    el.innerHTML = `
+      <div class="radius-box" style="border-radius:${px}px"></div>
+      <div class="radius-val">${val}pt</div>
+      <div class="radius-usage">${usage}</div>`;
+    radiusGrid.appendChild(el);
+  });
+
+  const shadows = [
+    ["하단 액션바 elevation", "opacity .08 · radius 8 · offset (0,-2) · black", "멀티선택 액션바, 앨범 상세 하단바", false],
+    ["선택 체크 오버레이", "opacity .3 · radius 2 · offset (0,1) · black", "앨범 선택 오버레이, 병합 시트 이미지", false],
+    ["MiniProgress FAB", "opacity .1 · radius 12 · offset (0,4) · black", "플로팅 원형 진행률 버튼 컨테이너", false],
+    ["탭바 (파라미터 존재)", "setShadow(...) 호출이 주석 처리됨", "TabbarViewController.swift — 현재 미적용", true],
+  ];
+
+  const shadowGrid = document.getElementById("shadowGrid");
+  shadows.forEach(([label, spec, usage, disabled]) => {
+    const el = document.createElement("div");
+    el.className = "shadow-item" + (disabled ? " disabled" : "");
+    el.innerHTML = `
+      <div class="shadow-box" style="box-shadow:${disabled ? 'none' : spec.split(' · ').map(s=>s).join(' ')}"></div>
+      <div class="shadow-label">${label}${disabled ? '<span class="badge">비활성</span>' : ''}</div>
+      <div class="shadow-spec">${spec}</div>
+      <div class="shadow-usage">${usage}</div>`;
+    shadowGrid.appendChild(el);
+  });
+
+  // Animated glow-dot shadow — rendered separately since it's a keyframe animation, not a static box-shadow
+  const glowItem = document.createElement("div");
+  glowItem.className = "shadow-item";
+  glowItem.innerHTML = `
+    <div class="shadow-box" style="display:flex;align-items:center;justify-content:center;">
+      <div class="glow-dot"></div>
+    </div>
+    <div class="shadow-label">Glow-dot Pulse (애니메이션)</div>
+    <div class="shadow-spec">opacity .4→.9→.4 · radius 2→8 · 1.2s ease-in-out infinite</div>
+    <div class="shadow-usage">MiniProgressView — 진행률 위치를 표시하는 발광 점 펄스</div>`;
+  shadowGrid.appendChild(glowItem);
+
+  const compGroups = [
+    ["Tabbar (정정됨)", "Tabbar/Custom/CustomTabBarViewController.swift · CustomTabBarItem.swift · Tabbar/TabbarViewController.swift", [
+      ["엣지투엣지 flat bar", "<span>플로팅 필(radius 28·shadow·selected box) 관련 호출이 TabbarViewController.swift에서 모두 주석 처리되어 현재는 화면 폭 전체를 차지하는 각진 바입니다. height 68 · 좌우 패딩 12.</span>"],
+      ["반투명 서피스", "<span><code>Theme.surface</code> 72% 알파, 별도 블러 뷰는 없습니다(NaviBarView와 달리).</span>"],
+      ["색상만으로 선택 표시", "<span>선택 배경 pill 없이 아이콘/라벨 tint만 전환 — 비선택 <code>textSecondary</code>, 선택 <code>primary</code>.</span>"],
+      ["아이템 레이아웃", "<span>세로 UIStackView(아이콘+라벨), spacing 4, 선택 여부에 따라 tint 이미지를 교체.</span>"],
+      ["show/hide 트랜지션", "<span><code>animateFade</code>/<code>animateBottom</code>으로 0.2s 페이드·슬라이드 (전체화면 진입 시 탭바 숨김에 사용, 여전히 동작).</span>"],
+    ]],
+    ["Alert", "Alert/AlertViewController.swift", [
+      ["커스텀 모달", "<span>UIAlertController가 아닌 자체 구현. 40% 블랙 딤 스크림, 카드 <code>Theme.background</code>, radius 20.</span>"],
+      ["스프링 등장 애니메이션", "<span>1.12배 스케일에서 damping 0.8로 진입(0.3s), 닫힐 때는 0.9배로 축소하며 페이드아웃(0.2s).</span>"],
+      ["버튼 레이아웃", "<span>2개면 가로 배치+세로 구분선, 3개 이상이면 세로 스택+가로 구분선. cancel 스타일 버튼이 있을 때만 바깥 탭으로 닫힘.</span>"],
+    ]],
+    ["Navigation Bar", "Navigation/NaviBarView.swift · NaviBarButton.swift", [
+      ["커스텀 내비바", "<span>UINavigationBar 미사용. 옵션에 따라 라이트 블러 또는 flat <code>Theme.background</code>. 콘텐츠 행 44pt, 좌우 인셋 16, 세이프에어리어에서 20 오프셋.</span>"],
+      ["로고/타이틀/서브타이틀 3가지 레이아웃", "<span>화면별로 로고 중앙, 중앙 타이틀, 좌측 타이틀+서브타이틀 형태를 선택.</span>"],
+      ["NaviBarButton", "<span>32×32 원형 히트타겟(44×44 슬롯 내 6pt 인셋), 컬러 필 배경 옵션(radius 16 + strokeSoft 보더), 4×4 미확인 뱃지 닷, disabled 시 40% 알파.</span>"],
+    ]],
+    ["Bottom Sheets", "Sheet/AlbumRenameSheet.swift · AlbumOptionsSheet.swift · AlbumMergeSheet.swift · ClusterSplitSheet.swift · AlbumAnalysisSheet.swift · TravelerManagementSheet.swift", [
+      ["공통 그래버", "<span>5×2.5pt 필 형태 핸들, <code>strokeSoft</code>/<code>strokeStrong</code> — 6종 시트 전부 동일.</span>"],
+      ["시스템 시트 + preferredCornerRadius 28", "<span><code>UISheetPresentationController</code>로 프레젠트, 커스텀 detent(<code>.medium()</code>, 고정 260, <code>[.medium(), .large()]</code> 등 시트별 상이).</span>"],
+      ["버튼은 UIButton.Configuration 기반", "<span><code>config.background.cornerRadius = 18</code> 사용 — 수동 <code>layer.cornerRadius</code>가 아님. 예: Rename 시트의 outlined Cancel / filled Save.</span>"],
+    ]],
+    ["Loading", "Common/Components/Loading/LoadingView.swift (class CardStackLoadingView)", [
+      ["스피너 아님, 카드 애니메이션", "<span>Core Graphics로 그린 작은 라운드 카드 3장(accent/secondary/primary)이 <code>CADisplayLink</code> 기반 사인파로 각자 다른 위상으로 떠다니는 애니메이션. 각 카드에 드롭섀도우 적용.</span>"],
+      ["닫기 버튼", "<span>radius 10 원형, 검정 30% 배경, <code>showDismissButton()</code> 호출 시 페이드인.</span>"],
+    ]],
+    ["Mini Progress", "MiniProgress/MiniProgressView.swift", [
+      ["듀얼 링 FAB", "<span>72×72(radius 36) 원형, 위/아래 반원 아크 2개(위치 분석/앨범 분석), 4pt 스트로크, round cap. 트랙 <code>strokeSoft</code>, 진행 <code>primary</code>.</span>"],
+      ["발광 점", "<span>진행 위치를 따라가는 흰 점에 <code>primary</code> 색 glow-dot pulse 그림자 애니메이션 적용 (Shadow 섹션 참고).</span>"],
+    ]],
+    ["Empty State", "Album/AlbumEmtpyView.swift", [
+      ["그라디언트 히어로 카드", "<span>radius 28, <code>GradientCardView</code>로 primary→accent→secondary 애니메이션 그라디언트. 흰색 30pt 볼드 타이틀 + 15pt 서브타이틀.</span>"],
+      ["필 CTA 버튼", "<span>radius 21(높이 42의 정확히 절반), sparkles 아이콘, 흰 배경에 <code>primary</code> 텍스트, “분석 시작”.</span>"],
+      ["보조 안내 카드", "<span>radius 18, strokeSoft 1pt 보더, 40×40 아이콘 칩(radius 20, surfaceCool 배경)로 백그라운드 위치 분석을 설명.</span>"],
+    ]],
+    ["Album Cards", "Common/Components/Album/*Cell.swift", [
+      ["DateAlbumCell", "<span>radius 16, 풀블리드 커버 + 하단 블랙 그라디언트 오버레이(0→60% 알파), 연도 22pt bold + 카운트 12pt.</span>"],
+      ["TravelAlbumCell / LocationAlbumCell", "<span>radius 20 / 14(썸네일 14, 지도 프리뷰 10, 핀 14).</span>"],
+      ["CategoryAlbumCell", "<span>아이콘 랩 8~9, 가로 스크롤 첫/끝 아이템만 14 라운드(가운데는 각짐) — BoxView와 유사한 위치 기반 라운딩 패턴.</span>"],
+      ["Face/AnimalAlbumCell · SimilarAlbumCell", "<span>34 원형 아바타 + 8 카운트 배지 / 8·10 radius, 그림자 코드는 주석 처리되어 있어 미적용.</span>"],
+      ["공통 스타일", "<span><code>Theme.surface</code> 배경 + <code>strokeSoft</code> 1pt 보더 + <code>masksToBounds</code>.</span>"],
+    ]],
+    ["Photo Grid", "Common/Components/Photo/PhotoCell.swift", [
+      ["그리드 셀", "<span>커버 radius 12, 기본 <code>strokeSoft</code> 보더가 미분석 사진일 때 <code>negative</code>(빨강)로 바뀌어 시각적으로 경고합니다.</span>"],
+      ["선택 모드", "<span>30% 블랙 딤 + 22×22 원형 체크 배지(radius 11, 흰 보더 2pt), 선택 시 <code>primary</code> 채움 + 흰 체크마크.</span>"],
+      ["로딩 플레이스홀더", "<span><code>GradientCardView</code>(radius 12) 셔머 애니메이션.</span>"],
+    ]],
+    ["MyPage List", "MyPage/BoxView.swift · MyPageCell.swift · MyPageSwitchCell.swift", [
+      ["iOS 설정 스타일 그룹 리스트", "<span><code>BoxView</code>가 행 위치(top/middle/bottom/single)에 따라 <code>UIBezierPath</code>+<code>CAShapeLayer</code>로 코너를 선택적으로 라운딩(radius 12)하고 같은 경로로 1pt <code>strokeSoft</code> 보더를 그립니다.</span>"],
+      ["하이라이트 플래시", "<span>탭 시 행이 잠깐 <code>surfaceWarm</code>/<code>surfaceCool</code>로 틴트되었다가 0.5s에 걸쳐 <code>surface</code>로 복귀.</span>"],
+      ["스위치", "<span><code>UISwitch</code> on-tint는 <code>Theme.primary</code>.</span>"],
+    ]],
+    ["Consent / Onboarding / Terms", "Consent/ConsentViewController.swift · TermsViewController.swift · OnBoard/OnboardingPageViewController.swift", [
+      ["온보딩 이미지·버튼·시트형 컨테이너", "<span>radius 6/12/14/16이 이미지, 액션 버튼, 바텀시트형 컨테이너, 아바타에 각각 사용됩니다.</span>"],
+    ]],
+    ["Splash", "Splash/SplashViewController.swift", [
+      ["애니메이션 카드 3장", "<span>radius 6 포인트 카드(primary/secondary/accent) + radius 10 보조 카드로 구성된 런치 애니메이션과 함께 “moa” 워드마크가 페이드인.</span>"],
+    ]],
+    ["Image Viewer", "ImageViewer/ImageViewerViewController.swift", [
+      ["원형 컨트롤", "<span>radius 20/22 버튼·컨테이너, radius 13 앨범 배지 칩.</span>"],
+      ["전용 배경색", "<span><code>viewerBackground</code> 토큰(#0D0D0D / #050505) 사용 — 다른 화면과 분리된 순수 뷰어 배경.</span>"],
+    ]],
+    ["Feedback / Open Source", "Feedback/FeedbackViewController.swift · OpenSource/OpenSourceCell.swift", [
+      ["피드백 모달", "<span>radius 16 컨테이너, 16/600 제출 버튼 타이포.</span>"],
+      ["오픈소스 셀", "<span>radius 6/10 텍스트뷰. <code>UIColor(named: \"Cream\")</code> 참조는 실제 컬러셋이 없어 항상 <code>.systemBackground</code>로 폴백되는 죽은 코드 — 실제 토큰 아님.</span>"],
+    ]],
+  ];
+
+  const compGroupsEl = document.getElementById("compGroups");
+  compGroups.forEach(([title, path, items]) => {
+    const el = document.createElement("div");
+    el.className = "comp-group";
+    const itemsHtml = items.map(([b, span]) => `<li><b>${b}</b>${span}</li>`).join("");
+    el.innerHTML = `<h3>${title}</h3><div class="comp-path">${path}</div><ul>${itemsHtml}</ul>`;
+    compGroupsEl.appendChild(el);
+  });
+</script>

@@ -29,7 +29,8 @@ public final class TabbarDIContainer {
             libraryRepository: appDiContainer.photoLibraryRepository,
             analysisRepository: appDiContainer.photoAnalysisRepository,
             dataRepository: appDiContainer.photoDataRepository,
-            geoRepository: appDiContainer.geoRepository
+            geoRepository: appDiContainer.geoRepository,
+            userDefaultRepository: appDiContainer.userDefaultRepository
         )
 
         let autoAlbumUseCase = DefaultAutoAlbumUseCase(

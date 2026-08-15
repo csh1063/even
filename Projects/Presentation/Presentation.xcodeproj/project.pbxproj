@@ -19,6 +19,7 @@
 		14143B565EE1025E86B4A457 /* LabelsDIContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D7B5780986C5EECD1B78992 /* LabelsDIContainer.swift */; };
 		161A4A9F95E4F0FBC867CE81 /* FaceCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26371EC091BC8C695C25E490 /* FaceCellView.swift */; };
 		17750AE257E622DD8E82133C /* Extension_UITextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C2998FAD7DD5077BD097DB /* Extension_UITextView.swift */; };
+		17AE6577D22699F7FAB7DA30 /* AppLifecycleNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4414B1751F902B9ECB86FE87 /* AppLifecycleNotification.swift */; };
 		18559B997BA8DED659E2135E /* LocationAlbumCellViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BBF3D39CC49B71F014AE289 /* LocationAlbumCellViewModel.swift */; };
 		1A7DB07DCAC17919C8D1CFA3 /* CategoryAlbumCellViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D04A8C5EC590DDABBF1C900D /* CategoryAlbumCellViewModel.swift */; };
 		1EB3782697E5D5765188E1DE /* Extension_UISegmentedControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AC6050EB2A12AA43E785BA5 /* Extension_UISegmentedControl.swift */; };
@@ -55,6 +56,7 @@
 		495DB8F6655FCA0D6274214F /* AlertButtonConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58C970CD41B6B5F29F411FAB /* AlertButtonConfig.swift */; };
 		4BCF8BA89CF38E87649D89F7 /* OnboardingPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F818E97932F5F10B0B88546 /* OnboardingPageViewController.swift */; };
 		4CBB27F7B63BE0497C778288 /* SplashCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1DFADB91C9C20B195DC6FDC /* SplashCoordinator.swift */; };
+		4CCCB092638B574AD0D86A3F /* BackgroundTaskManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5551AD05E571D4EE666FD3B /* BackgroundTaskManager.swift */; };
 		4F95FE8B7007302DEEECFC6E /* PhotoLibraryCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39ED3BC2474DC0F432EAFB85 /* PhotoLibraryCoordinator.swift */; };
 		503294F3FE598FB11A6F11EC /* CustomTabBarItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABC1E533AB4C8AAA8B48F1F3 /* CustomTabBarItem.swift */; };
 		51A80C8D542492F4A2AAC3F0 /* NaviBarButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10F1A991453FF9438018AFD /* NaviBarButton.swift */; };
@@ -138,6 +140,7 @@
 		D16F155FE2E16F2C9B1B6748 /* BaseViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4970CC3CF7281FDEDF5A2E4 /* BaseViewModel.swift */; };
 		D2401B28E7AB82DDAAA87369 /* AnimalAlbumCellViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF23FE86270662BD0A6F651D /* AnimalAlbumCellViewModel.swift */; };
 		D24C0F7E143F39B377B212AF /* DateAlbumCellViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C34337A5C9A294A2CDD5EBC /* DateAlbumCellViewModel.swift */; };
+		D3EE4875939368402F1C02E8 /* AnalysisCompletionNotifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 356C28677B4F63103A41C55A /* AnalysisCompletionNotifier.swift */; };
 		D42E0F0F75FAEAF72E9D94EF /* SplashViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1A9C282BE62BA859D280F2 /* SplashViewController.swift */; };
 		D780798251ABB602C673F957 /* AlbumSectionHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EADC85A61F46BF0C87AB56FC /* AlbumSectionHeaderView.swift */; };
 		D91250039E053A41D805325F /* AnimalCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C2C9280919A6765F4C88CC /* AnimalCellView.swift */; };
@@ -165,6 +168,7 @@
 		F8CB2CABD741F2433648EB65 /* DateAlbumCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7B7B6AC79007B6435DC639A /* DateAlbumCell.swift */; };
 		F93F7D9DB90707845B44657C /* SimilarAlbumCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BBA3F3365AD93BF4DC9BE96 /* SimilarAlbumCell.swift */; };
 		F9E6A3D8031A6501ED265135 /* TravelerHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B0D384585E6C77D06018FFC /* TravelerHeaderView.swift */; };
+		FBB48E259D22753E64E379AC /* BackgroundProcessingScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8E74CDCB7B6883C0C530066 /* BackgroundProcessingScheduler.swift */; };
 		FC9A0BD427D721DDCC1B2AEB /* Regex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D028AB2DA0BB0AC69E334BB /* Regex.swift */; };
 		FD72876B346CBB1594A8774A /* PhotoTestCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73D037E2C431D0650FE179B1 /* PhotoTestCoordinator.swift */; };
 		FFDB23C771BFE626931A589E /* PhotoTestDIContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F687BDB1C5A5D939130A0D13 /* PhotoTestDIContainer.swift */; };
@@ -218,6 +222,7 @@
 		3248007A1FE0B50132ED59EF /* MyPageCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPageCell.swift; sourceTree = "<group>"; };
 		342AE4EAEE40294F0A26F2B8 /* Presentation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Presentation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		34AD422405AEA0A6A12AAD28 /* MainCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainCoordinator.swift; sourceTree = "<group>"; };
+		356C28677B4F63103A41C55A /* AnalysisCompletionNotifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalysisCompletionNotifier.swift; sourceTree = "<group>"; };
 		39ED3BC2474DC0F432EAFB85 /* PhotoLibraryCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryCoordinator.swift; sourceTree = "<group>"; };
 		39F511DFA9EA5D2DF48E3794 /* AlbumSelectionActionBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumSelectionActionBar.swift; sourceTree = "<group>"; };
 		3A1A9C282BE62BA859D280F2 /* SplashViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashViewController.swift; sourceTree = "<group>"; };
@@ -230,6 +235,7 @@
 		401BDA993F79FCBA353C96E3 /* AlbumListCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumListCoordinator.swift; sourceTree = "<group>"; };
 		41AE4EF10D324D138285AD48 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		41CA43C4455F51F86D88B772 /* Extension_UILabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension_UILabel.swift; sourceTree = "<group>"; };
+		4414B1751F902B9ECB86FE87 /* AppLifecycleNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLifecycleNotification.swift; sourceTree = "<group>"; };
 		48B5FBDDBDD95CCE3EE8EA9B /* BaseViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseViewController.swift; sourceTree = "<group>"; };
 		4AC6050EB2A12AA43E785BA5 /* Extension_UISegmentedControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension_UISegmentedControl.swift; sourceTree = "<group>"; };
 		4B0961E8873C1BFDA61108A2 /* TuistAssets+Presentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TuistAssets+Presentation.swift"; sourceTree = "<group>"; };
@@ -298,6 +304,7 @@
 		B17589FEE05ACDB5C24C1C19 /* MyCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyCell.swift; sourceTree = "<group>"; };
 		B3D6B45B01A697B2ADE4A948 /* OnboardingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewController.swift; sourceTree = "<group>"; };
 		B4BBD0AE24CC83598B1C3148 /* AlertManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertManager.swift; sourceTree = "<group>"; };
+		B5551AD05E571D4EE666FD3B /* BackgroundTaskManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundTaskManager.swift; sourceTree = "<group>"; };
 		B60D24A9AF2A390B1B3B536A /* AlbumListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumListViewController.swift; sourceTree = "<group>"; };
 		B75F176FC43277493F0EED6E /* PhotoSectionHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoSectionHeaderView.swift; sourceTree = "<group>"; };
 		B82DD2AE84CB5B6F383CC898 /* AlbumSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumSection.swift; sourceTree = "<group>"; };
@@ -325,6 +332,7 @@
 		D3D8386C4524E82DE539EA53 /* LabelsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelsViewController.swift; sourceTree = "<group>"; };
 		D8300BFD9F89CA11913EBBE1 /* Extension_String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension_String.swift; sourceTree = "<group>"; };
 		D8BAD0070B04CDF1EAB02CFB /* AlbumDetailDIContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumDetailDIContainer.swift; sourceTree = "<group>"; };
+		D8E74CDCB7B6883C0C530066 /* BackgroundProcessingScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundProcessingScheduler.swift; sourceTree = "<group>"; };
 		D950EBD5C5E8E6FB899C6E8A /* MyPageCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPageCoordinator.swift; sourceTree = "<group>"; };
 		DA704CC81D0F97A19AA5B775 /* PhotoHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoHeader.swift; sourceTree = "<group>"; };
 		DF23FE86270662BD0A6F651D /* AnimalAlbumCellViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimalAlbumCellViewModel.swift; sourceTree = "<group>"; };
@@ -413,9 +421,11 @@
 			isa = PBXGroup;
 			children = (
 				C084F4C74A0717B91AD0FC1B /* Analytics */,
+				2E653E175698DE38AE24BEE6 /* Background */,
 				2EAA0AE8D17F6832885302E3 /* Base */,
 				B18E3960CEEA5B6DBA69504B /* Components */,
 				3EF02DC3D9F1AA9278D00F45 /* DI */,
+				8B6EA71C5B45311072252699 /* Notification */,
 				505E957C678CDAED77D5BDBA /* AppStoreInfo.swift */,
 			);
 			path = Common;
@@ -466,6 +476,16 @@
 				24F4C9EDD75B280BB4BE30A9 /* HomeViewModel.swift */,
 			);
 			path = Home;
+			sourceTree = "<group>";
+		};
+		2E653E175698DE38AE24BEE6 /* Background */ = {
+			isa = PBXGroup;
+			children = (
+				356C28677B4F63103A41C55A /* AnalysisCompletionNotifier.swift */,
+				D8E74CDCB7B6883C0C530066 /* BackgroundProcessingScheduler.swift */,
+				B5551AD05E571D4EE666FD3B /* BackgroundTaskManager.swift */,
+			);
+			path = Background;
 			sourceTree = "<group>";
 		};
 		2EAA0AE8D17F6832885302E3 /* Base */ = {
@@ -579,6 +599,14 @@
 				B75F176FC43277493F0EED6E /* PhotoSectionHeaderView.swift */,
 			);
 			path = Photo;
+			sourceTree = "<group>";
+		};
+		8B6EA71C5B45311072252699 /* Notification */ = {
+			isa = PBXGroup;
+			children = (
+				4414B1751F902B9ECB86FE87 /* AppLifecycleNotification.swift */,
+			);
+			path = Notification;
 			sourceTree = "<group>";
 		};
 		8C6F1C1ED32FFCC07FCF3749 /* OnBoard */ = {
@@ -1014,6 +1042,9 @@
 				4389F098097A9E30C07AEC7E /* AlertViewModel.swift in Sources */,
 				69D039CFB7779BCF9D8D7D75 /* AnalyticsTracker.swift in Sources */,
 				F6AEFFCD4CDD73E9293CBC70 /* AppStoreInfo.swift in Sources */,
+				D3EE4875939368402F1C02E8 /* AnalysisCompletionNotifier.swift in Sources */,
+				FBB48E259D22753E64E379AC /* BackgroundProcessingScheduler.swift in Sources */,
+				4CCCB092638B574AD0D86A3F /* BackgroundTaskManager.swift in Sources */,
 				AD90B623AC1F4BE0A892F9C4 /* BaseCoordinator.swift in Sources */,
 				415FC59E52A77D8CF12C8565 /* BaseEventRouter.swift in Sources */,
 				36AA397C26610437D42082A8 /* BaseViewController.swift in Sources */,
@@ -1071,6 +1102,7 @@
 				22E9BE6A63E4C891FFBF6C76 /* UIGestureRecognizer+Publisher.swift in Sources */,
 				13F779FE4F17BDBA660A1B35 /* UIView+Publisher.swift in Sources */,
 				DF40F78A11997062375AF294 /* AppDIContainer.swift in Sources */,
+				17AE6577D22699F7FAB7DA30 /* AppLifecycleNotification.swift in Sources */,
 				E201E6BB6C1AD52BDF604BFF /* ConsentViewController.swift in Sources */,
 				C51AC37E47783F8E061DFAAB /* TermsViewController.swift in Sources */,
 				A4DAE5DEF5B8562D6686667B /* FeedbackViewController.swift in Sources */,
