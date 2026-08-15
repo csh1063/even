@@ -357,17 +357,18 @@ open class CustomTabBarController: UIViewController {
         }
     }
 
-    public func setSelectedBox(radius: CGFloat, color: UIColor) {
+    public func setSelectedBox(color: UIColor) {
+        let verticalMargin: CGFloat = 4
         let box = UIView()
         box.backgroundColor = color
-        box.layer.cornerRadius = radius
+        box.layer.cornerRadius = height / 2 - verticalMargin
 
         self.tabBarView.insertSubview(box, belowSubview: tabBarStackView)
 
         box.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            box.topAnchor.constraint(equalTo: self.tabBarView.topAnchor, constant: 8),
-            box.bottomAnchor.constraint(equalTo: self.tabBarView.bottomAnchor, constant: -8)
+            box.topAnchor.constraint(equalTo: self.tabBarView.topAnchor, constant: verticalMargin),
+            box.bottomAnchor.constraint(equalTo: self.tabBarView.bottomAnchor, constant: -verticalMargin)
         ])
 
         self.selectedBox = box
