@@ -33,22 +33,24 @@ final class TabbarViewController: CustomTabBarController {
 
         self.binding()
 
-        self.setBackgroundColor(Theme.surface.withAlphaComponent(0.72))
+        self.setBackgroundColor(Theme.background.withAlphaComponent(0.72))
 
         self.setItemColors(
             normal: Theme.textSecondary,
-//            selected: .white)
-            selected: Theme.primary)
+            selected: .white)
+//            selected: Theme.primary)
 
-        self.setLayoutMargin(height: 68,
-                             margin: .init(leading: 0, trailing: 0, bottom: 0),
-                             padding: .init(leading: 12, trailing: 12))
-//        self.setLayoutMargin(height: 56, bottom: 4,
-//                             leading: 80, trailing: 80, cornerRadius: 28)
+//        self.setLayoutMargin(height: 68,
+//                             margin: .init(leading: 0, trailing: 0, bottom: 0),
+//                             padding: .init(leading: 12, trailing: 12))
+        self.setAlign(.center)
+        self.setLayoutMargin(height: 56, itemWidth: 80,
+                             margin: .init(bottom: 4),
+                             padding: .zero, cornerRadius: 28)
 
-//        self.setShadow(color: .black, alpha: 0.1, x: 0, y: 4, blur: 16)
+        self.setShadow(color: .black, alpha: 0.3, x: 0, y: 4, blur: 16)
 
-//        self.setSelectedBox(radius: 26, color: Theme.primary)
+        self.setSelectedBox(color: Theme.primary)
 
         self.selectedIndex = 1
 

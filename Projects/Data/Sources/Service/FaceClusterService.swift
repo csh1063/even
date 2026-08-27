@@ -77,7 +77,10 @@ public final class FaceClusterService {
         engine.cluster(embeddings: embeddings)
     }
 
-    public func clusterWithLeftoverRetry(embeddings: [FaceEmbedding]) -> ClusteringOutcome<FaceEmbedding> {
-        engine.clusterWithLeftoverRetry(embeddings: embeddings, maxRetryRounds: 3)
+    public func clusterWithLeftoverRetry(
+        embeddings: [FaceEmbedding],
+        onProgress: @escaping @Sendable (Double) -> Void = { _ in }
+    ) -> ClusteringOutcome<FaceEmbedding> {
+        engine.clusterWithLeftoverRetry(embeddings: embeddings, maxRetryRounds: 3, onProgress: onProgress)
     }
 }

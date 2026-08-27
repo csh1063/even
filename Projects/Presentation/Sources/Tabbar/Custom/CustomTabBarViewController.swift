@@ -7,7 +7,12 @@
 
 import Foundation
 import UIKit
-import SnapKit
+
+public enum CustomTabBarAlign {
+    case center
+    case left
+    case right
+}
 
 open class CustomTabBarController: UIViewController {
 
@@ -17,7 +22,13 @@ open class CustomTabBarController: UIViewController {
         let bottom: CGFloat
 
         static var zero: Margin {
-            return Margin(leading: 0, trailing: 0, bottom: 0)
+            return Margin()
+        }
+        
+        init(leading: CGFloat = 0, trailing: CGFloat = 0, bottom: CGFloat = 0) {
+            self.leading = leading
+            self.trailing = trailing
+            self.bottom = bottom
         }
     }
 
@@ -33,8 +44,10 @@ open class CustomTabBarController: UIViewController {
     private var tabBarView = UIView()
     private var tabBarLeading: NSLayoutConstraint!
     private var tabBarTrailing: NSLayoutConstraint!
+    private var tabBarCenter: NSLayoutConstraint!
     private var tabBarBottom: NSLayoutConstraint!
     private var tabBarHeight: NSLayoutConstraint!
+    private var tabBarWidth: NSLayoutConstraint!
     private var tabBarPaddingLeading: NSLayoutConstraint!
     private var tabBarPaddingTrailing: NSLayoutConstraint!
 
@@ -44,7 +57,8 @@ open class CustomTabBarController: UIViewController {
     private var tabBarStackView = UIStackView()
 
     private var selectedBox: UIView?
-    private var selectedBoxCenter: Constraint?
+    private var selectedBoxLeading: NSLayoutConstraint?
+    private var selectedBoxTrailing: NSLayoutConstraint?
     private var isFirst: Bool = true
 
     private var viewControllers: [UIViewController] = []
@@ -54,6 +68,7 @@ open class CustomTabBarController: UIViewController {
     private var margin: Margin = .zero
     private var padding: Padding = .zero
     private var height: CGFloat = 50
+    private var itemWidth: CGFloat?
     private var cornerRadius: CGFloat?
 
     private var color: UIColor = .black
@@ -152,10 +167,12 @@ open class CustomTabBarController: UIViewController {
         self.view.addSubview(tabBarView)
         self.tabBarView.addSubview(tabBarStackView)
 
+        self.tabBarCenter = self.tabBarView.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         self.tabBarLeading = self.tabBarView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: margin.leading)
         self.tabBarTrailing = self.tabBarView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: margin.trailing)
         self.tabBarBottom = self.tabBarView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: margin.bottom)
         self.tabBarHeight = self.tabBarView.heightAnchor.constraint(equalToConstant: height)
+        self.tabBarWidth = self.tabBarView.widthAnchor.constraint(equalToConstant: (itemWidth ?? 70) * CGFloat(items.count))
 
         self.tabBarPaddingLeading = self.tabBarStackView.leadingAnchor.constraint(
             equalTo: self.tabBarView.leadingAnchor,
@@ -198,6 +215,9 @@ open class CustomTabBarController: UIViewController {
             item.setTag(index)
             item.setItem(viewController.tabBarItem)
             item.addTarget(self, action: #selector(tabButtonTapped(_:)), for: .touchUpInside)
+//            if let itemWidth {
+//                item.widthAnchor.constraint(equalToConstant: itemWidth).isActive = true
+//            }
 
             self.tabBarStackView.addArrangedSubview(item)
             items.append(item)
@@ -231,10 +251,15 @@ open class CustomTabBarController: UIViewController {
                 if self.items.count > selectedIndex {
                     let item = self.items[selectedIndex]
 
-                    selectedBoxCenter?.deactivate()
-                    box.snp.makeConstraints { make in
-                        selectedBoxCenter = make.leading.trailing.equalTo(item).inset(8).constraint
-                    }
+                    selectedBoxLeading?.isActive = false
+                    selectedBoxTrailing?.isActive = false
+
+                    let leading = box.leadingAnchor.constraint(equalTo: item.leadingAnchor, constant: 8)
+                    let trailing = box.trailingAnchor.constraint(equalTo: item.trailingAnchor, constant: -8)
+                    NSLayoutConstraint.activate([leading, trailing])
+                    self.selectedBoxLeading = leading
+                    self.selectedBoxTrailing = trailing
+
                     if isFirst {
                         self.view.layoutIfNeeded()
                         self.isFirst = false
@@ -292,13 +317,34 @@ open class CustomTabBarController: UIViewController {
             }
         }
     }
+    
+    public func setAlign(_ align: CustomTabBarAlign = CustomTabBarAlign.center) {
+        switch align {
+        case .center:
+            self.tabBarCenter.isActive = true
+            self.tabBarLeading.isActive = false
+            self.tabBarTrailing.isActive = false
+            self.tabBarWidth.isActive = true
+        case .left:
+            self.tabBarCenter.isActive = false
+            self.tabBarLeading.isActive = true
+            self.tabBarTrailing.isActive = false
+            self.tabBarWidth.isActive = true
+        case .right:
+            self.tabBarCenter.isActive = false
+            self.tabBarLeading.isActive = false
+            self.tabBarTrailing.isActive = true
+            self.tabBarWidth.isActive = true
+        }
+    }
 
-    public func setLayoutMargin(height: CGFloat,
+    public func setLayoutMargin(height: CGFloat, itemWidth: CGFloat? = nil,
                                 margin: Margin,
                                 padding: Padding,
                                 cornerRadius: CGFloat? = nil) {
-
+        
         self.height = height
+        self.itemWidth = itemWidth
         self.margin = margin
         self.padding = padding
 
@@ -310,6 +356,10 @@ open class CustomTabBarController: UIViewController {
 
         if let cornerRadius = cornerRadius {
             self.cornerRadius = cornerRadius
+        }
+        
+        if let itemWidth {
+            self.tabBarWidth.constant = itemWidth * CGFloat(items.count)
         }
 
         self.setMargin()
@@ -352,17 +402,19 @@ open class CustomTabBarController: UIViewController {
         }
     }
 
-    public func setSelectedBox(radius: CGFloat, color: UIColor) {
+    public func setSelectedBox(color: UIColor) {
+        let verticalMargin: CGFloat = 4
         let box = UIView()
         box.backgroundColor = color
-        box.layer.cornerRadius = radius
+        box.layer.cornerRadius = height / 2 - verticalMargin
 
         self.tabBarView.insertSubview(box, belowSubview: tabBarStackView)
 
-        box.snp.makeConstraints { make in
-//            make.width.equalTo(60)
-            make.top.bottom.equalTo(self.tabBarView).inset(8)
-        }
+        box.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            box.topAnchor.constraint(equalTo: self.tabBarView.topAnchor, constant: verticalMargin),
+            box.bottomAnchor.constraint(equalTo: self.tabBarView.bottomAnchor, constant: -verticalMargin)
+        ])
 
         self.selectedBox = box
     }

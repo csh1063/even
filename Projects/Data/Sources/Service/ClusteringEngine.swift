@@ -122,14 +122,31 @@ public final class ClusteringEngine<Item: ClusterableEmbedding> {
 
     /// 1) raw cluster 형성 → 2) leftover만 모아 최대 maxRetryRounds회 재시도(새 raw cluster가
     /// 0개인 라운드가 나오면 조기 종료) → 3) 모든 라운드의 raw cluster를 합쳐 최종 병합을 딱 한 번 수행.
-    public func clusterWithLeftoverRetry(embeddings: [Item], maxRetryRounds: Int = 3) -> ClusteringOutcome<Item> {
+    ///
+    /// `onProgress`는 유사도 행렬 계산처럼 무거운 단계 하나가 통째로 끝나야만 다음 값을 보낼 수 있어서
+    /// 촘촘한 진행률은 아니다 — 그래도 몇 분씩 걸릴 수 있는 이 함수가 호출자 입장에서 "그동안 아무 신호도
+    /// 없는 단일 블랙박스"로 보이지 않게 하는 목적. 형성(1) + 최대 재시도(maxRetryRounds) + 병합(1) 단계를
+    /// 분모로 삼아 "지금까지 확실히 끝낸 단계 비율"만 보여준다(재시도가 조기 종료돼도 근사치면 충분).
+    public func clusterWithLeftoverRetry(
+        embeddings: [Item],
+        maxRetryRounds: Int = 3,
+        onProgress: @escaping @Sendable (Double) -> Void = { _ in }
+    ) -> ClusteringOutcome<Item> {
         guard !embeddings.isEmpty else { return ClusteringOutcome(clusters: [], leftover: []) }
+
+        let totalPhases = Double(maxRetryRounds + 2)
+        var completedPhases: Double = 0
+        func reportPhaseComplete() {
+            completedPhases += 1
+            onProgress(min(completedPhases / totalPhases, 1.0))
+        }
 
         var rawGroups: [[Item]] = []
 
         let (initialRaw, initialLeftover) = formRawClusters(embeddings: embeddings)
         rawGroups.append(contentsOf: initialRaw)
         var pool = initialLeftover
+        reportPhaseComplete()
 
         var round = 0
         while round < maxRetryRounds, !pool.isEmpty {
@@ -142,10 +159,12 @@ public final class ClusteringEngine<Item: ClusterableEmbedding> {
             }
             rawGroups.append(contentsOf: raw)
             pool = leftover
+            reportPhaseComplete()
         }
 
         let (clusters, mergeLeftover) = mergeRawClusters(rawGroups)
         let finalLeftover = mergeLeftover + pool
+        onProgress(1.0)
 
         debugLog("📊 [\(logTag)] 전체 완료 → raw cluster \(rawGroups.count)개 → 최종 클러스터 \(clusters.count)개 / 최종 leftover \(finalLeftover.count)개")
         return ClusteringOutcome(clusters: clusters, leftover: finalLeftover)

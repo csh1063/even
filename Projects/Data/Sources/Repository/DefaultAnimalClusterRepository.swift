@@ -29,10 +29,13 @@ public final class DefaultAnimalClusterRepository: AnimalClusterRepository {
 
     // MARK: - 전체 클러스터링 및 앨범 저장
 
-    public func clusterAndSaveAlbums() async throws {
+    public func clusterAndSaveAlbums(onProgress: @escaping @Sendable (Double) -> Void) async throws {
         let context = ModelContext(container)
 
-        let embeddingDescriptor = FetchDescriptor<AnimalEmbeddingEntity>()
+        var embeddingDescriptor = FetchDescriptor<AnimalEmbeddingEntity>()
+        // photo/cluster를 루프 안에서 하나씩 접근하면 SwiftData가 개별로 fault를 해결하며 디스크를
+        // 왕복한다(N+1) — 미리 한 번에 당겨와서 이후 접근이 전부 메모리에서 끝나게 한다.
+        embeddingDescriptor.relationshipKeyPathsForPrefetching = [\.photo, \.cluster]
         let allEntities = try context.fetch(embeddingDescriptor)
             .sorted { $0.id.uuidString < $1.id.uuidString }
 
@@ -57,8 +60,20 @@ public final class DefaultAnimalClusterRepository: AnimalClusterRepository {
         let embeddings = Array(allEntities.map { $0.toDomain() }.reversed())
         let dogEmbeddings = embeddings.filter { $0.species == .dog }
         let catEmbeddings = embeddings.filter { $0.species == .cat }
-        let dogOutcome = clusterService.clusterWithLeftoverRetry(embeddings: dogEmbeddings)
-        let catOutcome = clusterService.clusterWithLeftoverRetry(embeddings: catEmbeddings)
+
+        // 개/고양이 순차 처리 두 단계를 각 종의 임베딩 수 비율로 나눠서 0~0.9 구간에 합쳐 보고한다
+        // (0.9~1.0은 클러스터링 이후 앨범 적용 단계용) — 한쪽 종이 비어있으면 그 종의 클러스터링은
+        // 아예 호출되지 않아 onProgress도 안 불리므로 가중치가 0이어도 문제없다.
+        let totalCount = max(embeddings.count, 1)
+        let dogWeight = Double(dogEmbeddings.count) / Double(totalCount)
+        let catWeight = Double(catEmbeddings.count) / Double(totalCount)
+
+        let dogOutcome = clusterService.clusterWithLeftoverRetry(embeddings: dogEmbeddings) { ratio in
+            onProgress(ratio * dogWeight * 0.9)
+        }
+        let catOutcome = clusterService.clusterWithLeftoverRetry(embeddings: catEmbeddings) { ratio in
+            onProgress((dogWeight + ratio * catWeight) * 0.9)
+        }
         let clusterResults = dogOutcome.clusters + catOutcome.clusters
         let leftoverCount = dogOutcome.leftover.count + catOutcome.leftover.count
 
@@ -86,6 +101,7 @@ public final class DefaultAnimalClusterRepository: AnimalClusterRepository {
         }
 
         try context.save()
+        onProgress(1.0)
     }
 
     /// 동물 앨범 전체를 (종 구분 없이) 사진 수 내림차순으로 "반려동물 1"부터 다시 번호 매긴다.
@@ -162,12 +178,14 @@ public final class DefaultAnimalClusterRepository: AnimalClusterRepository {
         }
 
         var currentPhotoIds = Set(album.photos.map { $0.localIdentifier })
+        var currentEmbeddingIds = Set(cluster.animalEmbeddings.map { $0.id })
 
         for embedding in result.embeddings {
             guard let entity = entityById[embedding.id] else { continue }
             entity.cluster = cluster
-            if !cluster.animalEmbeddings.contains(where: { $0.id == entity.id }) {
+            if !currentEmbeddingIds.contains(entity.id) {
                 cluster.animalEmbeddings.append(entity)
+                currentEmbeddingIds.insert(entity.id)
             }
 
             guard let photo = entity.photo else { continue }

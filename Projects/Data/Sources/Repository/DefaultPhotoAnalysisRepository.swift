@@ -55,7 +55,7 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
     /// 여러 사진 배치 분석 → 진행률 스트림 반환
     public func analyze(excludingIds: [String]) -> AsyncThrowingStream<ProgressAnalysis, Error> {
         return AsyncThrowingStream { continuation in
-            Task {
+            let task = Task {
                 do {
                     let allAssets = try await libraryService.getPhotoList().photos
                     let photos = allAssets.filter { !excludingIds.contains($0.asset.localIdentifier) }
@@ -65,6 +65,7 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                     let batches = photos.chunked(into: batchSize)
 
                     for batch in batches {
+                        try Task.checkCancellation()
                         try await withThrowingTaskGroup(of: (Photo, [PhotoLabel]).self) { group in
                             for photo in batch {
                                 group.addTask {
@@ -136,6 +137,7 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                     continuation.finish(throwing: error)
                 }
             }
+            continuation.onTermination = { @Sendable _ in task.cancel() }
         }
     }
 

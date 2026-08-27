@@ -22,16 +22,19 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
 
     // MARK: - 전체 클러스터링 및 앨범 저장
 
-    public func clusterAndSaveAlbums() async throws {
+    public func clusterAndSaveAlbums(onProgress: @escaping @Sendable (Double) -> Void) async throws {
         let context = ModelContext(container)
 
         // 1. DB에서 모든 FaceEmbeddingEntity 로드
         // SwiftData의 fetch 순서 자체가 실행마다 안정적으로 보장되지 않아서, id(UUID) 문자열 기준으로
         // 직접 정렬해 순서를 고정한다 — 안 그러면 Chinese Whispers 내부 순회를 고정해봤자
         // 입력 순서 자체가 매번 달라져서 같은 사진으로 재분석해도 결과가 달라질 수 있다.
-        let embeddingDescriptor = FetchDescriptor<FaceEmbeddingEntity>(
+        var embeddingDescriptor = FetchDescriptor<FaceEmbeddingEntity>(
             predicate: #Predicate { $0.hasGlasses == false }
         )
+        // photo/cluster를 루프 안에서 하나씩 접근하면 SwiftData가 개별로 fault를 해결하며 디스크를
+        // 왕복한다(N+1) — 미리 한 번에 당겨와서 이후 접근이 전부 메모리에서 끝나게 한다.
+        embeddingDescriptor.relationshipKeyPathsForPrefetching = [\.photo, \.cluster]
         let allEntities = try context.fetch(embeddingDescriptor)
             .sorted { $0.id.uuidString < $1.id.uuidString }
 
@@ -54,7 +57,11 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
         // 클러스터링 — raw cluster 형성에서 버려진 임베딩은 leftover만 모아 최대 3회 재시도한 뒤
         // 전체 라운드의 raw cluster를 합쳐 최종 병합까지 끝낸 결과가 outcome.clusters로 온다
         let embeddings = Array(allEntities.map { $0.toDomain() }.reversed())
-        let outcome = clusterService.clusterWithLeftoverRetry(embeddings: embeddings)
+        // 클러스터링 자체(0~0.9)와 결과를 앨범에 적용하는 나머지(0.9~1.0)를 나눠서, 클러스터링이
+        // 끝난 뒤에도 진행률이 계속 움직이는 것처럼 보이게 한다 — 실제로는 적용 단계가 훨씬 빠르다.
+        let outcome = clusterService.clusterWithLeftoverRetry(embeddings: embeddings) { ratio in
+            onProgress(ratio * 0.9)
+        }
 
         debugLog("📊 총 \(outcome.clusters.count)개 클러스터 생성 (leftover \(outcome.leftover.count)개)")
 
@@ -81,6 +88,7 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
         }
 
         try context.save()
+        onProgress(1.0)
     }
 
     /// 인물 앨범 전체를 사진 수 내림차순으로 "인물 1"부터 다시 번호 매긴다. 사용자가 직접 이름을
@@ -153,12 +161,14 @@ public final class DefaultFaceClusterRepository: FaceClusterRepository {
         }
 
         var currentPhotoIds = Set(album.photos.map { $0.localIdentifier })
+        var currentEmbeddingIds = Set(cluster.faceEmbeddings.map { $0.id })
 
         for embedding in result.embeddings {
             guard let entity = entityById[embedding.id] else { continue }
             entity.cluster = cluster
-            if !cluster.faceEmbeddings.contains(where: { $0.id == entity.id }) {
+            if !currentEmbeddingIds.contains(entity.id) {
                 cluster.faceEmbeddings.append(entity)
+                currentEmbeddingIds.insert(entity.id)
             }
 
             guard let photo = entity.photo else { continue }

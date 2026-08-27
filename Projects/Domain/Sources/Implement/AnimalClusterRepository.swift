@@ -15,7 +15,7 @@ import Foundation
 
 public protocol AnimalClusterRepository {
     /// 전체 재클러스터링 및 앨범 저장
-    func clusterAndSaveAlbums() async throws
+    func clusterAndSaveAlbums(onProgress: @escaping @Sendable (Double) -> Void) async throws
 
     /// 새 임베딩을 기존 클러스터에 매칭하여 앨범에 추가
     func matchAndAddNewEmbeddings(embeddingIds: [UUID]) async throws

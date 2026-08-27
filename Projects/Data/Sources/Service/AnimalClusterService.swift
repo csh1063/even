@@ -21,7 +21,10 @@ public final class AnimalClusterService {
         engine.cluster(embeddings: embeddings)
     }
 
-    public func clusterWithLeftoverRetry(embeddings: [AnimalEmbedding]) -> ClusteringOutcome<AnimalEmbedding> {
-        engine.clusterWithLeftoverRetry(embeddings: embeddings, maxRetryRounds: 3)
+    public func clusterWithLeftoverRetry(
+        embeddings: [AnimalEmbedding],
+        onProgress: @escaping @Sendable (Double) -> Void = { _ in }
+    ) -> ClusteringOutcome<AnimalEmbedding> {
+        engine.clusterWithLeftoverRetry(embeddings: embeddings, maxRetryRounds: 3, onProgress: onProgress)
     }
 }

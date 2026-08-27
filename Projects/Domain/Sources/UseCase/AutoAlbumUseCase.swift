@@ -78,23 +78,32 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
     /// 날짜/주소/카테고리는 아직 분류되지 않은 사진만, 비슷한사진은 시간 윈도우 안에서만 증분 처리한다.
     public func generateAllAlbums(fullRegenerate: Bool) -> AsyncThrowingStream<ProgressAlbum, Error> {
         AsyncThrowingStream { continuation in
-            Task {
+            let task = Task {
                 do {
                     let totalSteps = 5.0
 
+                    try Task.checkCancellation()
                     try await classifyNewPhotosCore(fullRegenerate: fullRegenerate)
                     continuation.yield(ProgressAlbum(step: .creatingAlbums, ratio: 1 / totalSteps))
 
-                    try await createFaceAlbumsCore()
+                    try Task.checkCancellation()
+                    try await createFaceAlbumsCore { ratio in
+                        continuation.yield(ProgressAlbum(step: .creatingAlbums, ratio: 1 / totalSteps + ratio * (1 / totalSteps)))
+                    }
                     continuation.yield(ProgressAlbum(step: .creatingAlbums, ratio: 2 / totalSteps))
 
-                    try await createAnimalAlbumsCore()
+                    try Task.checkCancellation()
+                    try await createAnimalAlbumsCore { ratio in
+                        continuation.yield(ProgressAlbum(step: .creatingAlbums, ratio: 2 / totalSteps + ratio * (1 / totalSteps)))
+                    }
                     continuation.yield(ProgressAlbum(step: .creatingAlbums, ratio: 3 / totalSteps))
 
                     // 여행 앨범이 "누가 포함되는지"(사람+동물)를 계산하려면 얼굴/동물 앨범이 먼저 만들어져 있어야 한다
+                    try Task.checkCancellation()
                     try await createTravelAlbumsCore()
                     continuation.yield(ProgressAlbum(step: .creatingAlbums, ratio: 4 / totalSteps))
 
+                    try Task.checkCancellation()
                     try await updateSimilarAlbumsIncrementalCore(fullRegenerate: fullRegenerate) { ratio in
                         continuation.yield(ProgressAlbum(step: .creatingAlbums, ratio: 4 / totalSteps + ratio * (1 / totalSteps)))
                     }
@@ -109,6 +118,13 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
                 } catch {
                     continuation.finish(throwing: error)
                 }
+            }
+            // for try await로 소비하던 쪽이 자기 Task가 취소돼서 중간에 소비를 그만두면 이 스트림도
+            // 종료(termination)되는데, 그것만으로는 위 Task { ... }가 알아서 안 멈춘다(별개의 detached
+            // Task라 밖에서 소비를 그만해도 자기가 취소됐다는 걸 모른다) — onTermination에서 명시적으로
+            // task를 취소해서, 위 각 단계 사이의 checkCancellation()이 이걸 감지하고 실제로 멈추게 한다.
+            continuation.onTermination = { _ in
+                task.cancel()
             }
         }
     }
@@ -438,13 +454,13 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
         }
     }
 
-    private func createFaceAlbumsCore() async throws {
-        try await faceClusterRepository.clusterAndSaveAlbums()
+    private func createFaceAlbumsCore(onProgress: @escaping @Sendable (Double) -> Void = { _ in }) async throws {
+        try await faceClusterRepository.clusterAndSaveAlbums(onProgress: onProgress)
         try albumDataRepository.syncAlbums()
     }
 
-    private func createAnimalAlbumsCore() async throws {
-        try await animalClusterRepository.clusterAndSaveAlbums()
+    private func createAnimalAlbumsCore(onProgress: @escaping @Sendable (Double) -> Void = { _ in }) async throws {
+        try await animalClusterRepository.clusterAndSaveAlbums(onProgress: onProgress)
         try albumDataRepository.syncAlbums()
     }
 

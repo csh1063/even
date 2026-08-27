@@ -464,16 +464,27 @@ public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepo
     }
 
     // MARK: - Private
+
+    // assetsd가 죽는 등의 이유로 PHImageManager 콜백이 영영 안 올 수 있다 — isSynchronous 콜백이므로
+    // 타임아웃 없이 걸리면 이 continuation이 영원히 안 풀려서 상위 분석/앨범생성 파이프라인 전체가 멈춘다.
+    private static let featureVectorTimeout: TimeInterval = 8
+
     private func extractFeatureVector(localIdentifier: String) async -> [Float]? {
         return await withCheckedContinuation { continuation in
+            let resumeGuard = ResumeOnceGuard()
+
             let options = PHImageRequestOptions()
             options.isSynchronous = true
             options.deliveryMode = .fastFormat
 
             let result = PHAsset.fetchAssets(withLocalIdentifiers: [localIdentifier], options: nil)
             guard let asset = result.firstObject else {
-                continuation.resume(returning: nil)
+                resumeGuard.resume(continuation, with: nil)
                 return
+            }
+
+            DispatchQueue.global().asyncAfter(deadline: .now() + Self.featureVectorTimeout) {
+                resumeGuard.resume(continuation, with: nil)
             }
 
             PHImageManager.default().requestImage(
@@ -483,7 +494,7 @@ public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepo
                 options: options
             ) { image, _ in
                 guard let cgImage = image?.cgImage else {
-                    continuation.resume(returning: nil)
+                    resumeGuard.resume(continuation, with: nil)
                     return
                 }
 
@@ -493,7 +504,7 @@ public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepo
 
                 guard let observation = request.results?.first as? VNFeaturePrintObservation,
                       observation.elementType == .float else {
-                    continuation.resume(returning: nil)
+                    resumeGuard.resume(continuation, with: nil)
                     return
                 }
 
@@ -501,7 +512,7 @@ public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepo
                 let values: [Float] = observation.data.withUnsafeBytes { rawBuffer in
                     Array(rawBuffer.bindMemory(to: Float.self).prefix(count))
                 }
-                continuation.resume(returning: values)
+                resumeGuard.resume(continuation, with: values)
             }
         }
     }
@@ -510,5 +521,20 @@ public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepo
         var squaredSum: Float = 0
         vDSP_distancesq(a, 1, b, 1, &squaredSum, vDSP_Length(a.count))
         return squaredSum.squareRoot()
+    }
+}
+
+/// PHImageManager 콜백과 타임아웃 둘 다 같은 continuation을 resume하려 할 수 있어서, 스레드 안전하게
+/// 딱 한 번만 resume되도록 보장한다 — CheckedContinuation은 중복 resume 시 크래시하기 때문에 필요하다.
+private final class ResumeOnceGuard {
+    private let lock = NSLock()
+    private var didResume = false
+
+    func resume(_ continuation: CheckedContinuation<[Float]?, Never>, with value: [Float]?) {
+        lock.lock()
+        defer { lock.unlock() }
+        guard !didResume else { return }
+        didResume = true
+        continuation.resume(returning: value)
     }
 }
