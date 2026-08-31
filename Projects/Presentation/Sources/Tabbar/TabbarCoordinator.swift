@@ -86,11 +86,31 @@ final class TabbarCoordinator: BaseCoordinator {
     }
 
     private func showAnalysisSheet(progress: AnalyzeProgress) {
+        // 같은 progress를 보여주는 플로팅 미니 진행률이 이미 떠 있다면(최소화 상태에서 다시 시트를
+        // 열게 되는 경우) 중복 표시되지 않도록 먼저 치운다.
+        AnalysisProgressManager.shared.hide()
+
         let sheet = AlbumAnalysisSheet(progress: progress)
         sheet.isModalInPresentation = true
         if let presentation = sheet.sheetPresentationController {
             presentation.detents = [.medium()]
             presentation.preferredCornerRadius = 28
+        }
+        // 사용자가 명시적으로 최소화 버튼을 눌러 시트를 닫으면(스와이프/탭-아웃은 여전히 막혀있음),
+        // 진행 중이던 분석/앨범생성 진행률을 그대로 물려받는 플로팅 미니 진행률로 대체한다 — 분석
+        // 자체는 계속 진행된다. 플로팅 미니 진행률을 다시 탭하면 원래 시트로 복귀한다.
+        sheet.onMinimize = { [weak self] in
+            AnalysisProgressManager.shared.show(
+                locationProgress: progress.photoProgress,
+                albumProgress: progress.albumProgress,
+                onTap: {
+                    // 슬라이드-아웃 애니메이션이 실제로 끝난 뒤에 시트를 띄운다 — 바로 present하면
+                    // 위젯이 사라지는 게 아니라 새로 뜬 시트에 그냥 가려져서 애니메이션이 안 보였다.
+                    AnalysisProgressManager.shared.hide(delay: 0) {
+                        self?.showAnalysisSheet(progress: progress)
+                    }
+                }
+            )
         }
 
         tabbarViewController?.present(sheet, animated: true)

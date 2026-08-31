@@ -13,6 +13,17 @@ import Combine
 final class AlbumAnalysisSheet: UIViewController {
 
     var progress: AnalyzeProgress
+    /// 사용자가 명시적으로 최소화 버튼을 눌렀을 때만 불린다 — 스와이프/탭-아웃으로는 안 닫히므로
+    /// (isModalInPresentation = true, 분석 중 리셋 화면 이동 방지 목적) 이 콜백이 유일한 "닫힘" 신호다.
+    var onMinimize: (() -> Void)?
+
+    private let minimizeButton: UIButton = {
+        let button = UIButton(type: .system)
+        let config = UIImage.SymbolConfiguration(pointSize: 15, weight: .semibold)
+        button.setImage(UIImage(systemName: "xmark", withConfiguration: config), for: .normal)
+        button.tintColor = Theme.textSecondary
+        return button
+    }()
 
     private let grabberView: UIView = {
         let view = UIView()
@@ -61,7 +72,6 @@ final class AlbumAnalysisSheet: UIViewController {
     private let albumProgressPublisher: AnyPublisher<Double, Never>
     private let albumCompletedPublisher: AnyPublisher<Void, Never>
     private var cancellables = Set<AnyCancellable>()
-    private var didStartAlbumGeneration = false
 
     init(progress: AnalyzeProgress) {
         self.progress = progress
@@ -83,6 +93,12 @@ final class AlbumAnalysisSheet: UIViewController {
         view.backgroundColor = Theme.surface
         setupLayout()
         setupBindings()
+        minimizeButton.addTarget(self, action: #selector(minimizeTapped), for: .touchUpInside)
+    }
+
+    @objc private func minimizeTapped() {
+        onMinimize?()
+        dismiss(animated: true)
     }
 
     override func viewDidLayoutSubviews() {
@@ -123,6 +139,7 @@ final class AlbumAnalysisSheet: UIViewController {
         mainStack.setCustomSpacing(12, after: rowStack)
 
         view.addSubview(grabberView)
+        view.addSubview(minimizeButton)
         view.addSubview(mainStack)
 
         grabberView.snp.makeConstraints { make in
@@ -130,6 +147,12 @@ final class AlbumAnalysisSheet: UIViewController {
             make.centerX.equalTo(view)
             make.width.equalTo(42)
             make.height.equalTo(5)
+        }
+
+        minimizeButton.snp.makeConstraints { make in
+            make.top.equalTo(view).offset(16)
+            make.trailing.equalTo(view).inset(20)
+            make.width.height.equalTo(28)
         }
 
         circleBackground.snp.makeConstraints { make in
@@ -151,10 +174,11 @@ final class AlbumAnalysisSheet: UIViewController {
     }
 
     private func setupBindings() {
-        // 사진 분석이 끝나기 전까지는 앨범 생성은 아직 시작 전이니 "대기" 상태로 보여준다
+        // 사진 분석과 앨범 생성이 순차가 아니라 2트랙(주소/라벨)으로 동시에 진행되고, 앨범 생성도
+        // 각 트랙이 끝나는 대로 바로 시작되므로 두 로딩 인디케이터를 처음부터 같이 돌린다.
         photoRow.startSpinner()
-        albumRow.setTitle(String(localized: "앨범 생성 대기", bundle: .module))
-        albumRow.stopSpinner()
+        albumRow.setTitle(String(localized: "앨범 생성 중", bundle: .module))
+        albumRow.startSpinner()
 
         // progress 값(0~1)은 오직 진행률 바 표시용 — @Published라 구독 시점 현재값을 리플레이하기 때문에
         // "완료"라는 확정적인 상태 전환은 이 값으로 추론하지 않고, 아래 photoCompleted/albumCompleted
@@ -176,7 +200,10 @@ final class AlbumAnalysisSheet: UIViewController {
         photoCompletedPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] in
-                self?.startAlbumGenerationIfNeeded()
+                guard let self else { return }
+                self.photoRow.updateProgress(1.0)
+                self.photoRow.setTitle(String(localized: "사진 분석 완료", bundle: .module))
+                self.photoRow.stopSpinner()
             }
             .store(in: &cancellables)
 
@@ -184,24 +211,12 @@ final class AlbumAnalysisSheet: UIViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] in
                 guard let self else { return }
-                self.startAlbumGenerationIfNeeded()
                 self.albumRow.updateProgress(1.0)
                 self.albumRow.setTitle(String(localized: "앨범 생성 완료", bundle: .module))
                 self.albumRow.stopSpinner()
                 self.endPage()
             }
             .store(in: &cancellables)
-    }
-
-    private func startAlbumGenerationIfNeeded() {
-        guard !didStartAlbumGeneration else { return }
-        didStartAlbumGeneration = true
-
-        photoRow.setTitle(String(localized: "사진 분석 완료", bundle: .module))
-        photoRow.stopSpinner()
-
-        albumRow.setTitle(String(localized: "앨범 생성 중", bundle: .module))
-        albumRow.startSpinner()
     }
 
     private func endPage() {

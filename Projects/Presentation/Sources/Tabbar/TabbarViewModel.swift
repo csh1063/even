@@ -50,6 +50,43 @@ public final class TabbarViewModel: BaseViewModel {
     // 현재값을 항상 리플레이한다 — "완료"라는 확정적 신호는 그거와 별개로 한 번만 쏘는 이벤트로 관리한다
     // (PassthroughSubject는 과거 값을 리플레이하지 않아서, 뒤늦게 구독해도 엉뚱한 값에 걸릴 일이 없다)
     private let photoCompletedSubject = PassthroughSubject<Void, Never>()
+
+    // MARK: - 진행률 컴포넌트 (사용자 확정 가중치)
+    //
+    // 각 항목은 자기 몫만큼의 가중치를 가진 독립적인 0~1 값이고, progressRatio/autoAlbumProgressRatio는
+    // 이 값들을 가중합해서 매번 다시 계산한다("실행 순서"가 아니라 "가중치"만 정해져 있는 구조라, 두
+    // 항목이 동시에 끝나면 둘 다 그대로 반영되고, 어느 순서로 끝나든 상관없다).
+    //
+    // 사진 분석: 날짜 5% + (지오코딩+라벨/임베딩 결합) 85% + 중복사진 탐지(임베딩 추출+비교) 10%
+    private var dateProgress: Double = 0
+    private var streamProgress: Double = 0
+    private var dupDetectProgress: Double = 0
+    // 앨범 생성: 여행 30% + 지역 10% + 얼굴/동물 30% + 여행자연결 10% + 카테고리 10% + 중복앨범저장 10%
+    private var travelProgress: Double = 0
+    private var regionProgress: Double = 0
+    private var faceAnimalProgress: Double = 0
+    private var travelerLinkProgress: Double = 0
+    private var categoryProgress: Double = 0
+    private var dupSaveProgress: Double = 0
+
+    private func resetProgressComponents() {
+        dateProgress = 0; streamProgress = 0; dupDetectProgress = 0
+        travelProgress = 0; regionProgress = 0; faceAnimalProgress = 0
+        travelerLinkProgress = 0; categoryProgress = 0; dupSaveProgress = 0
+    }
+
+    private func recomputePhotoProgress() {
+        progressRatio = dateProgress * 0.05 + streamProgress * 0.85 + dupDetectProgress * 0.1
+    }
+
+    private func recomputeAlbumProgress() {
+        autoAlbumProgressRatio = travelProgress * 0.3
+            + regionProgress * 0.1
+            + faceAnimalProgress * 0.3
+            + travelerLinkProgress * 0.1
+            + categoryProgress * 0.1
+            + dupSaveProgress * 0.1
+    }
     private let albumCompletedSubject = PassthroughSubject<Void, Never>()
     @Published private var isAnalyzing: Bool = false
     @Published private var isComplete: Bool = false
@@ -232,32 +269,143 @@ public final class TabbarViewModel: BaseViewModel {
 
     // MARK: - 분석 + 앨범 생성 통합 플로우
 
+    /// 분석이 진행되는 동안(전체가 끝나길 기다리지 않고) 각 데이터가 준비되는 대로 관련 앨범을 바로
+    /// 생성한다. 두 트랙이 각자 필요한 데이터만 준비되면 바로 다음 단계로 넘어간다 — 기다릴 필요 없는
+    /// 단계를 억지로 뒤에 묶어두지 않는다:
+    /// - 주소 트랙: 지오코딩 완료 → 여행 앨범 → 지역 앨범(주소만 있으면 됨, 라벨 안 씀)
+    /// - 라벨 트랙: 라벨+임베딩 완료 → 카테고리 앨범(라벨만 있으면 됨) → 얼굴/동물 앨범 → 중복사진 탐지
+    ///   (얼굴/동물·중복탐지는 카테고리보다 오래 걸려서 카테고리를 먼저 끝내는 게 이득)
+    ///
+    /// 진행률은 "실행 순서"가 아니라 "가중치"로만 정해진다 — 각 항목은 자기 몫(위 `recomputePhotoProgress`/
+    /// `recomputeAlbumProgress` 참고)만큼의 독립적인 0~1 값이고, 매번 가중합해서 다시 계산한다. 그래서
+    /// 두 항목이 동시에 끝나면 둘 다 그대로 반영되고, 어느 순서로 끝나든 상관없다. 사진 분석 게이지와
+    /// 앨범 생성 게이지도 서로 독립적으로 각자 진행된다.
+    ///
+    /// "사진 분석 완료"/"앨범 생성 완료" 신호는 주소+라벨 두 스트림이 다 끝나는 시점(아래 for-loop가
+    /// 끝나는 시점)에 쏜다 — 위 두 트랙에서 파생되는 앨범 생성 작업들(여행/지역/카테고리/얼굴/동물/
+    /// 중복탐지)은 전부 최선형(best-effort)이라, 이 시점에 아직 안 끝났어도 계속 진행되며
+    /// autoAlbumProgressRatio를 갱신하고 플로팅 미니 진행률이 그걸 이어서 보여준다.
     private func analysis() async {
         guard !isAnalyzing else { return }
         self.isAnalyzing = true
+        self.progressRatio = 0
+        self.autoAlbumProgressRatio = 0
+        self.isComplete = false
+        self.resetProgressComponents()
 
         let startedAt = Date()
         debugLog("⏱️ [분석] 시작: \(startedAt)")
 
         do {
-            for try await progress in analysisUseCase.analysis() {
+            for try await progress in analysisUseCase.analysis(
+                onBasicScanCompleted: { [weak self] in
+                    debugLog("⏱️ [분석] 기본 스캔 완료 — 누적 \(String(format: "%.1f", Date().timeIntervalSince(startedAt)))초")
+                    debugLog("⏱️ [분석] 지오코딩+라벨 스트림 시작 — 누적 \(String(format: "%.1f", Date().timeIntervalSince(startedAt)))초")
+                    Task { @MainActor in
+                        let stepStartedAt = Date()
+                        debugLog("⏱️ [분석] 날짜 앨범 생성 시작 — 누적 \(String(format: "%.1f", Date().timeIntervalSince(startedAt)))초")
+                        try? await self?.autoAlbumUseCase.createDateAlbumsEarly()
+                        if let self {
+                            self.dateProgress = 1
+                            self.recomputePhotoProgress()
+                        }
+                        debugLog("⏱️ [분석] 날짜 앨범 생성 완료 — 구간 \(String(format: "%.1f", Date().timeIntervalSince(stepStartedAt)))초, 누적 \(String(format: "%.1f", Date().timeIntervalSince(startedAt)))초")
+                    }
+                },
+                onAddressStreamCompleted: { [weak self] in
+                    debugLog("⏱️ [분석] 주소(지오코딩) 스트림 완료 — 누적 \(String(format: "%.1f", Date().timeIntervalSince(startedAt)))초")
+                    Task { @MainActor in
+                        let stepStartedAt = Date()
+                        debugLog("⏱️ [분석] 여행+지역 앨범 생성 시작 — 누적 \(String(format: "%.1f", Date().timeIntervalSince(startedAt)))초")
+                        // createTravelAlbumsEarly 안에서 여행 앨범 만들고 바로 이어서 지역 분류까지
+                        // 끝낸다(둘 다 주소만 있으면 되는 작업이라 라벨을 기다릴 필요가 없다).
+                        try? await self?.autoAlbumUseCase.createTravelAlbumsEarly()
+                        if let self {
+                            self.travelProgress = 1
+                            self.regionProgress = 1
+                            self.recomputeAlbumProgress()
+                        }
+                        debugLog("⏱️ [분석] 여행+지역 앨범 생성 완료 — 구간 \(String(format: "%.1f", Date().timeIntervalSince(stepStartedAt)))초, 누적 \(String(format: "%.1f", Date().timeIntervalSince(startedAt)))초")
+                    }
+                },
+                onLabelStreamCompleted: { [weak self] in
+                    debugLog("⏱️ [분석] 라벨+임베딩 스트림 완료 — 누적 \(String(format: "%.1f", Date().timeIntervalSince(startedAt)))초")
+                    Task { @MainActor in
+                        let stepStartedAt = Date()
+
+                        // 카테고리는 라벨만 있으면 되고 얼굴/동물·중복탐지 결과가 필요 없어서 먼저 끝낸다.
+                        debugLog("⏱️ [분석] 카테고리 앨범 생성 시작 — 누적 \(String(format: "%.1f", Date().timeIntervalSince(startedAt)))초")
+                        try? await self?.autoAlbumUseCase.createCategoryAlbumsEarly()
+                        if let self {
+                            self.categoryProgress = 1
+                            self.recomputeAlbumProgress()
+                        }
+                        debugLog("⏱️ [분석] 카테고리 앨범 생성 완료 — 누적 \(String(format: "%.1f", Date().timeIntervalSince(startedAt)))초")
+
+                        debugLog("⏱️ [분석] 얼굴/동물 앨범 생성 시작 — 누적 \(String(format: "%.1f", Date().timeIntervalSince(startedAt)))초")
+                        try? await self?.autoAlbumUseCase.createPersonAndSimilarAlbums { ratio in
+                            Task { @MainActor in
+                                guard let self else { return }
+                                self.faceAnimalProgress = max(self.faceAnimalProgress, ratio)
+                                self.recomputeAlbumProgress()
+                            }
+                        }
+                        // createPersonAndSimilarAlbums 안에서 여행자 연결까지 같이 끝난 뒤 리턴된다
+                        if let self {
+                            self.faceAnimalProgress = 1
+                            self.travelerLinkProgress = 1
+                            self.recomputeAlbumProgress()
+                        }
+                        debugLog("⏱️ [분석] 얼굴/동물 앨범 생성 + 여행자 연결 완료 — 누적 \(String(format: "%.1f", Date().timeIntervalSince(startedAt)))초")
+
+                        // 중복(비슷한) 사진 탐지 — 전체 임베딩 추출+비교가 대부분의 시간을 차지해서
+                        // 분석 게이지의 몫으로 노출한다. 앨범 저장도 이 호출 안에서 같이 끝나므로,
+                        // 끝나자마자 앨범생성 게이지의 "중복앨범저장" 몫도 같이 올린다.
+                        debugLog("⏱️ [분석] 중복 사진 탐지 시작 — 누적 \(String(format: "%.1f", Date().timeIntervalSince(startedAt)))초")
+                        try? await self?.autoAlbumUseCase.detectDuplicatePhotos { ratio in
+                            Task { @MainActor in
+                                guard let self else { return }
+                                self.dupDetectProgress = max(self.dupDetectProgress, ratio)
+                                self.recomputePhotoProgress()
+                            }
+                        }
+                        if let self {
+                            self.dupDetectProgress = 1
+                            self.dupSaveProgress = 1
+                            self.recomputePhotoProgress()
+                            self.recomputeAlbumProgress()
+                        }
+                        debugLog("⏱️ [분석] 라벨 트랙(카테고리/얼굴/동물/중복탐지) 전체 완료 — 구간 \(String(format: "%.1f", Date().timeIntervalSince(stepStartedAt)))초, 누적 \(String(format: "%.1f", Date().timeIntervalSince(startedAt)))초")
+                    }
+                }
+            ) {
                 switch progress.state {
                 case .progress(let ratio):
-                    self.progressRatio = ratio
+                    self.streamProgress = max(self.streamProgress, ratio)
+                    self.recomputePhotoProgress()
                 case .completed:
-                    self.progressRatio = 1.0
+                    self.streamProgress = 1
+                    self.recomputePhotoProgress()
                 case .unavailable:
                     break
                 }
             }
-            self.progressRatio = 1.0
+            self.streamProgress = 1
+            self.recomputePhotoProgress()
+            debugLog("⏱️ [분석] 주소+라벨 스트림 전체 완료 — 누적 \(String(format: "%.1f", Date().timeIntervalSince(startedAt)))초")
+
             self.photoCompletedSubject.send(())
             try? await legacyAccessUseCase.markLegacyFreeAccess()
 
-            await runAlbumGeneration()
+            self.progressRatio = 1.0
+            self.autoAlbumProgressRatio = 1.0
+            self.isComplete = true
+            self.albumCompletedSubject.send(())
+            self.endAllProcess()
         } catch {
             self.progressRatio = 1.0
             self.autoAlbumProgressRatio = 1.0
+            self.isComplete = true
             self.photoCompletedSubject.send(())
             self.albumCompletedSubject.send(())
         }

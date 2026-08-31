@@ -29,10 +29,10 @@ final class AlbumEmtpyView: UIView {
 
     private var messageLabel: UILabel = {
         let label = UILabel()
-        label.text = String(localized: "전체 사진을 분석해 관련된 사진끼리 앨범으로 정리해요", bundle: .module)
+        label.text = String(localized: "날짜·여행·인물·반려동물까지\n사진을 자동으로 분류해 앨범을 만들어요", bundle: .module)
         label.font = .systemFont(ofSize: 15, weight: .medium)
         label.textColor = .white.withAlphaComponent(0.92)
-        label.numberOfLines = 2
+        label.numberOfLines = 0
         return label
     }()
 
@@ -55,27 +55,27 @@ final class AlbumEmtpyView: UIView {
         return analysisButton
     }()
 
-    private var locationView = UIView(backgroundColor: Theme.surface)
+    private var progressiveView = UIView(backgroundColor: Theme.surface)
     private var coverView = UIView(backgroundColor: Theme.surfaceCool)
     private var iconImageView: UIImageView = {
-        let icon = UIImage(systemName: "location.fill.viewfinder")?.withRenderingMode(.alwaysTemplate)
+        let icon = UIImage(systemName: "square.stack.3d.up.fill")?.withRenderingMode(.alwaysTemplate)
         let imageView = UIImageView(image: icon)
         imageView.tintColor = Theme.secondary
         return imageView
     }()
-    private var locationTitleLabel: UILabel = {
+    private var progressiveTitleLabel: UILabel = {
         let label = UILabel()
-        label.text = String(localized: "좌표 분석은 백그라운드에서 진행돼요", bundle: .module)
+        label.text = String(localized: "앨범이 순서대로 만들어져요", bundle: .module)
         label.font = .systemFont(ofSize: 15, weight: .semibold)
         label.textColor = Theme.textPrimary
         return label
     }()
-    private var locationMessageLabel: UILabel = {
+    private var progressiveMessageLabel: UILabel = {
         let label = UILabel()
-        label.text = String(localized: "사진에 저장된 좌표를 주소로 변환하고 관련 앨범을 생성해요", bundle: .module)
+        label.text = String(localized: "날짜·여행 앨범부터 먼저 뜨고,\n나머지도 분석하는 동안 하나씩 완성돼요", bundle: .module)
         label.font = .systemFont(ofSize: 13, weight: .regular)
         label.textColor = Theme.textSecondary
-        label.numberOfLines = 2
+        label.numberOfLines = 0
         return label
     }()
 
@@ -98,7 +98,7 @@ final class AlbumEmtpyView: UIView {
             Theme.accent,
             Theme.secondary
         ]
-        locationView.addBorder(color: Theme.strokeSoft, borderWidth: 1)
+        progressiveView.addBorder(color: Theme.strokeSoft, borderWidth: 1)
     }
 
     private func setupView() {
@@ -110,9 +110,9 @@ final class AlbumEmtpyView: UIView {
             Theme.accent,
             Theme.secondary
         ]
-        locationView.layer.cornerRadius = 18
-        locationView.layer.masksToBounds = true
-        locationView.addBorder(color: Theme.strokeSoft, borderWidth: 1)
+        progressiveView.layer.cornerRadius = 18
+        progressiveView.layer.masksToBounds = true
+        progressiveView.addBorder(color: Theme.strokeSoft, borderWidth: 1)
 
         coverView.layer.cornerRadius = 20
         coverView.layer.masksToBounds = true
@@ -122,16 +122,18 @@ final class AlbumEmtpyView: UIView {
         analysisView.addSubview(messageLabel)
         analysisView.addSubview(analysisButton)
 
-        addSubview(locationView)
-        locationView.addSubview(coverView)
-        locationView.addSubview(iconImageView)
-        locationView.addSubview(locationTitleLabel)
-        locationView.addSubview(locationMessageLabel)
+        addSubview(progressiveView)
+        progressiveView.addSubview(coverView)
+        progressiveView.addSubview(iconImageView)
+        progressiveView.addSubview(progressiveTitleLabel)
+        progressiveView.addSubview(progressiveMessageLabel)
 
+        // 카드 높이를 고정값(180)으로 박아두면 메시지가 길어지거나 기기 폭이 좁아 줄바꿈이 늘어날 때
+        // 텍스트가 잘려서 "..."으로 보이는 문제가 있었다 — 내부 요소들의 top~bottom 제약 체인이 이미
+        // 높이를 완전히 결정하므로, 고정 높이 없이 내용에 맞춰 자연스럽게 늘어나게 둔다.
         analysisView.snp.makeConstraints { make in
             make.top.equalTo(self).offset(16)
             make.leading.trailing.equalTo(self).inset(20)
-            make.height.equalTo(180)
         }
 
         titleLabel.snp.makeConstraints { make in
@@ -151,7 +153,7 @@ final class AlbumEmtpyView: UIView {
             make.bottom.equalTo(analysisView).offset(-22)
         }
 
-        locationView.snp.makeConstraints { make in
+        progressiveView.snp.makeConstraints { make in
             make.top.equalTo(analysisView.snp.bottom).offset(20)
             make.leading.trailing.equalTo(self).inset(20)
             make.bottom.equalTo(self).inset(32)
@@ -159,26 +161,26 @@ final class AlbumEmtpyView: UIView {
 
         coverView.snp.makeConstraints { make in
             make.width.height.equalTo(40)
-            make.leading.equalTo(locationView).offset(16)
-            make.centerY.equalTo(locationView)
+            make.leading.equalTo(progressiveView).offset(16)
+            make.centerY.equalTo(progressiveView)
         }
 
         iconImageView.snp.makeConstraints { make in
             make.center.equalTo(coverView)
-            make.width.height.equalTo(32)
+            make.width.height.equalTo(20)
         }
 
-        locationTitleLabel.snp.makeConstraints { make in
+        progressiveTitleLabel.snp.makeConstraints { make in
             make.leading.equalTo(coverView.snp.trailing).offset(12)
-            make.trailing.equalTo(locationView).offset(-16)
-            make.top.equalTo(locationView).offset(16)
+            make.trailing.equalTo(progressiveView).offset(-16)
+            make.top.equalTo(progressiveView).offset(16)
         }
 
-        locationMessageLabel.snp.makeConstraints { make in
+        progressiveMessageLabel.snp.makeConstraints { make in
             make.leading.equalTo(coverView.snp.trailing).offset(12)
-            make.trailing.equalTo(locationView).offset(-16)
-            make.top.equalTo(locationTitleLabel.snp.bottom).offset(4)
-            make.bottom.equalTo(locationView).offset(-16)
+            make.trailing.equalTo(progressiveView).offset(-16)
+            make.top.equalTo(progressiveTitleLabel.snp.bottom).offset(4)
+            make.bottom.equalTo(progressiveView).offset(-16)
         }
     }
 

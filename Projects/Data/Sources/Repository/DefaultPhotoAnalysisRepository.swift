@@ -104,6 +104,9 @@ public final class DefaultPhotoAnalysisRepository: PhotoAnalysisRepository {
                                         animalEmbedding = []
                                     }
 
+                                    debugLog("id: \(photoId) / year: \(year ?? "?"), month: \(month ?? "?")")
+                                    debugLog("labels: \(labels.map { $0.name }.joined(separator: ", "))")
+
                                     let newPhoto = Photo(
                                         localIdentifier: photo.asset.localIdentifier,
                                         createdAt: photo.asset.creationDate ?? Date(),
