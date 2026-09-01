@@ -37,7 +37,10 @@ struct FaceAlbumCellViewModel: AlbumCellViewModel {
         self.albumUseCase = albumUseCase
 
         self.isNamed       = album.isRenamed
-        self.isHighlighted = album.displayName == String(localized: "나", bundle: .module)
+        // album.displayName은 클러스터링 시점에 저장되는 데이터 값이라 항상 원문 "나"다(로케일 영향
+        // 안 받음) — 여기서 String(localized:)로 비교하면 영어 로케일에서 "Me"로 바뀌어서 절대 안
+        // 맞아떨어진다(AlbumDetailUseCase.swift가 원문 리터럴로 비교하는 것과 동일하게 맞춤).
+        self.isHighlighted = album.displayName == "나"
     }
 
     var faceCellViewModel: FaceCellViewModel {

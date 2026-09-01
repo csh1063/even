@@ -37,6 +37,18 @@ final class ProgressRow: UIView {
         return view
     }()
 
+    /// "자세히" 토글 — 눌리면 onToggleDetail만 알려주고, 실제 펼침/접힘 콘텐츠는 이 뷰를 들고 있는
+    /// 쪽(AlbumAnalysisSheet)이 책임진다. 이 뷰는 그저 화살표 방향만 setDetailExpanded로 반영한다.
+    var onToggleDetail: (() -> Void)?
+
+    private let detailToggleButton: UIButton = {
+        let button = UIButton(type: .system)
+        let config = UIImage.SymbolConfiguration(pointSize: 11, weight: .semibold)
+        button.setImage(UIImage(systemName: "chevron.down", withConfiguration: config), for: .normal)
+        button.tintColor = Theme.textTertiary
+        return button
+    }()
+
     private let progressView: UIView = {
         let view = UIView()
         view.backgroundColor = Theme.primary
@@ -59,6 +71,7 @@ final class ProgressRow: UIView {
         layer.cornerRadius = 16
         layer.masksToBounds = true
         setupLayout()
+        detailToggleButton.addTarget(self, action: #selector(detailToggleTapped), for: .touchUpInside)
     }
 
     required init?(coder: NSCoder) { fatalError() }
@@ -66,6 +79,18 @@ final class ProgressRow: UIView {
     func updateBorderColor() {
         layer.borderWidth = 1
         layer.borderColor = Theme.strokeSoft.cgColor
+    }
+
+    @objc private func detailToggleTapped() {
+        onToggleDetail?()
+    }
+
+    /// 화살표 방향만 반영(위/아래) — 펼쳐진 콘텐츠는 이 뷰 소관이 아니다.
+    func setDetailExpanded(_ expanded: Bool) {
+        UIView.animate(withDuration: 0.25) {
+            // 정확히 180도(.pi)는 회전 방향이 애매해질 수 있어 아주 살짝 못 미치게 돈다.
+            self.detailToggleButton.transform = expanded ? CGAffineTransform(rotationAngle: .pi - 0.001) : .identity
+        }
     }
 
     func setTitle(_ title: String) {
@@ -118,6 +143,7 @@ final class ProgressRow: UIView {
         progressView.addSubview(fillLabel)
         addSubview(iconBackground)
         addSubview(spinner)
+        addSubview(detailToggleButton)
 
         self.snp.makeConstraints { make in
             make.height.equalTo(58)
@@ -154,6 +180,12 @@ final class ProgressRow: UIView {
         spinner.snp.makeConstraints { make in
             make.trailing.equalTo(self).offset(-12)
             make.centerY.equalTo(self)
+        }
+
+        detailToggleButton.snp.makeConstraints { make in
+            make.trailing.equalTo(spinner.snp.leading).offset(-4)
+            make.centerY.equalTo(self)
+            make.width.height.equalTo(28)
         }
 
     }
