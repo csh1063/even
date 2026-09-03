@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 import Combine
 
 final class TabbarViewController: CustomTabBarController {
@@ -15,6 +16,9 @@ final class TabbarViewController: CustomTabBarController {
 
     private var showOnConsent: Bool = false
     private var showOnboarding: Bool = false
+
+    /// 탭 전환도 "사용자가 화면을 이동했다" 신호 중 하나 — 분석 진행 미니위젯을 배지로 축소하는 데 쓴다.
+    var onTabSelected: (() -> Void)?
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -44,8 +48,10 @@ final class TabbarViewController: CustomTabBarController {
 //                             margin: .init(leading: 0, trailing: 0, bottom: 0),
 //                             padding: .init(leading: 12, trailing: 12))
         self.setAlign(.center)
+        // leading은 평소(.center)엔 안 쓰이지만, 분석 진행 배지가 뜰 때 .left로 전환하는 순간 쓰인다
+        // (setBadgeModeActive 참고) — 화면 맨 왼쪽에 딱 붙지 않도록 미리 여백을 정해둔다.
         self.setLayoutMargin(height: 56, itemWidth: 80,
-                             margin: .init(bottom: 4),
+                             margin: .init(leading: 20, bottom: 4),
                              padding: .zero, cornerRadius: 28)
 
         self.setShadow(color: .black, alpha: 0.3, x: 0, y: 4, blur: 16)
@@ -116,8 +122,20 @@ final class TabbarViewController: CustomTabBarController {
     func hideTabbar() {
         self.animateFade(isShow: false)
     }
+
+    /// 분석 진행 배지(3단계)가 뜰 때만 탭바를 왼쪽으로 슬라이드해서 배지 자리를 내주고, 배지가
+    /// 사라지면 다시 가운데로 되돌린다 — 평소(분석 안 할 때) 탭바 모양은 그대로 유지하기 위해 이
+    /// 상태일 때만 정렬을 바꾼다.
+    func setBadgeModeActive(_ isActive: Bool) {
+        UIView.animate(withDuration: 0.4, delay: 0, options: [.curveEaseInOut]) {
+            self.setAlign(isActive ? .left : .center)
+            self.view.layoutIfNeeded()
+        }
+    }
 }
 
 extension TabbarViewController: CustomTabBarDelegate {
-
+    func tabBarController(_ tabBarController: CustomTabBarController, didSelect viewController: UIViewController) {
+        onTabSelected?()
+    }
 }

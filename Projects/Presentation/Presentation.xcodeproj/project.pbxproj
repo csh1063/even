@@ -28,6 +28,7 @@
 		235B72274ABF4BF368815AAD /* SimilarAlbumCellViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145AC80643E8EF1235C8168F /* SimilarAlbumCellViewModel.swift */; };
 		25B589A7BA24E5F04CB8DD4B /* AlbumEmtpyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D5978061AAA23A7ABA308AE /* AlbumEmtpyView.swift */; };
 		25CA39F7CEFA94BCD329CDAC /* AlbumSelectionActionBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F511DFA9EA5D2DF48E3794 /* AlbumSelectionActionBar.swift */; };
+		27D0FE9B5DB0D056FF6E2DC5 /* AnalysisBadgeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F7D3EB55E3E06CD68623C76 /* AnalysisBadgeManager.swift */; };
 		27E28FA1E7C3DD3AEAFC94A1 /* OpenSourceCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FA8F2EAD6ABB2AA3D68370 /* OpenSourceCell.swift */; };
 		292D2553A716A2C6634E1652 /* Extension_Sequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = E40A6C338B0BC01EC436E06E /* Extension_Sequence.swift */; };
 		2D7787A92580939395AFAA41 /* MyPageCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D950EBD5C5E8E6FB899C6E8A /* MyPageCoordinator.swift */; };
@@ -74,6 +75,7 @@
 		633196953593398A7090354A /* AlbumListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B60D24A9AF2A390B1B3B536A /* AlbumListViewController.swift */; };
 		68F7B92E595CE29E2B5D931A /* AlbumDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B5DDF86843F2E3695365DF /* AlbumDetailViewModel.swift */; };
 		69D039CFB7779BCF9D8D7D75 /* AnalyticsTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = E80ABCE343B8363B4B538628 /* AnalyticsTracker.swift */; };
+		6A7D42EF814FA9895878BFD4 /* ChecklistItemRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A404E8297EB819AA57DBAC4 /* ChecklistItemRow.swift */; };
 		6B21C00E402B89F04AC73A81 /* Extension_UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D42EEB1F9EB444EE42BCE28 /* Extension_UIImage.swift */; };
 		6DFE320F438EC6EADEAB239B /* NaviBarType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C18C417DC62917A6F8651BD /* NaviBarType.swift */; };
 		7157D7BA625AF2649C9DD85A /* TravelerManagementSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D8FC4DDF2869B6DD2972EB1 /* TravelerManagementSheet.swift */; };
@@ -87,6 +89,7 @@
 		7DBCAEB0D6433387E8F774BB /* PhotoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B86EE313B24249685CA4C2F7 /* PhotoCell.swift */; };
 		7F0DB89FCC63AE28726DD967 /* HomeCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CE527805A0FFC681F30F295 /* HomeCoordinator.swift */; };
 		7F4FDBF08CB243F08BE8ED8E /* FeedbackViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEEC0A4D906E34A5261579DB /* FeedbackViewModel.swift */; };
+		7F5592AC7DE7901F93556129 /* AnalysisBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D03CDFF410F894A99CC9D7CF /* AnalysisBadgeView.swift */; };
 		802B12E33E2A659E054052E4 /* ImageLoadable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AE569B13800FF9871F9B568 /* ImageLoadable.swift */; };
 		816DA425CF89A37BB407B2E7 /* MainCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34AD422405AEA0A6A12AAD28 /* MainCoordinator.swift */; };
 		844350A9318751FDA20ACBFD /* AnalysisProgressManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D320388CBAAEC0F5B0406D3 /* AnalysisProgressManager.swift */; };
@@ -271,8 +274,10 @@
 		8283ED43F36B19F071F13E23 /* Extension_UIButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension_UIButton.swift; sourceTree = "<group>"; };
 		82F0720D9B464CF8F3E51AD1 /* Domain.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Domain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		89F76F166FDFEB0A004CE633 /* PhotoTestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoTestViewController.swift; sourceTree = "<group>"; };
+		8A404E8297EB819AA57DBAC4 /* ChecklistItemRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChecklistItemRow.swift; sourceTree = "<group>"; };
 		8D7BED52C187B9DC312AD0E8 /* SplashViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashViewModel.swift; sourceTree = "<group>"; };
 		8F123E57E42305BA2907FE13 /* AlbumDIContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumDIContainer.swift; sourceTree = "<group>"; };
+		8F7D3EB55E3E06CD68623C76 /* AnalysisBadgeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalysisBadgeManager.swift; sourceTree = "<group>"; };
 		92D379FC79776FBC7A77423B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		976797041FBCEDED9606E242 /* MyPageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPageViewController.swift; sourceTree = "<group>"; };
 		98AAFFF31B76C431F1139731 /* HomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
@@ -319,6 +324,7 @@
 		CC48366424EBCDCD6592A9E3 /* ListCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListCoordinator.swift; sourceTree = "<group>"; };
 		CCD53CB3AA237E06A9C76764 /* Extension_UIViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension_UIViewController.swift; sourceTree = "<group>"; };
 		CEB9EB9C6C13C8F825E27E73 /* SnapKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SnapKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D03CDFF410F894A99CC9D7CF /* AnalysisBadgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalysisBadgeView.swift; sourceTree = "<group>"; };
 		D04A8C5EC590DDABBF1C900D /* CategoryAlbumCellViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryAlbumCellViewModel.swift; sourceTree = "<group>"; };
 		D08197393B15C2173440D03F /* AlbumCellViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumCellViewModel.swift; sourceTree = "<group>"; };
 		D37F0BDC6E502968F417C15F /* TravelPhotoPickerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TravelPhotoPickerViewModel.swift; sourceTree = "<group>"; };
@@ -563,6 +569,8 @@
 		661168A167C32A7D0144795E /* MiniProgress */ = {
 			isa = PBXGroup;
 			children = (
+				8F7D3EB55E3E06CD68623C76 /* AnalysisBadgeManager.swift */,
+				D03CDFF410F894A99CC9D7CF /* AnalysisBadgeView.swift */,
 				6D320388CBAAEC0F5B0406D3 /* AnalysisProgressManager.swift */,
 				9F75D7585252F6F216EA3407 /* MiniProgressView.swift */,
 			);
@@ -656,6 +664,7 @@
 			isa = PBXGroup;
 			children = (
 				578476C7DF38CB77591E8F91 /* AlbumAnalysisSheet.swift */,
+				8A404E8297EB819AA57DBAC4 /* ChecklistItemRow.swift */,
 				98C031AE6DAE167FF27731C4 /* ProgressRow.swift */,
 			);
 			path = AlbumAnalysisSheet;
@@ -1093,6 +1102,8 @@
 				1105E8EA1D4E774E78877F9B /* ListViewModel.swift in Sources */,
 				816DA425CF89A37BB407B2E7 /* MainCoordinator.swift in Sources */,
 				56AC79A47BE146CAF1BFF861 /* MainDIContainer.swift in Sources */,
+				27D0FE9B5DB0D056FF6E2DC5 /* AnalysisBadgeManager.swift in Sources */,
+				7F5592AC7DE7901F93556129 /* AnalysisBadgeView.swift in Sources */,
 				844350A9318751FDA20ACBFD /* AnalysisProgressManager.swift in Sources */,
 				C48504015447BE9145C3B19B /* MiniProgressView.swift in Sources */,
 				360EC230457FE62E99B85C5E /* BoxView.swift in Sources */,
@@ -1126,6 +1137,7 @@
 				729B91FE44EF04E9EE610439 /* PhotoTestViewController.swift in Sources */,
 				A66EA7FFA90ADCC87447CF53 /* PhotoTestViewModel.swift in Sources */,
 				9AD6C7E9A5FA5F94CC182ACB /* AlbumAnalysisSheet.swift in Sources */,
+				6A7D42EF814FA9895878BFD4 /* ChecklistItemRow.swift in Sources */,
 				583F1860FF067258C0853DD6 /* ProgressRow.swift in Sources */,
 				7C0145556EBC1873AEB15550 /* AlbumMergeSheet.swift in Sources */,
 				CB35CC3AB192980D23002577 /* AlbumOptionsSheet.swift in Sources */,

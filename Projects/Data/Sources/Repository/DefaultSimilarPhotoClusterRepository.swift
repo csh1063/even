@@ -241,6 +241,7 @@ public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepo
 
         // 8. 저장
         try context.save()
+        debugLog("✅ [SimilarPhoto] 완료")
     }
 
     public func clusterNewPhotos(
@@ -461,6 +462,7 @@ public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepo
         }
 
         try context.save()
+        debugLog("✅ [SimilarPhoto] 증분 처리 완료")
     }
 
     // MARK: - Private

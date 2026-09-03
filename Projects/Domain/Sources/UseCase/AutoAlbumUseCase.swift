@@ -13,6 +13,31 @@ public protocol AutoAlbumUseCase {
     /// 다시 분류한다 — "자동 앨범 전체 재생성"처럼 앨범만 지우고 이 플래그는 그대로인 상황에서
     /// 날짜/주소/카테고리 앨범이 재생성되지 않는 문제를 피하기 위함
     func generateAllAlbums(fullRegenerate: Bool) -> AsyncThrowingStream<ProgressAlbum, Error>
+
+    // MARK: - 점진적 앨범 노출용 (분석 진행 중 단계별로 호출)
+
+    /// 날짜 앨범만 즉시 생성 — 사진 기본 스캔 직후, 라벨/지오코딩을 기다리지 않고 안전하게 부를 수
+    /// 있다("이미 처리됨" 플래그를 안 건드리는 순수 추가 연산이라 나중에 분류가 다시 돌아도 안전).
+    func createDateAlbumsEarly() async throws
+    /// 여행 앨범 생성(빈 여행자로) + 지역 앨범 분류 — 지오코딩(주소) 스트림이 끝나는 대로 부른다.
+    /// 지역 분류는 주소 데이터만 있으면 되고 라벨을 안 써서, 라벨 스트림을 기다릴 필요가 없다.
+    func createTravelAlbumsEarly() async throws
+    /// 이미 만들어진 여행 앨범들에 얼굴/동물 앨범 연결 정보를 채운다 — 얼굴/동물 클러스터링이 끝난 뒤
+    /// 부른다. 여러 번 불러도 안전하다.
+    func linkTravelersToExistingTravelAlbums() async throws
+    /// 카테고리 앨범 분류(+날짜 안전망, "분류 완료" 표시까지) — 라벨+임베딩 스트림이 끝나는 대로,
+    /// 얼굴/동물·중복탐지보다 먼저 부른다. 카테고리는 라벨만 있으면 되므로 그 둘을 기다릴 필요가 없다.
+    func createCategoryAlbumsEarly() async throws
+    /// 얼굴/동물 앨범 생성 + 여행자 연결 — 라벨+임베딩 스트림이 끝나는 대로, 카테고리 다음에 부른다.
+    /// onProgress(0~1)는 얼굴/동물 앨범 생성 자체의 진행률만 나타낸다(여행자 연결은 빠른 patch
+    /// 연산이라 별도 신호 없음).
+    func createPersonAndSimilarAlbums(onProgress: @escaping @Sendable (Double) -> Void) async throws
+    /// 중복(비슷한) 사진 탐지 — 전체 임베딩 추출 + 쌍대 비교가 대부분의 시간을 차지하는 "분석"의 일부로
+    /// 취급한다(앨범 저장 자체는 이 호출 안에서 같이 끝나며 빠르다). 라벨 스트림이 끝나는 대로, 얼굴/동물
+    /// 다음에 부른다 — 라벨/임베딩과 무관하게 독립적으로 자체 특징벡터를 추출하지만, "분석 완료"의
+    /// 마지막 단계로 노출하기 위해 여기서 부른다.
+    func detectDuplicatePhotos(onProgress: @escaping @Sendable (Double) -> Void) async throws
+
     func createDateAlbums() async throws
     func createLocationAlbums() async throws
     func createCategoryAlbums() async throws
@@ -101,6 +126,7 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
                     // 여행 앨범이 "누가 포함되는지"(사람+동물)를 계산하려면 얼굴/동물 앨범이 먼저 만들어져 있어야 한다
                     try Task.checkCancellation()
                     try await createTravelAlbumsCore()
+                    try await linkTravelersToTravelAlbumsCore()
                     continuation.yield(ProgressAlbum(step: .creatingAlbums, ratio: 4 / totalSteps))
 
                     try Task.checkCancellation()
@@ -127,6 +153,52 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
                 task.cancel()
             }
         }
+    }
+
+    // MARK: - 점진적 앨범 노출용
+
+    public func createDateAlbumsEarly() async throws {
+        try createDateAlbumsCore()
+        try albumDataRepository.syncAlbums()
+    }
+
+    public func createTravelAlbumsEarly() async throws {
+        try await createTravelAlbumsCore()
+        // 지역 분류는 주소만 있으면 되고 라벨이 필요 없어서, 라벨 스트림을 기다리지 않고 여행 앨범
+        // 바로 다음에 처리한다(둘 다 "주소 트랙"이 끝나야 의미 있는 작업이라 같이 묶었다).
+        try await classifyLocationOnlyCore()
+        try albumDataRepository.syncAlbums()
+        try await userDefaultRepository.saveLocationAnalyzedDate()
+    }
+
+    public func linkTravelersToExistingTravelAlbums() async throws {
+        try await linkTravelersToTravelAlbumsCore()
+    }
+
+    // 카테고리는 라벨만 있으면 되고 얼굴/동물 클러스터링이나 중복탐지 결과가 필요 없어서, 그 둘보다
+    // 먼저 처리한다. classifyCategoryAndFinalizeCore가 날짜 안전망 처리 + markAlbumsGenerated로
+    // "분류 완료" 표시까지 담당한다(지역 패스는 이 표시를 안 하므로 순서가 바뀌어도 안전 — 카테고리가
+    // 실질적으로 항상 나중에 끝나는 쪽이라 여기서 최종 표시를 맡는다).
+    public func createCategoryAlbumsEarly() async throws {
+        try await classifyCategoryAndFinalizeCore()
+        try albumDataRepository.syncAlbums()
+        try await userDefaultRepository.saveAnalyzedDate()
+    }
+
+    public func createPersonAndSimilarAlbums(onProgress: @escaping @Sendable (Double) -> Void) async throws {
+        // 얼굴 50% / 동물 50%
+        try await createFaceAlbumsCore { ratio in onProgress(ratio * 0.5) }
+        try await createAnimalAlbumsCore { ratio in onProgress(0.5 + ratio * 0.5) }
+        onProgress(1.0)
+        // 여행 앨범이 얼굴/동물보다 먼저 만들어졌을 수 있어서, 방금 끝난 얼굴/동물 앨범 기준으로
+        // 여행자 연결을 다시 채운다(이미 있으면 그대로, 여행 앨범이 아직 없으면 조용히 no-op).
+        try await linkTravelersToTravelAlbumsCore()
+    }
+
+    // 중복(비슷한) 사진의 "전체 임베딩 추출 + 비교" 구간이 대부분의 시간을 차지해서 분석 게이지의
+    // 일부로 노출한다 — 앨범 저장 자체는 이 함수 안에서 같이 끝나며 빠르므로 별도 신호가 필요 없다.
+    public func detectDuplicatePhotos(onProgress: @escaping @Sendable (Double) -> Void) async throws {
+        try await updateSimilarAlbumsIncrementalCore(onProgress: onProgress)
     }
 
     // MARK: - 앨범 타입별 단독 재생성 (테스트/개별 재생성용)
@@ -454,6 +526,141 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
         }
     }
 
+    // classifyPhotosFinal()에서만 쓰는, 진행률 표시를 위해 지역만 먼저 분류하는 패스 — 카테고리 패스가
+    // 끝난 뒤에만 markAlbumsGenerated로 "처리 완료"를 표시하므로(classifyCategoryAndFinalizeCore 참고),
+    // 이 패스만 끝나고 앱이 죽어도 다음 실행에서 지역+카테고리가 다시 시도된다.
+    private func classifyLocationOnlyCore(fullRegenerate: Bool = false) async throws {
+        var locationAlbums = try albumDataRepository.fetchAll(from: "location")
+        var locationAlbumPhotoMap: [UUID: [String]] = [:]
+
+        // 이 패스는 markAlbumsGenerated를 안 부른다(카테고리 패스가 끝난 뒤에만 최종 표시하려고 일부러
+        // 미룸, classifyCategoryAndFinalizeCore 참고) — 그런데 fetchAlbumUnclassified(limit:)는 offset이
+        // 없고 "아직 처리 안 됨" 플래그로만 걸러서, 마킹 없이 그대로 반복 호출하면 매번 똑같은 첫
+        // 페이지만 돌려줘서 무한루프에 빠진다(실제로 "최종 분류 시작" 이후 멈추는 버그로 나타났음).
+        // 그래서 대상 목록은 한 번만 통째로 가져오고, 페이지 분할은 메모리 안에서만 한다.
+        let allTargetPhotos = fullRegenerate
+            ? try photoDataRepository.fetchAllForClassification(limit: Int.max, offset: 0)
+            : try photoDataRepository.fetchAlbumUnclassified(limit: Int.max)
+
+        for pageStart in stride(from: 0, to: allTargetPhotos.count, by: classificationPageSize) {
+            let photos = Array(allTargetPhotos[pageStart..<min(pageStart + classificationPageSize, allTargetPhotos.count)])
+
+            var addressCount: [String: [String]] = [:]
+            for photo in photos {
+                guard let address = photo.address, let (key, addressText) = addressKeyValue(address) else { continue }
+                if !addressText.isEmpty && !addressCount[key, default: []].contains(addressText) {
+                    addressCount[key, default: []].append(addressText)
+                }
+            }
+            for (address, areas) in addressCount {
+                let album = Album(
+                    name: address,
+                    displayName: address,
+                    isAuto: true,
+                    keywords: areas,
+                    photoCount: 0,
+                    from: "location"
+                )
+                if let saved = try albumDataRepository.saveAlbum(album: album) {
+                    locationAlbums.append(saved)
+                }
+            }
+            for album in locationAlbums {
+                let matched = photos
+                    .filter {
+                        if let address = $0.address, let (_, addressText) = addressKeyValue(address) {
+                            return album.keywords.contains(addressText)
+                        }
+                        return false
+                    }
+                    .map { $0.localIdentifier }
+                guard !matched.isEmpty else { continue }
+                locationAlbumPhotoMap[album.id, default: []].append(contentsOf: matched)
+            }
+        }
+
+        for (albumId, photoIdentifiers) in locationAlbumPhotoMap {
+            try albumDataRepository.addPhotos(albumId: albumId, photoIdentifiers: photoIdentifiers)
+        }
+    }
+
+    // classifyPhotosFinal()에서만 쓰는, 지역 패스 다음에 도는 카테고리 패스 — 날짜는 createDateAlbumsEarly로
+    // 대부분 이미 처리됐겠지만 그 이후 추가된 사진을 위한 안전망으로 여기서도 같이 처리한다(addPhotos가
+    // dedup이라 중복 호출해도 안전). 지역+날짜+카테고리가 전부 끝난 이 시점에만 markAlbumsGenerated로
+    // "처리 완료"를 표시한다.
+    private func classifyCategoryAndFinalizeCore(fullRegenerate: Bool = false) async throws {
+        let ruleCategories: [String: AlbumRule] = try await photoCategoryRepository.fetchRuleCategories()
+
+        var dateAlbums = try albumDataRepository.fetchAll(from: "date")
+        var categoryAlbums = try albumDataRepository.fetchAll(from: "category")
+        var dateAlbumPhotoMap: [UUID: [String]] = [:]
+        var categoryAlbumPhotoMap: [UUID: [String]] = [:]
+        var offset = 0
+
+        while true {
+            let photos = fullRegenerate
+                ? try photoDataRepository.fetchAllForClassification(limit: classificationPageSize, offset: offset)
+                : try photoDataRepository.fetchAlbumUnclassified(limit: classificationPageSize)
+            if photos.isEmpty { break }
+
+            let years = Set(photos.compactMap { $0.year })
+            for year in years {
+                let album = Album(
+                    name: year,
+                    displayName: "\(year)",
+                    isAuto: true,
+                    keywords: ["\(year)", "\(year)년"],
+                    photoCount: 0,
+                    from: "date"
+                )
+                if let saved = try albumDataRepository.saveAlbum(album: album) {
+                    dateAlbums.append(saved)
+                }
+            }
+            for album in dateAlbums {
+                let matched = photos
+                    .filter { album.keywords.contains($0.year ?? "") }
+                    .map { $0.localIdentifier }
+                guard !matched.isEmpty else { continue }
+                dateAlbumPhotoMap[album.id, default: []].append(contentsOf: matched)
+            }
+
+            for (albumName, rule) in ruleCategories {
+                let matchedPhotos = photos.filter { matchesRule($0, rule: rule) }
+                guard !matchedPhotos.isEmpty else { continue }
+
+                let album = Album(
+                    name: albumName,
+                    displayName: albumName,
+                    isAuto: true,
+                    photoCount: 0,
+                    from: "category"
+                )
+                if let saved = try albumDataRepository.saveAlbum(album: album) {
+                    categoryAlbums.append(saved)
+                }
+            }
+            for album in categoryAlbums {
+                guard let rule = ruleCategories[album.name] else { continue }
+                let matched = photos
+                    .filter { matchesRule($0, rule: rule) }
+                    .map { $0.localIdentifier }
+                guard !matched.isEmpty else { continue }
+                categoryAlbumPhotoMap[album.id, default: []].append(contentsOf: matched)
+            }
+
+            try photoDataRepository.markAlbumsGenerated(identifiers: photos.map { $0.localIdentifier })
+            if fullRegenerate { offset += photos.count }
+        }
+
+        for (albumId, photoIdentifiers) in dateAlbumPhotoMap {
+            try albumDataRepository.addPhotos(albumId: albumId, photoIdentifiers: photoIdentifiers)
+        }
+        for (albumId, photoIdentifiers) in categoryAlbumPhotoMap {
+            try albumDataRepository.addPhotos(albumId: albumId, photoIdentifiers: photoIdentifiers)
+        }
+    }
+
     private func createFaceAlbumsCore(onProgress: @escaping @Sendable (Double) -> Void = { _ in }) async throws {
         try await faceClusterRepository.clusterAndSaveAlbums(onProgress: onProgress)
         try albumDataRepository.syncAlbums()
@@ -465,39 +672,65 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
     }
 
     private func createTravelAlbumsCore() async throws {
-        try self.albumDataRepository.deleteAutoAlbums(by: "travel")
+        let existingTravelAlbums = try albumDataRepository.fetchAll(from: "travel")
 
-        let allPhotosForTravel = try photoDataRepository.fetchHasCoordinators()
-            .map { PhotoLocationSnapshot(from: $0) }
+        // 끝난 날짜(endDate)를 아는 여행 앨범(=이 증분 로직 도입 이후 만들어진 앨범) 중 가장 최근 것만
+        // 갱신 대상으로 삼는다 — 새 사진이 추가된다고 몇 달 전 여행까지 통째로 다시 만들 필요는 없다.
+        // 하나도 없으면(최초 실행이거나, endDate가 비어있던 예전 앨범만 있는 경우) 안전하게 전체를
+        // 다시 훑는다 — 이번에 새로 저장되는 앨범부터는 startDate/endDate가 채워지므로 다음 실행부터는
+        // 자연스럽게 증분 경로를 타게 된다.
+        let lastTravelAlbum = existingTravelAlbums
+            .compactMap { album -> (Album, Date)? in album.endDate.map { (album, $0) } }
+            .max { $0.1 < $1.1 }?.0
+
+        let targetPhotos: [PhotoLocationSnapshot]
+        let albumIdToReplace: UUID?
+
+        if let lastTravelAlbum, let lastEndDate = lastTravelAlbum.endDate {
+            let existingPhotos = try albumDataRepository.fetchPhotos(by: lastTravelAlbum.id)
+            // 마지막 여행 이후, 좌표는 있는데 아직 어느 여행 앨범에도 안 들어간 사진만 새로 본다.
+            // 이 사진들이 마지막 여행에 이어지는지 아니면 아직 만들어지지 않은 새 여행인지는 아래
+            // detect()가 마지막 여행의 기존 사진들과 "같이" 재클러스터링해서 알아서 판단하게 둔다.
+            let newPhotos = try photoDataRepository.fetchHasCoordinators()
+                .filter { $0.createdAt > lastEndDate }
+            guard !newPhotos.isEmpty else {
+                // 마지막 여행 이후로 새로 좌표가 붙은 사진이 없으면 다시 계산할 게 없다
+                return
+            }
+            targetPhotos = (existingPhotos + newPhotos).map { PhotoLocationSnapshot(from: $0) }
+            albumIdToReplace = lastTravelAlbum.id
+        } else {
+            targetPhotos = try photoDataRepository.fetchHasCoordinators().map { PhotoLocationSnapshot(from: $0) }
+            albumIdToReplace = nil
+        }
 
         // 홈존 만들기
-        try analyzeIfNeeded(from: allPhotosForTravel)
+        try analyzeIfNeeded(from: targetPhotos)
 
         let homeZones = try fetchHomeZones()
         debugLog("🏠 이번 여행 판정에 사용되는 홈존 \(homeZones.count)개")
         for zone in homeZones {
-            debugLog("   - \(zone.addressDescription(in: allPhotosForTravel)) (분석일: \(zone.analyzedAt))")
+            debugLog("   - \(zone.addressDescription(in: targetPhotos)) (분석일: \(zone.analyzedAt))")
         }
 
-        let clusters = try await travelRepository.detect(from: allPhotosForTravel, homeZones: homeZones)
+        let clusters = try await travelRepository.detect(from: targetPhotos, homeZones: homeZones)
 
-        // 얼굴 앨범들의 사진 id 집합을 미리 한 번만 만들어둔다 — 여행 앨범마다 매번 다시 조회하지 않도록.
-        // "누가 포함되는지"는 이 시점에 고정되고(재생성해야 갱신), 그 사람 이름은 항상 얼굴 앨범을
-        // 다시 조회해서 보여주므로 나중에 이름을 바꿔도 자동으로 반영된다
-        let faceAlbums = try albumDataRepository.fetchAll(from: "face")
-        let faceAlbumPhotoSets: [(id: UUID, photoIds: Set<String>)] = try faceAlbums.map { album in
-            let photos = try albumDataRepository.fetchPhotos(by: album.id)
-            return (album.id, Set(photos.map { $0.localIdentifier }))
+        if let albumIdToReplace {
+            try albumDataRepository.delete(id: albumIdToReplace)
+        } else {
+            try albumDataRepository.deleteAutoAlbums(by: "travel")
         }
 
-        // 반려동물도 "이 여행에 함께 있었는지" 같은 방식으로 연결한다
-        let animalAlbums = try albumDataRepository.fetchAll(from: "animal")
-        let animalAlbumPhotoSets: [(id: UUID, photoIds: Set<String>)] = try animalAlbums.map { album in
-            let photos = try albumDataRepository.fetchPhotos(by: album.id)
-            return (album.id, Set(photos.map { $0.localIdentifier }))
-        }
-
+        // 다른(이번에 안 건드리는) 여행 앨범과 내부 식별용 name이 겹치지 않도록, 기존 앨범들의
+        // "장소 N" 카운트를 먼저 읽어와 이어서 매긴다 — 안 그러면 saveAlbum(returnExist: true)이
+        // 이름이 겹치는 엉뚱한 기존 앨범에 이번 사진들을 잘못 합쳐버릴 수 있다.
         var placeCounts: [String: Int] = [:]
+        for album in existingTravelAlbums where album.id != albumIdToReplace {
+            guard let lastSpaceIndex = album.name.lastIndex(of: " "),
+                  let count = Int(album.name[album.name.index(after: lastSpaceIndex)...]) else { continue }
+            let place = String(album.name[..<lastSpaceIndex])
+            placeCounts[place] = max(placeCounts[place] ?? 0, count + 1)
+        }
 
         for cluster in clusters {
             // 하루짜리 여행은 "여행"보다 "나들이"가 더 자연스럽다 (출발/도착 구분이 무의미한 짧은 일정)
@@ -519,26 +752,59 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
             let album = Album(
                 name: albumName,
                 displayName: displayName,
+                startDate: cluster.startDate,
+                endDate: cluster.endDate,
                 isAuto: true,
                 coverPhotoIdentifier: cluster.photos.first?.localIdentifier,
                 photoCount: cluster.photos.count,
                 from: "travel"
             )
             if let saved = try albumDataRepository.saveAlbum(album: album, returnExist: true) {
-                let identifiers = cluster.photos.map { $0.localIdentifier }
-                try albumDataRepository.addPhotos(albumId: saved.id, photoIdentifiers: identifiers)
-
-                // 이 여행 사진과 한 장이라도 겹치는 얼굴/동물 앨범들을 연결
-                let travelPhotoIds = Set(identifiers)
-                let linkedFaceAlbumIds = TravelerLinking.linkedAlbumIds(tripPhotoIds: travelPhotoIds, candidates: faceAlbumPhotoSets)
-                try albumDataRepository.updateLinkedFaceAlbums(albumId: saved.id, faceAlbumIds: linkedFaceAlbumIds)
-
-                let linkedAnimalAlbumIds = TravelerLinking.linkedAlbumIds(tripPhotoIds: travelPhotoIds, candidates: animalAlbumPhotoSets)
-                try albumDataRepository.updateLinkedAnimalAlbums(albumId: saved.id, animalAlbumIds: linkedAnimalAlbumIds)
+                // 좌표 기반으로 뽑힌 사진들 외에, 이 여행 기간(시작~끝, 양끝 포함) 안에 있는 사진은
+                // 좌표 유무 상관없이 전부 같이 넣는다 — 비행기모드/실내 등으로 위치 정보가 안 붙은
+                // 사진도 여행 기간 안이면 놓치지 않기 위함. addPhotos는 중복 추가에 안전하다.
+                let coordinatedIdentifiers = Set(cluster.photos.map { $0.localIdentifier })
+                let periodPhotos = try photoDataRepository.fetchPhotos(from: cluster.startDate, to: cluster.endDate)
+                let allIdentifiers = coordinatedIdentifiers.union(periodPhotos.map { $0.localIdentifier })
+                try albumDataRepository.addPhotos(albumId: saved.id, photoIdentifiers: Array(allIdentifiers))
             }
         }
 
         try albumDataRepository.syncAlbums()
+    }
+
+    /// 여행 앨범들에 얼굴/동물 앨범 연결 정보를 채운다(또는 다시 채운다) — 얼굴/동물 클러스터링이
+    /// 여행 앨범 생성보다 늦게 끝나는 경우를 위해 별도 단계로 분리했다. 여러 번 불러도 안전하다
+    /// (매번 다시 계산해서 덮어쓰는 단순 patch라 중복/누락 걱정 없음).
+    private func linkTravelersToTravelAlbumsCore() async throws {
+        let travelAlbums = try albumDataRepository.fetchAll(from: "travel")
+        guard !travelAlbums.isEmpty else { return }
+
+        // 얼굴 앨범들의 사진 id 집합을 미리 한 번만 만들어둔다 — 여행 앨범마다 매번 다시 조회하지 않도록.
+        // "누가 포함되는지"는 이 시점에 고정되고(재생성해야 갱신), 그 사람 이름은 항상 얼굴 앨범을
+        // 다시 조회해서 보여주므로 나중에 이름을 바꿔도 자동으로 반영된다
+        let faceAlbums = try albumDataRepository.fetchAll(from: "face")
+        let faceAlbumPhotoSets: [(id: UUID, photoIds: Set<String>)] = try faceAlbums.map { album in
+            let photos = try albumDataRepository.fetchPhotos(by: album.id)
+            return (album.id, Set(photos.map { $0.localIdentifier }))
+        }
+
+        // 반려동물도 "이 여행에 함께 있었는지" 같은 방식으로 연결한다
+        let animalAlbums = try albumDataRepository.fetchAll(from: "animal")
+        let animalAlbumPhotoSets: [(id: UUID, photoIds: Set<String>)] = try animalAlbums.map { album in
+            let photos = try albumDataRepository.fetchPhotos(by: album.id)
+            return (album.id, Set(photos.map { $0.localIdentifier }))
+        }
+
+        for travelAlbum in travelAlbums {
+            let travelPhotoIds = Set(try albumDataRepository.fetchPhotos(by: travelAlbum.id).map { $0.localIdentifier })
+
+            let linkedFaceAlbumIds = TravelerLinking.linkedAlbumIds(tripPhotoIds: travelPhotoIds, candidates: faceAlbumPhotoSets)
+            try albumDataRepository.updateLinkedFaceAlbums(albumId: travelAlbum.id, faceAlbumIds: linkedFaceAlbumIds)
+
+            let linkedAnimalAlbumIds = TravelerLinking.linkedAlbumIds(tripPhotoIds: travelPhotoIds, candidates: animalAlbumPhotoSets)
+            try albumDataRepository.updateLinkedAnimalAlbums(albumId: travelAlbum.id, animalAlbumIds: linkedAnimalAlbumIds)
+        }
     }
 
     private func createSimilarAlbumsCore(

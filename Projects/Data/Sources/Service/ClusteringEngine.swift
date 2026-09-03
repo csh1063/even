@@ -242,7 +242,8 @@ public final class ClusteringEngine<Item: ClusterableEmbedding> {
             }
         }
 
-        
+        debugLog("🔗 엣지 수: \(edges.count)개")
+
         var nodeEdges = Array(repeating: [(idx: Int, sim: Float)](), count: n)
         for edge in edges {
             nodeEdges[edge.i].append((edge.j, edge.sim))

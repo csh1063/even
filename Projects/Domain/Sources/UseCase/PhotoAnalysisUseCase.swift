@@ -9,8 +9,22 @@
 import Foundation
 
 public protocol PhotoAnalysisUseCase {
-    func analysis() -> AsyncThrowingStream<ProgressAnalysis, Error>
+    /// 라벨+얼굴/동물 임베딩 스트림과 주소(지오코딩) 스트림은 내부적으로 이미 동시에 돈다 — 이 둘은
+    /// 하나로 합쳐진 진행률만 밖으로 나가서, 호출자는 "지오코딩만 끝났다"/"라벨만 끝났다"를 구분할
+    /// 방법이 없었다. 두 콜백은 각 스트림이 (성공이든, 주소 쪽은 실패를 삼키고든) 끝나는 시점에 정확히
+    /// 한 번씩 불려서, 호출자가 그 시점에 맞춰 관련 앨범 생성을 조기에 트리거할 수 있게 한다.
+    func analysis(
+        onBasicScanCompleted: @escaping @Sendable () -> Void,
+        onAddressStreamCompleted: @escaping @Sendable () -> Void,
+        onLabelStreamCompleted: @escaping @Sendable () -> Void
+    ) -> AsyncThrowingStream<ProgressAnalysis, Error>
     func locationAnalysis() -> AsyncThrowingStream<ProgressAnalysis, Error>
+}
+
+extension PhotoAnalysisUseCase {
+    public func analysis() -> AsyncThrowingStream<ProgressAnalysis, Error> {
+        analysis(onBasicScanCompleted: {}, onAddressStreamCompleted: {}, onLabelStreamCompleted: {})
+    }
 }
 
 public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
@@ -20,9 +34,11 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
     private let dataRepository: PhotoDataRepository
     private let geoRepository: GeoRepository
 
-    // 라벨+얼굴 분석과 주소 변환을 동시에 진행할 때의 진행률 가중치
-    private let labelWeight: Double = 4.0 / 5.0
-    private let addressWeight: Double = 1.0 / 5.0
+    // 라벨+얼굴 분석과 주소 변환을 동시에 진행할 때의 진행률 가중치 — 분석 게이지 전체(100%) 중
+    // 이 둘이 차지하는 85%(지오코딩30/라벨55) 안에서의 상대 비율이다. 나머지 15%(날짜5 + 중복탐지10)는
+    // TabbarViewModel이 이 스트림 바깥에서 더한다.
+    private let labelWeight: Double = 55.0 / 85.0
+    private let addressWeight: Double = 30.0 / 85.0
 
     public init(
         libraryRepository: PhotoLibraryRepository,
@@ -37,11 +53,16 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
     }
 
     // 사진 기본 정보 저장 → 라벨+얼굴 분석과 주소 변환 동시 진행 (4:1 가중 진행률)
-    public func analysis() -> AsyncThrowingStream<ProgressAnalysis, Error> {
+    public func analysis(
+        onBasicScanCompleted: @escaping @Sendable () -> Void,
+        onAddressStreamCompleted: @escaping @Sendable () -> Void,
+        onLabelStreamCompleted: @escaping @Sendable () -> Void
+    ) -> AsyncThrowingStream<ProgressAnalysis, Error> {
         AsyncThrowingStream { continuation in
             Task {
                 do {
                     try await saveAllPhotosBase()
+                    onBasicScanCompleted()
 
                     let combiner = ProgressCombiner(labelWeight: labelWeight, addressWeight: addressWeight)
 
@@ -60,6 +81,7 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                                     continuation.yield(ProgressAnalysis(photo: progress.photo, state: .unavailable(reason: reason)))
                                 }
                             }
+                            onLabelStreamCompleted()
                         }
                         group.addTask { [weak self] in
                             guard let self else { return }
@@ -82,6 +104,7 @@ public final class DefaultPhotoAnalysisUseCase: PhotoAnalysisUseCase {
                                 debugLog("⚠️ 주소 분석 실패, 무시하고 계속 진행: \(error)")
                                 _ = await combiner.updateAddress(1.0)
                             }
+                            onAddressStreamCompleted()
                         }
                         try await group.waitForAll()
                     }

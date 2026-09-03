@@ -42,6 +42,8 @@ public final class DefaultAlbumDataRepository: AlbumDataRepository {
             id: album.id,
             name: album.name,
             displayName: album.displayName,
+            startDate: album.startDate,
+            endDate: album.endDate,
             isAuto: album.isAuto,
             coverPhotoIdentifier: album.coverPhotoIdentifier,
             from: album.from
