@@ -368,11 +368,17 @@ public final class TabbarViewModel: BaseViewModel {
                 onBasicScanCompleted: { [weak self] in
                     debugLog("⏱️ [분석] 기본 스캔 완료 — 누적 \(String(format: "%.1f", Date().timeIntervalSince(startedAt)))초")
                     debugLog("⏱️ [분석] 지오코딩+라벨 스트림 시작 — 누적 \(String(format: "%.1f", Date().timeIntervalSince(startedAt)))초")
-                    basicScanTask = Task { @MainActor in
+                    // Task { @MainActor in ... }로 띄우면, 그 안의 XXXCore() 함수들이 실제로는 await
+                    // 지점이 없는(또는 적은) 동기 SwiftData 페이지 조회 루프라서 메인 스레드에서 그대로
+                    // 실행돼버린다 — 몇 초씩 걸리는 동안 X 버튼 같은 UI 터치가 전혀 안 먹히는 원인이었다.
+                    // Task.detached로 메인 액터 밖에서 돌리고, 상태(progress) 갱신하는 부분만 명시적으로
+                    // MainActor.run으로 돌아와서 처리한다.
+                    basicScanTask = Task.detached(priority: .userInitiated) {
                         let stepStartedAt = Date()
                         debugLog("⏱️ [분석] 날짜 앨범 생성 시작 — 누적 \(String(format: "%.1f", Date().timeIntervalSince(startedAt)))초")
                         try? await self?.autoAlbumUseCase.createDateAlbumsEarly()
-                        if let self {
+                        await MainActor.run {
+                            guard let self else { return }
                             self.dateProgress = 1
                             self.recomputePhotoProgress()
                         }
@@ -381,8 +387,9 @@ public final class TabbarViewModel: BaseViewModel {
                 },
                 onAddressStreamCompleted: { [weak self] in
                     debugLog("⏱️ [분석] 주소(지오코딩) 스트림 완료 — 누적 \(String(format: "%.1f", Date().timeIntervalSince(startedAt)))초")
-                    addressTrackTask = Task { @MainActor in
-                        if let self {
+                    addressTrackTask = Task.detached(priority: .userInitiated) {
+                        await MainActor.run {
+                            guard let self else { return }
                             self.addressProgress = 1
                             self.recomputePhotoProgress()
                         }
@@ -391,7 +398,8 @@ public final class TabbarViewModel: BaseViewModel {
                         // createTravelAlbumsEarly 안에서 여행 앨범 만들고 바로 이어서 지역 분류까지
                         // 끝낸다(둘 다 주소만 있으면 되는 작업이라 라벨을 기다릴 필요가 없다).
                         try? await self?.autoAlbumUseCase.createTravelAlbumsEarly()
-                        if let self {
+                        await MainActor.run {
+                            guard let self else { return }
                             self.travelProgress = 1
                             self.regionProgress = 1
                             self.recomputeAlbumProgress()
@@ -401,13 +409,14 @@ public final class TabbarViewModel: BaseViewModel {
                 },
                 onLabelStreamCompleted: { [weak self] in
                     debugLog("⏱️ [분석] 라벨+임베딩 스트림 완료 — 누적 \(String(format: "%.1f", Date().timeIntervalSince(startedAt)))초")
-                    labelTrackTask = Task { @MainActor in
+                    labelTrackTask = Task.detached(priority: .userInitiated) {
                         let stepStartedAt = Date()
 
                         // 카테고리는 라벨만 있으면 되고 얼굴/동물·중복탐지 결과가 필요 없어서 먼저 끝낸다.
                         debugLog("⏱️ [분석] 카테고리 앨범 생성 시작 — 누적 \(String(format: "%.1f", Date().timeIntervalSince(startedAt)))초")
                         try? await self?.autoAlbumUseCase.createCategoryAlbumsEarly()
-                        if let self {
+                        await MainActor.run {
+                            guard let self else { return }
                             self.categoryProgress = 1
                             self.recomputeAlbumProgress()
                         }
@@ -430,7 +439,8 @@ public final class TabbarViewModel: BaseViewModel {
                             }
                         }
                         // createPersonAndSimilarAlbums 안에서 여행자 연결까지 같이 끝난 뒤 리턴된다
-                        if let self {
+                        await MainActor.run {
+                            guard let self else { return }
                             self.faceProgress = 1
                             self.animalProgress = 1
                             self.travelerLinkProgress = 1
@@ -449,7 +459,8 @@ public final class TabbarViewModel: BaseViewModel {
                                 self.recomputePhotoProgress()
                             }
                         }
-                        if let self {
+                        await MainActor.run {
+                            guard let self else { return }
                             self.dupDetectProgress = 1
                             self.dupSaveProgress = 1
                             self.recomputePhotoProgress()

@@ -205,9 +205,11 @@ final class AlbumAnalysisSheet: UIViewController {
         }
 
         minimizeButton.snp.makeConstraints { make in
-            make.top.equalTo(view).offset(16)
-            make.trailing.equalTo(view).inset(20)
-            make.width.height.equalTo(28)
+            // 탭 영역을 44x44(애플 권장 최소 터치 크기)로 키우되, 아이콘 자체 위치는 기존(28pt 기준
+            // top:16/trailing:20)과 같은 자리에 오도록 오프셋을 같이 보정했다.
+            make.top.equalTo(view).offset(8)
+            make.trailing.equalTo(view).inset(12)
+            make.width.height.equalTo(44)
         }
 
         circleBackground.snp.makeConstraints { make in
