@@ -63,7 +63,7 @@ public struct ClusteringConfig {
         minimumClusterSize: 2,
         minimumMergedClusterSize: 10,
         minimumClusterQuality: 0.50,
-        maxIterations: 10,
+        maxIterations: 3,
         mergeThreshold: 0.60,
         minimumInternalSimilarity: 0.10,
         minimumPairwiseSimilarity: 0.10
@@ -77,7 +77,7 @@ public struct ClusteringConfig {
         minimumClusterSize: 2,
         minimumMergedClusterSize: 10,
         minimumClusterQuality: 0.60,
-        maxIterations: 10,
+        maxIterations: 3,
         mergeThreshold: 0.60,
         minimumInternalSimilarity: 0.20,
         minimumPairwiseSimilarity: 0.20

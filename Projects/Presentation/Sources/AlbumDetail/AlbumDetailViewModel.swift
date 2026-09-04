@@ -17,6 +17,8 @@ enum AlbumDetailViewModelAction {
     case pickMergeTarget(candidates: [AlbumMergeCandidate], isTravel: Bool, currentAlbum: Album)
     case pickSplitClusters(clusters: [FaceClusterSummary])
     case pickTravelerManagement(travelers: [Album], others: [Album])
+    /// 대표 사진 후보를 골랐을 때 — 실제 적용 전에 미리보기 화면을 띄워달라는 요청
+    case previewCover(album: Album, candidateId: String)
 }
 
 @MainActor
@@ -31,6 +33,8 @@ protocol AlbumDetailViewModelDelegate: AnyObject {
     func travelerManagementTapped()
     func saveTravelerManagement(travelerIds: [UUID])
     func refreshAfterPhotosAdded()
+    /// 대표 사진 미리보기 화면에서 "선택"을 확정했을 때만 실제로 저장
+    func setCover(id: String)
 }
 
 @MainActor
@@ -44,6 +48,8 @@ public final class AlbumDetailViewModel: BaseViewModel {
         case selectItem(id: String, inSelectionMode: Bool)
         case deleteSelected(ids: [String])
         case excludeSelected(ids: [String])
+        /// 대표 사진 고르기 모드에서 사진을 탭했을 때 — 바로 적용하지 않고 미리보기부터 요청
+        case selectCoverCandidate(id: String)
     }
 
     public struct Output {
@@ -53,6 +59,7 @@ public final class AlbumDetailViewModel: BaseViewModel {
         let errorMessage: AnyPublisher<String?, Never>
         let selectionMode: AnyPublisher<AlbumDetailPageMode, Never>
         let travelerInfo: AnyPublisher<TravelerInfo?, Never>
+        let coverPhotoIdentifier: AnyPublisher<String?, Never>
     }
 
     /// 여행 헤더에 "이름 문구"와 "인원 수"를 분리해서 보여주기 위한 값
@@ -67,6 +74,7 @@ public final class AlbumDetailViewModel: BaseViewModel {
     @Published private var errorMessage: String?
     @Published private var selectionMode: AlbumDetailPageMode = .list
     @Published private var travelerInfo: TravelerInfo?
+    @Published private var currentCoverId: String?
 
     var onAction: ((AlbumDetailViewModelAction) -> Void)?
 
@@ -102,6 +110,7 @@ public final class AlbumDetailViewModel: BaseViewModel {
         // intrinsic width가 0에 가까워지면서 옆 버튼들이 비율을 이상하게 나눠 갖는 버그가 있어서,
         // 공백 한 칸으로 "보이기엔 비어있지만 폭은 0이 아닌" 상태를 만든다 (NaviBarView 자체는 안 건드림)
         self.albumName = Self.computedAlbumName(for: album)
+        self.currentCoverId = album.coverPhotoIdentifier
         self.imageUseCase = imageUseCase
         self.detailUseCase = detailUseCase
         self.selectionMode = startInSelectionMode ? .onlySelect : .list
@@ -120,7 +129,8 @@ public final class AlbumDetailViewModel: BaseViewModel {
             isLoading: $isLoading.eraseToAnyPublisher(),
             errorMessage: $errorMessage.eraseToAnyPublisher(),
             selectionMode: $selectionMode.eraseToAnyPublisher(),
-            travelerInfo: $travelerInfo.eraseToAnyPublisher()
+            travelerInfo: $travelerInfo.eraseToAnyPublisher(),
+            coverPhotoIdentifier: $currentCoverId.eraseToAnyPublisher()
         )
     }
 
@@ -219,6 +229,9 @@ public final class AlbumDetailViewModel: BaseViewModel {
                 ]
             )
 
+        case .selectCoverCandidate(let id):
+            onAction?(.previewCover(album: album, candidateId: id))
+
         case .excludeSelected(let ids):
             showAlert(
                 title: String(localized: "다른 사람 인가요?", bundle: .module),
@@ -241,6 +254,7 @@ public final class AlbumDetailViewModel: BaseViewModel {
             if let refreshed = try await detailUseCase.fetchAlbum(id: album.id) {
                 album = refreshed
                 albumName = Self.computedAlbumName(for: album)
+                currentCoverId = album.coverPhotoIdentifier
             }
             let photos = try await detailUseCase.fetchPhotos(by: album.id)
             // photos를 publish하면 셀이 바로 loadFaceImage를 호출하므로,
@@ -317,6 +331,14 @@ public final class AlbumDetailViewModel: BaseViewModel {
         } catch {
             isLoading = false
         }
+    }
+
+    private func setCoverPhoto(id: String) async {
+        do {
+            try await detailUseCase.updateCoverPhoto(id: album.id, identifier: id)
+            album.coverPhotoIdentifier = id
+            currentCoverId = id
+        } catch {}
     }
 
     private func deleteAlbum() {
@@ -476,5 +498,9 @@ extension AlbumDetailViewModel: AlbumDetailViewModelDelegate {
 
     func refreshAfterPhotosAdded() {
         send(.refresh)
+    }
+
+    func setCover(id: String) {
+        Task { await setCoverPhoto(id: id) }
     }
 }

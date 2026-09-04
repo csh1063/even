@@ -199,7 +199,9 @@ public final class DefaultAnimalClusterRepository: AnimalClusterRepository {
 
         album.photoCount = album.photos.count
 
-        if let bestEntity = album.animalClusters
+        // 사용자가 대표 사진을 직접 골랐으면 재분석 때 이 앨범이 다시 매칭돼도 자동으로 덮어쓰지 않는다
+        if !album.coverPhotoManuallySet,
+           let bestEntity = album.animalClusters
             .flatMap({ $0.animalEmbeddings })
             .max(by: { $0.detectionConfidence < $1.detectionConfidence }),
            let bestPhotoId = bestEntity.photo?.localIdentifier {

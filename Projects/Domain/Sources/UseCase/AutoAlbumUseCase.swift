@@ -672,16 +672,27 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
     }
 
     private func createTravelAlbumsCore() async throws {
+        // 지난 실행이 "삭제 → 재클러스터링 → 재저장" 도중에 죽었으면(체크포인트가 남아있으면), 여기
+        // DB에 남아있는 여행 앨범 상태를 못 믿는다 — 별도 복구 경로로 처리한다.
+        if let pendingCheckpoint = try? await userDefaultRepository.fetchTravelAlbumCheckpoint() {
+            try await resumeCrashedTravelAlbumRebuild(anchorDate: pendingCheckpoint.anchorDate)
+            return
+        }
+
         let existingTravelAlbums = try albumDataRepository.fetchAll(from: "travel")
 
-        // 끝난 날짜(endDate)를 아는 여행 앨범(=이 증분 로직 도입 이후 만들어진 앨범) 중 가장 최근 것만
-        // 갱신 대상으로 삼는다 — 새 사진이 추가된다고 몇 달 전 여행까지 통째로 다시 만들 필요는 없다.
-        // 하나도 없으면(최초 실행이거나, endDate가 비어있던 예전 앨범만 있는 경우) 안전하게 전체를
-        // 다시 훑는다 — 이번에 새로 저장되는 앨범부터는 startDate/endDate가 채워지므로 다음 실행부터는
-        // 자연스럽게 증분 경로를 타게 된다.
-        let lastTravelAlbum = existingTravelAlbums
+        // 끝난 날짜(endDate)를 아는 여행 앨범(=이 증분 로직 도입 이후 만들어진 앨범)을 최신순으로 정렬 —
+        // 가장 최근 것만 갱신 대상으로 삼는다. 새 사진이 추가된다고 몇 달 전 여행까지 통째로 다시 만들
+        // 필요는 없다. 하나도 없으면(최초 실행이거나, endDate가 비어있던 예전 앨범만 있는 경우) 안전하게
+        // 전체를 다시 훑는다 — 이번에 새로 저장되는 앨범부터는 startDate/endDate가 채워지므로 다음
+        // 실행부터는 자연스럽게 증분 경로를 타게 된다.
+        let sortedByEndDate = existingTravelAlbums
             .compactMap { album -> (Album, Date)? in album.endDate.map { (album, $0) } }
-            .max { $0.1 < $1.1 }?.0
+            .sorted { $0.1 < $1.1 }
+        let lastTravelAlbum = sortedByEndDate.last?.0
+        // 체크포인트에 남길 안전 기준점 — 지금 재계산 대상(곧 삭제될) lastTravelAlbum이 아니라, 그
+        // 바로 이전(이번에 안 건드리는) 여행 앨범의 끝 날짜. 없으면(여행 앨범이 0~1개뿐이면) nil.
+        let safeAnchorForCheckpoint = sortedByEndDate.count >= 2 ? sortedByEndDate[sortedByEndDate.count - 2].1 : nil
 
         let targetPhotos: [PhotoLocationSnapshot]
         let albumIdToReplace: UUID?
@@ -715,6 +726,10 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
 
         let clusters = try await travelRepository.detect(from: targetPhotos, homeZones: homeZones)
 
+        // 여기서부터 삭제 → 재저장이 시작된다 — 이 사이에 앱이 죽으면 다음 실행이 safeAnchorForCheckpoint
+        // 기준으로 안전하게 복구할 수 있도록 체크포인트를 남긴다(성공하면 맨 끝에서 지운다)
+        try? await userDefaultRepository.beginTravelAlbumCheckpoint(anchorDate: safeAnchorForCheckpoint)
+
         if let albumIdToReplace {
             try albumDataRepository.delete(id: albumIdToReplace)
         } else {
@@ -732,6 +747,66 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
             placeCounts[place] = max(placeCounts[place] ?? 0, count + 1)
         }
 
+        try await saveTravelClusters(clusters, placeCounts: &placeCounts)
+
+        try albumDataRepository.syncAlbums()
+        try? await userDefaultRepository.clearTravelAlbumCheckpoint()
+    }
+
+    /// 지난 실행이 여행 앨범 재계산(삭제 → 재클러스터링 → 재저장) 도중 죽었을 때의 복구 경로.
+    /// anchorDate(그 이전까지는 안전하다고 기록해둔 기준점) 이후에 남아있는 여행 앨범은 그 실패한
+    /// 시도가 절반쯤 저장해놓은 부산물일 수 있으므로 먼저 정리하고, anchorDate 이후 구간을 통째로
+    /// 다시 그러모아 재계산한다(개별 앨범이 아니라 날짜 범위로 다시 모으므로, 그 앨범이 이미 지워졌어도
+    /// 안전하게 동작한다).
+    private func resumeCrashedTravelAlbumRebuild(anchorDate: Date?) async throws {
+        let existingTravelAlbums = try albumDataRepository.fetchAll(from: "travel")
+        for album in existingTravelAlbums {
+            let endDate = album.endDate ?? .distantPast
+            guard anchorDate == nil || endDate > anchorDate! else { continue }
+            try albumDataRepository.delete(id: album.id)
+        }
+
+        let targetPhotos: [PhotoLocationSnapshot]
+        if let anchorDate {
+            let photosAfterAnchor = try photoDataRepository.fetchHasCoordinators()
+                .filter { $0.createdAt > anchorDate }
+            guard !photosAfterAnchor.isEmpty else {
+                try? await userDefaultRepository.clearTravelAlbumCheckpoint()
+                return
+            }
+            targetPhotos = photosAfterAnchor.map { PhotoLocationSnapshot(from: $0) }
+        } else {
+            targetPhotos = try photoDataRepository.fetchHasCoordinators().map { PhotoLocationSnapshot(from: $0) }
+        }
+
+        try analyzeIfNeeded(from: targetPhotos)
+        let homeZones = try fetchHomeZones()
+        debugLog("🏠 [여행 앨범 복구] 이번 여행 판정에 사용되는 홈존 \(homeZones.count)개")
+
+        let clusters = try await travelRepository.detect(from: targetPhotos, homeZones: homeZones)
+
+        // anchorDate 이후 앨범은 위에서 이미 다 지웠으므로 추가로 지울 게 없다 — anchorDate 이전(안전한)
+        // 앨범들의 "장소 N" 카운트만 이어받는다
+        var placeCounts: [String: Int] = [:]
+        let remainingAlbums = existingTravelAlbums.filter { album in
+            guard let anchorDate else { return false }
+            return (album.endDate ?? .distantPast) <= anchorDate
+        }
+        for album in remainingAlbums {
+            guard let lastSpaceIndex = album.name.lastIndex(of: " "),
+                  let count = Int(album.name[album.name.index(after: lastSpaceIndex)...]) else { continue }
+            let place = String(album.name[..<lastSpaceIndex])
+            placeCounts[place] = max(placeCounts[place] ?? 0, count + 1)
+        }
+
+        try await saveTravelClusters(clusters, placeCounts: &placeCounts)
+
+        try albumDataRepository.syncAlbums()
+        try? await userDefaultRepository.clearTravelAlbumCheckpoint()
+    }
+
+    /// 클러스터링 결과를 여행 앨범으로 저장하는 공통 로직 — 정상 경로/체크포인트 복구 경로가 같이 쓴다
+    private func saveTravelClusters(_ clusters: [TravelCluster], placeCounts: inout [String: Int]) async throws {
         for cluster in clusters {
             // 하루짜리 여행은 "여행"보다 "나들이"가 더 자연스럽다 (출발/도착 구분이 무의미한 짧은 일정)
             let isSingleDay = Calendar.current.isDate(cluster.startDate, inSameDayAs: cluster.endDate)
@@ -769,8 +844,6 @@ public final class DefaultAutoAlbumUseCase: AutoAlbumUseCase {
                 try albumDataRepository.addPhotos(albumId: saved.id, photoIdentifiers: Array(allIdentifiers))
             }
         }
-
-        try albumDataRepository.syncAlbums()
     }
 
     /// 여행 앨범들에 얼굴/동물 앨범 연결 정보를 채운다(또는 다시 채운다) — 얼굴/동물 클러스터링이

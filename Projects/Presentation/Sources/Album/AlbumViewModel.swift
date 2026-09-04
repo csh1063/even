@@ -163,11 +163,11 @@ public final class AlbumViewModel: BaseViewModel {
                 .travel(TravelAlbumCellViewModel(album: $0, imageLoader: self))
             }
 
-        data.items[.date] = []// albums.filter { $0.from == "date" }
-//            .sorted { $0.displayName > $1.displayName }
-//            .map {
-//                .date(DateAlbumCellViewModel(album: $0, imageLoader: self))
-//            }
+        data.items[.date] = albums.filter { $0.from == "date" }
+            .sorted { $0.displayName > $1.displayName }
+            .map {
+                .date(DateAlbumCellViewModel(album: $0, imageLoader: self))
+            }
 
         data.items[.location] = albums.filter { $0.from == "location" }
             .sorted { $0.photoCount > $1.photoCount }
@@ -186,6 +186,7 @@ public final class AlbumViewModel: BaseViewModel {
             }
 
         data.items[.face] = albums.filter { AlbumSection.faceSectionFromValues.contains($0.from) }
+            .filter { $0.photoCount >= 20 }
             .sorted { $0.photoCount > $1.photoCount }
             .map { album in
                 album.from == "animal"

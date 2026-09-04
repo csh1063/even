@@ -21,10 +21,14 @@ public protocol AlbumDataRepository {
     func fetchAutoAll() throws -> [Album]
     func fetchPhotos(by albumId: UUID) throws -> [Photo]
     func fetchFaceBoundingBoxes(clusterId: String) throws -> [String: CGRect]
+    /// 대표 사진 후보 미리보기용 — fetchFaceBoundingBoxes와 같은 개념을 동물 앨범에 적용
+    func fetchAnimalBoundingBoxes(clusterId: String) throws -> [String: CGRect]
     func fetchCoverFaceBoundingBox(albumId: UUID) throws -> CGRect?
     func fetchCoverAnimalBoundingBox(albumId: UUID) throws -> CGRect?
     func updateAlbum(album: Album) throws
     func updateAlbumName(new name: String, id: UUID) throws
+    /// 사용자가 앨범 대표(커버) 사진을 직접 고른 경우 저장
+    func updateCoverPhoto(id: UUID, identifier: String) throws
     func delete(id: UUID) throws
     func deleteAutoAlbums(by from: String) throws  // 자동 앨범만 삭제
     func addPhoto(albumId: UUID, photoIdentifier: String) throws

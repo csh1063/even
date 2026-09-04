@@ -149,6 +149,27 @@ public final class DefaultAlbumDataRepository: AlbumDataRepository {
         return result
     }
 
+    public func fetchAnimalBoundingBoxes(clusterId: String) throws -> [String: CGRect] {
+
+        let context = ModelContext(container)
+        let fetchDescriptor = FetchDescriptor<AnimalEmbeddingEntity>()
+
+        let entities = try context.fetch(fetchDescriptor)
+
+        var result: [String: CGRect] = [:]
+        for entity in entities {
+            guard entity.cluster?.album?.name == clusterId,
+                  let localIdentifier = entity.photo?.localIdentifier else { continue }
+            result[localIdentifier] = CGRect(
+                x: entity.boundingBoxX,
+                y: entity.boundingBoxY,
+                width: entity.boundingBoxWidth,
+                height: entity.boundingBoxHeight
+            )
+        }
+        return result
+    }
+
     /// 앨범 커버로 쓸 사진(coverPhotoIdentifier) 안에서, 이 앨범 소속 클러스터의 얼굴 boundingBox를 찾는다.
     /// 별도로 저장해두지 않고 커버 사진과 클러스터 관계로 그때그때 찾는 이유는, 저장해두면 커버 사진이
     /// 바뀔 때마다 boundingBox도 같이 갱신해줘야 하는데 그 동기화가 깨지기 쉽기 때문 (실제로 한 번 깨졌었음)
@@ -207,7 +228,11 @@ public final class DefaultAlbumDataRepository: AlbumDataRepository {
 
         entity.name = album.name
         entity.displayName = album.displayName
-        entity.coverPhotoIdentifier = album.coverPhotoIdentifier
+        // 사용자가 직접 고른 대표 사진은 스플래시 동기화(syncCoverAndCount) 같은 자동 갱신에 덮이면 안
+        // 된다 — DB에 저장된 entity의 플래그가 진실이라, 호출자가 넘긴 album 값과 무관하게 여기서 막는다
+        if !entity.coverPhotoManuallySet {
+            entity.coverPhotoIdentifier = album.coverPhotoIdentifier
+        }
         entity.photoCount = album.photoCount
 
         try context.save()
@@ -227,6 +252,26 @@ public final class DefaultAlbumDataRepository: AlbumDataRepository {
 
         entity.displayName = name
         entity.isRenamed = true
+
+        try context.save()
+
+        try self.syncAlbums()
+    }
+
+    public func updateCoverPhoto(id: UUID, identifier: String) throws {
+
+        let context = ModelContext(container)
+
+        let fetchDescriptor = FetchDescriptor<AlbumEntity>(
+            predicate: #Predicate { $0.id == id }
+        )
+
+        guard let entity = try context.fetch(fetchDescriptor).first else {
+            throw AlbumRepositoryError.albumNotFound
+        }
+
+        entity.coverPhotoIdentifier = identifier
+        entity.coverPhotoManuallySet = true
 
         try context.save()
 
@@ -322,7 +367,8 @@ public final class DefaultAlbumDataRepository: AlbumDataRepository {
         let latestNewPhoto = uniqueNewPhotos.max(by: { $0.createdAt < $1.createdAt })
         let currentCoverPhoto = album.photos.first(where: { $0.localIdentifier == album.coverPhotoIdentifier })
 
-        if let latestNew = latestNewPhoto {
+        // 사용자가 직접 고른 대표 사진이면 새 사진이 추가돼도 자동으로 안 바꾼다
+        if !album.coverPhotoManuallySet, let latestNew = latestNewPhoto {
             if let currentCover = currentCoverPhoto, currentCover.createdAt >= latestNew.createdAt {
                 // 기존 커버가 더 최신이면 유지 (아무것도 안 함)
             } else {

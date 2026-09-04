@@ -74,4 +74,24 @@ public final class DefaultUserDefaultRepository: UserDefaultRepository {
     public func showConsent() async throws -> Bool {
         service.bool(UserDefaultsKey.showConsent) ?? false
     }
+
+    public func beginTravelAlbumCheckpoint(anchorDate: Date?) async throws {
+        service.set(true, forK: UserDefaultsKey.travelAlbumCheckpointPending)
+        if let anchorDate {
+            service.set(anchorDate, forKey: UserDefaultsKey.travelAlbumCheckpointAnchorDate)
+        } else {
+            service.remove(forKey: UserDefaultsKey.travelAlbumCheckpointAnchorDate)
+        }
+    }
+
+    public func clearTravelAlbumCheckpoint() async throws {
+        service.remove(forKey: UserDefaultsKey.travelAlbumCheckpointPending)
+        service.remove(forKey: UserDefaultsKey.travelAlbumCheckpointAnchorDate)
+    }
+
+    public func fetchTravelAlbumCheckpoint() async throws -> TravelAlbumCheckpoint? {
+        guard service.bool(UserDefaultsKey.travelAlbumCheckpointPending) == true else { return nil }
+        let anchorDate = service.get(forKey: UserDefaultsKey.travelAlbumCheckpointAnchorDate) as? Date
+        return TravelAlbumCheckpoint(anchorDate: anchorDate)
+    }
 }

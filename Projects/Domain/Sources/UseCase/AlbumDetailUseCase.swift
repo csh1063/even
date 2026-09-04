@@ -13,7 +13,11 @@ public protocol AlbumDetailUseCase {
     func fetchAlbum(id: UUID) async throws -> Album?
     func fetchPhotos(by albumId: UUID) async throws -> [Photo]
     func fetchFaceBoundingBoxes(clusterId: String) async throws -> [String: CGRect]
+    /// 대표 사진 후보 미리보기용 — fetchFaceBoundingBoxes와 같은 개념을 동물 앨범에 적용
+    func fetchAnimalBoundingBoxes(clusterId: String) async throws -> [String: CGRect]
     func editAlbumName(new name: String, id: UUID) async throws
+    /// 사용자가 앨범 대표(커버) 사진을 직접 고른 경우 저장
+    func updateCoverPhoto(id: UUID, identifier: String) async throws
     /// 앨범 타입에 맞는 삭제 경로로 라우팅한다 — 인물/동물은 재분석해도 다시 안 생기도록
     /// 블랙리스트까지 처리하는 전용 삭제를, 그 외 타입은 범용 삭제를 사용한다.
     func deleteAlbum(_ album: Album) async throws
@@ -89,8 +93,16 @@ public final class DefaultAlbumDetailUseCase: AlbumDetailUseCase {
         try repository.fetchFaceBoundingBoxes(clusterId: clusterId)
     }
 
+    public func fetchAnimalBoundingBoxes(clusterId: String) async throws -> [String: CGRect] {
+        try repository.fetchAnimalBoundingBoxes(clusterId: clusterId)
+    }
+
     public func editAlbumName(new name: String, id: UUID) async throws {
         try repository.updateAlbumName(new: name, id: id)
+    }
+
+    public func updateCoverPhoto(id: UUID, identifier: String) async throws {
+        try repository.updateCoverPhoto(id: id, identifier: identifier)
     }
 
     public func deleteAlbum(_ album: Album) async throws {

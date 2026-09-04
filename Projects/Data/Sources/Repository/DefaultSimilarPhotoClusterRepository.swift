@@ -19,7 +19,7 @@ public final class DefaultSimilarPhotoClusterRepository: SimilarPhotoClusterRepo
     public var timeWindowMinutes: Double = 24 * 60 * 2
     /// 1차 클러스터링(윈도우 내)에서 시간 공백 때문에 끊긴 그룹들을,
     /// 시간 제약 없이 centroid(그룹 평균 벡터) 기준으로 한 번 더 병합할 때 쓰는 threshold.
-    public var mergeThreshold: Float = 0.45
+    public var mergeThreshold: Float = 0.4
 
     private let minSimilarCount: Int = 2
     /// 1차(윈도우 내)/병합/증분 결과 상관없이, 최종 그룹 크기가 이 값 미만이면 앨범을 만들지 않는다.

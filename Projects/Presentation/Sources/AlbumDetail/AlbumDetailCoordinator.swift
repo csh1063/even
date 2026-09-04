@@ -69,6 +69,8 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
                 self?.showClusterSplitPicker(clusters: clusters)
             case .pickTravelerManagement(let travelers, let others):
                 self?.showTravelerManagement(travelers: travelers, others: others)
+            case .previewCover(let album, let candidateId):
+                self?.showCoverPreview(album: album, candidateId: candidateId)
             }
         }
 
@@ -111,15 +113,26 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
     func showAlbumOptions(album: Album) {
         var options: [OptionRowConfig] = []
 
-        // 날짜/카테고리/장소/중복 앨범은 이름이 자동 분류 기준 그 자체라서(예: "2026년", "카페") 사용자가
-        // 바꿀 수 있게 두지 않는다 — 인물/동물/여행 앨범만 이름 변경 가능
-        let renameableTypes: Set<String> = ["face", "animal", "travel"]
-        if renameableTypes.contains(album.from) {
+        // 날짜/카테고리/장소/중복 앨범은 이름/대표 사진이 자동 분류 기준 그 자체라서(예: "2026년", "카페")
+        // 사용자가 바꿀 수 있게 두지 않는다 — 인물/동물/여행 앨범만 이름 변경 + 대표 사진 변경 가능.
+        // 나머지 타입은 항상 최신 사진이 대표로 자동 유지된다(addPhotos/similar 클러스터링 쪽 로직)
+        let editableCoverTypes: Set<String> = ["face", "animal", "travel"]
+        if editableCoverTypes.contains(album.from) {
             options.append(
                 OptionRowConfig(icon: "pencil.line", title: String(localized: "앨범명 변경", bundle: .module), style: .normal) { [weak self] in
                     self?.showAlbumRenameSheet(album: album)
                 }
             )
+
+            // 대표 사진 고르기는 사진 그리드(실제 상세 화면)가 떠 있어야 탭해서 고를 수 있다 — 메인/모두보기
+            // 화면에서 길게 눌러 띄운 빠른 메뉴(presentAlbumMenu, 상세 화면 진입 없음)에서는 제외한다
+            if viewController != nil {
+                options.append(
+                    OptionRowConfig(icon: "photo.on.rectangle.angled", title: String(localized: "대표 사진 변경", bundle: .module), style: .normal) { [weak self] in
+                        self?.delegate?.changeMode(.pickCover)
+                    }
+                )
+            }
         }
 
         if album.from == "face" || album.from == "animal" {
@@ -175,6 +188,23 @@ public final class AlbumDetailCoordinator: BaseCoordinator {
         }
 
         navigationController.present(sheet, animated: true)
+    }
+
+    /// 취소하면 아무 것도 하지 않고 그리드(pickCover 모드)로 돌아가고, 선택해야만 실제로 저장 + 그리드를
+    /// 나간다 — "적용됐는지 안 됐는지 알 수 없다"는 문제를 없애기 위해 즉시 반영 대신 명시적 확인을 거친다
+    func showCoverPreview(album: Album, candidateId: String) {
+        let vc = CoverPhotoPreviewViewController(
+            album: album,
+            candidateId: candidateId,
+            imageUseCase: diContainer.makeImageUseCase(),
+            detailUseCase: diContainer.makeAlbumDetailUseCase()
+        )
+        vc.onConfirm = { [weak self] in
+            self?.delegate?.setCover(id: candidateId)
+            (self?.viewController as? AlbumDetailViewController)?.exitSelectionMode()
+        }
+
+        navigationController.present(vc, animated: true)
     }
 
     func showMergeTargetPicker(candidates: [AlbumMergeCandidate], isTravel: Bool, currentAlbum: Album) {
