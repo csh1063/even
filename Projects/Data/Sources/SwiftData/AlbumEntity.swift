@@ -20,6 +20,9 @@ public final class AlbumEntity {
 
     public var isAuto: Bool              // 자동 생성 앨범 여부
     public var coverPhotoIdentifier: String?
+    /// 사용자가 "대표 사진 변경"으로 직접 고른 적 있는지 — true면 스플래시 동기화/사진 추가/클러스터링
+    /// 재계산 등 자동 커버 갱신 로직이 이 값을 덮어쓰지 않는다
+    public var coverPhotoManuallySet: Bool = false
     public var photoCount: Int = 0
     public var from: String
     public var isEdited: Bool = false        // 병합/제외/분리 등 구조가 변경된 적 있는지

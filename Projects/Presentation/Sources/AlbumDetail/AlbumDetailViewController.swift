@@ -16,6 +16,8 @@ enum AlbumDetailPageMode {
     case list
     case select
     case onlySelect
+    /// 대표(커버) 사진 고르기 — 탭한 사진이 바로 대표로 저장되고 모드가 끝난다(다중 선택 아님)
+    case pickCover
 }
 
 final class AlbumDetailViewController: BaseViewController {
@@ -97,7 +99,14 @@ final class AlbumDetailViewController: BaseViewController {
         didSet { updateModeUI() }
     }
     private var isSelectionMode: Bool { pageMode != .list }
+    /// 여러 장을 체크해서 지우기/제외하기 같은 "다중 선택" UI(체크박스, 하단 바)가 필요한 모드인지 —
+    /// pickCover는 탭 한 번으로 바로 끝나는 단일 동작이라 여기 포함하지 않는다
+    private var isMultiSelectMode: Bool { pageMode == .select || pageMode == .onlySelect }
     private(set) var selectedIdentifiers: Set<String> = []
+    /// 대표 사진 고르기 그리드에서 "대표" 태그를 어느 셀에 붙일지 판단하는 기준
+    private var currentCoverId: String? {
+        didSet { refreshCoverTags() }
+    }
     private var travelerInfo: AlbumDetailViewModel.TravelerInfo? {
         // reloadData()는 사진 셀까지 전부 다시 그려서 깜빡였다 — 헤더가 이미 떠 있으면 그 뷰의 텍스트만
         // 직접 바꾸고, 크기 재계산만 invalidateLayout으로 처리한다 (사진 셀은 전혀 안 건드림).
@@ -210,6 +219,11 @@ final class AlbumDetailViewController: BaseViewController {
             }
             .store(in: &cancellables)
 
+        output.coverPhotoIdentifier
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] id in self?.currentCoverId = id }
+            .store(in: &cancellables)
+
         output.travelerInfo
             .receive(on: DispatchQueue.main)
             .sink { [weak self] info in self?.travelerInfo = info }
@@ -238,7 +252,8 @@ final class AlbumDetailViewController: BaseViewController {
     func enterMode(_ mode: AlbumDetailPageMode) {
         guard mode != .list else { return }
         pageMode = mode
-        collectionView.isEditing = true
+        // pickCover는 체크박스로 여러 장 고르는 게 아니라 탭 한 번으로 바로 끝나서 editing 모드가 필요 없다
+        collectionView.isEditing = mode != .pickCover
     }
 
     func exitSelectionMode() {
@@ -261,13 +276,14 @@ final class AlbumDetailViewController: BaseViewController {
     }
 
     private func updateModeUI() {
-        bottomBar.isHidden = !isSelectionMode
+        bottomBar.isHidden = !isMultiSelectMode
 
         switch pageMode {
         case .list:
             collectionView.allowsMultipleSelection = false
             collectionView.allowsMultipleSelectionDuringEditing = false
             naviView.addButtons([LeftButton(type: .back), RightButton(type: .select), RightButton(type: .more)])
+            naviView.setMessage("")
         case .select:
             collectionView.allowsMultipleSelection = true
             collectionView.allowsMultipleSelectionDuringEditing = true
@@ -276,13 +292,33 @@ final class AlbumDetailViewController: BaseViewController {
             collectionView.allowsMultipleSelection = true
             collectionView.allowsMultipleSelectionDuringEditing = true
             naviView.addButtons([LeftButton(type: .back), RightButton(type: .more)])
+        case .pickCover:
+            collectionView.allowsMultipleSelection = false
+            collectionView.allowsMultipleSelectionDuringEditing = false
+            naviView.addButtons([LeftButton(type: .back), RightButton(type: .cancel)])
+            naviView.setMessage(
+                String(localized: "대표로 쓸 사진을 선택해주세요", bundle: .module),
+                color: Theme.textSecondary,
+                font: .systemFont(ofSize: 13)
+            )
         }
 
         bindNaviActions()
 
         collectionView.visibleCells.forEach { cell in
             guard let photoCell = cell as? PhotoCell else { return }
-            photoCell.setSelectionMode(isSelectionMode)
+            photoCell.setSelectionMode(isMultiSelectMode)
+        }
+        refreshCoverTags()
+    }
+
+    /// 대표 사진 고르기 모드일 때만, 지금 이미 대표로 저장돼 있는 사진 셀에 "대표" 태그를 붙인다
+    private func refreshCoverTags() {
+        collectionView.visibleCells.forEach { cell in
+            guard let photoCell = cell as? PhotoCell,
+                  let indexPath = collectionView.indexPath(for: photoCell),
+                  let item = dataSource.itemIdentifier(for: indexPath) else { return }
+            photoCell.setCoverTag(pageMode == .pickCover && item.localIdentifier == currentCoverId)
         }
     }
 
@@ -328,8 +364,9 @@ extension AlbumDetailViewController {
         let cellRegistration = UICollectionView.CellRegistration<PhotoCell, PhotoCellItemViewModel> { [weak self] cell, indexPath, cellViewModel in
             guard let self else { return }
             cell.configure(with: cellViewModel, index: indexPath.row)
-            cell.setSelectionMode(isSelectionMode)
+            cell.setSelectionMode(isMultiSelectMode)
             cell.setSelected(selectedIdentifiers.contains(cellViewModel.localIdentifier))
+            cell.setCoverTag(pageMode == .pickCover && cellViewModel.localIdentifier == currentCoverId)
 
 //            // 셀 탭 → viewer 열기
 //            cell.cellTapPublisher
@@ -339,7 +376,14 @@ extension AlbumDetailViewController {
 //                .store(in: &cancellables)
 
             cell.onImageTap = { [weak self] in
-                self?.viewModel.send(.selectItem(id: cellViewModel.localIdentifier, inSelectionMode: self?.isSelectionMode ?? false))
+                guard let self else { return }
+                if pageMode == .pickCover {
+                    // 바로 적용하지 않고 미리보기부터 — 그리드는 그대로 pickCover 모드에 남아있는다
+                    // (취소하면 다시 고를 수 있도록). 실제 적용/모드 종료는 미리보기의 "선택" 확정 후에만
+                    viewModel.send(.selectCoverCandidate(id: cellViewModel.localIdentifier))
+                    return
+                }
+                viewModel.send(.selectItem(id: cellViewModel.localIdentifier, inSelectionMode: isSelectionMode))
             }
         }
 
@@ -379,7 +423,7 @@ extension AlbumDetailViewController {
 
 extension AlbumDetailViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        guard isSelectionMode,
+        guard isMultiSelectMode,
               let item = dataSource.itemIdentifier(for: indexPath),
               let cell = collectionView.cellForItem(at: indexPath) as? PhotoCell else { return }
 
@@ -389,7 +433,7 @@ extension AlbumDetailViewController: UICollectionViewDelegate {
     }
 
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-        guard isSelectionMode,
+        guard isMultiSelectMode,
               let item = dataSource.itemIdentifier(for: indexPath),
               let cell = collectionView.cellForItem(at: indexPath) as? PhotoCell else { return }
 
@@ -399,7 +443,7 @@ extension AlbumDetailViewController: UICollectionViewDelegate {
     }
 
     func collectionView(_ collectionView: UICollectionView, shouldBeginMultipleSelectionInteractionAt indexPath: IndexPath) -> Bool {
-        return isSelectionMode
+        return isMultiSelectMode
     }
 }
 

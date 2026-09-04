@@ -36,8 +36,9 @@ struct AnalysisChecklistProgress {
     let similar: AnyPublisher<Double, Never>
 }
 
-/// 시트 "자세히" 목록 — 앨범 생성 쪽 6항목(날짜 앨범은 위 dateCheck와 중복돼서 목록에서 뺌).
+/// 시트 "자세히" 목록 — 앨범 생성 쪽 7항목
 struct AlbumChecklistProgress {
+    let date: AnyPublisher<Double, Never>
     let travel: AnyPublisher<Double, Never>
     let region: AnyPublisher<Double, Never>
     let category: AnyPublisher<Double, Never>
@@ -89,7 +90,10 @@ public final class TabbarViewModel: BaseViewModel {
     @Published private var addressProgress: Double = 0
     @Published private var streamProgress: Double = 0
     @Published private var dupDetectProgress: Double = 0
-    // 앨범 생성: 여행 30% + 지역 10% + 얼굴 15%/동물 15% + 여행자연결 10% + 카테고리 10% + 중복앨범저장 10%
+    // 앨범 생성: 날짜 5% + 여행 30% + 지역 5% + 얼굴 15%/동물 15% + 여행자연결 10% + 카테고리 10% + 중복앨범저장 10%
+    // (날짜 앨범을 다시 목록에 넣으면서 지역 10% → 5%로 줄이고 그 5%를 날짜로 옮겼다 — 둘 다 빠르게
+    // 끝나는 단순 분류 단계라 같은 급으로 취급)
+    @Published private var dateAlbumProgress: Double = 0
     @Published private var travelProgress: Double = 0
     @Published private var regionProgress: Double = 0
     @Published private var faceProgress: Double = 0
@@ -100,6 +104,7 @@ public final class TabbarViewModel: BaseViewModel {
 
     private func resetProgressComponents() {
         dateProgress = 0; addressProgress = 0; streamProgress = 0; dupDetectProgress = 0
+        dateAlbumProgress = 0
         travelProgress = 0; regionProgress = 0; faceProgress = 0; animalProgress = 0
         travelerLinkProgress = 0; categoryProgress = 0; dupSaveProgress = 0
     }
@@ -109,8 +114,9 @@ public final class TabbarViewModel: BaseViewModel {
     }
 
     private func recomputeAlbumProgress() {
-        autoAlbumProgressRatio = travelProgress * 0.3
-            + regionProgress * 0.1
+        autoAlbumProgressRatio = dateAlbumProgress * 0.05
+            + travelProgress * 0.3
+            + regionProgress * 0.05
             + faceProgress * 0.15
             + animalProgress * 0.15
             + travelerLinkProgress * 0.1
@@ -188,6 +194,7 @@ public final class TabbarViewModel: BaseViewModel {
                 similar: $dupDetectProgress.eraseToAnyPublisher()
             ),
             albumChecklist: AlbumChecklistProgress(
+                date: $dateAlbumProgress.eraseToAnyPublisher(),
                 travel: $travelProgress.eraseToAnyPublisher(),
                 region: $regionProgress.eraseToAnyPublisher(),
                 category: $categoryProgress.eraseToAnyPublisher(),
@@ -381,6 +388,8 @@ public final class TabbarViewModel: BaseViewModel {
                             guard let self else { return }
                             self.dateProgress = 1
                             self.recomputePhotoProgress()
+                            self.dateAlbumProgress = 1
+                            self.recomputeAlbumProgress()
                         }
                         debugLog("⏱️ [분석] 날짜 앨범 생성 완료 — 구간 \(String(format: "%.1f", Date().timeIntervalSince(stepStartedAt)))초, 누적 \(String(format: "%.1f", Date().timeIntervalSince(startedAt)))초")
                     }

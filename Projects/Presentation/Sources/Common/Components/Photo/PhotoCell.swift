@@ -52,6 +52,20 @@ final class PhotoCell: UICollectionViewCell {
         return iv
     }()
 
+    /// 대표 사진 고르기 그리드에서, 지금 이미 대표로 저장돼 있는 사진에 붙는 태그
+    private let coverTagLabel: UILabel = {
+        let lb = UILabel()
+        lb.text = String(localized: "대표", bundle: .module)
+        lb.textColor = .white
+        lb.font = .systemFont(ofSize: 10, weight: .bold)
+        lb.textAlignment = .center
+        lb.backgroundColor = Theme.primary
+        lb.layer.cornerRadius = 8
+        lb.layer.masksToBounds = true
+        lb.isHidden = true
+        return lb
+    }()
+
     var onImageTap: (() -> Void)?
 
     private var task: Task<Void, Never>?
@@ -76,6 +90,7 @@ final class PhotoCell: UICollectionViewCell {
         mainImageView.image = nil
         setSelectionMode(false)
         setSelected(false)
+        setCoverTag(false)
     }
 
     // MARK: - Setup
@@ -94,6 +109,7 @@ final class PhotoCell: UICollectionViewCell {
         coverView.addSubview(checkCoverView)
         checkCoverView.addSubview(checkView)
         checkView.addSubview(checkImageView)
+        coverView.addSubview(coverTagLabel)
 
         coverView.snp.makeConstraints { make in make.edges.equalToSuperview() }
         mainImageView.snp.makeConstraints { make in make.edges.equalToSuperview() }
@@ -103,7 +119,13 @@ final class PhotoCell: UICollectionViewCell {
         checkCoverView.snp.makeConstraints { make in
             make.top.trailing.equalToSuperview()
         }
-        
+
+        coverTagLabel.snp.makeConstraints { make in
+            make.top.leading.equalToSuperview().inset(6)
+            make.height.equalTo(18)
+            make.width.greaterThanOrEqualTo(32)
+        }
+
         checkView.snp.makeConstraints { make in
             make.edges.equalToSuperview().inset(8)
             make.width.height.equalTo(22)
@@ -180,5 +202,9 @@ final class PhotoCell: UICollectionViewCell {
             checkView.layer.borderColor = UIColor.white.cgColor
             checkImageView.isHidden = true
         }
+    }
+
+    func setCoverTag(_ show: Bool) {
+        coverTagLabel.isHidden = !show
     }
 }

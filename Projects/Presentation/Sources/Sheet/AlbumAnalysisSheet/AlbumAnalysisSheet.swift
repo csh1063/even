@@ -77,9 +77,7 @@ final class AlbumAnalysisSheet: UIViewController {
     private let animalAnalysisItem = ChecklistItemRow(icon: "pawprint.fill", title: String(localized: "반려동물 분석", bundle: .module))
     private let similarItem = ChecklistItemRow(icon: "square.on.square", title: String(localized: "비슷한 사진", bundle: .module))
 
-    // 날짜 앨범은 위 "날짜 확인"과 내용이 겹쳐서 목록에서는 뺀다 — 생성 로직 자체는 그대로 두고
-    // (AutoAlbumUseCase.createDateAlbumsEarly 등 안 건드림) 이 화면에 노출하는 행만 주석 처리.
-    // private let dateAlbumItem = ChecklistItemRow(icon: "calendar", title: String(localized: "날짜 앨범", bundle: .module))
+    private let dateAlbumItem = ChecklistItemRow(icon: "calendar", title: String(localized: "날짜 앨범", bundle: .module))
     private let travelAlbumItem = ChecklistItemRow(icon: "suitcase.fill", title: String(localized: "여행 앨범", bundle: .module))
     private let regionAlbumItem = ChecklistItemRow(icon: "mappin.and.ellipse", title: String(localized: "지역 앨범", bundle: .module))
     private let categoryAlbumItem = ChecklistItemRow(icon: "square.grid.2x2.fill", title: String(localized: "카테고리 앨범", bundle: .module))
@@ -158,7 +156,7 @@ final class AlbumAnalysisSheet: UIViewController {
         }
         [dateCheckItem, addressConvertItem, travelSpotItem, photoLabelItem, faceAnalysisItem, animalAnalysisItem, similarItem]
             .forEach { photoChecklistContainer.addArrangedSubview($0) }
-        [travelAlbumItem, regionAlbumItem, categoryAlbumItem, faceAlbumItem, animalAlbumItem, duplicateAlbumItem]
+        [dateAlbumItem, travelAlbumItem, regionAlbumItem, categoryAlbumItem, faceAlbumItem, animalAlbumItem, duplicateAlbumItem]
             .forEach { albumChecklistContainer.addArrangedSubview($0) }
 
         photoChecklistWrapper = wrapWithTopDivider(photoChecklistContainer)
@@ -193,8 +191,8 @@ final class AlbumAnalysisSheet: UIViewController {
         mainStack.setCustomSpacing(12, after: rowStack)
 
         view.addSubview(grabberView)
-        view.addSubview(minimizeButton)
         view.addSubview(scrollView)
+        view.addSubview(minimizeButton)
         scrollView.addSubview(mainStack)
 
         grabberView.snp.makeConstraints { make in
@@ -207,7 +205,7 @@ final class AlbumAnalysisSheet: UIViewController {
         minimizeButton.snp.makeConstraints { make in
             // 탭 영역을 44x44(애플 권장 최소 터치 크기)로 키우되, 아이콘 자체 위치는 기존(28pt 기준
             // top:16/trailing:20)과 같은 자리에 오도록 오프셋을 같이 보정했다.
-            make.top.equalTo(view).offset(8)
+            make.top.equalTo(grabberView.snp.bottom).offset(8)
             make.trailing.equalTo(view).inset(12)
             make.width.height.equalTo(44)
         }
@@ -317,6 +315,7 @@ final class AlbumAnalysisSheet: UIViewController {
         bindChecklistItem(animalAnalysisItem, to: progress.analysisChecklist.animal)
         bindChecklistItem(similarItem, to: progress.analysisChecklist.similar)
 
+        bindChecklistItem(dateAlbumItem, to: progress.albumChecklist.date)
         bindChecklistItem(travelAlbumItem, to: progress.albumChecklist.travel)
         bindChecklistItem(regionAlbumItem, to: progress.albumChecklist.region)
         bindChecklistItem(categoryAlbumItem, to: progress.albumChecklist.category)
